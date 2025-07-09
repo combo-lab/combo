@@ -121,7 +121,6 @@ defmodule Phoenix.MixProject do
       links: %{"GitHub" => @scm_url},
       files: ~w(
           assets/js lib priv CHANGELOG.md LICENSE.md mix.exs package.json README.md .formatter.exs
-          installer/templates/phx_web/components/core_components.ex
         )
     ]
   end
@@ -254,10 +253,7 @@ defmodule Phoenix.MixProject do
       docs: ["docs", &generate_js_docs/1],
       "assets.build": ["esbuild module", "esbuild cdn", "esbuild cdn_min", "esbuild main"],
       "assets.watch": "esbuild module --watch",
-      "archive.build": &raise_on_archive_build/1,
-      # copy core_components before compiling / publishing
-      compile: [&copy_core_components/1, "compile"],
-      "hex.publish": [&copy_core_components/1, "hex.publish"]
+      "archive.build": &raise_on_archive_build/1
     ]
   end
 
@@ -271,14 +267,5 @@ defmodule Phoenix.MixProject do
     You are trying to install "phoenix" as an archive, which is not supported. \
     You probably meant to install "phx_new" instead
     """)
-  end
-
-  defp copy_core_components(_) do
-    source =
-      Path.join(__DIR__, "installer/templates/phx_web/components/core_components.ex")
-
-    destination_dir = Path.join([__DIR__, "priv", "templates", "phx.gen.live"])
-    destination = Path.join(destination_dir, "core_components.ex")
-    File.cp!(source, destination)
   end
 end
