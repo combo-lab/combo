@@ -79,9 +79,6 @@ defmodule Phoenix.MixProject do
       {:phoenix_template, "~> 1.0"},
       {:websock_adapter, "~> 0.5.3"},
 
-      # TODO Drop phoenix_view as an optional dependency in Phoenix v2.0
-      {:phoenix_view, "~> 2.0", optional: true},
-
       # Optional deps
       {:plug_cowboy, "~> 2.7", optional: true},
       {:bandit, "~> 1.0", optional: true},
