@@ -20,9 +20,11 @@ defmodule Phoenix.Template do
   Once a template engine is defined, you can tell Phoenix
   about it via the template engines option:
 
-      config :phoenix_template, :template_engines,
-        eex: Phoenix.Template.EExEngine,
-        exs: Phoenix.Template.ExsEngine
+      config :phoenix, :template,
+        engines: [
+          eex: CustomEExEngine,
+          exs: CustomExsEngine
+        ]
 
   ## Format encoders
 
@@ -37,10 +39,14 @@ defmodule Phoenix.Template do
 
   New encoders can be added via the format encoder option:
 
-      config :phoenix_template, :format_encoders,
-        html: Phoenix.HTML.Engine
+      config :phoenix, :template,
+        format_encoders: [
+          html: Phoenix.HTML.Engine
+        ]
 
   """
+
+  alias Phoenix.Env
 
   @type path :: binary
   @type root :: binary
@@ -261,30 +267,31 @@ defmodule Phoenix.Template do
   end
 
   defp compiled_format_encoders do
-    case Application.fetch_env(:phoenix_template, :compiled_format_encoders) do
+    case Env.fetch_env(:template, :compiled_format_encoders) do
       {:ok, encoders} ->
         encoders
 
       :error ->
+        custom_encoders = Env.get_env(:template, :format_encoders, [])
+
         encoders =
           default_encoders()
-          |> Keyword.merge(raw_config(:format_encoders, []))
+          |> Keyword.merge(custom_encoders)
           |> Enum.filter(fn {_, v} -> v end)
           |> Enum.into(%{}, fn {k, v} -> {to_string(k), v} end)
 
-        Application.put_env(:phoenix_template, :compiled_format_encoders, encoders)
+        Env.put_env(:template, :compiled_format_encoders, encoders)
+
         encoders
     end
   end
 
   defp default_encoders do
-    [html: Phoenix.HTML.Engine, json: json_library(), js: Phoenix.HTML.Engine]
-  end
-
-  defp json_library() do
-    Application.get_env(:phoenix_template, :json_library) ||
-      deprecated_config(:phoenix_view, :json_library) ||
-      Application.get_env(:phoenix, :json_library, Jason)
+    [
+      html: Phoenix.HTML.Engine,
+      json: Phoenix.json_library(),
+      js: Phoenix.HTML.Engine
+    ]
   end
 
   @doc """
@@ -297,18 +304,20 @@ defmodule Phoenix.Template do
   end
 
   defp compiled_engines do
-    case Application.fetch_env(:phoenix_template, :compiled_template_engines) do
+    case Env.fetch_env(:template, :compiled_engines) do
       {:ok, engines} ->
         engines
 
       :error ->
+        custom_engines = Env.get_env(:template, :engines, [])
+
         engines =
           default_engines()
-          |> Keyword.merge(raw_config(:template_engines, []))
+          |> Keyword.merge(custom_engines)
           |> Enum.filter(fn {_, v} -> v end)
           |> Enum.into(%{})
 
-        Application.put_env(:phoenix_template, :compiled_template_engines, engines)
+        Env.put_env(:template, :compiled_engines, engines)
         engines
     end
   end
@@ -320,22 +329,6 @@ defmodule Phoenix.Template do
       leex: Phoenix.LiveView.Engine,
       heex: Phoenix.LiveView.HTMLEngine
     ]
-  end
-
-  defp raw_config(name, fallback) do
-    Application.get_env(:phoenix_template, name) ||
-      deprecated_config(:phoenix_view, name) ||
-      Application.get_env(:phoenix, name, fallback)
-  end
-
-  defp deprecated_config(app, name) do
-    if value = Application.get_env(app, name) do
-      IO.warn(
-        "config :#{app}, :#{name} is deprecated, please use config :phoenix_template, :#{name} instead"
-      )
-
-      value
-    end
   end
 
   ## Lookup API
