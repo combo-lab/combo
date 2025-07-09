@@ -427,26 +427,26 @@ defmodule Phoenix.Template do
     args =
       if given_engines, do: [root, pattern, Macro.escape(given_engines)], else: [root, pattern]
 
-    Module.put_attribute(module, :phoenix_templates_hashes, {hash, args})
+    Module.put_attribute(module, :phoenix_template_hashes, {hash, args})
     triplets
   end
 
   @doc false
   def __idempotent_setup__(module, engines) do
     # Store the used engines so they become requires on before_compile
-    if used_engines = Module.get_attribute(module, :phoenix_templates_engines) do
-      Module.put_attribute(module, :phoenix_templates_engines, Map.merge(used_engines, engines))
+    if used_engines = Module.get_attribute(module, :phoenix_template_engines) do
+      Module.put_attribute(module, :phoenix_template_engines, Map.merge(used_engines, engines))
     else
-      Module.register_attribute(module, :phoenix_templates_hashes, accumulate: true)
-      Module.put_attribute(module, :phoenix_templates_engines, engines)
+      Module.register_attribute(module, :phoenix_template_hashes, accumulate: true)
+      Module.put_attribute(module, :phoenix_template_engines, engines)
       Module.put_attribute(module, :before_compile, Phoenix.Template)
     end
   end
 
   @doc false
   defmacro __before_compile__(env) do
-    hashes = Module.get_attribute(env.module, :phoenix_templates_hashes)
-    engines = Module.get_attribute(env.module, :phoenix_templates_engines)
+    hashes = Module.get_attribute(env.module, :phoenix_template_hashes)
+    engines = Module.get_attribute(env.module, :phoenix_template_engines)
 
     body =
       Enum.reduce(hashes, false, fn {hash, args}, acc ->
