@@ -471,37 +471,4 @@ defmodule Phoenix.Template do
       end
     end
   end
-
-  ## Deprecated API
-
-  @deprecated "Use Phoenix.View.template_path_to_name/3"
-  def template_path_to_name(path, root) do
-    path
-    |> Path.rootname()
-    |> Path.relative_to(root)
-  end
-
-  @deprecated "Use Phoenix.View.module_to_template_root/3"
-  def module_to_template_root(module, base, suffix) do
-    module
-    |> unsuffix(suffix)
-    |> Module.split()
-    |> Enum.drop(length(Module.split(base)))
-    |> Enum.map(&Macro.underscore/1)
-    |> join_paths()
-  end
-
-  defp join_paths([]), do: ""
-  defp join_paths(paths), do: Path.join(paths)
-
-  defp unsuffix(value, suffix) do
-    string = to_string(value)
-    suffix_size = byte_size(suffix)
-    prefix_size = byte_size(string) - suffix_size
-
-    case string do
-      <<prefix::binary-size(prefix_size), ^suffix::binary>> -> prefix
-      _ -> string
-    end
-  end
 end
