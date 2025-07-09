@@ -12,7 +12,7 @@ defmodule Phoenix do
 
     # Warm up caches
     _ = Phoenix.Template.engines()
-    _ = Phoenix.Template.format_encoder("index.html")
+    _ = Phoenix.Template.format_encoders()
 
     # Configure proper system flags from Phoenix only
     if stacktrace_depth = Application.get_env(:phoenix, :stacktrace_depth) do

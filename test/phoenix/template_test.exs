@@ -10,6 +10,16 @@ defmodule Phoenix.TemplateTest do
     assert is_map(Template.engines())
   end
 
+  test "format_encoders/0" do
+    assert is_map(Template.format_encoders())
+  end
+
+  test "format_encoder/1 returns the format encoder for a given format" do
+    assert Template.format_encoder("html") == Phoenix.HTML.Engine
+    assert Template.format_encoder("js") == Phoenix.HTML.Engine
+    assert Template.format_encoder("unknown") == nil
+  end
+
   test "find_all/3 finds all templates in the given root" do
     templates = Template.find_all(@templates)
     assert Path.join(@templates, "show.html.eex") in templates
@@ -20,12 +30,6 @@ defmodule Phoenix.TemplateTest do
 
   test "hash/3 returns the hash for the given root" do
     assert is_binary(Template.hash(@templates))
-  end
-
-  test "format_encoder/1 returns the formatter for a given template" do
-    assert Template.format_encoder("html") == Phoenix.HTML.Engine
-    assert Template.format_encoder("js") == Phoenix.HTML.Engine
-    assert Template.format_encoder("unknown") == nil
   end
 
   describe "embed_templates/2" do

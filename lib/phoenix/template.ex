@@ -265,44 +265,7 @@ defmodule Phoenix.Template do
   ## Configuration API
 
   @doc """
-  Returns the format encoder for the given template.
-  """
-  @spec format_encoder(format :: String.t()) :: module | nil
-  def format_encoder(format) when is_binary(format) do
-    Map.get(compiled_format_encoders(), format)
-  end
-
-  defp compiled_format_encoders do
-    case Env.fetch_env(:template, :compiled_format_encoders) do
-      {:ok, encoders} ->
-        encoders
-
-      :error ->
-        custom_encoders = Env.get_env(:template, :format_encoders, [])
-
-        encoders =
-          default_encoders()
-          |> Keyword.merge(custom_encoders)
-          |> Enum.filter(fn {_, v} -> v end)
-          |> Enum.into(%{}, fn {k, v} -> {to_string(k), v} end)
-
-        Env.put_env(:template, :compiled_format_encoders, encoders)
-
-        encoders
-    end
-  end
-
-  defp default_encoders do
-    [
-      html: Phoenix.HTML.Engine,
-      json: Phoenix.json_library(),
-      js: Phoenix.HTML.Engine
-    ]
-  end
-
-  @doc """
-  Returns a keyword list with all template engines
-  extensions followed by their modules.
+  Returns all template engines as a map.
   """
   @spec engines() :: %{atom => module}
   def engines do
@@ -333,6 +296,49 @@ defmodule Phoenix.Template do
       eex: Phoenix.Template.EExEngine,
       exs: Phoenix.Template.ExsEngine,
       heex: Phoenix.LiveView.HTMLEngine
+    ]
+  end
+
+  @doc """
+  Returns all format encoders as a map.
+  """
+  @spec format_encoders() :: %{String.t() => module}
+  def format_encoders do
+    compiled_format_encoders()
+  end
+
+  @doc """
+  Returns the format encoder for a given format.
+  """
+  @spec format_encoder(format :: String.t()) :: module | nil
+  def format_encoder(format) when is_binary(format) do
+    Map.get(compiled_format_encoders(), format)
+  end
+
+  defp compiled_format_encoders do
+    case Env.fetch_env(:template, :compiled_format_encoders) do
+      {:ok, encoders} ->
+        encoders
+
+      :error ->
+        custom_encoders = Env.get_env(:template, :format_encoders, [])
+
+        encoders =
+          default_encoders()
+          |> Keyword.merge(custom_encoders)
+          |> Enum.filter(fn {_, v} -> v end)
+          |> Enum.into(%{}, fn {k, v} -> {to_string(k), v} end)
+
+        Env.put_env(:template, :compiled_format_encoders, encoders)
+        encoders
+    end
+  end
+
+  defp default_encoders do
+    [
+      html: Phoenix.HTML.Engine,
+      json: Phoenix.json_library(),
+      js: Phoenix.HTML.Engine
     ]
   end
 
