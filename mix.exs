@@ -76,7 +76,6 @@ defmodule Phoenix.MixProject do
       {:plug_crypto, "~> 1.2 or ~> 2.0"},
       {:telemetry, "~> 0.4 or ~> 1.0"},
       {:phoenix_pubsub, "~> 2.1"},
-      {:phoenix_template, "~> 1.0"},
       {:websock_adapter, "~> 0.5.3"},
 
       # Optional deps
