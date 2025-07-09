@@ -169,7 +169,7 @@ defmodule Phoenix.Template do
 
   ## Examples
 
-      Phoenix.Template.render(YourApp.UserView, "index", "html", name: "John Doe")
+      Phoenix.Template.render(DemoWeb.UserHTML, "index", "html", name: "John Doe")
       #=> {:safe, "Hello John Doe"}
 
   ## Assigns
