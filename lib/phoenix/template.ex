@@ -332,7 +332,6 @@ defmodule Phoenix.Template do
     [
       eex: Phoenix.Template.EExEngine,
       exs: Phoenix.Template.ExsEngine,
-      leex: Phoenix.LiveView.Engine,
       heex: Phoenix.LiveView.HTMLEngine
     ]
   end
