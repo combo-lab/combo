@@ -1,8 +1,4 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./priv/static/phoenix-orange.png" />
-  <source media="(prefers-color-scheme: light)" srcset="./priv/static/phoenix.png" />
-  <img src="./priv/static/phoenix.png" alt="Phoenix logo" />
-</picture>
+# Combo
 
 > Peace of mind from prototype to production.
 
@@ -77,22 +73,6 @@ cd assets
 npm install
 ```
 
-## Important links
+## License
 
-* [#elixir][1] on [Libera][2] IRC
-* [elixir-lang Slack channel][3]
-* [Issues tracker][4]
-* [Phoenix Forum (questions and proposals)][5]
-* Visit Phoenix's sponsor, DockYard, for expert [Phoenix Consulting](https://dockyard.com/phoenix-consulting)
-
-  [1]: https://web.libera.chat/?channels=#elixir
-  [2]: https://libera.chat/
-  [3]: https://elixir-lang.slack.com/
-  [4]: https://github.com/phoenixframework/phoenix/issues
-  [5]: https://elixirforum.com/c/phoenix-forum
-
-## Copyright and License
-
-Copyright (c) 2014, Chris McCord.
-
-Phoenix source code is licensed under the [MIT License](LICENSE.md).
+[MIT](LICENSE.txt)
