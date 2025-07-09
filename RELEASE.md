@@ -7,7 +7,7 @@
       - `mix test` in the root folder
       - `mix test` in the `installer/` folder
   5. Commit, push code
-  6. Publish `phx_new` and `phoenix` packages and docs after pruning any extraneous uncommitted files
+  6. Publish `phoenix` packages and docs after pruning any extraneous uncommitted files
   7. Test installer by generating a new app, running `mix deps.get`, and compiling
   8. Publish to `npm` with `npm publish`
   9. Update Elixir and Erlang/OTP versions on new.phoenixframework.org

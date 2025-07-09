@@ -1,13 +1,6 @@
 defmodule Phoenix.MixProject do
   use Mix.Project
 
-  if Mix.env() != :prod do
-    for path <- :code.get_path(),
-        Regex.match?(~r/phx_new-[\w\.\-]+\/ebin$/, List.to_string(path)) do
-      Code.delete_path(path)
-    end
-  end
-
   @version "1.8.0-rc.3"
   @scm_url "https://github.com/phoenixframework/phoenix"
 
@@ -251,20 +244,12 @@ defmodule Phoenix.MixProject do
     [
       docs: ["docs", &generate_js_docs/1],
       "assets.build": ["esbuild module", "esbuild cdn", "esbuild cdn_min", "esbuild main"],
-      "assets.watch": "esbuild module --watch",
-      "archive.build": &raise_on_archive_build/1
+      "assets.watch": "esbuild module --watch"
     ]
   end
 
   defp generate_js_docs(_) do
     Mix.Task.run("app.start")
     System.cmd("npm", ["run", "docs"])
-  end
-
-  defp raise_on_archive_build(_) do
-    Mix.raise("""
-    You are trying to install "phoenix" as an archive, which is not supported. \
-    You probably meant to install "phx_new" instead
-    """)
   end
 end
