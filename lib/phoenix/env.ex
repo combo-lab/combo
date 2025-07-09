@@ -9,6 +9,10 @@ defmodule Phoenix.Env do
     get(namespace, []) |> Keyword.get(key, default)
   end
 
+  def fetch_env(namespace, key) do
+    get(namespace, []) |> Keyword.fetch(key)
+  end
+
   def put_env(namespace, key, value) when is_atom(namespace) and is_atom(key) do
     existing_opts = get(namespace, [])
 

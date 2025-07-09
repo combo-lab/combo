@@ -36,6 +36,19 @@ defmodule Phoenix.EnvTest do
     end
   end
 
+  describe "fetch_env/2" do
+    test "fetches value" do
+      ns = :f1
+
+      Application.put_env(@app, ns, k1: "v1", k2: "v2")
+      assert {:ok, "v1"} == Env.fetch_env(ns, :k1)
+      assert {:ok, "v2"} == Env.fetch_env(ns, :k2)
+      assert :error == Env.fetch_env(ns, :k3)
+
+      on_exit(fn -> Application.delete_env(@app, ns) end)
+    end
+  end
+
   describe "put_env/3" do
     test "puts kv pair" do
       ns = :p1
