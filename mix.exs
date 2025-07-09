@@ -202,6 +202,7 @@ defmodule Phoenix.MixProject do
     # Phoenix
     # Phoenix.Channel
     # Phoenix.Controller
+    # Phoenix.Template
     # Phoenix.Endpoint
     # Phoenix.Naming
     # Phoenix.Logger
