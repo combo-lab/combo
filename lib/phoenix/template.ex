@@ -1,21 +1,26 @@
 defmodule Phoenix.Template do
   @moduledoc """
+  Rendering templates.
+
+  This module provides functions for loading and compiling templates from disk.
+
+  In practice, developers rarely use `Phoenix.Template` directly.
+
+  ## Templates
+
   Templates are markup languages that are compiled to Elixir code.
 
-  This module provides functions for loading and compiling templates
-  from disk. A markup language is compiled to Elixir code via an engine.
-  See `Phoenix.Template.Engine`.
+  ## Template engines
 
-  In practice, developers rarely use `Phoenix.Template` directly. Instead,
-  libraries such as `Phoenix.View` and `Phoenix.LiveView` use it as a
-  building block.
+  A markup language is compiled to Elixir code via an engine. Engines specify
+  the method of converting a template path into quoted expressions.
 
-  ## Custom Template Engines
+  ### Custom template engines
 
-  Phoenix supports custom template engines. Engines tell
-  Phoenix how to convert a template path into quoted expressions.
-  See `Phoenix.Template.Engine` for more information on
-  the API required to be implemented by custom engines.
+  Phoenix supports custom template engines.
+
+  See `Phoenix.Template.Engine` for more information on the API required to
+  be implemented by custom engines.
 
   Once a template engine is defined, you can tell Phoenix
   about it via the template engines option:
@@ -29,13 +34,14 @@ defmodule Phoenix.Template do
   ## Format encoders
 
   Besides template engines, Phoenix has the concept of format encoders.
-  Format encoders work per format and are responsible for encoding a
-  given format to a string. For example, when rendering JSON, your
-  templates may return a regular Elixir map. Then the JSON format
-  encoder is invoked to convert it to JSON.
 
-  A format encoder must export a function called `encode_to_iodata!/1`
-  which receives the rendering artifact and returns iodata.
+  Format encoders work per format and are responsible for encoding a given
+  format to a string. For example, when rendering JSON, your templates may
+  return a regular Elixir map. Then the JSON format encoder is invoked to
+  convert it to JSON.
+
+  A format encoder must export a function called `encode_to_iodata!/1` which
+  receives the rendering artifact and returns iodata.
 
   New encoders can be added via the format encoder option:
 
