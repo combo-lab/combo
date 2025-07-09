@@ -129,7 +129,6 @@ defmodule Phoenix.MixProject do
     [
       source_ref: "v#{@version}",
       main: "overview",
-      logo: "logo.png",
       extra_section: "GUIDES",
       assets: %{"guides/assets" => "assets"},
       formatters: ["html", "epub"],
