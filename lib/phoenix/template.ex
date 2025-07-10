@@ -292,8 +292,7 @@ defmodule Phoenix.Template do
   defp default_engines do
     [
       eex: Phoenix.Template.EExEngine,
-      exs: Phoenix.Template.ExsEngine,
-      heex: Phoenix.LiveView.HTMLEngine
+      exs: Phoenix.Template.ExsEngine
     ]
   end
 

@@ -77,6 +77,8 @@ defmodule Phoenix.MixProject do
       {:telemetry, "~> 0.4 or ~> 1.0"},
       {:phoenix_pubsub, "~> 2.1"},
       {:websock_adapter, "~> 0.5.3"},
+      # merge it in, later
+      {:phoenix_html, "~> 4.0"},
 
       # Optional deps
       {:plug_cowboy, "~> 2.7", optional: true},
@@ -95,7 +97,6 @@ defmodule Phoenix.MixProject do
       {:makeup_syntect, "~> 0.1.0", only: :docs},
 
       # Test dependencies
-      {:phoenix_html, "~> 4.0", only: [:docs, :test]},
       {:mint, "~> 1.4", only: :test},
       {:mint_web_socket, "~> 1.0.0", only: :test},
 
@@ -203,7 +204,6 @@ defmodule Phoenix.MixProject do
     # Phoenix
     # Phoenix.Channel
     # Phoenix.Controller
-    # Phoenix.Template
     # Phoenix.Endpoint
     # Phoenix.Naming
     # Phoenix.Logger
@@ -215,6 +215,12 @@ defmodule Phoenix.MixProject do
     # Phoenix.VerifiedRoutes
 
     [
+      Template: [
+        Phoenix.Template,
+        Phoenix.Template.Engine,
+        Phoenix.Template.ExsEngine,
+        Phoenix.Template.EExEngine,
+      ],
       Testing: [
         Phoenix.ChannelTest,
         Phoenix.ConnTest

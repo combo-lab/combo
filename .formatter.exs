@@ -67,35 +67,12 @@ locals_without_parens = [
   embed_templates: 1,
   embed_templates: 2,
 
-  # Phoenix.Live{Dashboard,View}
+  # Phoenix.Template.HTMLEngine.Component
   attr: 2,
   attr: 3,
-  live: 2,
-  live: 3,
-  live: 4,
-  live_dashboard: 1,
-  live_dashboard: 2,
-  on_mount: 1,
   slot: 1,
   slot: 2,
   slot: 3,
-
-  # Phoenix.LiveViewTest
-  assert_patch: 1,
-  assert_patch: 2,
-  assert_patch: 3,
-  assert_patched: 2,
-  assert_push_event: 3,
-  assert_push_event: 4,
-  assert_redirect: 1,
-  assert_redirect: 2,
-  assert_redirect: 3,
-  assert_redirected: 2,
-  assert_reply: 2,
-  assert_reply: 3,
-  refute_redirected: 2,
-  refute_push_event: 3,
-  refute_push_event: 4
 ]
 
 [
