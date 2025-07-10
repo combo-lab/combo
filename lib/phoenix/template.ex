@@ -133,18 +133,18 @@ defmodule Phoenix.Template do
   @doc """
   Renders the template and returns iodata.
   """
-  def render_to_iodata(module, template, format, assign) do
+  def render_to_iodata(module, template, format, assigns) do
     module
-    |> render(template, format, assign)
+    |> render(template, format, assigns)
     |> encode(format)
   end
 
   @doc """
   Renders the template to string.
   """
-  def render_to_string(module, template, format, assign) do
+  def render_to_string(module, template, format, assigns) do
     module
-    |> render_to_iodata(template, format, assign)
+    |> render_to_iodata(template, format, assigns)
     |> IO.iodata_to_binary()
   end
 
