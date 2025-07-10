@@ -93,6 +93,7 @@ defmodule Phoenix.MixProject do
       {:makeup_elixir, "~> 1.0.1 or ~> 1.1", only: :docs},
       {:makeup_eex, "~> 2.0", only: :docs},
       {:makeup_syntect, "~> 0.1.0", only: :docs},
+
       # Test dependencies
       {:phoenix_html, "~> 4.0", only: [:docs, :test]},
       {:mint, "~> 1.4", only: :test},
