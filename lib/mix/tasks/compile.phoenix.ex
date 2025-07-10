@@ -45,14 +45,8 @@ defmodule Mix.Tasks.Compile.Phoenix do
     function_exported?(mod, :__phoenix_recompile__?, 0) and mod.__phoenix_recompile__?()
   end
 
-  if Version.match?(System.version(), ">= 1.11.0") do
-    # Recompile is provided by Mix, we don't need to do anything
-    defp mix_recompile?(_mod), do: false
-  else
-    defp mix_recompile?(mod) do
-      function_exported?(mod, :__mix_recompile__?, 0) and mod.__mix_recompile__?()
-    end
-  end
+  # Recompile is provided by Mix, we don't need to do anything
+  defp mix_recompile?(_mod), do: false
 
   defp modules_to_file_paths(modules) do
     Stream.map(modules, fn mod -> mod.__info__(:compile)[:source] end)
