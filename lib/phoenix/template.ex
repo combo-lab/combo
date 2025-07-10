@@ -1,8 +1,6 @@
 defmodule Phoenix.Template do
   @moduledoc """
-  Rendering templates.
-
-  This module provides functions for loading and compiling templates from disk.
+  Compiling and rendering templates.
 
   In practice, developers rarely use `Phoenix.Template` directly.
 
