@@ -78,8 +78,6 @@ defmodule Phoenix.MixProject do
       {:telemetry, "~> 0.4 or ~> 1.0"},
       {:phoenix_pubsub, "~> 2.1"},
       {:websock_adapter, "~> 0.5.3"},
-      # merge it in, later
-      {:phoenix_html, "~> 4.0"},
 
       # Optional deps
       {:plug_cowboy, "~> 2.7", optional: true},
