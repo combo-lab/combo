@@ -36,5 +36,8 @@ defmodule Phoenix.Template.HTMLEngine.Compiler do
     EEx.compile_string(source, opts)
   end
 
+  @doc false
+  defdelegate __reserved_assigns__, to: Engine
+
   defp trim?, do: Application.get_env(:phoenix, :trim_on_html_eex_engine, true)
 end

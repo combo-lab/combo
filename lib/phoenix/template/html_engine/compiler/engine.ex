@@ -7,6 +7,9 @@ defmodule Phoenix.Template.HTMLEngine.Compiler.Engine do
   alias Phoenix.Template.HTMLEngine.Compiler.Assigns
   alias Phoenix.Template.HTMLEngine.Compiler.IOBuilder
 
+  @doc false
+  def __reserved_assigns__, do: [:__slot__, :inner_block]
+
   @behaviour EEx.Engine
 
   @impl true

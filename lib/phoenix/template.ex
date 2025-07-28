@@ -67,7 +67,7 @@ defmodule Phoenix.Template do
   end
 
   @doc """
-  A convenience macro for embeding templates as functions.
+  Embeds external template files into the module as functions.
 
   This macro is built on top of the more general `compile_all/3`
   functionality.
@@ -95,9 +95,9 @@ defmodule Phoenix.Template do
       end
 
   Now, your module will have a `about/1` and `sitemap/1` functions.
-  Note that functions across different formats were embedded. In case
-  you want to distinguish between them, you can give a more specific
-  pattern:
+
+  Multiple invocations of `embed_templates` is also supported, which can be
+  useful if you have more than one template format. For example:
 
       defmodule MyAppWeb.Emails do
         import Phoenix.Template, only: [embed_templates: 2]

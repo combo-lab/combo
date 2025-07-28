@@ -1,10 +1,311 @@
-defmodule Phoenix.Template.HTMLEngine.Component.Declarative do
-  @moduledoc false
+defmodule Phoenix.Template.HTMLEngine.DeclarativeAssigns do
+  @moduledoc """
+  """
 
-  @reserved_assigns [:__slot__, :inner_block]
+  alias Phoenix.Template.HTMLEngine.Compiler
 
-  @doc false
-  def __reserved__, do: @reserved_assigns
+  @doc """
+  The macro to setup declarative assigns.
+
+  It:
+
+  * overrides `def/2` and `defp/2`.
+  * imports `attr/_` and `slot/_`.
+  * configures `:global_prefixes`.
+
+  """
+  defmacro __using__(opts \\ []) do
+    imports =
+      quote do
+        import Kernel, except: [def: 2, defp: 2]
+
+        import unquote(__MODULE__),
+          only: [def: 2, defp: 2, attr: 2, attr: 3, slot: 1, slot: 2, slot: 3]
+      end
+
+    globals =
+      quote bind_quoted: [module: __MODULE__, opts: opts] do
+        for {prefix_match, value} <- module.__setup__(__MODULE__, opts) do
+          @doc false
+          def __global__?(unquote(prefix_match)), do: unquote(value)
+        end
+      end
+
+    [imports, globals]
+  end
+
+  @doc ~S'''
+  Declares an attribute for CH components.
+
+  ## Arguments
+
+  An attribute is declared by its name, type, and options.
+
+  * `name` - an atom defining the name of the attribute. Note that attributes
+     cannot define the same name as any other attributes or slots declared
+     or the same component.
+
+  * `type` - an atom defining the type of the attribute.
+
+  * `opts` - a keyword list of options. Defaults to `[]`.
+
+  ### Types
+
+  The following types are supported:
+
+  | Name            | Description                                                          |
+  |-----------------|----------------------------------------------------------------------|
+  | `:any`          | any term (including `nil`)                                           |
+  | `:string`       | any binary string                                                    |
+  | `:atom`         | any atom (including `true`, `false`, and `nil`)                      |
+  | `:boolean`      | any boolean                                                          |
+  | `:integer`      | any integer                                                          |
+  | `:float`        | any float                                                            |
+  | `:list`         | any list of any arbitrary types                                      |
+  | `:map`          | any map of any arbitrary types                                       |
+  | `:fun`          | any function                                                         |
+  | `{:fun, arity}` | any function of arity                                                |
+  | `:global`       | any common HTML attributes, plus those defined by `:global_prefixes` |
+  | A struct module | any module that defines a struct with `defstruct/1`                  |
+
+  Note only `:any` and `:atom` expect the value to be set to `nil`.
+
+  ### Options
+
+  * `:required` - marks an attribute as required. If a caller does not pass the
+    given attribute, a compile warning is issued.
+
+  * `:default` - the default value for the attribute if not provided. If this
+    option is not set and the attribute is not given, accessing the attribute
+    will fail unless a value is explicitly set with `assign_new/3`.
+
+  * `:examples` - a non-exhaustive list of values accepted by the attribute, used
+    for documentation purposes.
+
+  * `:values` - an exhaustive list of values accepted by the attributes. If a caller
+    passes a literal not contained in this list, a compile warning is issued.
+
+  * `:doc` - documentation for the attribute.
+
+  ## Compile-Time Validations
+
+  LiveView performs some validation of attributes via the `:phoenix_live_view` compiler.
+  When attributes are defined, LiveView will warn at compilation time on the caller if:
+
+  * A required attribute of a component is missing.
+
+  * An unknown attribute is given.
+
+  * You specify a literal attribute (such as `value="string"` or `value`, but not `value={expr}`)
+  and the type does not match. The following types currently support literal validation:
+  `:string`, `:atom`, `:boolean`, `:integer`, `:float`, `:map` and `:list`.
+
+  * You specify a literal attribute and it is not a member of the `:values` list.
+
+  LiveView does not perform any validation at runtime. This means the type information is mostly
+  used for documentation and reflection purposes.
+
+  On the side of the LiveView component itself, defining attributes provides the following quality
+  of life improvements:
+
+  * The default value of all attributes will be added to the `assigns` map upfront.
+
+  * Attribute documentation is generated for the component.
+
+  * Required struct types are annotated and emit compilation warnings. For example, if you specify
+  `attr :user, User, required: true` and then you write `@user.non_valid_field` in your template,
+  a warning will be emitted.
+
+  * Calls made to the component are tracked for reflection and validation purposes.
+
+  ## Documentation Generation
+
+  Public components that define attributes will have their attribute
+  types and docs injected into the function's documentation, depending on the
+  value of the `@doc` module attribute:
+
+  * if `@doc` is a string, the attribute docs are injected into that string. The optional
+  placeholder `[INSERT LVATTRDOCS]` can be used to specify where in the string the docs are
+  injected. Otherwise, the docs are appended to the end of the `@doc` string.
+
+  * if `@doc` is unspecified, the attribute docs are used as the default `@doc` string.
+
+  * if `@doc` is `false`, the attribute docs are omitted entirely.
+
+  The injected attribute docs are formatted as a markdown list:
+
+    * `name` (`:type`) (required) - attr docs. Defaults to `:default`.
+
+  By default, all attributes will have their types and docs injected into the function `@doc`
+  string. To hide a specific attribute, you can set the value of `:doc` to `false`.
+
+  ## Example
+
+      attr :name, :string, required: true
+      attr :age, :integer, required: true
+
+      def celebrate(assigns) do
+        ~CH"""
+        <p>
+          Happy birthday {@name}!
+          You are {@age} years old.
+        </p>
+        """
+      end
+  '''
+  @doc type: :macro
+  defmacro attr(name, type, opts \\ []) do
+    type = Macro.expand_literals(type, %{__CALLER__ | function: {:attr, 3}})
+    opts = Macro.expand_literals(opts, %{__CALLER__ | function: {:attr, 3}})
+
+    quote do
+      unquote(__MODULE__).__attr__!(
+        __MODULE__,
+        unquote(name),
+        unquote(type),
+        unquote(opts),
+        __ENV__.line,
+        __ENV__.file
+      )
+    end
+  end
+
+  @doc ~S'''
+  Declares a slot for CH components.
+
+  ## Arguments
+
+  * `name` - an atom defining the name of the slot. Note that slots cannot define
+    the same name as any other slots or attributes declared for the same component.
+
+  * `opts` - a keyword list of options. Defaults to `[]`.
+
+  * `block` - a code block containing calls to `attr/3`. Defaults to `nil`.
+
+  ### Options
+
+  * `:required` - marks a slot as required. If a caller does not pass a value for a
+    required slot, a compilation warning is emitted. Otherwise, an omitted slot will
+    default to `[]`.
+
+  * `:validate_attrs` - when set to `false`, no warning is emitted when a caller passes
+    attributes to a slot defined without a do block. If not set, defaults to `true`.
+
+  * `:doc` - documentation for the slot. Any slot attributes declared will have their
+    documentation listed alongside the slot.
+
+  ### Slot Attributes
+
+  A named slot may declare attributes by passing a block with calls to `attr/3`.
+
+  Unlike attributes, slot attributes cannot accept the `:default` option. Passing one
+  will result in a compile warning being issued.
+
+  ### The Default Slot
+
+  The default slot can be declared by passing `:inner_block` as the `name` of the slot.
+
+  Note that the `:inner_block` slot declaration cannot accept a block. Passing one will
+  result in a compilation error.
+
+  ## Compile-Time Validations
+
+  LiveView performs some validation of slots via the `:phoenix_live_view` compiler.
+  When slots are defined, LiveView will warn at compilation time on the caller if:
+
+  * A required slot of a component is missing.
+
+  * An unknown slot is given.
+
+  * An unknown slot attribute is given.
+
+  On the side of the component itself, defining attributes provides the following
+  quality of life improvements:
+
+  * Slot documentation is generated for the component.
+
+  * Calls made to the component are tracked for reflection and validation purposes.
+
+  ## Documentation Generation
+
+  Public components that define slots will have their docs injected into the function's
+  documentation, depending on the value of the `@doc` module attribute:
+
+  * if `@doc` is a string, the slot docs are injected into that string. The optional placeholder
+  `[INSERT LVATTRDOCS]` can be used to specify where in the string the docs are injected.
+  Otherwise, the docs are appended to the end of the `@doc` string.
+
+  * if `@doc` is unspecified, the slot docs are used as the default `@doc` string.
+
+  * if `@doc` is `false`, the slot docs are omitted entirely.
+
+  The injected slot docs are formatted as a markdown list:
+
+    * `name` (required) - slot docs. Accepts attributes:
+      * `name` (`:type`) (required) - attr docs. Defaults to `:default`.
+
+  By default, all slots will have their docs injected into the function `@doc` string.
+  To hide a specific slot, you can set the value of `:doc` to `false`.
+
+  ## Example
+
+      slot :header
+      slot :inner_block, required: true
+      slot :footer
+
+      def modal(assigns) do
+        ~CH"""
+        <div class="modal">
+          <div class="modal-header">
+            {render_slot(@header) || "Modal"}
+          </div>
+          <div class="modal-body">
+            {render_slot(@inner_block)}
+          </div>
+          <div class="modal-footer">
+            {render_slot(@footer) || submit_button()}
+          </div>
+        </div>
+        """
+      end
+
+  As shown in the example above, `render_slot/1` returns `nil` when an optional slot is declared
+  and none is given. This can be used to attach default behaviour.
+  '''
+  @doc type: :macro
+  defmacro slot(name, opts, block)
+
+  defmacro slot(name, opts, do: block) when is_atom(name) and is_list(opts) do
+    quote do
+      unquote(__MODULE__).__slot__!(
+        __MODULE__,
+        unquote(name),
+        unquote(opts),
+        __ENV__.line,
+        __ENV__.file,
+        fn -> unquote(block) end
+      )
+    end
+  end
+
+  @doc """
+  Declares a slot. See `slot/3` for more information.
+  """
+  @doc type: :macro
+  defmacro slot(name, opts \\ []) when is_atom(name) and is_list(opts) do
+    {block, opts} = Keyword.pop(opts, :do, nil)
+
+    quote do
+      unquote(__MODULE__).__slot__!(
+        __MODULE__,
+        unquote(name),
+        unquote(opts),
+        __ENV__.line,
+        __ENV__.file,
+        fn -> unquote(block) end
+      )
+    end
+  end
 
   ## Global
 
@@ -138,8 +439,6 @@ defmodule Phoenix.Template.HTMLEngine.Component.Declarative do
   end
 
   def __global__?(_), do: false
-
-  ## Def overrides
 
   @doc false
   defmacro def(expr, body) do
@@ -647,7 +946,7 @@ defmodule Phoenix.Template.HTMLEngine.Component.Declarative do
 
         attr_names = for(attr <- attrs, do: attr.name)
         slot_names = for(slot <- slots, do: slot.name)
-        known_keys = attr_names ++ slot_names ++ @reserved_assigns
+        known_keys = attr_names ++ slot_names ++ Compiler.__reserved_assigns__()
 
         def_body =
           if global_name do
@@ -665,7 +964,13 @@ defmodule Phoenix.Template.HTMLEngine.Component.Declarative do
                 |> Map.merge(assigns)
                 |> Map.put(:__given__, assigns)
 
-              super(Phoenix.Template.HTMLEngine.Component.assign(merged, unquote(global_name), globals))
+              super(
+                Phoenix.Template.HTMLEngine.Component.assign(
+                  merged,
+                  unquote(global_name),
+                  globals
+                )
+              )
             end
           else
             quote do

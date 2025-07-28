@@ -55,15 +55,15 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
     compile_string("<textarea {@extra_assigns}><%= render_slot(@inner_block) %></textarea>")
   end
 
-  def remote_function_component(assigns) do
+  def remote_component(assigns) do
     compile_string("REMOTE COMPONENT: Value: {@value}")
   end
 
-  def remote_function_component_with_inner_block(assigns) do
+  def remote_component_with_inner_block(assigns) do
     compile_string("REMOTE COMPONENT: Value: {@value}, Content: {render_slot(@inner_block)}")
   end
 
-  def remote_function_component_with_inner_block_args(assigns) do
+  def remote_component_with_inner_block_args(assigns) do
     compile_string("""
     REMOTE COMPONENT WITH ARGS: Value: {@value}
     {render_slot(@inner_block, %{
@@ -73,15 +73,15 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
     """)
   end
 
-  defp local_function_component(assigns) do
+  defp local_component(assigns) do
     compile_string("LOCAL COMPONENT: Value: {@value}")
   end
 
-  defp local_function_component_with_inner_block(assigns) do
+  defp local_component_with_inner_block(assigns) do
     compile_string("LOCAL COMPONENT: Value: {@value}, Content: {render_slot(@inner_block)}")
   end
 
-  defp local_function_component_with_inner_block_args(assigns) do
+  defp local_component_with_inner_block_args(assigns) do
     compile_string("""
     LOCAL COMPONENT WITH ARGS: Value: {@value}
     {render_slot(@inner_block, %{
@@ -655,7 +655,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       assigns = %{}
 
       assert render_compiled(
-               "<Phoenix.Template.HTMLEngine.CompilerTest.remote_function_component value='1'/>"
+               "<Phoenix.Template.HTMLEngine.CompilerTest.remote_component value='1'/>"
              ) ==
                "REMOTE COMPONENT: Value: 1"
     end
@@ -664,7 +664,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       alias Phoenix.Template.HTMLEngine.CompilerTest
       assigns = %{}
 
-      assert render_compiled("<CompilerTest.remote_function_component value='1'/>") ==
+      assert render_compiled("<CompilerTest.remote_component value='1'/>") ==
                "REMOTE COMPONENT: Value: 1"
     end
 
@@ -672,9 +672,9 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       assigns = %{}
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.remote_function_component_with_inner_block value='1'>
+             <Phoenix.Template.HTMLEngine.CompilerTest.remote_component_with_inner_block value='1'>
                The inner content
-             </Phoenix.Template.HTMLEngine.CompilerTest.remote_function_component_with_inner_block>
+             </Phoenix.Template.HTMLEngine.CompilerTest.remote_component_with_inner_block>
              """) == "REMOTE COMPONENT: Value: 1, Content: \n  The inner content\n"
     end
 
@@ -689,13 +689,13 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       assigns = %{}
 
       assert render_compiled("""
-             <.local_function_component_with_inner_block_args
+             <.local_component_with_inner_block_args
                value="aBcD"
                :let={%{upcase: upcase, downcase: downcase}}
              >
                Upcase: <%= upcase %>
                Downcase: <%= downcase %>
-             </.local_function_component_with_inner_block_args>
+             </.local_component_with_inner_block_args>
              """) =~ expected
     end
 
@@ -710,13 +710,13 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       assigns = %{}
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.remote_function_component_with_inner_block_args
+             <Phoenix.Template.HTMLEngine.CompilerTest.remote_component_with_inner_block_args
                value="aBcD"
                :let={%{upcase: upcase, downcase: downcase}}
              >
                Upcase: <%= upcase %>
                Downcase: <%= downcase %>
-             </Phoenix.Template.HTMLEngine.CompilerTest.remote_function_component_with_inner_block_args>
+             </Phoenix.Template.HTMLEngine.CompilerTest.remote_component_with_inner_block_args>
              """) =~ expected
     end
 
@@ -731,23 +731,23 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
 
       assert_raise(RuntimeError, message, fn ->
         render_compiled("""
-        <Phoenix.Template.HTMLEngine.CompilerTest.remote_function_component_with_inner_block_args
+        <Phoenix.Template.HTMLEngine.CompilerTest.remote_component_with_inner_block_args
           {[value: "aBcD"]}
           :let={%{wrong: _}}
         >
           ...
-        </Phoenix.Template.HTMLEngine.CompilerTest.remote_function_component_with_inner_block_args>
+        </Phoenix.Template.HTMLEngine.CompilerTest.remote_component_with_inner_block_args>
         """)
       end)
     end
 
     test "raise on remote call passing args to self close components" do
-      message = ~r".exs:2:79: cannot use :let on a remote component without inner content"
+      message = ~r".exs:2:70: cannot use :let on a remote component without inner content"
 
       assert_raise(ParseError, message, fn ->
         render("""
         <br>
-        <Phoenix.Template.HTMLEngine.CompilerTest.remote_function_component value='1' :let={var}/>
+        <Phoenix.Template.HTMLEngine.CompilerTest.remote_component value='1' :let={var}/>
         """)
       end)
     end
@@ -755,7 +755,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
     test "local call (self close)" do
       assigns = %{}
 
-      assert render_compiled("<.local_function_component value='1'/>") ==
+      assert render_compiled("<.local_component value='1'/>") ==
                "LOCAL COMPONENT: Value: 1"
     end
 
@@ -763,9 +763,9 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       assigns = %{}
 
       assert render_compiled("""
-             <.local_function_component_with_inner_block value='1'>
+             <.local_component_with_inner_block value='1'>
                The inner content
-             </.local_function_component_with_inner_block>
+             </.local_component_with_inner_block>
              """) == "LOCAL COMPONENT: Value: 1, Content: \n  The inner content\n"
     end
 
@@ -780,23 +780,23 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       assigns = %{}
 
       assert render_compiled("""
-             <.local_function_component_with_inner_block_args
+             <.local_component_with_inner_block_args
                value="aBcD"
                :let={%{upcase: upcase, downcase: downcase}}
              >
                Upcase: <%= upcase %>
                Downcase: <%= downcase %>
-             </.local_function_component_with_inner_block_args>
+             </.local_component_with_inner_block_args>
              """) =~ expected
 
       assert render_compiled("""
-             <.local_function_component_with_inner_block_args
+             <.local_component_with_inner_block_args
                {[value: "aBcD"]}
                :let={%{upcase: upcase, downcase: downcase}}
              >
                Upcase: <%= upcase %>
                Downcase: <%= downcase %>
-             </.local_function_component_with_inner_block_args>
+             </.local_component_with_inner_block_args>
              """) =~ expected
     end
 
@@ -811,23 +811,23 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
 
       assert_raise(RuntimeError, message, fn ->
         render_compiled("""
-        <.local_function_component_with_inner_block_args
+        <.local_component_with_inner_block_args
           {[value: "aBcD"]}
           :let={%{wrong: _}}
         >
           ...
-        </.local_function_component_with_inner_block_args>
+        </.local_component_with_inner_block_args>
         """)
       end)
     end
 
     test "raise on local call passing args to self close components" do
-      message = ~r".exs:2:38: cannot use :let on a local component without inner content"
+      message = ~r".exs:2:29: cannot use :let on a local component without inner content"
 
       assert_raise(ParseError, message, fn ->
         render("""
         <br>
-        <.local_function_component value='1' :let={var}/>
+        <.local_component value='1' :let={var}/>
         """)
       end)
     end
@@ -837,7 +837,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       test/phoenix/template/html_engine/compiler_test.exs:4:3: cannot define multiple :let attributes. Another :let has already been defined at line 3
         |
       1 | <br>
-      2 | <Phoenix.Template.HTMLEngine.CompilerTest.remote_function_component value='1'
+      2 | <Phoenix.Template.HTMLEngine.CompilerTest.remote_component value='1'
       3 |   :let={var1}
       4 |   :let={var2}
         |   ^\
@@ -846,10 +846,10 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       assert_raise(ParseError, message, fn ->
         render("""
         <br>
-        <Phoenix.Template.HTMLEngine.CompilerTest.remote_function_component value='1'
+        <Phoenix.Template.HTMLEngine.CompilerTest.remote_component value='1'
           :let={var1}
           :let={var2}
-        ></Phoenix.Template.HTMLEngine.CompilerTest.remote_function_component>
+        ></Phoenix.Template.HTMLEngine.CompilerTest.remote_component>
         """)
       end)
 
@@ -857,7 +857,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       test/phoenix/template/html_engine/compiler_test.exs:4:3: cannot define multiple :let attributes. Another :let has already been defined at line 3
         |
       1 | <br>
-      2 | <.local_function_component value='1'
+      2 | <.local_component value='1'
       3 |   :let={var1}
       4 |   :let={var2}
         |   ^\
@@ -866,43 +866,43 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       assert_raise(ParseError, message, fn ->
         render("""
         <br>
-        <.local_function_component value='1'
+        <.local_component value='1'
           :let={var1}
           :let={var2}
-        ></.local_function_component>
+        ></.local_component>
         """)
       end)
     end
 
     test "invalid :let expr" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:2:79: :let must be a pattern between {...} in remote component: Phoenix.Template.HTMLEngine.CompilerTest.remote_function_component
+      test/phoenix/template/html_engine/compiler_test.exs:2:70: :let must be a pattern between {...} in remote component: Phoenix.Template.HTMLEngine.CompilerTest.remote_component
         |
       1 | <br>
-      2 | <Phoenix.Template.HTMLEngine.CompilerTest.remote_function_component value='1' :let=\"1\"
-        |                                                                               ^\
+      2 | <Phoenix.Template.HTMLEngine.CompilerTest.remote_component value='1' :let=\"1\"
+        |                                                                      ^\
       """
 
       assert_raise(ParseError, message, fn ->
         render("""
         <br>
-        <Phoenix.Template.HTMLEngine.CompilerTest.remote_function_component value='1' :let="1"
+        <Phoenix.Template.HTMLEngine.CompilerTest.remote_component value='1' :let="1"
         />
         """)
       end)
 
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:2:38: :let must be a pattern between {...} in local component: local_function_component
+      test/phoenix/template/html_engine/compiler_test.exs:2:29: :let must be a pattern between {...} in local component: local_component
         |
       1 | <br>
-      2 | <.local_function_component value='1' :let=\"1\"
-        |                                      ^\
+      2 | <.local_component value='1' :let=\"1\"
+        |                             ^\
       """
 
       assert_raise(ParseError, message, fn ->
         render("""
         <br>
-        <.local_function_component value='1' :let="1"
+        <.local_component value='1' :let="1"
         />
         """)
       end)
@@ -910,17 +910,17 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
 
     test "raise with invalid special attr" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:2:38: unsupported attribute :bar in local component: local_function_component
+      test/phoenix/template/html_engine/compiler_test.exs:2:29: unsupported attribute :bar in local component: local_component
         |
       1 | <br>
-      2 | <.local_function_component value='1' :bar=\"1\"}
-        |                                      ^\
+      2 | <.local_component value='1' :bar=\"1\"}
+        |                             ^\
       """
 
       assert_raise(ParseError, message, fn ->
         render("""
         <br>
-        <.local_function_component value='1' :bar="1"}
+        <.local_component value='1' :bar="1"}
         />
         """)
       end)
@@ -928,30 +928,30 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
 
     test "raise on unclosed local call" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:1:1: end of template reached without closing tag for <.local_function_component>
+      test/phoenix/template/html_engine/compiler_test.exs:1:1: end of template reached without closing tag for <.local_component>
         |
-      1 | <.local_function_component value='1' :let={var}>
+      1 | <.local_component value='1' :let={var}>
         | ^\
       """
 
       assert_raise(ParseError, message, fn ->
         render("""
-        <.local_function_component value='1' :let={var}>
+        <.local_component value='1' :let={var}>
         """)
       end)
 
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:2:3: end of do-block reached without closing tag for <.local_function_component>
+      test/phoenix/template/html_engine/compiler_test.exs:2:3: end of do-block reached without closing tag for <.local_component>
         |
       1 | <%= if true do %>
-      2 |   <.local_function_component value='1' :let={var}>
+      2 |   <.local_component value='1' :let={var}>
         |   ^\
       """
 
       assert_raise(ParseError, message, fn ->
         render("""
         <%= if true do %>
-          <.local_function_component value='1' :let={var}>
+          <.local_component value='1' :let={var}>
         <% end %>
         """)
       end)
@@ -1015,7 +1015,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
   end
 
   describe "named slots" do
-    def function_component_with_single_slot(assigns) do
+    def component_with_single_slot(assigns) do
       compile_string("""
       BEFORE SLOT
       <%= render_slot(@sample) %>
@@ -1023,7 +1023,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       """)
     end
 
-    def function_component_with_slots(assigns) do
+    def component_with_slots(assigns) do
       compile_string("""
       BEFORE HEADER
       <%= render_slot(@header) %>
@@ -1033,7 +1033,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       """)
     end
 
-    def function_component_with_slots_and_default(assigns) do
+    def component_with_slots_and_default(assigns) do
       compile_string("""
       BEFORE HEADER
       <%= render_slot(@header) %>
@@ -1043,7 +1043,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       """)
     end
 
-    def function_component_with_slots_and_args(assigns) do
+    def component_with_slots_and_args(assigns) do
       compile_string("""
       BEFORE SLOT
       <%= render_slot(@sample, 1) %>
@@ -1051,7 +1051,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       """)
     end
 
-    def function_component_with_slot_attrs(assigns) do
+    def component_with_slot_attrs(assigns) do
       compile_string("""
       <%= for entry <- @sample do %>
       <%= entry.a %>
@@ -1061,7 +1061,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       """)
     end
 
-    def function_component_with_multiple_slots_entries(assigns) do
+    def component_with_multiple_slots_entries(assigns) do
       compile_string("""
       <%= for entry <- @sample do %>
         <%= entry.id %>: <%= render_slot(entry, %{}) %>
@@ -1069,7 +1069,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       """)
     end
 
-    def function_component_with_self_close_slots(assigns) do
+    def component_with_self_close_slots(assigns) do
       compile_string("""
       <%= for entry <- @sample do %>
         <%= entry.id %>
@@ -1100,20 +1100,20 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
 
       assert render_compiled("""
              COMPONENT WITH SLOTS:
-             <.function_component_with_single_slot>
+             <.component_with_single_slot>
                <:sample>
                  The sample slot
                </:sample>
-             </.function_component_with_single_slot>
+             </.component_with_single_slot>
              """) == expected
 
       assert render_compiled("""
              COMPONENT WITH SLOTS:
-             <Phoenix.Template.HTMLEngine.CompilerTest.function_component_with_single_slot>
+             <Phoenix.Template.HTMLEngine.CompilerTest.component_with_single_slot>
                <:sample>
                  The sample slot
                </:sample>
-             </Phoenix.Template.HTMLEngine.CompilerTest.function_component_with_single_slot>
+             </Phoenix.Template.HTMLEngine.CompilerTest.component_with_single_slot>
              """) == expected
     end
 
@@ -1124,18 +1124,18 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
 
       assert_raise(RuntimeError, message, fn ->
         render_compiled("""
-        <.function_component_with_single_slot>
+        <.component_with_single_slot>
           <:sample/>
-        </.function_component_with_single_slot>
+        </.component_with_single_slot>
         """)
       end)
 
       assert_raise(RuntimeError, message, fn ->
         render_compiled("""
-        <.function_component_with_single_slot>
+        <.component_with_single_slot>
           <:sample/>
           <:sample/>
-        </.function_component_with_single_slot>
+        </.component_with_single_slot>
         """)
       end)
     end
@@ -1158,26 +1158,26 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
 
       assert render_compiled("""
              COMPONENT WITH SLOTS:
-             <.function_component_with_single_slot>
+             <.component_with_single_slot>
                <:sample>
                  entry 1
                </:sample>
                <:sample>
                  entry 2
                </:sample>
-             </.function_component_with_single_slot>
+             </.component_with_single_slot>
              """) == expected
 
       assert render_compiled("""
              COMPONENT WITH SLOTS:
-             <Phoenix.Template.HTMLEngine.CompilerTest.function_component_with_single_slot>
+             <Phoenix.Template.HTMLEngine.CompilerTest.component_with_single_slot>
                <:sample>
                  entry 1
                </:sample>
                <:sample>
                  entry 2
                </:sample>
-             </Phoenix.Template.HTMLEngine.CompilerTest.function_component_with_single_slot>
+             </Phoenix.Template.HTMLEngine.CompilerTest.component_with_single_slot>
              """) == expected
     end
 
@@ -1192,17 +1192,17 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       """
 
       assert render_compiled("""
-             <.function_component_with_multiple_slots_entries>
+             <.component_with_multiple_slots_entries>
                <:sample id="1">one</:sample>
                <:sample id="2">two</:sample>
-             </.function_component_with_multiple_slots_entries>
+             </.component_with_multiple_slots_entries>
              """) == expected
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.function_component_with_multiple_slots_entries>
+             <Phoenix.Template.HTMLEngine.CompilerTest.component_with_multiple_slots_entries>
                <:sample id="1">one</:sample>
                <:sample id="2">two</:sample>
-             </Phoenix.Template.HTMLEngine.CompilerTest.function_component_with_multiple_slots_entries>
+             </Phoenix.Template.HTMLEngine.CompilerTest.component_with_multiple_slots_entries>
              """) == expected
     end
 
@@ -1211,15 +1211,15 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       expected = "\nA\n and \nB\n"
 
       assert render_compiled("""
-             <.function_component_with_slot_attrs>
+             <.component_with_slot_attrs>
                <:sample a={@a} b="B"> and </:sample>
-             </.function_component_with_slot_attrs>
+             </.component_with_slot_attrs>
              """) == expected
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.function_component_with_slot_attrs>
+             <Phoenix.Template.HTMLEngine.CompilerTest.component_with_slot_attrs>
                <:sample a={@a} b="B"> and </:sample>
-             </Phoenix.Template.HTMLEngine.CompilerTest.function_component_with_slot_attrs>
+             </Phoenix.Template.HTMLEngine.CompilerTest.component_with_slot_attrs>
              """) == expected
     end
 
@@ -1245,27 +1245,27 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
 
       assert render_compiled("""
              BEFORE COMPONENT
-             <.function_component_with_slots>
+             <.component_with_slots>
                <:header>
                  The header content
                </:header>
                <:footer>
                  The footer content
                </:footer>
-             </.function_component_with_slots>
+             </.component_with_slots>
              AFTER COMPONENT
              """) == expected
 
       assert render_compiled("""
              BEFORE COMPONENT
-             <Phoenix.Template.HTMLEngine.CompilerTest.function_component_with_slots>
+             <Phoenix.Template.HTMLEngine.CompilerTest.component_with_slots>
                <:header>
                  The header content
                </:header>
                <:footer>
                  The footer content
                </:footer>
-             </Phoenix.Template.HTMLEngine.CompilerTest.function_component_with_slots>
+             </Phoenix.Template.HTMLEngine.CompilerTest.component_with_slots>
              AFTER COMPONENT
              """) == expected
     end
@@ -1296,7 +1296,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
 
       assert render_compiled("""
              BEFORE COMPONENT
-             <.function_component_with_slots_and_default>
+             <.component_with_slots_and_default>
                top
                <:header>
                  The header content
@@ -1306,13 +1306,13 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
                  The footer content
                </:footer>
                bot
-             </.function_component_with_slots_and_default>
+             </.component_with_slots_and_default>
              AFTER COMPONENT
              """) == expected
 
       assert render_compiled("""
              BEFORE COMPONENT
-             <Phoenix.Template.HTMLEngine.CompilerTest.function_component_with_slots_and_default>
+             <Phoenix.Template.HTMLEngine.CompilerTest.component_with_slots_and_default>
                top
                <:header>
                  The header content
@@ -1322,7 +1322,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
                  The footer content
                </:footer>
                bot
-             </Phoenix.Template.HTMLEngine.CompilerTest.function_component_with_slots_and_default>
+             </Phoenix.Template.HTMLEngine.CompilerTest.component_with_slots_and_default>
              AFTER COMPONENT
              """) == expected
     end
@@ -1343,22 +1343,22 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
 
       assert render_compiled("""
              COMPONENT WITH SLOTS:
-             <.function_component_with_slots_and_args>
+             <.component_with_slots_and_args>
                <:sample :let={arg}>
                  The sample slot
                  Arg: <%= arg %>
                </:sample>
-             </.function_component_with_slots_and_args>
+             </.component_with_slots_and_args>
              """) == expected
 
       assert render_compiled("""
              COMPONENT WITH SLOTS:
-             <Phoenix.Template.HTMLEngine.CompilerTest.function_component_with_slots_and_args>
+             <Phoenix.Template.HTMLEngine.CompilerTest.component_with_slots_and_args>
                <:sample :let={arg}>
                  The sample slot
                  Arg: <%= arg %>
                </:sample>
-             </Phoenix.Template.HTMLEngine.CompilerTest.function_component_with_slots_and_args>
+             </Phoenix.Template.HTMLEngine.CompilerTest.component_with_slots_and_args>
              """) == expected
     end
 
@@ -1382,29 +1382,29 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       """
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.function_component_with_single_slot>
+             <Phoenix.Template.HTMLEngine.CompilerTest.component_with_single_slot>
                <:sample>
                 The outer slot
-                 <.function_component_with_single_slot>
+                 <.component_with_single_slot>
                    <:sample>
                    The inner slot
                    </:sample>
-                 </.function_component_with_single_slot>
+                 </.component_with_single_slot>
                </:sample>
-             </Phoenix.Template.HTMLEngine.CompilerTest.function_component_with_single_slot>
+             </Phoenix.Template.HTMLEngine.CompilerTest.component_with_single_slot>
              """) == expected
 
       assert render_compiled("""
-             <.function_component_with_single_slot>
+             <.component_with_single_slot>
                <:sample>
                 The outer slot
-                 <.function_component_with_single_slot>
+                 <.component_with_single_slot>
                    <:sample>
                    The inner slot
                    </:sample>
-                 </.function_component_with_single_slot>
+                 </.component_with_single_slot>
                </:sample>
-             </.function_component_with_single_slot>
+             </.component_with_single_slot>
              """) == expected
     end
 
@@ -1419,17 +1419,17 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       """
 
       assert render_compiled("""
-             <.function_component_with_self_close_slots>
+             <.component_with_self_close_slots>
                <:sample id="1"/>
                <:sample id="2"/>
-             </.function_component_with_self_close_slots>
+             </.component_with_self_close_slots>
              """) == expected
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.function_component_with_self_close_slots>
+             <Phoenix.Template.HTMLEngine.CompilerTest.component_with_self_close_slots>
                <:sample id="1"/>
                <:sample id="2"/>
-             </Phoenix.Template.HTMLEngine.CompilerTest.function_component_with_self_close_slots>
+             </Phoenix.Template.HTMLEngine.CompilerTest.component_with_self_close_slots>
              """) == expected
     end
 
@@ -1437,16 +1437,16 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       message = """
       test/phoenix/template/html_engine/compiler_test.exs:2:19: cannot use :let on a slot without inner content
         |
-      1 | <.function_component_with_self_close_slots>
+      1 | <.component_with_self_close_slots>
       2 |   <:sample id="1" :let={var}/>
         |                   ^\
       """
 
       assert_raise(ParseError, message, fn ->
         render("""
-        <.function_component_with_self_close_slots>
+        <.component_with_self_close_slots>
           <:sample id="1" :let={var}/>
-        </.function_component_with_self_close_slots>
+        </.component_with_self_close_slots>
         """)
       end)
     end
@@ -1502,7 +1502,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       message = """
       test/phoenix/template/html_engine/compiler_test.exs:3:3: invalid slot entry <:sample>. A slot entry must be a direct child of a component
         |
-      1 | <Phoenix.Template.HTMLEngine.CompilerTest.function_component_with_single_slot>
+      1 | <Phoenix.Template.HTMLEngine.CompilerTest.component_with_single_slot>
       2 | <%= if true do %>
       3 |   <:sample>
         |   ^\
@@ -1510,13 +1510,13 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
 
       assert_raise(ParseError, message, fn ->
         render("""
-        <Phoenix.Template.HTMLEngine.CompilerTest.function_component_with_single_slot>
+        <Phoenix.Template.HTMLEngine.CompilerTest.component_with_single_slot>
         <%= if true do %>
           <:sample>
             <p>Content</p>
           </:sample>
         <% end %>
-        </Phoenix.Template.HTMLEngine.CompilerTest.function_component_with_single_slot>
+        </Phoenix.Template.HTMLEngine.CompilerTest.component_with_single_slot>
         """)
       end)
 
@@ -1713,22 +1713,22 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       assigns = %{items: [1, 2]}
 
       assert render_compiled("""
-             <.local_function_component :for={val <- @items} value={val} />
+             <.local_component :for={val <- @items} value={val} />
              """) == "LOCAL COMPONENT: Value: 1LOCAL COMPONENT: Value: 2"
 
       assert render_compiled("""
              <br>
-             <Phoenix.Template.HTMLEngine.CompilerTest.remote_function_component :for={val <- @items} value={val} />
+             <Phoenix.Template.HTMLEngine.CompilerTest.remote_component :for={val <- @items} value={val} />
              """) == "<br>\nREMOTE COMPONENT: Value: 1REMOTE COMPONENT: Value: 2"
 
       assert render_compiled("""
              <br>
-             <Phoenix.Template.HTMLEngine.CompilerTest.remote_function_component_with_inner_block :for={val <- @items} value={val}>inner<%= val %></Phoenix.Template.HTMLEngine.CompilerTest.remote_function_component_with_inner_block>
+             <Phoenix.Template.HTMLEngine.CompilerTest.remote_component_with_inner_block :for={val <- @items} value={val}>inner<%= val %></Phoenix.Template.HTMLEngine.CompilerTest.remote_component_with_inner_block>
              """) ==
                "<br>\nREMOTE COMPONENT: Value: 1, Content: inner1REMOTE COMPONENT: Value: 2, Content: inner2"
 
       assert render_compiled("""
-             <.local_function_component_with_inner_block :for={val <- @items} value={val}>inner<%= val %></.local_function_component_with_inner_block>
+             <.local_component_with_inner_block :for={val <- @items} value={val}>inner<%= val %></.local_component_with_inner_block>
              """) ==
                "LOCAL COMPONENT: Value: 1, Content: inner1LOCAL COMPONENT: Value: 2, Content: inner2"
     end
@@ -1836,19 +1836,19 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       assigns = %{flag: true}
 
       assert render_compiled("""
-             <.local_function_component value="123" :if={@flag} />
+             <.local_component value="123" :if={@flag} />
              """) == "LOCAL COMPONENT: Value: 123"
 
       assert render_compiled("""
-             <.local_function_component value="123" :if={!@flag}>test</.local_function_component>
+             <.local_component value="123" :if={!@flag}>test</.local_component>
              """) == ""
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.remote_function_component value="123" :if={@flag} />
+             <Phoenix.Template.HTMLEngine.CompilerTest.remote_component value="123" :if={@flag} />
              """) == "REMOTE COMPONENT: Value: 123"
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.remote_function_component value="123" :if={!@flag}>test</Phoenix.Template.HTMLEngine.CompilerTest.remote_function_component>
+             <Phoenix.Template.HTMLEngine.CompilerTest.remote_component value="123" :if={!@flag}>test</Phoenix.Template.HTMLEngine.CompilerTest.remote_component>
              """) == ""
     end
 
@@ -1933,90 +1933,21 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       assigns = %{items: [1, 2, 3, 4]}
 
       assert render_compiled("""
-             <.local_function_component  :for={i <- @items} :if={rem(i, 2) == 0} value={i}/>
+             <.local_component  :for={i <- @items} :if={rem(i, 2) == 0} value={i}/>
              """) == "LOCAL COMPONENT: Value: 2LOCAL COMPONENT: Value: 4"
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.remote_function_component  :for={i <- @items} :if={rem(i, 2) == 0} value={i}/>
+             <Phoenix.Template.HTMLEngine.CompilerTest.remote_component  :for={i <- @items} :if={rem(i, 2) == 0} value={i}/>
              """) == "REMOTE COMPONENT: Value: 2REMOTE COMPONENT: Value: 4"
 
       assert render_compiled("""
-             <.local_function_component_with_inner_block  :for={i <- @items} :if={rem(i, 2) == 0} value={i}><%= i %></.local_function_component_with_inner_block>
+             <.local_component_with_inner_block  :for={i <- @items} :if={rem(i, 2) == 0} value={i}><%= i %></.local_component_with_inner_block>
              """) == "LOCAL COMPONENT: Value: 2, Content: 2LOCAL COMPONENT: Value: 4, Content: 4"
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.remote_function_component_with_inner_block :for={i <- @items} :if={rem(i, 2) == 0} value={i}><%= i %></Phoenix.Template.HTMLEngine.CompilerTest.remote_function_component_with_inner_block>
+             <Phoenix.Template.HTMLEngine.CompilerTest.remote_component_with_inner_block :for={i <- @items} :if={rem(i, 2) == 0} value={i}><%= i %></Phoenix.Template.HTMLEngine.CompilerTest.remote_component_with_inner_block>
              """) ==
                "REMOTE COMPONENT: Value: 2, Content: 2REMOTE COMPONENT: Value: 4, Content: 4"
-    end
-  end
-
-  describe "compiler tracing" do
-    alias Phoenix.Template.HTMLEngine.Component, as: C, warn: false
-
-    defmodule Tracer do
-      def trace(event, _env)
-          when elem(event, 0) in [
-                 :alias_expansion,
-                 :alias_reference,
-                 :imported_function,
-                 :remote_function
-               ] do
-        send(self(), event)
-        :ok
-      end
-
-      def trace(_event, _env), do: :ok
-    end
-
-    defp tracer_eval(line, content) do
-      eval_string(content, %{},
-        env: %{__ENV__ | tracers: [Tracer], lexical_tracker: self(), line: line + 1},
-        line: line + 1,
-        indentation: 6
-      )
-    end
-
-    test "handles imports" do
-      tracer_eval(__ENV__.line, """
-      <.link>Ok</.link>
-      """)
-
-      assert_receive {:imported_function, meta, Phoenix.Template.HTMLEngine.Component, :link, 1}
-      assert meta[:line] == __ENV__.line - 4
-      assert meta[:column] == 7
-    end
-
-    test "handles remote calls" do
-      tracer_eval(__ENV__.line, """
-      <Phoenix.Template.HTMLEngine.Component.link>Ok</Phoenix.Template.HTMLEngine.Component.link>
-      """)
-
-      assert_receive {:alias_reference, meta, Phoenix.Template.HTMLEngine.Component}
-      assert meta[:line] == __ENV__.line - 4
-      assert meta[:column] == 7
-
-      assert_receive {:remote_function, meta, Phoenix.Template.HTMLEngine.Component, :link, 1}
-      assert meta[:line] == __ENV__.line - 8
-      assert meta[:column] == 46
-    end
-
-    test "handles aliases" do
-      tracer_eval(__ENV__.line, """
-      <C.link>Ok</C.link>
-      """)
-
-      assert_receive {:alias_expansion, meta, Elixir.C, Phoenix.Template.HTMLEngine.Component}
-      assert meta[:line] == __ENV__.line - 4
-      assert meta[:column] == 7
-
-      assert_receive {:alias_reference, meta, Phoenix.Template.HTMLEngine.Component}
-      assert meta[:line] == __ENV__.line - 8
-      assert meta[:column] == 7
-
-      assert_receive {:remote_function, meta, Phoenix.Template.HTMLEngine.Component, :link, 1}
-      assert meta[:line] == __ENV__.line - 12
-      assert meta[:column] == 10
     end
   end
 end

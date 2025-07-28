@@ -50,6 +50,7 @@ defmodule Phoenix.MixProject do
   end
 
   defp elixirc_paths(:docs), do: ["lib", "installer/lib"]
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
   defp extra_applications(:test), do: [:inets]
@@ -99,6 +100,7 @@ defmodule Phoenix.MixProject do
       # Test dependencies
       {:mint, "~> 1.4", only: :test},
       {:mint_web_socket, "~> 1.0.0", only: :test},
+      {:lazy_html, "~> 0.1.0", only: :test},
 
       # Dev dependencies
       {:esbuild, "~> 0.8", only: :dev}
