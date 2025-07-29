@@ -1,6 +1,6 @@
 defmodule Phoenix.Template.EExEngine do
   @moduledoc """
-  The Phoenix engine that handles the `.eex` extension.
+  The template engine that handles the `.eex` extension.
   """
 
   @behaviour Phoenix.Template.Engine

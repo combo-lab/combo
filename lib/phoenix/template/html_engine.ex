@@ -1,6 +1,6 @@
 defmodule Phoenix.Template.HTMLEngine do
   @moduledoc """
-  The engine that powers Combo HTML templates.
+  The template engine that powers Combo HTML templates.
   """
 
   @behaviour Phoenix.Template.Engine
