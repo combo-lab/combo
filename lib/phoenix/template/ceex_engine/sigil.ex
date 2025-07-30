@@ -1,6 +1,6 @@
 defmodule Phoenix.Template.CEExEngine.Sigil do
   @moduledoc """
-  Provides sigils for this engine.
+  Provides `~CE` sigil.
   """
 
   alias Phoenix.Template.CEExEngine.Compiler

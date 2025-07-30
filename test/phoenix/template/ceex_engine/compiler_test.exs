@@ -3,7 +3,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
 
   alias Combo.SafeHTML
 
-  import Phoenix.Template.CEExEngine.Component
+  use Phoenix.Template.CEExEngine
   alias Phoenix.Template.CEExEngine.Compiler
   alias Phoenix.Template.CEExEngine.Tokenizer.ParseError
 
@@ -53,7 +53,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
   end
 
   def textarea(assigns) do
-    assigns = assign(assigns, :extra_assigns, assigns_to_attributes(assigns, []))
+    assigns = assign(assigns, :extra_assigns, assigns_to_attrs(assigns, []))
     compile_string("<textarea {@extra_assigns}><%= render_slot(@inner_block) %></textarea>")
   end
 
@@ -267,7 +267,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
 
     test "comment - raise on missing -->" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:1:6: expected closing `-->` for comment
+      test/phoenix/template/ceex_engine/compiler_test.exs:1:6: expected closing `-->` for comment
         |
       1 | Begin<!-- <%= 123 %>
         |      ^\
@@ -379,7 +379,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
   describe "tag validations" do
     test "unmatched open/close tags" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:4:1: unmatched closing tag. Expected </div> for <div> at line 2, got: </span>
+      test/phoenix/template/ceex_engine/compiler_test.exs:4:1: unmatched closing tag. Expected </div> for <div> at line 2, got: </span>
         |
       1 | <br>
       2 | <div>
@@ -400,7 +400,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
 
     test "unmatched open/close tags with nested tags" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:6:1: unmatched closing tag. Expected </div> for <div> at line 2, got: </span>
+      test/phoenix/template/ceex_engine/compiler_test.exs:6:1: unmatched closing tag. Expected </div> for <div> at line 2, got: </span>
         |
       3 |   <p>
       4 |     text
@@ -423,7 +423,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
 
     test "unmatched open/close tags with void tags" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:1:16: unmatched closing tag. Expected </div> for <div> at line 1, got: </link> (note <link> is a void tag and cannot have any content)
+      test/phoenix/template/ceex_engine/compiler_test.exs:1:16: unmatched closing tag. Expected </div> for <div> at line 1, got: </link> (note <link> is a void tag and cannot have any content)
         |
       1 | <div><link>Text</link></div>
         |                ^\
@@ -436,7 +436,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
 
     test "invalid remote tag" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:1:1: invalid tag <Foo>
+      test/phoenix/template/ceex_engine/compiler_test.exs:1:1: invalid tag <Foo>
         |
       1 | <Foo foo=\"bar\" />
         | ^\
@@ -451,7 +451,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
 
     test "missing open tag" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:2:3: missing opening tag for </span>
+      test/phoenix/template/ceex_engine/compiler_test.exs:2:3: missing opening tag for </span>
         |
       1 | text
       2 |   </span>
@@ -468,7 +468,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
 
     test "missing open tag with void tag" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:1:11: missing opening tag for </link> (note <link> is a void tag and cannot have any content)
+      test/phoenix/template/ceex_engine/compiler_test.exs:1:11: missing opening tag for </link> (note <link> is a void tag and cannot have any content)
         |
       1 | <link>Text</link>
         |           ^\
@@ -481,7 +481,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
 
     test "missing closing tag" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:2:1: end of template reached without closing tag for <div>
+      test/phoenix/template/ceex_engine/compiler_test.exs:2:1: end of template reached without closing tag for <div>
         |
       1 | <br>
       2 | <div foo={@foo}>
@@ -496,7 +496,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
       end)
 
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:2:3: end of template reached without closing tag for <span>
+      test/phoenix/template/ceex_engine/compiler_test.exs:2:3: end of template reached without closing tag for <span>
         |
       1 | text
       2 |   <span foo={@foo}>
@@ -514,7 +514,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
 
     test "invalid tag name" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:2:3: invalid tag <Oops>
+      test/phoenix/template/ceex_engine/compiler_test.exs:2:3: invalid tag <Oops>
         |
       1 | <br>
       2 |   <Oops foo={@foo}>
@@ -533,7 +533,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
 
     test "invalid tag" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:1:10: expected closing `}` for expression
+      test/phoenix/template/ceex_engine/compiler_test.exs:1:10: expected closing `}` for expression
 
       In case you don't want `{` to begin a new interpolation, you may write it using `&lbrace;` or using `<%= "{" %>`
         |
@@ -548,7 +548,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
       end)
 
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:2:3: expected closing `}` for expression
+      test/phoenix/template/ceex_engine/compiler_test.exs:2:3: expected closing `}` for expression
 
       In case you don't want `{` to begin a new interpolation, you may write it using `&lbrace;` or using `<%= "{" %>`
         |
@@ -569,7 +569,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
       end)
 
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:2:6: expected closing `}` for expression
+      test/phoenix/template/ceex_engine/compiler_test.exs:2:6: expected closing `}` for expression
 
       In case you don't want `{` to begin a new interpolation, you may write it using `&lbrace;` or using `<%= "{" %>`
         |
@@ -836,7 +836,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
 
     test "raise on duplicated :let" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:4:3: cannot define multiple :let attributes. Another :let has already been defined at line 3
+      test/phoenix/template/ceex_engine/compiler_test.exs:4:3: cannot define multiple :let attributes. Another :let has already been defined at line 3
         |
       1 | <br>
       2 | <Phoenix.Template.CEExEngine.CompilerTest.remote_component value='1'
@@ -856,7 +856,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
       end)
 
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:4:3: cannot define multiple :let attributes. Another :let has already been defined at line 3
+      test/phoenix/template/ceex_engine/compiler_test.exs:4:3: cannot define multiple :let attributes. Another :let has already been defined at line 3
         |
       1 | <br>
       2 | <.local_component value='1'
@@ -878,7 +878,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
 
     test "invalid :let expr" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:2:70: :let must be a pattern between {...} in remote component: Phoenix.Template.CEExEngine.CompilerTest.remote_component
+      test/phoenix/template/ceex_engine/compiler_test.exs:2:70: :let must be a pattern between {...} in remote component: Phoenix.Template.CEExEngine.CompilerTest.remote_component
         |
       1 | <br>
       2 | <Phoenix.Template.CEExEngine.CompilerTest.remote_component value='1' :let=\"1\"
@@ -894,7 +894,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
       end)
 
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:2:29: :let must be a pattern between {...} in local component: local_component
+      test/phoenix/template/ceex_engine/compiler_test.exs:2:29: :let must be a pattern between {...} in local component: local_component
         |
       1 | <br>
       2 | <.local_component value='1' :let=\"1\"
@@ -912,7 +912,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
 
     test "raise with invalid special attr" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:2:29: unsupported attribute :bar in local component: local_component
+      test/phoenix/template/ceex_engine/compiler_test.exs:2:29: unsupported attribute :bar in local component: local_component
         |
       1 | <br>
       2 | <.local_component value='1' :bar=\"1\"}
@@ -930,7 +930,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
 
     test "raise on unclosed local call" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:1:1: end of template reached without closing tag for <.local_component>
+      test/phoenix/template/ceex_engine/compiler_test.exs:1:1: end of template reached without closing tag for <.local_component>
         |
       1 | <.local_component value='1' :let={var}>
         | ^\
@@ -943,7 +943,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
       end)
 
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:2:3: end of do-block reached without closing tag for <.local_component>
+      test/phoenix/template/ceex_engine/compiler_test.exs:2:3: end of do-block reached without closing tag for <.local_component>
         |
       1 | <%= if true do %>
       2 |   <.local_component value='1' :let={var}>
@@ -961,7 +961,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
 
     test "when tag is unclosed" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:2:1: end of template reached without closing tag for <div>
+      test/phoenix/template/ceex_engine/compiler_test.exs:2:1: end of template reached without closing tag for <div>
         |
       1 | <div>Foo</div>
       2 | <div>
@@ -979,7 +979,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
 
     test "when syntax error on HTML attributes" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:2:9: invalid attribute value after `=`. Expected either a value between quotes (such as \"value\" or 'value') or an Elixir expression between curly braces (such as `{expr}`)
+      test/phoenix/template/ceex_engine/compiler_test.exs:2:9: invalid attribute value after `=`. Expected either a value between quotes (such as \"value\" or 'value') or an Elixir expression between curly braces (such as `{expr}`)
         |
       1 | <div>Bar</div>
       2 | <div id=>Foo</div>
@@ -1437,7 +1437,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
 
     test "raise if self close slot uses :let" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:2:19: cannot use :let on a slot without inner content
+      test/phoenix/template/ceex_engine/compiler_test.exs:2:19: cannot use :let on a slot without inner content
         |
       1 | <.component_with_self_close_slots>
       2 |   <:sample id="1" :let={var}/>
@@ -1484,7 +1484,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
 
     test "raise if the slot entry is not a direct child of a component" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:2:3: invalid slot entry <:sample>. A slot entry must be a direct child of a component
+      test/phoenix/template/ceex_engine/compiler_test.exs:2:3: invalid slot entry <:sample>. A slot entry must be a direct child of a component
         |
       1 | <div>
       2 |   <:sample>
@@ -1502,7 +1502,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
       end)
 
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:3:3: invalid slot entry <:sample>. A slot entry must be a direct child of a component
+      test/phoenix/template/ceex_engine/compiler_test.exs:3:3: invalid slot entry <:sample>. A slot entry must be a direct child of a component
         |
       1 | <Phoenix.Template.CEExEngine.CompilerTest.component_with_single_slot>
       2 | <%= if true do %>
@@ -1523,7 +1523,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
       end)
 
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:3:5: invalid slot entry <:footer>. A slot entry must be a direct child of a component
+      test/phoenix/template/ceex_engine/compiler_test.exs:3:5: invalid slot entry <:footer>. A slot entry must be a direct child of a component
         |
       1 | <.mydiv>
       2 |   <:sample>
@@ -1544,7 +1544,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
       end)
 
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:1:1: invalid slot entry <:sample>. A slot entry must be a direct child of a component
+      test/phoenix/template/ceex_engine/compiler_test.exs:1:1: invalid slot entry <:sample>. A slot entry must be a direct child of a component
         |
       1 | <:sample>
         | ^\
@@ -1559,7 +1559,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
       end)
 
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:1:1: invalid slot entry <:sample>. A slot entry must be a direct child of a component
+      test/phoenix/template/ceex_engine/compiler_test.exs:1:1: invalid slot entry <:sample>. A slot entry must be a direct child of a component
         |
       1 | <:sample>
         | ^\
@@ -1578,7 +1578,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
   describe "html validations" do
     test "raise on unsupported special attrs" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:1:6: unsupported attribute :let in tag: div
+      test/phoenix/template/ceex_engine/compiler_test.exs:1:6: unsupported attribute :let in tag: div
         |
       1 | <div :let={@user}>Content</div>
         |      ^\
@@ -1591,7 +1591,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
       end)
 
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:1:6: unsupported attribute :foo in tag: div
+      test/phoenix/template/ceex_engine/compiler_test.exs:1:6: unsupported attribute :foo in tag: div
         |
       1 | <div :foo=\"something\" />
         |      ^\
@@ -1623,7 +1623,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
         end
 
       message = Exception.message(exception)
-      assert message =~ "test/phoenix/template/html_engine/compiler_test.exs:12:22:"
+      assert message =~ "test/phoenix/template/ceex_engine/compiler_test.exs:12:22:"
       assert message =~ "syntax error before: ','"
     end
 
@@ -1644,7 +1644,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
         end
 
       message = Exception.message(exception)
-      assert message =~ "test/phoenix/template/html_engine/compiler_test.exs:12:16:"
+      assert message =~ "test/phoenix/template/ceex_engine/compiler_test.exs:12:16:"
       assert message =~ "syntax error before: ','"
     end
   end
@@ -1672,7 +1672,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
 
     test "raise on invalid :for expr" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:1:6: :for must be a generator expression (pattern <- enumerable) between {...} in tag: div
+      test/phoenix/template/ceex_engine/compiler_test.exs:1:6: :for must be a generator expression (pattern <- enumerable) between {...} in tag: div
         |
       1 | <div :for={@user}>Content</div>
         |      ^\
@@ -1685,7 +1685,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
       end)
 
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:1:6: :for must be an expression between {...} in tag: div
+      test/phoenix/template/ceex_engine/compiler_test.exs:1:6: :for must be an expression between {...} in tag: div
         |
       1 | <div :for=\"1\">Content</div>
         |      ^\
@@ -1698,7 +1698,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
       end)
 
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:1:7: :for must be an expression between {...} in local component: div
+      test/phoenix/template/ceex_engine/compiler_test.exs:1:7: :for must be an expression between {...} in local component: div
         |
       1 | <.div :for=\"1\">Content</.div>
         |       ^\
@@ -1737,7 +1737,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
 
     test "raise on duplicated :for" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:1:28: cannot define multiple :for attributes. Another :for has already been defined at line 1
+      test/phoenix/template/ceex_engine/compiler_test.exs:1:28: cannot define multiple :for attributes. Another :for has already been defined at line 1
         |
       1 | <div :for={item <- [1, 2]} :for={item <- [1, 2]}>Content</div>
         |                            ^\
@@ -1821,7 +1821,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
 
     test "raise on invalid :if expr" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:1:6: :if must be an expression between {...} in tag: div
+      test/phoenix/template/ceex_engine/compiler_test.exs:1:6: :if must be an expression between {...} in tag: div
         |
       1 | <div :if=\"1\">test</div>
         |      ^\
@@ -1856,7 +1856,7 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
 
     test "raise on duplicated :if" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:1:17: cannot define multiple :if attributes. Another :if has already been defined at line 1
+      test/phoenix/template/ceex_engine/compiler_test.exs:1:17: cannot define multiple :if attributes. Another :if has already been defined at line 1
         |
       1 | <div :if={true} :if={false}>test</div>
         |                 ^\

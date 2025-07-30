@@ -1,5 +1,7 @@
 defmodule Phoenix.Template.CEExEngine.Compiler do
-  @moduledoc false
+  @moduledoc """
+  The compiler for `Phoenix.Template.CEExEngine`.
+  """
 
   alias Phoenix.Env
   alias Phoenix.Template.CEExEngine.Compiler.Engine

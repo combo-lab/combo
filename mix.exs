@@ -215,11 +215,30 @@ defmodule Phoenix.MixProject do
     # Phoenix.VerifiedRoutes
 
     [
+      "Safe HTML": [
+        Combo.SafeHTML,
+        Combo.SafeHTML.Safe
+      ],
       Template: [
         Phoenix.Template,
         Phoenix.Template.Engine,
+        Phoenix.Template.FormatEncoder,
         Phoenix.Template.ExsEngine,
         Phoenix.Template.EExEngine,
+        Phoenix.Template.CEExEngine,
+        Phoenix.Template.CEExEngine.Compiler,
+        Phoenix.Template.CEExEngine.Sigil,
+        Phoenix.Template.CEExEngine.Assigns,
+        Phoenix.Template.CEExEngine.DeclarativeAssigns,
+        Phoenix.Template.CEExEngine.Slot,
+        Phoenix.Template.CEExEngine.Formatter,
+        Phoenix.Template.HTMLEncoder
+      ],
+      HTML: [
+        Phoenix.HTML,
+        Phoenix.HTML.Form,
+        Phoenix.HTML.FormData,
+        Phoenix.HTML.FormField
       ],
       Testing: [
         Phoenix.ChannelTest,

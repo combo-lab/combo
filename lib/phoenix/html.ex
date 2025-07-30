@@ -2,6 +2,11 @@ defmodule Phoenix.HTML do
   @moduledoc """
   Building blocks for working with HTML.
 
+  It's built on top of:
+
+  - `Combo.SafeHTML`
+  - `Phoenix.Template.CEExEngine`
+
   It provides following main functionalities:
 
     * Form handling
@@ -81,21 +86,15 @@ defmodule Phoenix.HTML do
   """
 
   @doc false
-  defmacro __using__(_) do
-    raise """
-    use Phoenix.HTML is no longer supported in v4.0.
-
-    To keep compatibility with previous versions, \
-    add {:phoenix_html_helpers, "~> 1.0"} to your mix.exs deps
-    and then, instead of "use Phoenix.HTML", you might:
-
-        import Phoenix.HTML
-        import Phoenix.HTML.Form
-        use PhoenixHTMLHelpers
-
-    """
+  defmacro __using__(opts \\ []) do
+    quote bind_quoted: [opts: opts] do
+      import Phoenix.Template, only: [embed_templates: 1]
+      import Phoenix.Template.CEExEngine.Sigil
+      import Phoenix.Template.CEExEngine.Assigns
+      use Phoenix.Template.CEExEngine.DeclarativeAssigns, opts
+      import Phoenix.Template.CEExEngine.Slot
+    end
   end
-
 
   @doc """
   Marks the given content as raw.

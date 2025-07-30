@@ -16,7 +16,7 @@ defmodule Combo.SafeHTML do
   @typedoc "May be safe or unsafe. To use it safely, conversion is required."
   @type unsafe :: Safe.t()
 
-  @typedoc "Guaranteed to be safe"
+  @typedoc "Guaranteed to be safe."
   @type safe :: {:safe, iodata()}
 
   @doc """
@@ -75,7 +75,7 @@ defmodule Combo.SafeHTML do
 
   """
   @spec safe_to_string(safe()) :: String.t()
-  def safe_to_string({:safe, iodata}) do
+  def safe_to_string({:safe, iodata} = _safe) do
     IO.iodata_to_binary(iodata)
   end
 
