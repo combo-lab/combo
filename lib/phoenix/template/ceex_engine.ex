@@ -1,6 +1,6 @@
-defmodule Phoenix.Template.HTMLEngine do
+defmodule Phoenix.Template.CEExEngine do
   @moduledoc """
-  The template engine that powers Combo HTML templates.
+  The template engine that handles the `.ceex` extension.
   """
 
   @behaviour Phoenix.Template.Engine

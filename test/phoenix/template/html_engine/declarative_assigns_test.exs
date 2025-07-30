@@ -69,7 +69,7 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
   defp rendered_to_string(rendered) do
     rendered
-    |> Phoenix.HTML.html_escape()
+    |> Phoenix.HTML.to_safe()
     |> Phoenix.HTML.safe_to_string()
   end
 

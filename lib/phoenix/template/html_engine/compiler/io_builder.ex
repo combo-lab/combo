@@ -54,7 +54,7 @@ defmodule Phoenix.Template.HTMLEngine.Compiler.IOBuilder do
 
     i = Counter.get(counter)
     var = Macro.var(:"v#{i}", __MODULE__)
-    ast = quote do: unquote(var) = unquote(__MODULE__).to_safe(unquote(expr))
+    ast = quote do: unquote(var) = unquote(to_safe(expr))
 
     Counter.inc(counter)
     %{state | dynamic: [ast | dynamic], static: [var | static]}
@@ -69,12 +69,40 @@ defmodule Phoenix.Template.HTMLEngine.Compiler.IOBuilder do
     EEx.Engine.handle_expr(state, marker, expr)
   end
 
-  @doc false
-  def to_safe(value) do
-    case value do
-      {:safe, data} -> data
-      bin when is_binary(bin) -> Phoenix.HTML.Engine.html_escape(bin)
-      other -> Phoenix.HTML.Safe.to_iodata(other)
+  ## Safe conversion
+
+  defp to_safe(expr), do: to_safe(expr, line_from_expr(expr))
+
+  # do the conversion at compile time
+  defp to_safe(literal, _line)
+       when is_binary(literal) or is_atom(literal) or is_number(literal) do
+    literal
+    |> Phoenix.HTML.Safe.to_iodata()
+    |> IO.iodata_to_binary()
+  end
+
+  # do the conversion at runtime
+  defp to_safe(list, line) when is_list(list) do
+    quote line: line, do: Phoenix.HTML.Safe.List.to_iodata(unquote(list))
+  end
+
+  # do the convertion at runtime, and optimize common cases
+  defp to_safe(expr, line) do
+    # keep stacktraces for protocol dispatch and coverage
+    safe_return = quote line: line, do: data
+    bin_return = quote line: line, do: Combo.HTML.Escape.escape_html(bin)
+    other_return = quote line: line, do: Phoenix.HTML.Safe.to_iodata(other)
+
+    # prevent warnings of generated clauses
+    quote generated: true do
+      case unquote(expr) do
+        {:safe, data} -> unquote(safe_return)
+        bin when is_binary(bin) -> unquote(bin_return)
+        other -> unquote(other_return)
+      end
     end
   end
+
+  defp line_from_expr({_, meta, _}) when is_list(meta), do: Keyword.get(meta, :line, 0)
+  defp line_from_expr(_), do: 0
 end

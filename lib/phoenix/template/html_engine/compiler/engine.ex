@@ -76,7 +76,7 @@ defmodule Phoenix.Template.HTMLEngine.Compiler.Engine do
     tokens = Tokenizer.finalize(tokens, file, cont, source)
 
     quoted = handle_tokens(state, "template", tokens)
-    quoted = Assigns.handle_assigns(quoted)
+    quoted = Assigns.traverse(quoted)
 
     quoted =
       if body_annotation = caller && TagHandler.annotate_body(caller) do

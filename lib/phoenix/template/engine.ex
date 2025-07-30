@@ -2,7 +2,7 @@ defmodule Phoenix.Template.Engine do
   @moduledoc """
   The behaviour for implementing template engines.
 
-  Check out `Phoenix.Template.*` for existing engines.
+  Check out `Phoenix.Template` for more details.
   """
 
   @doc """

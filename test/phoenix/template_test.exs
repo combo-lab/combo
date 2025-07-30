@@ -15,14 +15,14 @@ defmodule Phoenix.TemplateTest do
   end
 
   test "format_encoder/1 returns the format encoder for a given format" do
-    assert Template.format_encoder("html") == Phoenix.HTML.Engine
-    assert Template.format_encoder("js") == Phoenix.HTML.Engine
+    assert Template.format_encoder("html") == Phoenix.Template.HTMLEncoder
+    assert Template.format_encoder("js") == Phoenix.Template.HTMLEncoder
     assert Template.format_encoder("unknown") == nil
   end
 
   test "find_all/3 finds all templates in the given root" do
     templates = Template.find_all(@templates)
-    assert Path.join(@templates, "show.html.eex") in templates
+    assert Path.join(@templates, "show.html.ceex") in templates
 
     templates = Template.find_all(Path.expand("unknown"))
     assert templates == []
@@ -41,10 +41,11 @@ defmodule Phoenix.TemplateTest do
     end
 
     test "embeds templates" do
-      assert EmbedTemplates.trim(%{}) == {:safe, ["12", "\n", "34", "\n", "56"]}
-
       assert EmbedTemplates.show(%{message: "hello"}) ==
-               {:safe, ["<div>Show! ", "hello", "</div>\n"]}
+               {:safe, ["<div", ">", "Show! ", "hello", "</div>", "\n"]}
+
+      assert EmbedTemplates.trim(%{}) ==
+               {:safe, ["12", "\n  ", "34", "\n", "56"]}
     end
 
     test "embeds templates with suffix" do
@@ -61,15 +62,15 @@ defmodule Phoenix.TemplateTest do
     end
 
     test "compiles all templates at once" do
-      assert AllTemplates.show_html_eex(%{message: "hello!"})
+      assert AllTemplates.show_html_ceex(%{message: "hello!"})
              |> Phoenix.HTML.safe_to_string() ==
                "<div>Show! hello!</div>\n"
 
-      assert AllTemplates.show_html_eex(%{message: "<hello>"})
+      assert AllTemplates.show_html_ceex(%{message: "<hello>"})
              |> Phoenix.HTML.safe_to_string() ==
                "<div>Show! &lt;hello&gt;</div>\n"
 
-      assert AllTemplates.show_html_eex(%{message: {:safe, "<hello>"}})
+      assert AllTemplates.show_html_ceex(%{message: {:safe, "<hello>"}})
              |> Phoenix.HTML.safe_to_string() ==
                "<div>Show! <hello></div>\n"
 
@@ -78,17 +79,18 @@ defmodule Phoenix.TemplateTest do
       refute AllTemplates.__mix_recompile__?()
     end
 
-    test "trims only compiled HTML files" do
-      assert AllTemplates.no_trim_text_eex(%{}) == "12\n  34\n56\n"
-      assert AllTemplates.trim_html_eex(%{}) |> Phoenix.HTML.safe_to_string() == "12\n34\n56"
+    test "trims only HTML templates" do
+      assert AllTemplates.trim_html_ceex(%{}) |> Phoenix.HTML.safe_to_string() == "12\n  34\n56"
+      assert AllTemplates.trim_text_eex(%{}) == "12\n  34\n56\n"
     end
 
     defmodule OptionsTemplates do
-      Template.compile_all(
-        &(&1 |> Path.basename() |> String.replace(".", "1")),
-        Path.expand("../fixtures/templates", __DIR__),
-        "*.html"
-      )
+      [{"layout1html1ceex", _}, {"show1html1ceex", _} | _] =
+        Template.compile_all(
+          &(&1 |> Path.basename() |> String.replace(".", "1")),
+          Path.expand("../fixtures/templates", __DIR__),
+          "*.html"
+        )
 
       [{"show2json2exs", _}] =
         Template.compile_all(
@@ -107,28 +109,31 @@ defmodule Phoenix.TemplateTest do
     end
 
     test "compiles templates across several calls" do
-      assert OptionsTemplates.show1html1eex(%{message: "hello!"})
+      assert OptionsTemplates.show1html1ceex(%{message: "hello!"})
              |> Phoenix.HTML.safe_to_string() ==
                "<div>Show! hello!</div>\n"
 
       assert OptionsTemplates.show2json2exs(%{}) == %{foo: "bar"}
 
-      assert OptionsTemplates.show3html3foo(%{message: "hello"})
-             |> Phoenix.HTML.safe_to_string() == "from hello"
+      assert OptionsTemplates.show3html3foo(%{message: "hello"}) == "from hello"
 
       refute OptionsTemplates.__mix_recompile__?()
     end
 
     test "render/4" do
-      assert Template.render(AllTemplates, "show_html_eex", "html", %{message: "hello!"}) ==
-               {:safe, ["<div>Show! ", "hello!", "</div>\n"]}
+      assigns = %{message: "hello!"}
+
+      assert Template.render(AllTemplates, "show_html_ceex", "html", assigns)
+             |> Phoenix.HTML.safe_to_string() ==
+               "<div>Show! hello!</div>\n"
     end
 
     test "render/4 with layout" do
-      assigns = %{message: "hello!", layout: {AllTemplates, "layout_html_eex"}}
+      assigns = %{message: "hello!", layout: {AllTemplates, "layout_html_ceex"}}
 
-      assert Template.render(AllTemplates, "show_html_eex", "html", assigns) ==
-               {:safe, ["<html>", ["<div>Show! ", "hello!", "</div>\n"], "</html>"]}
+      assert Template.render(AllTemplates, "show_html_ceex", "html", assigns)
+             |> Phoenix.HTML.safe_to_string() ==
+               "<html><div>Show! hello!</div>\n</html>"
     end
 
     test "render/4 with bad layout" do
@@ -136,13 +141,22 @@ defmodule Phoenix.TemplateTest do
 
       assert_raise ArgumentError, msg, fn ->
         assigns = %{message: "hello!", layout: {AllTemplates, "bad_layout"}}
-        Template.render(AllTemplates, "show_html_eex", "html", assigns)
+        Template.render(AllTemplates, "show_html_ceex", "html", assigns)
       end
     end
 
     test "render_to_iodata/4" do
-      assert Template.render_to_iodata(AllTemplates, "show_html_eex", "html", %{message: "hello!"}) ==
-               ["<div>Show! ", "hello!", "</div>\n"]
+      assigns = %{message: "hello!"}
+
+      assert Template.render_to_iodata(AllTemplates, "show_html_ceex", "html", assigns) ==
+               ["<div", ">", "Show! ", "hello!", "</div>", "\n"]
+    end
+
+    test "render_to_iodata/4 with layout" do
+      assigns = %{message: "hello!", layout: {AllTemplates, "layout_html_ceex"}}
+
+      assert Template.render_to_iodata(AllTemplates, "show_html_ceex", "html", assigns) ==
+               ["<html", ">", ["<div", ">", "Show! ", "hello!", "</div>", "\n"], "</html>"]
     end
 
     test "render_to_iodata/4 with bad layout" do
@@ -150,12 +164,12 @@ defmodule Phoenix.TemplateTest do
 
       assert_raise ArgumentError, msg, fn ->
         assigns = %{message: "hello!", layout: {AllTemplates, "bad_layout"}}
-        Template.render_to_iodata(AllTemplates, "show_html_eex", "html", assigns)
+        Template.render_to_iodata(AllTemplates, "show_html_ceex", "html", assigns)
       end
     end
 
     test "render_to_string/4" do
-      assert Template.render_to_string(AllTemplates, "show_html_eex", "html", %{message: "hello!"}) ==
+      assert Template.render_to_string(AllTemplates, "show_html_ceex", "html", %{message: "hello!"}) ==
                "<div>Show! hello!</div>\n"
     end
   end

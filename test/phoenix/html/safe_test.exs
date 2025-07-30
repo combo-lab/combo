@@ -3,29 +3,44 @@ defmodule Phoenix.HTML.SafeTest do
 
   alias Phoenix.HTML.Safe
 
-  test "impl for binaries" do
-    assert Safe.to_iodata("<foo>") == [[[] | "&lt;"], "foo" | "&gt;"]
-  end
-
-  test "impl for io data" do
-    assert Safe.to_iodata(~c"<foo>") == ["&lt;", 102, 111, 111, "&gt;"]
-    assert Safe.to_iodata([~c"<foo>"]) == [["&lt;", 102, 111, 111, "&gt;"]]
-    assert Safe.to_iodata([?<, "foo" | ?>]) == ["&lt;", "foo" | "&gt;"]
-  end
-
   test "impl for atoms" do
+    assert Safe.to_iodata(nil) == ""
     assert Safe.to_iodata(:"<foo>") == [[[] | "&lt;"], "foo" | "&gt;"]
   end
 
-  test "impl for safe data" do
-    assert Safe.to_iodata(1) == "1"
-    assert Safe.to_iodata(1.0) == "1.0"
-    assert Safe.to_iodata({:safe, "<foo>"}) == "<foo>"
+  test "impl for bitstrings" do
+    assert Safe.to_iodata("") == ""
+    assert Safe.to_iodata("<foo>") == [[[] | "&lt;"], "foo" | "&gt;"]
   end
 
-  test "impl for an invalid tuple" do
-    assert_raise Protocol.UndefinedError, fn ->
-      Safe.to_iodata({"needs %{count}", [count: 123]})
+  test "impl for integer" do
+    assert Safe.to_iodata(1) == "1"
+  end
+
+  test "impl for float" do
+    assert Safe.to_iodata(1.0) == "1.0"
+  end
+
+  describe "impl for tuple" do
+    test "{:safe, _}" do
+      assert Safe.to_iodata({:safe, "<foo>"}) == "<foo>"
+    end
+
+    test "other" do
+      assert_raise Protocol.UndefinedError, fn ->
+        Safe.to_iodata({"needs %{count}", [count: 123]})
+      end
+    end
+  end
+
+  test "impl for iolist" do
+    assert Safe.to_iodata(~c"foo") == [102, 111, 111]
+    assert Safe.to_iodata(~c"<foo>") == ["&lt;", 102, 111, 111, "&gt;"]
+    assert Safe.to_iodata([~c"<foo>"]) == [["&lt;", 102, 111, 111, "&gt;"]]
+    assert Safe.to_iodata([?<, "foo" | ?>]) == ["&lt;", "foo" | "&gt;"]
+
+    assert_raise ArgumentError, ~r/templates only support iodata/, fn ->
+      Safe.to_iodata(~c"foo🐥")
     end
   end
 
@@ -74,5 +89,11 @@ defmodule Phoenix.HTML.SafeTest do
 
     assert uri |> Safe.to_iodata() |> IO.iodata_to_binary() ==
              "http://www.example.org/foo?secret=&lt;a&amp;b&gt;"
+  end
+
+  test "equivalences" do
+    # Since some code may compare Safe.to_iodata("") with Safe.to_iodata(nil),
+    # we make sure they have equivalent representations.
+    assert Safe.to_iodata("") == Safe.to_iodata(nil)
   end
 end

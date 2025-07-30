@@ -51,7 +51,7 @@ defmodule Phoenix.Template.HTMLEngine.TagHandler.HTML do
 
   defp handle_attrs_escape(attrs, meta) do
     quote line: meta[:line] do
-      unquote(__MODULE__).attributes_escape(unquote(attrs))
+      unquote(__MODULE__).escape_attrs(unquote(attrs))
     end
   end
 
@@ -126,20 +126,23 @@ defmodule Phoenix.Template.HTMLEngine.TagHandler.HTML do
     do: :error
 
   @doc false
-  def attributes_escape(attrs) do
-    # We don't want to dasherize keys, which Phoenix.HTML does for atoms,
+  def escape_attrs(attrs) do
+    # We don't want to dasherize keys, which Combo.HTML.Escape does for atoms,
     # so we convert those to strings
-    attrs
-    |> Enum.map(fn
-      {key, value} when is_atom(key) -> {Atom.to_string(key), value}
-      other -> other
-    end)
-    |> Phoenix.HTML.attributes_escape()
+    escaped_attrs =
+      attrs
+      |> Enum.map(fn
+        {key, value} when is_atom(key) -> {Atom.to_string(key), value}
+        other -> other
+      end)
+      |> Combo.HTML.Escape.escape_attrs()
+
+    {:safe, escaped_attrs}
   end
 
   @doc false
   def class_attribute_encode(list) when is_list(list),
-    do: list |> class_attribute_list() |> Phoenix.HTML.Engine.encode_to_iodata!()
+    do: list |> class_attribute_list() |> Phoenix.HTML.Safe.to_iodata()
 
   def class_attribute_encode(other),
     do: empty_attribute_encode(other)
@@ -159,12 +162,12 @@ defmodule Phoenix.Template.HTMLEngine.TagHandler.HTML do
   def empty_attribute_encode(nil), do: ""
   def empty_attribute_encode(false), do: ""
   def empty_attribute_encode(true), do: ""
-  def empty_attribute_encode(value), do: Phoenix.HTML.Engine.encode_to_iodata!(value)
+  def empty_attribute_encode(value), do: Phoenix.HTML.Safe.to_iodata(value)
 
   @doc false
   def binary_encode(value) when is_binary(value) do
     value
-    |> Phoenix.HTML.Engine.encode_to_iodata!()
+    |> Phoenix.HTML.Safe.to_iodata()
     |> IO.iodata_to_binary()
   end
 

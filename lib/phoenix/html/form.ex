@@ -26,8 +26,8 @@ defmodule Phoenix.HTML.Form do
   by any data structure that wants to be cast to the `Phoenix.HTML.Form` struct.
   """
 
+  import Phoenix.HTML, only: [to_safe: 1]
   alias Phoenix.HTML.Form
-  import Phoenix.HTML
 
   @doc """
   Defines the Phoenix.HTML.Form struct.
@@ -166,7 +166,7 @@ defmodule Phoenix.HTML.Form do
   """
   @spec input_id(t | atom, field, Phoenix.HTML.Safe.t()) :: String.t()
   def input_id(name, field, value) do
-    {:safe, value} = html_escape(value)
+    {:safe, value} = to_safe(value)
     value_id = value |> IO.iodata_to_binary() |> String.replace(~r/\W/u, "_")
     input_id(name, field) <> "_" <> value_id
   end
@@ -262,12 +262,12 @@ defmodule Phoenix.HTML.Form do
   end
 
   def normalize_value("textarea", value) do
-    {:safe, value} = html_escape(value || "")
+    {:safe, value} = to_safe(value || "")
     {:safe, [?\n | value]}
   end
 
   def normalize_value("checkbox", value) do
-    html_escape(value) == {:safe, "true"}
+    to_safe(value) == {:safe, "true"}
   end
 
   def normalize_value(_type, value) do
@@ -340,7 +340,7 @@ defmodule Phoenix.HTML.Form do
     {:safe,
      escaped_options_for_select(
        options,
-       selected_values |> List.wrap() |> Enum.map(&html_escape/1)
+       selected_values |> List.wrap() |> Enum.map(&to_safe/1)
      )}
   end
 
@@ -390,14 +390,14 @@ defmodule Phoenix.HTML.Form do
   end
 
   defp option(option_key, option_value, extra, value) do
-    option_key = html_escape(option_key)
-    option_value = html_escape(option_value)
+    option_key = to_safe(option_key)
+    option_value = to_safe(option_value)
     attrs = extra ++ [selected: option_value in value, value: option_value]
     option_tag("option", attrs, option_key)
   end
 
   defp option_tag(name, attrs, {:safe, body}) when is_binary(name) and is_list(attrs) do
-    {:safe, attrs} = Phoenix.HTML.attributes_escape(attrs)
+    attrs = Combo.HTML.Escape.escape_attrs(attrs)
     [?<, name, attrs, ?>, body, ?<, ?/, name, ?>]
   end
 

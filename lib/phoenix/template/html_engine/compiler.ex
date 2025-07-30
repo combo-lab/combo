@@ -1,6 +1,7 @@
 defmodule Phoenix.Template.HTMLEngine.Compiler do
   @moduledoc false
 
+  alias Phoenix.Env
   alias Phoenix.Template.HTMLEngine.Compiler.Engine
 
   @doc false
@@ -39,5 +40,5 @@ defmodule Phoenix.Template.HTMLEngine.Compiler do
   @doc false
   defdelegate __reserved_assigns__, to: Engine
 
-  defp trim?, do: Application.get_env(:phoenix, :trim_on_html_eex_engine, true)
+  defp trim?, do: Env.get_env(:template, :trim_on_ceex_engine, true)
 end

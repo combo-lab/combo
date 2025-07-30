@@ -20,8 +20,8 @@ defmodule Phoenix.Template do
   See `Phoenix.Template.Engine` for more information on the API required to
   be implemented by custom engines.
 
-  Once a template engine is defined, you can tell Phoenix
-  about it via the template engines option:
+  Once a template engine is defined, you can use it via the template engines
+  option:
 
       config :phoenix, :template,
         engines: [
@@ -35,17 +35,19 @@ defmodule Phoenix.Template do
 
   Format encoders work per format and are responsible for encoding a given
   format to a string. For example, when rendering JSON, your templates may
-  return a regular Elixir map. Then the JSON format encoder is invoked to
+  return a regular Elixir map. Then, the JSON format encoder is invoked to
   convert it to JSON.
 
-  A format encoder must export a function called `encode_to_iodata!/1` which
-  receives the rendering artifact and returns iodata.
+  See `Phoenix.Template.FormatEncoder` for more information on the API
+  required to be implemented by custom format encoders.
 
-  New encoders can be added via the format encoder option:
+  Once a template engine is defined, you can use it via the forman encoders
+  option:
 
       config :phoenix, :template,
         format_encoders: [
-          html: Phoenix.HTML.Engine
+          html: CustomHTMLEncoder
+          json: CustomJSONEncoder
         ]
 
   """
@@ -291,8 +293,9 @@ defmodule Phoenix.Template do
 
   defp default_engines do
     [
+      exs: Phoenix.Template.ExsEngine,
       eex: Phoenix.Template.EExEngine,
-      exs: Phoenix.Template.ExsEngine
+      ceex: Phoenix.Template.CEExEngine
     ]
   end
 
@@ -333,9 +336,9 @@ defmodule Phoenix.Template do
 
   defp default_encoders do
     [
-      html: Phoenix.HTML.Engine,
+      html: Phoenix.Template.HTMLEncoder,
       json: Phoenix.json_library(),
-      js: Phoenix.HTML.Engine
+      js: Phoenix.Template.HTMLEncoder
     ]
   end
 

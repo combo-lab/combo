@@ -6,8 +6,9 @@ config :logger, :console,
 
 config :phoenix,
   json_library: Jason,
-  stacktrace_depth: 20,
-  trim_on_html_eex_engine: false
+  stacktrace_depth: 20
+
+config :phoenix, :template, trim_on_ceex_engine: false
 
 if Mix.env() == :dev do
   esbuild = fn args ->
