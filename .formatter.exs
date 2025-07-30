@@ -67,7 +67,7 @@ locals_without_parens = [
   embed_templates: 1,
   embed_templates: 2,
 
-  # Phoenix.Template.HTMLEngine.Component
+  # Phoenix.Template.CEExEngine.DeclarativeAssigns
   attr: 2,
   attr: 3,
   slot: 1,

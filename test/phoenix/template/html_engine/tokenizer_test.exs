@@ -1,8 +1,8 @@
-defmodule Phoenix.Template.HTMLEngine.TokenizerTest do
+defmodule Phoenix.Template.CEExEngine.TokenizerTest do
   use ExUnit.Case, async: true
 
-  alias Phoenix.Template.HTMLEngine.Tokenizer
-  alias Phoenix.Template.HTMLEngine.Tokenizer.ParseError
+  alias Phoenix.Template.CEExEngine.Tokenizer
+  alias Phoenix.Template.CEExEngine.Tokenizer.ParseError
 
   defp tokenizer_state(text), do: Tokenizer.init(text, "nofile", 0)
 

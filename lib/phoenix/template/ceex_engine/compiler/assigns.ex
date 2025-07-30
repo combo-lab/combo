@@ -1,4 +1,4 @@
-defmodule Phoenix.Template.HTMLEngine.Compiler.Assigns do
+defmodule Phoenix.Template.CEExEngine.Compiler.Assigns do
   @moduledoc false
 
   @doc """

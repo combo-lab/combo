@@ -1,9 +1,9 @@
-defmodule Phoenix.Template.HTMLEngine.TagHandler.HTML do
+defmodule Phoenix.Template.CEExEngine.TagHandler.HTML do
   @moduledoc false
 
   alias Combo.SafeHTML
 
-  @behaviour Phoenix.Template.HTMLEngine.TagHandler
+  @behaviour Phoenix.Template.CEExEngine.TagHandler
 
   @impl true
   def classify_type(":inner_block"), do: {:error, "the slot name :inner_block is reserved"}

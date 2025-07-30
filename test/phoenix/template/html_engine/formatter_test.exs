@@ -1,10 +1,10 @@
-defmodule Phoenix.Template.HTMLEngine.FormatterTest do
+defmodule Phoenix.Template.CEExEngine.FormatterTest do
   use ExUnit.Case, async: true
 
   use ExUnit.Case, async: true
 
-  alias Phoenix.Template.HTMLEngine.Formatter
-  alias Phoenix.Template.HTMLEngine.Tokenizer.ParseError
+  alias Phoenix.Template.CEExEngine.Formatter
+  alias Phoenix.Template.CEExEngine.Tokenizer.ParseError
 
   defp assert_formatter_output(input, expected, dot_formatter_opts \\ []) do
     dot_formatter_opts =

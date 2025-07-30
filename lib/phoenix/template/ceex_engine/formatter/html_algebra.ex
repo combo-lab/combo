@@ -1,4 +1,4 @@
-defmodule Phoenix.Template.HTMLEngine.Formatter.HTMLAlgebra do
+defmodule Phoenix.Template.CEExEngine.Formatter.HTMLAlgebra do
   @moduledoc false
 
   import Inspect.Algebra, except: [format: 2]

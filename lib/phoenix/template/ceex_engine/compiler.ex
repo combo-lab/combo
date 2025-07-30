@@ -1,8 +1,8 @@
-defmodule Phoenix.Template.HTMLEngine.Compiler do
+defmodule Phoenix.Template.CEExEngine.Compiler do
   @moduledoc false
 
   alias Phoenix.Env
-  alias Phoenix.Template.HTMLEngine.Compiler.Engine
+  alias Phoenix.Template.CEExEngine.Compiler.Engine
 
   @doc false
   defmacro compile_file(path, opts \\ []) do

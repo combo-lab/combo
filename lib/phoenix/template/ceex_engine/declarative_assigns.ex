@@ -1,8 +1,8 @@
-defmodule Phoenix.Template.HTMLEngine.DeclarativeAssigns do
+defmodule Phoenix.Template.CEExEngine.DeclarativeAssigns do
   @moduledoc """
   """
 
-  alias Phoenix.Template.HTMLEngine.Compiler
+  alias Phoenix.Template.CEExEngine.Compiler
 
   @doc """
   The macro to setup declarative assigns.
@@ -145,7 +145,7 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssigns do
       attr :age, :integer, required: true
 
       def celebrate(assigns) do
-        ~CH"""
+        ~CE"""
         <p>
           Happy birthday {@name}!
           You are {@age} years old.
@@ -254,7 +254,7 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssigns do
       slot :footer
 
       def modal(assigns) do
-        ~CH"""
+        ~CE"""
         <div class="modal">
           <div class="modal-header">
             {render_slot(@header) || "Modal"}
@@ -965,7 +965,7 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssigns do
                 |> Map.put(:__given__, assigns)
 
               super(
-                Phoenix.Template.HTMLEngine.Component.assign(
+                Phoenix.Template.CEExEngine.Component.assign(
                   merged,
                   unquote(global_name),
                   globals

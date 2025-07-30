@@ -1,4 +1,4 @@
-defmodule Phoenix.Template.HTMLEngine.Component do
+defmodule Phoenix.Template.CEExEngine.Component do
   @moduledoc ~S'''
   Defines reusable components.
 
@@ -9,13 +9,13 @@ defmodule Phoenix.Template.HTMLEngine.Component do
         use Phoenix.Component
 
         def greet(assigns) do
-          ~CH"""
+          ~CE"""
           <p>Hello, {@name}!</p>
           """
         end
       end
 
-  When invoked within a `.ch` template file: or `~CH` sigil
+  When invoked within a `.ch` template file: or `~CE` sigil
 
   ```ch
   <MyComponent.greet name="Jane" />
@@ -57,7 +57,7 @@ defmodule Phoenix.Template.HTMLEngine.Component do
   attr :name, :string, required: true
 
   def greet(assigns) do
-    ~CH"""
+    ~CE"""
     <p>Hello, {@name}!</p>
     """
   end
@@ -102,7 +102,7 @@ defmodule Phoenix.Template.HTMLEngine.Component do
   attr :age, :integer, required: true
 
   def celebrate(assigns) do
-    ~CH"""
+    ~CE"""
     <p>
       Happy birthday {@name}!
       You are {@age} years old.
@@ -138,7 +138,7 @@ defmodule Phoenix.Template.HTMLEngine.Component do
     attr :title, :string, required: true
 
     def heading(assigns) do
-      ~CH"""
+      ~CE"""
       <h1>{@title}</h1>
       """
     end
@@ -146,7 +146,7 @@ defmodule Phoenix.Template.HTMLEngine.Component do
     attr :name, :string, required: true
 
     def greet(assigns) do
-      ~CH"""
+      ~CE"""
       <p>Hello {@name}</p>
       """
     end
@@ -176,7 +176,7 @@ defmodule Phoenix.Template.HTMLEngine.Component do
   attr :rest, :global
 
   def notification(assigns) do
-    ~CH"""
+    ~CE"""
     <span {@rest}>{@message}</span>
     """
   end
@@ -236,7 +236,7 @@ defmodule Phoenix.Template.HTMLEngine.Component do
   slot :inner_block
 
   def button(assigns) do
-    ~CH"""
+    ~CE"""
     <button {@rest}>{render_slot(@inner_block)}</button>
     """
   end
@@ -288,7 +288,7 @@ defmodule Phoenix.Template.HTMLEngine.Component do
   slot :inner_block, required: true
 
   def button(assigns) do
-    ~CH"""
+    ~CE"""
     <button>
       {render_slot(@inner_block)}
     </button>
@@ -335,7 +335,7 @@ defmodule Phoenix.Template.HTMLEngine.Component do
       attr :entries, :list, default: []
 
       def unordered_list(assigns) do
-        ~CH"""
+        ~CE"""
         <ul>
           <li :for={entry <- @entries}>{render_slot(@inner_block, entry)}</li>
         </ul>
@@ -374,7 +374,7 @@ defmodule Phoenix.Template.HTMLEngine.Component do
       slot :footer, required: true
 
       def modal(assigns) do
-        ~CH"""
+        ~CE"""
         <div class="modal">
           <div class="modal-header">
             {render_slot(@header) || "Modal"}
@@ -434,7 +434,7 @@ defmodule Phoenix.Template.HTMLEngine.Component do
       attr :rows, :list, default: []
 
       def table(assigns) do
-        ~CH"""
+        ~CE"""
         <table>
           <tr>
             <th :for={col <- @column}>{col.label}</th>
@@ -503,7 +503,7 @@ defmodule Phoenix.Template.HTMLEngine.Component do
         embed_templates "cards/*"
 
         def landing_hero(assigns) do
-          ~CH"""
+          ~CE"""
           <.pricing_card />
           <.features_card />
           """
@@ -542,7 +542,7 @@ defmodule Phoenix.Template.HTMLEngine.Component do
   <!-- </AppWeb.CoreComponents.header> -->
   ```
 
-  Debug annotations work across any `~CH` or `.html.heex` template.
+  Debug annotations work across any `~CE` or `.html.heex` template.
   They can be enabled globally with the following configuration in your
   `config/dev.exs` file:
 
@@ -602,7 +602,7 @@ defmodule Phoenix.Template.HTMLEngine.Component do
     slot :inner_block, required: true
 
     def my_function(assigns) do
-      ~CH"""
+      ~CE"""
       <p>Dynamic component with shared assigns: {@shared}</p>
       {render_slot(@inner_block)}
       {render_slot(@named_slot)}
@@ -629,8 +629,8 @@ defmodule Phoenix.Template.HTMLEngine.Component do
 
   ## Functions
 
-  import Phoenix.Template.HTMLEngine.Sigil
-  alias Phoenix.Template.HTMLEngine.Compiler
+  import Phoenix.Template.CEExEngine.Sigil
+  alias Phoenix.Template.CEExEngine.Compiler
 
   @doc """
   Adds a key-value pair to assigns.
@@ -698,7 +698,7 @@ defmodule Phoenix.Template.HTMLEngine.Component do
   def my_component(assigns) do
     assigns = assign_new(assigns, :bg_color, fn -> Enum.random(~w(bg-red-200 bg-green-200 bg-blue-200)) end)
 
-    ~CH"""
+    ~CE"""
     <div class={@bg_color}>
       Example
     </div>
@@ -757,7 +757,7 @@ defmodule Phoenix.Template.HTMLEngine.Component do
           |> assign(:target, target)
           |> assign(:extra, extra)
 
-        ~CH"""
+        ~CE"""
         <a href={@to} target={@target} {@extra}>
           {render_slot(@inner_block)}
         </a>
@@ -812,7 +812,7 @@ defmodule Phoenix.Template.HTMLEngine.Component do
   Inside the component, you can render the table with headers, rows, and columns:
 
       def table(assigns) do
-        ~CH"""
+        ~CE"""
         <table>
           <tr>
             <th :for={col <- @col}>{col.label}</th>
@@ -844,7 +844,7 @@ defmodule Phoenix.Template.HTMLEngine.Component do
   def __render_slot__(entries, arg) when is_list(entries) do
     assigns = %{entries: entries, arg: arg}
 
-    ~CH"""
+    ~CE"""
     <%= for entry <- @entries do %>{call_inner_block!(entry, @arg)}<% end %>
     """noformat
   end
@@ -1016,11 +1016,11 @@ defmodule Phoenix.Template.HTMLEngine.Component do
   @doc false
   defmacro __using__(opts \\ []) do
     quote bind_quoted: [opts: opts] do
-      use Phoenix.Template.HTMLEngine.DeclarativeAssigns, opts
+      use Phoenix.Template.CEExEngine.DeclarativeAssigns, opts
 
       import Phoenix.Template, only: [embed_templates: 1]
-      import Phoenix.Template.HTMLEngine.Sigil
-      import Phoenix.Template.HTMLEngine.Component
+      import Phoenix.Template.CEExEngine.Sigil
+      import Phoenix.Template.CEExEngine.Component
     end
   end
 end

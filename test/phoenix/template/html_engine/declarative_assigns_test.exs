@@ -1,10 +1,10 @@
-defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
+defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
   use ExUnit.Case, async: true
 
   alias Combo.SafeHTML
 
-  import Phoenix.Template.HTMLEngine.Sigil
-  alias Phoenix.Template.HTMLEngine.DeclarativeAssigns
+  import Phoenix.Template.CEExEngine.Sigil
+  alias Phoenix.Template.CEExEngine.DeclarativeAssigns
 
   def parse_fragment(html) do
     lazydoc = LazyHTML.from_fragment(html)
@@ -95,15 +95,15 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
   end
 
   defmodule RemoteFunctionComponentWithAttrs do
-    use Phoenix.Template.HTMLEngine.Component
+    use Phoenix.Template.CEExEngine.Component
 
     attr :id, :any, required: true
     slot :inner_block
-    def remote(assigns), do: ~CH[]
+    def remote(assigns), do: ~CE[]
   end
 
   defmodule FunctionComponentWithAttrs do
-    use Phoenix.Template.HTMLEngine.Component
+    use Phoenix.Template.CEExEngine.Component
 
     import RemoteFunctionComponentWithAttrs
     alias RemoteFunctionComponentWithAttrs, as: Remote
@@ -112,50 +112,50 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
     attr :id, :any, required: true
     attr :email, :string, default: nil
     slot :inner_block
-    def func1(assigns), do: ~CH[]
+    def func1(assigns), do: ~CE[]
 
     def func2_line, do: __ENV__.line
     attr :name, :any, required: true
     attr :age, :integer, default: 0
-    def func2(assigns), do: ~CH[]
+    def func2(assigns), do: ~CE[]
 
     def func3_line, do: __ENV__.line
     attr :on_cancel, :fun, required: true
     attr :on_complete, {:fun, 2}, required: true
-    def func3(assigns), do: ~CH[]
+    def func3(assigns), do: ~CE[]
 
     def with_global_line, do: __ENV__.line
     attr :id, :string, default: "container"
-    def with_global(assigns), do: ~CH[<.button id={@id} class="btn" aria-hidden="true" />]
+    def with_global(assigns), do: ~CE[<.button id={@id} class="btn" aria-hidden="true" />]
 
     attr :id, :string, required: true
     attr :rest, :global
-    def button(assigns), do: ~CH[<button id={@id} {@rest} />]
+    def button(assigns), do: ~CE[<button id={@id} {@rest} />]
 
     def button_with_defaults_line, do: __ENV__.line
     attr :rest, :global, default: %{class: "primary"}
-    def button_with_defaults(assigns), do: ~CH[<button {@rest} />]
+    def button_with_defaults(assigns), do: ~CE[<button {@rest} />]
 
     def button_with_values_line, do: __ENV__.line
     attr :text, :string, values: ["Save", "Cancel"]
-    def button_with_values(assigns), do: ~CH[<button>{@text}</button>]
+    def button_with_values(assigns), do: ~CE[<button>{@text}</button>]
 
     def button_with_values_and_default_1_line, do: __ENV__.line
     attr :text, :string, values: ["Save", "Cancel"], default: "Save"
-    def button_with_values_and_default_1(assigns), do: ~CH[<button>{@text}</button>]
+    def button_with_values_and_default_1(assigns), do: ~CE[<button>{@text}</button>]
 
     def button_with_values_and_default_2_line, do: __ENV__.line
     attr :text, :string, default: "Save", values: ["Save", "Cancel"]
-    def button_with_values_and_default_2(assigns), do: ~CH[<button>{@text}</button>]
+    def button_with_values_and_default_2(assigns), do: ~CE[<button>{@text}</button>]
 
     def button_with_examples_line, do: __ENV__.line
     attr :text, :string, examples: ["Save", "Cancel"]
-    def button_with_examples(assigns), do: ~CH[<button>{@text}</button>]
+    def button_with_examples(assigns), do: ~CE[<button>{@text}</button>]
 
     def render_line, do: __ENV__.line
 
     def render(assigns) do
-      ~CH"""
+      ~CE"""
       <!-- local -->
       <.func1 id="1" />
       <!-- local with inner content -->
@@ -418,18 +418,18 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
   end
 
   defmodule FunctionComponentWithSlots do
-    use Phoenix.Template.HTMLEngine.Component
+    use Phoenix.Template.CEExEngine.Component
 
     def fun_with_slot_line, do: __ENV__.line + 3
 
     slot :inner_block
-    def fun_with_slot(assigns), do: ~CH[]
+    def fun_with_slot(assigns), do: ~CE[]
 
     def fun_with_named_slots_line, do: __ENV__.line + 4
 
     slot :header
     slot :footer
-    def fun_with_named_slots(assigns), do: ~CH[]
+    def fun_with_named_slots(assigns), do: ~CE[]
 
     def fun_with_slot_attrs_line, do: __ENV__.line + 6
 
@@ -437,7 +437,7 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
       attr :attr, :any
     end
 
-    def fun_with_slot_attrs(assigns), do: ~CH[]
+    def fun_with_slot_attrs(assigns), do: ~CE[]
 
     def table_line, do: __ENV__.line + 8
 
@@ -448,7 +448,7 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
     attr :rows, :list
 
     def table(assigns) do
-      ~CH"""
+      ~CE"""
       <table>
         <tr>
           <%= for col <- @col do %>
@@ -469,7 +469,7 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
     def render_line, do: __ENV__.line + 2
 
     def render(assigns) do
-      ~CH"""
+      ~CE"""
       <.fun_with_slot>
         Hello, World
       </.fun_with_slot>
@@ -611,7 +611,7 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
   test "stores components for bodyless clauses" do
     defmodule Bodyless do
-      use Phoenix.Template.HTMLEngine.Component
+      use Phoenix.Template.CEExEngine.Component
 
       def example_line, do: __ENV__.line + 2
 
@@ -670,7 +670,7 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
   test "matches on struct types" do
     defmodule StructTypes do
-      use Phoenix.Template.HTMLEngine.Component
+      use Phoenix.Template.CEExEngine.Component
 
       attr :uri, URI, required: true
       attr :other, :any
@@ -688,21 +688,21 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
   test "provides attr defaults" do
     defmodule AttrDefaults do
-      use Phoenix.Template.HTMLEngine.Component
+      use Phoenix.Template.CEExEngine.Component
 
       attr :one, :integer, default: 1
       attr :two, :integer, default: 2
 
       def add(assigns) do
         assigns = assign(assigns, :foo, :bar)
-        ~CH[{@one + @two}]
+        ~CE[{@one + @two}]
       end
 
       attr :nil_default, :string, default: nil
-      def example(assigns), do: ~CH[{inspect(@nil_default)}]
+      def example(assigns), do: ~CE[{inspect(@nil_default)}]
 
       attr :value, :string
-      def no_default(assigns), do: ~CH[{inspect(@value)}]
+      def no_default(assigns), do: ~CE[{inspect(@value)}]
 
       attr :id, :any
       attr :errors, :list, default: []
@@ -723,30 +723,30 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
   test "provides slot defaults" do
     defmodule SlotDefaults do
-      use Phoenix.Template.HTMLEngine.Component
+      use Phoenix.Template.CEExEngine.Component
 
       slot :inner_block
-      def func(assigns), do: ~CH[{render_slot(@inner_block)}]
+      def func(assigns), do: ~CE[{render_slot(@inner_block)}]
 
       slot :inner_block, required: true
-      def func_required(assigns), do: ~CH[{render_slot(@inner_block)}]
+      def func_required(assigns), do: ~CE[{render_slot(@inner_block)}]
     end
 
     assigns = %{}
-    assert "" == rendered_to_string(~CH[<SlotDefaults.func />])
-    assert "hello" == rendered_to_string(~CH[<SlotDefaults.func>hello</SlotDefaults.func>])
+    assert "" == rendered_to_string(~CE[<SlotDefaults.func />])
+    assert "hello" == rendered_to_string(~CE[<SlotDefaults.func>hello</SlotDefaults.func>])
   end
 
   test "slots with rest" do
     defmodule SlotWithGlobal do
-      use Phoenix.Template.HTMLEngine.Component
+      use Phoenix.Template.CEExEngine.Component
 
       attr :rest, :global
       slot :inner_block, required: true
       slot :col, required: true
 
       def test(assigns) do
-        ~CH"""
+        ~CE"""
         <div {@rest}>
           {render_slot(@inner_block)}
           <%= for col <- @col do %>
@@ -760,7 +760,7 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
     assigns = %{}
 
     template =
-      ~CH"""
+      ~CE"""
       <SlotWithGlobal.test class="my-class">
         block
         <:col>col1</:col>
@@ -787,7 +787,7 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
   test "does not raise when there is a nested module" do
     mod = fn ->
       defmodule NestedModules do
-        use Phoenix.Template.HTMLEngine.Component
+        use Phoenix.Template.CEExEngine.Component
 
         defmodule Nested do
           def fun(arg), do: arg
@@ -800,7 +800,7 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
   test "supports :doc for attr and slot documentation" do
     defmodule AttrDocs do
-      use Phoenix.Template.HTMLEngine.Component
+      use Phoenix.Template.CEExEngine.Component
 
       def attr_line, do: __ENV__.line
       attr :single, :any, doc: "a single line description"
@@ -825,13 +825,13 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
       attr :no_doc, :any
 
       @doc "my function component with attrs"
-      def func_with_attr_docs(assigns), do: ~CH[]
+      def func_with_attr_docs(assigns), do: ~CE[]
 
       slot :slot, doc: "a named slot" do
         attr :attr, :any, doc: "a slot attr"
       end
 
-      def func_with_slot_docs(assigns), do: ~CH[]
+      def func_with_slot_docs(assigns), do: ~CE[]
     end
 
     line = AttrDocs.attr_line()
@@ -1169,10 +1169,10 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrDocsInvalidType do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :invalid, :any, doc: :foo
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1182,10 +1182,10 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.SlotDocsInvalidType do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         slot :invalid, doc: :foo
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1193,19 +1193,19 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
   test "raise on invalid attr/2 args" do
     assert_raise FunctionClauseError, fn ->
       defmodule Phoenix.ComponentTest.AttrMacroInvalidName do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr "not an atom", :any
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
 
     assert_raise FunctionClauseError, fn ->
       defmodule Phoenix.ComponentTest.AttrMacroInvalidOpts do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :attr, :any, "not a list"
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1213,19 +1213,19 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
   test "raise on invalid slot/3 args" do
     assert_raise FunctionClauseError, fn ->
       defmodule Phoenix.ComponentTest.SlotMacroInvalidName do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         slot("not an atom")
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
 
     assert_raise FunctionClauseError, fn ->
       defmodule Phoenix.ComponentTest.SlotMacroInvalidOpts do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         slot :slot, "not a list"
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1235,14 +1235,14 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.MultiClauseWrong do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :foo, :any
-        def func(assigns = %{foo: _}), do: ~CH[]
-        def func(assigns = %{bar: _}), do: ~CH[]
+        def func(assigns = %{foo: _}), do: ~CE[]
+        def func(assigns = %{bar: _}), do: ~CE[]
 
         attr :bar, :any
-        def func(assigns = %{baz: _}), do: ~CH[]
+        def func(assigns = %{baz: _}), do: ~CE[]
       end
     end
   end
@@ -1252,14 +1252,14 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.MultiClauseWrong do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         slot :inner_block
-        def func(assigns = %{foo: _}), do: ~CH[]
-        def func(assigns = %{bar: _}), do: ~CH[]
+        def func(assigns = %{foo: _}), do: ~CE[]
+        def func(assigns = %{bar: _}), do: ~CE[]
 
         slot :named
-        def func(assigns = %{baz: _}), do: ~CH[]
+        def func(assigns = %{baz: _}), do: ~CE[]
       end
     end
   end
@@ -1270,7 +1270,7 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrOnInvalidFunction do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :foo, :any
         def func(a, b), do: a + b
@@ -1284,7 +1284,7 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.SlotOnInvalidFunction do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         slot :inner_block
         def func(a, b), do: a + b
@@ -1297,9 +1297,9 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrOnInvalidFunction do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
-        def func(assigns = %{baz: _}), do: ~CH[]
+        def func(assigns = %{baz: _}), do: ~CE[]
 
         attr :foo, :any
       end
@@ -1311,9 +1311,9 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.SlotOnInvalidFunction do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
-        def func(assigns = %{baz: _}), do: ~CH[]
+        def func(assigns = %{baz: _}), do: ~CE[]
 
         slot :inner_block
       end
@@ -1325,10 +1325,10 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrTypeNotSupported do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :foo, :not_a_type
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1338,10 +1338,10 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrTypeNotSupported do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :foo, {:fun, "a"}
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1351,10 +1351,10 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrTypeNotSupported do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :foo, {:invalid, 1}
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1364,13 +1364,13 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.SlotAttrTypeNotSupported do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         slot :named do
           attr :foo, :not_a_type
         end
 
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1380,13 +1380,13 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.SlotAttrTypeNotSupported do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         slot :named do
           attr :foo, {:fun, "a"}
         end
 
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1396,13 +1396,13 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.SlotAttrTypeNotSupported do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         slot :named do
           attr :foo, {:invalid, 1}
         end
 
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1412,13 +1412,13 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.SlotAttrGlobalNotSupported do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         slot :named do
           attr :foo, :global
         end
 
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1426,13 +1426,13 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
   test "reraise exceptions in slot/3 blocks" do
     assert_raise RuntimeError, "boom!", fn ->
       defmodule Phoenix.ComponentTest.SlotExceptionRaised do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         slot :named do
           raise "boom!"
         end
 
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1442,11 +1442,11 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrValueTypeMismatch do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :foo, :string, values: ["a string", :not_a_string]
 
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1456,11 +1456,11 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrExampleTypeMismatch do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :foo, :string, examples: ["a string", :not_a_string]
 
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1470,11 +1470,11 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrsValuesNotAList do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :foo, :string, values: :ok
 
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1484,11 +1484,11 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrsExamplesNotAList do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :foo, :string, examples: :ok
 
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1498,11 +1498,11 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrsValuesEmptyList do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :foo, :string, values: []
 
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1512,11 +1512,11 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrsExamplesEmptyList do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :foo, :string, examples: []
 
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1526,11 +1526,11 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrDefaultTypeMismatch do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :foo, :string, values: ["a string"], examples: ["a string"]
 
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1540,11 +1540,11 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrDefaultTypeMismatch do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :foo, :string, default: :not_a_string
 
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1555,11 +1555,11 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrDefaultValuesMismatch do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :foo, :string, default: "boom", values: ["foo", "bar", "baz"]
 
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1569,10 +1569,10 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrDefaultValuesMismatch do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :foo, :integer, default: 11, values: 1..10
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1582,13 +1582,13 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.SlotAttrDefault do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         slot :named do
           attr :foo, :any, default: :whatever
         end
 
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1598,10 +1598,10 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrOptionNotSupported do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :foo, :any, not_an_opt: true
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1611,13 +1611,13 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.SlotAttrOptionNotSupported do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         slot :named do
           attr :foo, :any, not_an_opt: true
         end
 
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1627,11 +1627,11 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrDup do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :foo, :any, required: true
         attr :foo, :string
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1641,11 +1641,11 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.SlotDup do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         slot :foo
         slot :foo
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1655,14 +1655,14 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.SlotAttrDup do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         slot :named do
           attr :foo, :any, required: true
           attr :foo, :string
         end
 
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1672,30 +1672,30 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule SlotAttrNameConflict do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         slot :named
         attr :named, :any
 
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
 
     assert_raise CompileError, msg, fn ->
       defmodule SlotAttrNameConflict do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :named, :any
         slot :named
 
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
 
   test "does not raise if multiple slots with different names share the same attr names" do
     defmodule MultipleSlotAttrs do
-      use Phoenix.Template.HTMLEngine.Component
+      use Phoenix.Template.CEExEngine.Component
 
       slot :foo do
         attr :attr, :any
@@ -1705,7 +1705,7 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
         attr :attr, :any
       end
 
-      def func(assigns), do: ~CH[]
+      def func(assigns), do: ~CE[]
     end
   end
 
@@ -1714,13 +1714,13 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule AttrsInDefaultSlot do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         slot :inner_block do
           attr :attr, :any
         end
 
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1730,10 +1730,10 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule InnerSlotAttr do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :inner_block, :string
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1743,11 +1743,11 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.MultiGlobal do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :rest, :global
         attr :rest2, :global
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end
@@ -1757,10 +1757,10 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.GlobalRequiredOpts do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :rest, :global, required: true
-        def func(assigns), do: ~CH[{@rest}]
+        def func(assigns), do: ~CE[{@rest}]
       end
     end
   end
@@ -1770,10 +1770,10 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.GlobalValueOpts do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :rest, :global, values: ["placeholder", "rel"]
-        def func(assigns), do: ~CH[{@rest}]
+        def func(assigns), do: ~CE[{@rest}]
       end
     end
   end
@@ -1783,10 +1783,10 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.GlobalExampleOpts do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         attr :rest, :global, examples: ["placeholder", "rel"]
-        def func(assigns), do: ~CH[{@rest}]
+        def func(assigns), do: ~CE[{@rest}]
       end
     end
   end
@@ -1796,10 +1796,10 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.InvalidSlotAttr do
-        use Elixir.Phoenix.Template.HTMLEngine.Component
+        use Elixir.Phoenix.Template.CEExEngine.Component
 
         slot :foo, require: true
-        def func(assigns), do: ~CH[]
+        def func(assigns), do: ~CE[]
       end
     end
   end

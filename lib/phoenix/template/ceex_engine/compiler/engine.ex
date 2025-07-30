@@ -1,11 +1,11 @@
-defmodule Phoenix.Template.HTMLEngine.Compiler.Engine do
+defmodule Phoenix.Template.CEExEngine.Compiler.Engine do
   @moduledoc false
 
-  alias Phoenix.Template.HTMLEngine.Tokenizer
-  alias Phoenix.Template.HTMLEngine.Tokenizer.ParseError
-  alias Phoenix.Template.HTMLEngine.TagHandler.HTML, as: TagHandler
-  alias Phoenix.Template.HTMLEngine.Compiler.Assigns
-  alias Phoenix.Template.HTMLEngine.Compiler.IOBuilder
+  alias Phoenix.Template.CEExEngine.Tokenizer
+  alias Phoenix.Template.CEExEngine.Tokenizer.ParseError
+  alias Phoenix.Template.CEExEngine.TagHandler.HTML, as: TagHandler
+  alias Phoenix.Template.CEExEngine.Compiler.Assigns
+  alias Phoenix.Template.CEExEngine.Compiler.IOBuilder
 
   @doc false
   def __reserved_assigns__, do: [:__slot__, :inner_block]
@@ -1289,7 +1289,7 @@ defmodule Phoenix.Template.HTMLEngine.Compiler.Engine do
   @doc """
   Renders a component defined by the given function.
 
-  This function is rarely invoked directly by users. Instead, it is used by `~CH`
+  This function is rarely invoked directly by users. Instead, it is used by `~CE`
   and other engine implementations to render `Phoenix.Component`s. For example,
   the following:
 
@@ -1324,7 +1324,7 @@ defmodule Phoenix.Template.HTMLEngine.Compiler.Engine do
         raise RuntimeError, """
         expected #{inspect(fun)} to return a tuple {:safe, iodata()}
 
-        Ensure your render function uses ~CH to define its template.
+        Ensure your render function uses ~CE to define its template.
 
         Got:
 

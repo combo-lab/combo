@@ -1,14 +1,12 @@
-defmodule Phoenix.Template.HTMLEngine.Compiler.IOBuilder do
+defmodule Phoenix.Template.CEExEngine.Compiler.IOBuilder do
   @moduledoc false
 
   # The module for building IO data.
   #
   # This module is built based on:
+  #
   # - Phoenix.HTML.Engine
   # - Phoenix.LiveView.Engine
-  #
-  # TODO: the to_safe/1 is relatively simple, I will merge more code from
-  #       above engines.
 
   alias Combo.SafeHTML
 
@@ -92,14 +90,12 @@ defmodule Phoenix.Template.HTMLEngine.Compiler.IOBuilder do
   defp to_safe(expr, line) do
     # keep stacktraces for protocol dispatch and coverage
     safe_return = quote line: line, do: data
-    bin_return = quote line: line, do: Combo.SafeHTML.escape(bin)
     other_return = quote line: line, do: Combo.SafeHTML.to_iodata(other)
 
     # prevent warnings of generated clauses
     quote generated: true do
       case unquote(expr) do
         {:safe, data} -> unquote(safe_return)
-        bin when is_binary(bin) -> unquote(bin_return)
         other -> unquote(other_return)
       end
     end

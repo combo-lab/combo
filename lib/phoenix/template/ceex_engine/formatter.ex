@@ -1,6 +1,6 @@
-defmodule Phoenix.Template.HTMLEngine.Formatter do
+defmodule Phoenix.Template.CEExEngine.Formatter do
   @moduledoc """
-  Format HEEx templates from `.heex` files or `~CH` sigils.
+  Format HEEx templates from `.heex` files or `~CE` sigils.
 
   This is a `mix format` [plugin](https://hexdocs.pm/mix/main/Mix.Tasks.Format.html#module-plugins).
 
@@ -28,7 +28,7 @@ defmodule Phoenix.Template.HTMLEngine.Formatter do
   ### Editor support
 
   Most editors that support `mix format` integration should automatically format
-  `.heex` and `~CH` templates. Other editors may require custom integration or
+  `.heex` and `~CE` templates. Other editors may require custom integration or
   even provide additional functionality. Here are some reference posts:
 
     * [Formatting HEEx templates in VS Code](https://pragmaticstudio.com/tutorials/formatting-heex-templates-in-vscode)
@@ -198,9 +198,9 @@ defmodule Phoenix.Template.HTMLEngine.Formatter do
 
   require Logger
 
-  alias Phoenix.Template.HTMLEngine.Formatter.HTMLAlgebra
-  alias Phoenix.Template.HTMLEngine.Tokenizer
-  alias Phoenix.Template.HTMLEngine.Tokenizer.ParseError
+  alias Phoenix.Template.CEExEngine.Formatter.HTMLAlgebra
+  alias Phoenix.Template.CEExEngine.Tokenizer
+  alias Phoenix.Template.CEExEngine.Tokenizer.ParseError
 
   defguard is_tag_open(tag_type)
            when tag_type in [:slot, :remote_component, :local_component, :tag]
@@ -263,7 +263,7 @@ defmodule Phoenix.Template.HTMLEngine.Formatter do
             raise ParseError, line: line, column: column, file: file, description: message
         end
 
-      # If the opening delimiter is a single character, such as ~CH"...", or the formatted code is empty,
+      # If the opening delimiter is a single character, such as ~CE"...", or the formatted code is empty,
       # do not add trailing newline.
       newline =
         if match?(<<_>>, opts[:opening_delimiter]) or formatted == [] or formatted == "",

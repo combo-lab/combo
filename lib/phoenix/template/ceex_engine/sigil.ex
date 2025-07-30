@@ -1,14 +1,14 @@
-defmodule Phoenix.Template.HTMLEngine.Sigil do
+defmodule Phoenix.Template.CEExEngine.Sigil do
   @moduledoc """
-  Provides sigils for working with `Phoenix.Template.HTMLEngine`.
+  Provides sigils for this engine.
   """
 
-  alias Phoenix.Template.HTMLEngine.Compiler
+  alias Phoenix.Template.CEExEngine.Compiler
 
-  defmacro sigil_CH({:<<>>, meta, [expr]}, modifiers)
+  defmacro sigil_CE({:<<>>, meta, [expr]}, modifiers)
            when modifiers == [] or modifiers == ~c"noformat" do
     if not Macro.Env.has_var?(__CALLER__, {:assigns, nil}) do
-      raise "~CH requires a variable named \"assigns\" to exist and be set to a map"
+      raise "~CE requires a variable named \"assigns\" to exist and be set to a map"
     end
 
     opts = [

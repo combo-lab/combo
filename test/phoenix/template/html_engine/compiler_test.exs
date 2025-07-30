@@ -1,11 +1,11 @@
-defmodule Phoenix.Template.HTMLEngine.CompilerTest do
+defmodule Phoenix.Template.CEExEngine.CompilerTest do
   use ExUnit.Case, async: true
 
   alias Combo.SafeHTML
 
-  import Phoenix.Template.HTMLEngine.Component
-  alias Phoenix.Template.HTMLEngine.Compiler
-  alias Phoenix.Template.HTMLEngine.Tokenizer.ParseError
+  import Phoenix.Template.CEExEngine.Component
+  alias Phoenix.Template.CEExEngine.Compiler
+  alias Phoenix.Template.CEExEngine.Tokenizer.ParseError
 
   # Helpers
 
@@ -348,9 +348,9 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       assigns = %{}
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.textarea phx-no-format>
+             <Phoenix.Template.CEExEngine.CompilerTest.textarea phx-no-format>
               Content
-             </Phoenix.Template.HTMLEngine.CompilerTest.textarea>
+             </Phoenix.Template.CEExEngine.CompilerTest.textarea>
              """) == "<textarea>\n Content\n</textarea>"
 
       assert render_compiled("<.textarea phx-no-format>Content</.textarea>") ==
@@ -621,34 +621,34 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
   end
 
   # describe "debug annotations" do
-  #   alias Phoenix.Template.HTMLEngine.Compiler.DebugAnnotation
-  #   import Phoenix.Template.HTMLEngine.Compiler.DebugAnnotation
+  #   alias Phoenix.Template.CEExEngine.Compiler.DebugAnnotation
+  #   import Phoenix.Template.CEExEngine.Compiler.DebugAnnotation
 
   #   test "without root tag" do
   #     assigns = %{}
 
   #     assert render_compiled("<DebugAnnotation.remote value='1'/>") ==
-  #              "<!-- <Phoenix.Template.HTMLEngine.Compiler.DebugAnnotation.remote> test/support/phoenix/template/html_engine/compiler/debug_annotation.exs:7 () -->REMOTE COMPONENT: Value: 1<!-- </Phoenix.Template.HTMLEngine.Compiler.DebugAnnotation.remote> -->"
+  #              "<!-- <Phoenix.Template.CEExEngine.Compiler.DebugAnnotation.remote> test/support/phoenix/template/html_engine/compiler/debug_annotation.exs:7 () -->REMOTE COMPONENT: Value: 1<!-- </Phoenix.Template.CEExEngine.Compiler.DebugAnnotation.remote> -->"
 
   #     assert render_compiled("<.local value='1'/>") ==
-  #              "<!-- <Phoenix.Template.HTMLEngine.Compiler.DebugAnnotation.local> test/support/phoenix/template/html_engine/compiler/debug_annotation.exs:15 () -->LOCAL COMPONENT: Value: 1<!-- </Phoenix.Template.HTMLEngine.Compiler.DebugAnnotation.local> -->"
+  #              "<!-- <Phoenix.Template.CEExEngine.Compiler.DebugAnnotation.local> test/support/phoenix/template/html_engine/compiler/debug_annotation.exs:15 () -->LOCAL COMPONENT: Value: 1<!-- </Phoenix.Template.CEExEngine.Compiler.DebugAnnotation.local> -->"
   #   end
 
   #   test "with root tag" do
   #     assigns = %{}
 
   #     assert render_compiled("<DebugAnnotation.remote_with_root value='1'/>") ==
-  #              "<!-- <Phoenix.Template.HTMLEngine.Compiler.DebugAnnotation.remote_with_root> test/support/phoenix/template/html_engine/compiler/debug_annotation.exs:11 () --><div>REMOTE COMPONENT: Value: 1</div><!-- </Phoenix.Template.HTMLEngine.Compiler.DebugAnnotation.remote_with_root> -->"
+  #              "<!-- <Phoenix.Template.CEExEngine.Compiler.DebugAnnotation.remote_with_root> test/support/phoenix/template/html_engine/compiler/debug_annotation.exs:11 () --><div>REMOTE COMPONENT: Value: 1</div><!-- </Phoenix.Template.CEExEngine.Compiler.DebugAnnotation.remote_with_root> -->"
 
   #     assert render_compiled("<.local_with_root value='1'/>") ==
-  #              "<!-- <Phoenix.Template.HTMLEngine.Compiler.DebugAnnotation.local_with_root> test/support/phoenix/template/html_engine/compiler/debug_annotation.exs:19 () --><div>LOCAL COMPONENT: Value: 1</div><!-- </Phoenix.Template.HTMLEngine.Compiler.DebugAnnotation.local_with_root> -->"
+  #              "<!-- <Phoenix.Template.CEExEngine.Compiler.DebugAnnotation.local_with_root> test/support/phoenix/template/html_engine/compiler/debug_annotation.exs:19 () --><div>LOCAL COMPONENT: Value: 1</div><!-- </Phoenix.Template.CEExEngine.Compiler.DebugAnnotation.local_with_root> -->"
   #   end
 
   #   test "nesting" do
   #     assigns = %{}
 
   #     assert render_compiled("<DebugAnnotation.nested value='1'/>") ==
-  #              "<!-- <Phoenix.Template.HTMLEngine.Compiler.DebugAnnotation.nested> test/support/phoenix/template/html_engine/compiler/debug_annotation.exs:23 () --><div>\n  <!-- @caller test/support/phoenix/template/html_engine/compiler/debug_annotation.exs:25 () --><!-- <Phoenix.Template.HTMLEngine.Compiler.DebugAnnotation.local_with_root> test/support/phoenix/template/html_engine/compiler/debug_annotation.exs:19 () --><div>LOCAL COMPONENT: Value: local</div><!-- </Phoenix.Template.HTMLEngine.Compiler.DebugAnnotation.local_with_root> -->\n</div><!-- </Phoenix.Template.HTMLEngine.Compiler.DebugAnnotation.nested> -->"
+  #              "<!-- <Phoenix.Template.CEExEngine.Compiler.DebugAnnotation.nested> test/support/phoenix/template/html_engine/compiler/debug_annotation.exs:23 () --><div>\n  <!-- @caller test/support/phoenix/template/html_engine/compiler/debug_annotation.exs:25 () --><!-- <Phoenix.Template.CEExEngine.Compiler.DebugAnnotation.local_with_root> test/support/phoenix/template/html_engine/compiler/debug_annotation.exs:19 () --><div>LOCAL COMPONENT: Value: local</div><!-- </Phoenix.Template.CEExEngine.Compiler.DebugAnnotation.local_with_root> -->\n</div><!-- </Phoenix.Template.CEExEngine.Compiler.DebugAnnotation.nested> -->"
   #   end
   # end
 
@@ -657,13 +657,13 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       assigns = %{}
 
       assert render_compiled(
-               "<Phoenix.Template.HTMLEngine.CompilerTest.remote_component value='1'/>"
+               "<Phoenix.Template.CEExEngine.CompilerTest.remote_component value='1'/>"
              ) ==
                "REMOTE COMPONENT: Value: 1"
     end
 
     test "remote call from alias (self close)" do
-      alias Phoenix.Template.HTMLEngine.CompilerTest
+      alias Phoenix.Template.CEExEngine.CompilerTest
       assigns = %{}
 
       assert render_compiled("<CompilerTest.remote_component value='1'/>") ==
@@ -674,9 +674,9 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       assigns = %{}
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.remote_component_with_inner_block value='1'>
+             <Phoenix.Template.CEExEngine.CompilerTest.remote_component_with_inner_block value='1'>
                The inner content
-             </Phoenix.Template.HTMLEngine.CompilerTest.remote_component_with_inner_block>
+             </Phoenix.Template.CEExEngine.CompilerTest.remote_component_with_inner_block>
              """) == "REMOTE COMPONENT: Value: 1, Content: \n  The inner content\n"
     end
 
@@ -712,13 +712,13 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       assigns = %{}
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.remote_component_with_inner_block_args
+             <Phoenix.Template.CEExEngine.CompilerTest.remote_component_with_inner_block_args
                value="aBcD"
                :let={%{upcase: upcase, downcase: downcase}}
              >
                Upcase: <%= upcase %>
                Downcase: <%= downcase %>
-             </Phoenix.Template.HTMLEngine.CompilerTest.remote_component_with_inner_block_args>
+             </Phoenix.Template.CEExEngine.CompilerTest.remote_component_with_inner_block_args>
              """) =~ expected
     end
 
@@ -733,12 +733,12 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
 
       assert_raise(RuntimeError, message, fn ->
         render_compiled("""
-        <Phoenix.Template.HTMLEngine.CompilerTest.remote_component_with_inner_block_args
+        <Phoenix.Template.CEExEngine.CompilerTest.remote_component_with_inner_block_args
           {[value: "aBcD"]}
           :let={%{wrong: _}}
         >
           ...
-        </Phoenix.Template.HTMLEngine.CompilerTest.remote_component_with_inner_block_args>
+        </Phoenix.Template.CEExEngine.CompilerTest.remote_component_with_inner_block_args>
         """)
       end)
     end
@@ -749,7 +749,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       assert_raise(ParseError, message, fn ->
         render("""
         <br>
-        <Phoenix.Template.HTMLEngine.CompilerTest.remote_component value='1' :let={var}/>
+        <Phoenix.Template.CEExEngine.CompilerTest.remote_component value='1' :let={var}/>
         """)
       end)
     end
@@ -839,7 +839,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       test/phoenix/template/html_engine/compiler_test.exs:4:3: cannot define multiple :let attributes. Another :let has already been defined at line 3
         |
       1 | <br>
-      2 | <Phoenix.Template.HTMLEngine.CompilerTest.remote_component value='1'
+      2 | <Phoenix.Template.CEExEngine.CompilerTest.remote_component value='1'
       3 |   :let={var1}
       4 |   :let={var2}
         |   ^\
@@ -848,10 +848,10 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       assert_raise(ParseError, message, fn ->
         render("""
         <br>
-        <Phoenix.Template.HTMLEngine.CompilerTest.remote_component value='1'
+        <Phoenix.Template.CEExEngine.CompilerTest.remote_component value='1'
           :let={var1}
           :let={var2}
-        ></Phoenix.Template.HTMLEngine.CompilerTest.remote_component>
+        ></Phoenix.Template.CEExEngine.CompilerTest.remote_component>
         """)
       end)
 
@@ -878,17 +878,17 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
 
     test "invalid :let expr" do
       message = """
-      test/phoenix/template/html_engine/compiler_test.exs:2:70: :let must be a pattern between {...} in remote component: Phoenix.Template.HTMLEngine.CompilerTest.remote_component
+      test/phoenix/template/html_engine/compiler_test.exs:2:70: :let must be a pattern between {...} in remote component: Phoenix.Template.CEExEngine.CompilerTest.remote_component
         |
       1 | <br>
-      2 | <Phoenix.Template.HTMLEngine.CompilerTest.remote_component value='1' :let=\"1\"
+      2 | <Phoenix.Template.CEExEngine.CompilerTest.remote_component value='1' :let=\"1\"
         |                                                                      ^\
       """
 
       assert_raise(ParseError, message, fn ->
         render("""
         <br>
-        <Phoenix.Template.HTMLEngine.CompilerTest.remote_component value='1' :let="1"
+        <Phoenix.Template.CEExEngine.CompilerTest.remote_component value='1' :let="1"
         />
         """)
       end)
@@ -1111,11 +1111,11 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
 
       assert render_compiled("""
              COMPONENT WITH SLOTS:
-             <Phoenix.Template.HTMLEngine.CompilerTest.component_with_single_slot>
+             <Phoenix.Template.CEExEngine.CompilerTest.component_with_single_slot>
                <:sample>
                  The sample slot
                </:sample>
-             </Phoenix.Template.HTMLEngine.CompilerTest.component_with_single_slot>
+             </Phoenix.Template.CEExEngine.CompilerTest.component_with_single_slot>
              """) == expected
     end
 
@@ -1172,14 +1172,14 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
 
       assert render_compiled("""
              COMPONENT WITH SLOTS:
-             <Phoenix.Template.HTMLEngine.CompilerTest.component_with_single_slot>
+             <Phoenix.Template.CEExEngine.CompilerTest.component_with_single_slot>
                <:sample>
                  entry 1
                </:sample>
                <:sample>
                  entry 2
                </:sample>
-             </Phoenix.Template.HTMLEngine.CompilerTest.component_with_single_slot>
+             </Phoenix.Template.CEExEngine.CompilerTest.component_with_single_slot>
              """) == expected
     end
 
@@ -1201,10 +1201,10 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
              """) == expected
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.component_with_multiple_slots_entries>
+             <Phoenix.Template.CEExEngine.CompilerTest.component_with_multiple_slots_entries>
                <:sample id="1">one</:sample>
                <:sample id="2">two</:sample>
-             </Phoenix.Template.HTMLEngine.CompilerTest.component_with_multiple_slots_entries>
+             </Phoenix.Template.CEExEngine.CompilerTest.component_with_multiple_slots_entries>
              """) == expected
     end
 
@@ -1219,9 +1219,9 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
              """) == expected
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.component_with_slot_attrs>
+             <Phoenix.Template.CEExEngine.CompilerTest.component_with_slot_attrs>
                <:sample a={@a} b="B"> and </:sample>
-             </Phoenix.Template.HTMLEngine.CompilerTest.component_with_slot_attrs>
+             </Phoenix.Template.CEExEngine.CompilerTest.component_with_slot_attrs>
              """) == expected
     end
 
@@ -1260,14 +1260,14 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
 
       assert render_compiled("""
              BEFORE COMPONENT
-             <Phoenix.Template.HTMLEngine.CompilerTest.component_with_slots>
+             <Phoenix.Template.CEExEngine.CompilerTest.component_with_slots>
                <:header>
                  The header content
                </:header>
                <:footer>
                  The footer content
                </:footer>
-             </Phoenix.Template.HTMLEngine.CompilerTest.component_with_slots>
+             </Phoenix.Template.CEExEngine.CompilerTest.component_with_slots>
              AFTER COMPONENT
              """) == expected
     end
@@ -1314,7 +1314,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
 
       assert render_compiled("""
              BEFORE COMPONENT
-             <Phoenix.Template.HTMLEngine.CompilerTest.component_with_slots_and_default>
+             <Phoenix.Template.CEExEngine.CompilerTest.component_with_slots_and_default>
                top
                <:header>
                  The header content
@@ -1324,7 +1324,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
                  The footer content
                </:footer>
                bot
-             </Phoenix.Template.HTMLEngine.CompilerTest.component_with_slots_and_default>
+             </Phoenix.Template.CEExEngine.CompilerTest.component_with_slots_and_default>
              AFTER COMPONENT
              """) == expected
     end
@@ -1355,12 +1355,12 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
 
       assert render_compiled("""
              COMPONENT WITH SLOTS:
-             <Phoenix.Template.HTMLEngine.CompilerTest.component_with_slots_and_args>
+             <Phoenix.Template.CEExEngine.CompilerTest.component_with_slots_and_args>
                <:sample :let={arg}>
                  The sample slot
                  Arg: <%= arg %>
                </:sample>
-             </Phoenix.Template.HTMLEngine.CompilerTest.component_with_slots_and_args>
+             </Phoenix.Template.CEExEngine.CompilerTest.component_with_slots_and_args>
              """) == expected
     end
 
@@ -1384,7 +1384,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       """
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.component_with_single_slot>
+             <Phoenix.Template.CEExEngine.CompilerTest.component_with_single_slot>
                <:sample>
                 The outer slot
                  <.component_with_single_slot>
@@ -1393,7 +1393,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
                    </:sample>
                  </.component_with_single_slot>
                </:sample>
-             </Phoenix.Template.HTMLEngine.CompilerTest.component_with_single_slot>
+             </Phoenix.Template.CEExEngine.CompilerTest.component_with_single_slot>
              """) == expected
 
       assert render_compiled("""
@@ -1428,10 +1428,10 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
              """) == expected
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.component_with_self_close_slots>
+             <Phoenix.Template.CEExEngine.CompilerTest.component_with_self_close_slots>
                <:sample id="1"/>
                <:sample id="2"/>
-             </Phoenix.Template.HTMLEngine.CompilerTest.component_with_self_close_slots>
+             </Phoenix.Template.CEExEngine.CompilerTest.component_with_self_close_slots>
              """) == expected
     end
 
@@ -1504,7 +1504,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       message = """
       test/phoenix/template/html_engine/compiler_test.exs:3:3: invalid slot entry <:sample>. A slot entry must be a direct child of a component
         |
-      1 | <Phoenix.Template.HTMLEngine.CompilerTest.component_with_single_slot>
+      1 | <Phoenix.Template.CEExEngine.CompilerTest.component_with_single_slot>
       2 | <%= if true do %>
       3 |   <:sample>
         |   ^\
@@ -1512,13 +1512,13 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
 
       assert_raise(ParseError, message, fn ->
         render("""
-        <Phoenix.Template.HTMLEngine.CompilerTest.component_with_single_slot>
+        <Phoenix.Template.CEExEngine.CompilerTest.component_with_single_slot>
         <%= if true do %>
           <:sample>
             <p>Content</p>
           </:sample>
         <% end %>
-        </Phoenix.Template.HTMLEngine.CompilerTest.component_with_single_slot>
+        </Phoenix.Template.CEExEngine.CompilerTest.component_with_single_slot>
         """)
       end)
 
@@ -1720,12 +1720,12 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
 
       assert render_compiled("""
              <br>
-             <Phoenix.Template.HTMLEngine.CompilerTest.remote_component :for={val <- @items} value={val} />
+             <Phoenix.Template.CEExEngine.CompilerTest.remote_component :for={val <- @items} value={val} />
              """) == "<br>\nREMOTE COMPONENT: Value: 1REMOTE COMPONENT: Value: 2"
 
       assert render_compiled("""
              <br>
-             <Phoenix.Template.HTMLEngine.CompilerTest.remote_component_with_inner_block :for={val <- @items} value={val}>inner<%= val %></Phoenix.Template.HTMLEngine.CompilerTest.remote_component_with_inner_block>
+             <Phoenix.Template.CEExEngine.CompilerTest.remote_component_with_inner_block :for={val <- @items} value={val}>inner<%= val %></Phoenix.Template.CEExEngine.CompilerTest.remote_component_with_inner_block>
              """) ==
                "<br>\nREMOTE COMPONENT: Value: 1, Content: inner1REMOTE COMPONENT: Value: 2, Content: inner2"
 
@@ -1754,9 +1754,9 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       assigns = %{items: [1, 2, 3, 4]}
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.slot_if value={0}>
+             <Phoenix.Template.CEExEngine.CompilerTest.slot_if value={0}>
                <:slot :for={i <- @items}>slot<%= i %></:slot>
-             </Phoenix.Template.HTMLEngine.CompilerTest.slot_if>
+             </Phoenix.Template.CEExEngine.CompilerTest.slot_if>
              """) == "<div>0-slot1slot2slot3slot4</div>"
     end
 
@@ -1764,9 +1764,9 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       assigns = %{items: [1, 2, 3, 4]}
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.slot_if value={0}>
+             <Phoenix.Template.CEExEngine.CompilerTest.slot_if value={0}>
                <:slot :for={i <- @items} :if={rem(i, 2) == 0}>slot<%= i %></:slot>
-             </Phoenix.Template.HTMLEngine.CompilerTest.slot_if>
+             </Phoenix.Template.CEExEngine.CompilerTest.slot_if>
              """) == "<div>0-slot2slot4</div>"
     end
 
@@ -1774,9 +1774,9 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       assigns = %{items: [1, 2, 3, 4]}
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.slot_if value={0}>
+             <Phoenix.Template.CEExEngine.CompilerTest.slot_if value={0}>
                <:slot :for={i <- @items} :if={rem(i, 2) == 0} :let={val}>slot<%= i %>(<%= val %>)</:slot>
-             </Phoenix.Template.HTMLEngine.CompilerTest.slot_if>
+             </Phoenix.Template.CEExEngine.CompilerTest.slot_if>
              """) == "<div>0-slot2(0)slot4(0)</div>"
     end
 
@@ -1784,12 +1784,12 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       assigns = %{items: [2, 3]}
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.slot_if value={0}>
+             <Phoenix.Template.CEExEngine.CompilerTest.slot_if value={0}>
                <:slot :if={false}>slot0</:slot>
                <:slot>slot1</:slot>
                <:slot :for={i <- @items}>slot<%= i %></:slot>
                <:slot>slot4</:slot>
-             </Phoenix.Template.HTMLEngine.CompilerTest.slot_if>
+             </Phoenix.Template.CEExEngine.CompilerTest.slot_if>
              """) == "<div>0-slot1slot2slot3slot4</div>"
     end
   end
@@ -1846,11 +1846,11 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
              """) == ""
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.remote_component value="123" :if={@flag} />
+             <Phoenix.Template.CEExEngine.CompilerTest.remote_component value="123" :if={@flag} />
              """) == "REMOTE COMPONENT: Value: 123"
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.remote_component value="123" :if={!@flag}>test</Phoenix.Template.HTMLEngine.CompilerTest.remote_component>
+             <Phoenix.Template.CEExEngine.CompilerTest.remote_component value="123" :if={!@flag}>test</Phoenix.Template.CEExEngine.CompilerTest.remote_component>
              """) == ""
     end
 
@@ -1885,19 +1885,19 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
       assigns = %{flag: true}
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.slot_if value={0}>
+             <Phoenix.Template.CEExEngine.CompilerTest.slot_if value={0}>
                <:slot :if={@flag}>slot1</:slot>
                <:slot :if={!@flag}>slot2</:slot>
                <:slot :if={@flag}>slot3</:slot>
-             </Phoenix.Template.HTMLEngine.CompilerTest.slot_if>
+             </Phoenix.Template.CEExEngine.CompilerTest.slot_if>
              """) == "<div>0-slot1slot3</div>"
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.slot_if_self_close value={0}>
+             <Phoenix.Template.CEExEngine.CompilerTest.slot_if_self_close value={0}>
                <:slot :if={@flag} val={1} />
                <:slot :if={!@flag} val={2} />
                <:slot :if={@flag} val={3} />
-             </Phoenix.Template.HTMLEngine.CompilerTest.slot_if_self_close>
+             </Phoenix.Template.CEExEngine.CompilerTest.slot_if_self_close>
              """) == "<div>0-1-3-</div>"
     end
   end
@@ -1939,7 +1939,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
              """) == "LOCAL COMPONENT: Value: 2LOCAL COMPONENT: Value: 4"
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.remote_component  :for={i <- @items} :if={rem(i, 2) == 0} value={i}/>
+             <Phoenix.Template.CEExEngine.CompilerTest.remote_component  :for={i <- @items} :if={rem(i, 2) == 0} value={i}/>
              """) == "REMOTE COMPONENT: Value: 2REMOTE COMPONENT: Value: 4"
 
       assert render_compiled("""
@@ -1947,7 +1947,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
              """) == "LOCAL COMPONENT: Value: 2, Content: 2LOCAL COMPONENT: Value: 4, Content: 4"
 
       assert render_compiled("""
-             <Phoenix.Template.HTMLEngine.CompilerTest.remote_component_with_inner_block :for={i <- @items} :if={rem(i, 2) == 0} value={i}><%= i %></Phoenix.Template.HTMLEngine.CompilerTest.remote_component_with_inner_block>
+             <Phoenix.Template.CEExEngine.CompilerTest.remote_component_with_inner_block :for={i <- @items} :if={rem(i, 2) == 0} value={i}><%= i %></Phoenix.Template.CEExEngine.CompilerTest.remote_component_with_inner_block>
              """) ==
                "REMOTE COMPONENT: Value: 2, Content: 2REMOTE COMPONENT: Value: 4, Content: 4"
     end

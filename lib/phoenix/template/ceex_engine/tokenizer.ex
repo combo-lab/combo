@@ -1,7 +1,7 @@
-defmodule Phoenix.Template.HTMLEngine.Tokenizer do
+defmodule Phoenix.Template.CEExEngine.Tokenizer do
   @moduledoc false
 
-  alias Phoenix.Template.HTMLEngine.TagHandler.HTML, as: TagHandler
+  alias Phoenix.Template.CEExEngine.TagHandler.HTML, as: TagHandler
 
   @space_chars ~c"\s\t\f"
   @quote_chars ~c"\"'"

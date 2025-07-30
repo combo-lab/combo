@@ -1,4 +1,4 @@
-defmodule Phoenix.Template.HTMLEngine.TagHandler do
+defmodule Phoenix.Template.CEExEngine.TagHandler do
   @moduledoc false
 
   # The behaviour for implementing tag handler.

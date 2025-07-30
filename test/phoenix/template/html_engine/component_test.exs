@@ -1,7 +1,7 @@
-defmodule Phoenix.Template.HTMLEngine.ComponentTest do
+defmodule Phoenix.Template.CEExEngine.ComponentTest do
   use ExUnit.Case, async: true
 
-  import Phoenix.Template.HTMLEngine.Component
+  import Phoenix.Template.CEExEngine.Component
 
   @assigns %{k1: "v1"}
 
