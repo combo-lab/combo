@@ -1,6 +1,8 @@
 defmodule Phoenix.Template.HTMLEngine.TagHandler.HTML do
   @moduledoc false
 
+  alias Combo.SafeHTML
+
   @behaviour Phoenix.Template.HTMLEngine.TagHandler
 
   @impl true
@@ -135,14 +137,14 @@ defmodule Phoenix.Template.HTMLEngine.TagHandler.HTML do
         {key, value} when is_atom(key) -> {Atom.to_string(key), value}
         other -> other
       end)
-      |> Combo.HTML.Escape.escape_attrs()
+      |> SafeHTML.escape_attrs()
 
     {:safe, escaped_attrs}
   end
 
   @doc false
   def class_attribute_encode(list) when is_list(list),
-    do: list |> class_attribute_list() |> Phoenix.HTML.Safe.to_iodata()
+    do: list |> class_attribute_list() |> SafeHTML.to_iodata()
 
   def class_attribute_encode(other),
     do: empty_attribute_encode(other)
@@ -162,12 +164,12 @@ defmodule Phoenix.Template.HTMLEngine.TagHandler.HTML do
   def empty_attribute_encode(nil), do: ""
   def empty_attribute_encode(false), do: ""
   def empty_attribute_encode(true), do: ""
-  def empty_attribute_encode(value), do: Phoenix.HTML.Safe.to_iodata(value)
+  def empty_attribute_encode(value), do: SafeHTML.to_iodata(value)
 
   @doc false
   def binary_encode(value) when is_binary(value) do
     value
-    |> Phoenix.HTML.Safe.to_iodata()
+    |> SafeHTML.to_iodata()
     |> IO.iodata_to_binary()
   end
 

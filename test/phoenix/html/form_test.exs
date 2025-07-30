@@ -1,7 +1,7 @@
 defmodule Phoenix.HTML.FormTest do
   use ExUnit.Case, async: true
 
-  import Phoenix.HTML
+  import Combo.SafeHTML, only: [safe_to_string: 1]
   import Phoenix.HTML.Form
   doctest Phoenix.HTML.Form
 

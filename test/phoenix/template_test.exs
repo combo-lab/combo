@@ -3,6 +3,7 @@ defmodule Phoenix.TemplateTest do
 
   doctest Phoenix.Template
   require Phoenix.Template, as: Template
+  import Combo.SafeHTML, only: [safe_to_string: 1]
 
   @templates Path.expand("../fixtures/templates", __DIR__)
 
@@ -63,15 +64,15 @@ defmodule Phoenix.TemplateTest do
 
     test "compiles all templates at once" do
       assert AllTemplates.show_html_ceex(%{message: "hello!"})
-             |> Phoenix.HTML.safe_to_string() ==
+             |> safe_to_string() ==
                "<div>Show! hello!</div>\n"
 
       assert AllTemplates.show_html_ceex(%{message: "<hello>"})
-             |> Phoenix.HTML.safe_to_string() ==
+             |> safe_to_string() ==
                "<div>Show! &lt;hello&gt;</div>\n"
 
       assert AllTemplates.show_html_ceex(%{message: {:safe, "<hello>"}})
-             |> Phoenix.HTML.safe_to_string() ==
+             |> safe_to_string() ==
                "<div>Show! <hello></div>\n"
 
       assert AllTemplates.show_json_exs(%{}) == %{foo: "bar"}
@@ -80,7 +81,7 @@ defmodule Phoenix.TemplateTest do
     end
 
     test "trims only HTML templates" do
-      assert AllTemplates.trim_html_ceex(%{}) |> Phoenix.HTML.safe_to_string() == "12\n  34\n56"
+      assert AllTemplates.trim_html_ceex(%{}) |> safe_to_string() == "12\n  34\n56"
       assert AllTemplates.trim_text_eex(%{}) == "12\n  34\n56\n"
     end
 
@@ -110,7 +111,7 @@ defmodule Phoenix.TemplateTest do
 
     test "compiles templates across several calls" do
       assert OptionsTemplates.show1html1ceex(%{message: "hello!"})
-             |> Phoenix.HTML.safe_to_string() ==
+             |> safe_to_string() ==
                "<div>Show! hello!</div>\n"
 
       assert OptionsTemplates.show2json2exs(%{}) == %{foo: "bar"}
@@ -124,7 +125,7 @@ defmodule Phoenix.TemplateTest do
       assigns = %{message: "hello!"}
 
       assert Template.render(AllTemplates, "show_html_ceex", "html", assigns)
-             |> Phoenix.HTML.safe_to_string() ==
+             |> safe_to_string() ==
                "<div>Show! hello!</div>\n"
     end
 
@@ -132,7 +133,7 @@ defmodule Phoenix.TemplateTest do
       assigns = %{message: "hello!", layout: {AllTemplates, "layout_html_ceex"}}
 
       assert Template.render(AllTemplates, "show_html_ceex", "html", assigns)
-             |> Phoenix.HTML.safe_to_string() ==
+             |> safe_to_string() ==
                "<html><div>Show! hello!</div>\n</html>"
     end
 
@@ -169,7 +170,9 @@ defmodule Phoenix.TemplateTest do
     end
 
     test "render_to_string/4" do
-      assert Template.render_to_string(AllTemplates, "show_html_ceex", "html", %{message: "hello!"}) ==
+      assert Template.render_to_string(AllTemplates, "show_html_ceex", "html", %{
+               message: "hello!"
+             }) ==
                "<div>Show! hello!</div>\n"
     end
   end

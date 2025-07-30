@@ -1,6 +1,7 @@
 defmodule Phoenix.Template.HTMLEngine.Compiler.IOBuilderTest do
   use ExUnit.Case, async: true
 
+  alias Combo.SafeHTML
   alias Phoenix.Template.HTMLEngine.Compiler.IOBuilder
 
   defmodule Engine do
@@ -45,7 +46,7 @@ defmodule Phoenix.Template.HTMLEngine.Compiler.IOBuilderTest do
       engine: Engine,
       file: __ENV__.file
     )
-    |> Phoenix.HTML.Safe.to_iodata()
+    |> SafeHTML.to_iodata()
     |> IO.iodata_to_binary()
   end
 

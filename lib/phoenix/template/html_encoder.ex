@@ -3,7 +3,9 @@ defmodule Phoenix.Template.HTMLEncoder do
   The format encoder for HTML.
   """
 
+  alias Combo.SafeHTML
+
   @behaviour Phoenix.Template.FormatEncoder
 
-  def encode_to_iodata!(data), do: Phoenix.HTML.Safe.to_iodata(data)
+  def encode_to_iodata!(data), do: SafeHTML.to_iodata(data)
 end

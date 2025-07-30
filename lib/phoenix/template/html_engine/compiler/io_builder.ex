@@ -10,6 +10,8 @@ defmodule Phoenix.Template.HTMLEngine.Compiler.IOBuilder do
   # TODO: the to_safe/1 is relatively simple, I will merge more code from
   #       above engines.
 
+  alias Combo.SafeHTML
+
   defmodule Counter do
     @moduledoc false
 
@@ -77,7 +79,7 @@ defmodule Phoenix.Template.HTMLEngine.Compiler.IOBuilder do
   defp to_safe(literal, _line)
        when is_binary(literal) or is_atom(literal) or is_number(literal) do
     literal
-    |> Phoenix.HTML.Safe.to_iodata()
+    |> SafeHTML.to_iodata()
     |> IO.iodata_to_binary()
   end
 
@@ -90,8 +92,8 @@ defmodule Phoenix.Template.HTMLEngine.Compiler.IOBuilder do
   defp to_safe(expr, line) do
     # keep stacktraces for protocol dispatch and coverage
     safe_return = quote line: line, do: data
-    bin_return = quote line: line, do: Combo.HTML.Escape.escape_html(bin)
-    other_return = quote line: line, do: Phoenix.HTML.Safe.to_iodata(other)
+    bin_return = quote line: line, do: Combo.SafeHTML.escape(bin)
+    other_return = quote line: line, do: Combo.SafeHTML.to_iodata(other)
 
     # prevent warnings of generated clauses
     quote generated: true do

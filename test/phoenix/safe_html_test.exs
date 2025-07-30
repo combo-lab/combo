@@ -1,18 +1,18 @@
-defmodule Combo.HTML.EscapeTest do
+defmodule Combo.SafeHTMLTest do
   use ExUnit.Case, async: true
 
-  import Combo.HTML.Escape
-  doctest Combo.HTML.Escape
+  import Combo.SafeHTML
+  doctest Combo.SafeHTML
 
-  describe "escape_html" do
+  describe "escape/1" do
     test "escapes entities" do
-      assert escape_html("foo") == "foo"
-      assert escape_html("<foo>") == [[[] | "&lt;"], "foo" | "&gt;"]
-      assert escape_html("\" & \'") == [[[[] | "&quot;"], " " | "&amp;"], " " | "&#39;"]
+      assert escape("foo") == "foo"
+      assert escape("<foo>") == [[[] | "&lt;"], "foo" | "&gt;"]
+      assert escape("\" & \'") == [[[[] | "&quot;"], " " | "&amp;"], " " | "&#39;"]
     end
   end
 
-  describe "escape_attrs" do
+  describe "escape_attrs/1" do
     test "key as atom" do
       assert escape_attrs([{:title, "the title"}]) |> IO.iodata_to_binary() ==
                ~s( title="the title")
@@ -126,7 +126,7 @@ defmodule Combo.HTML.EscapeTest do
     assert escape_js("Null character\u0000") == "Null character\\u0000"
   end
 
-  describe "escape_css" do
+  describe "escape_css/1" do
     test "null character" do
       assert escape_css(<<0>>) == <<0xFFFD::utf8>>
       assert escape_css("a\u0000") == "a\ufffd"

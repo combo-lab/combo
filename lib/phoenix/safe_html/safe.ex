@@ -1,4 +1,4 @@
-defprotocol Phoenix.HTML.Safe do
+defprotocol Combo.SafeHTML.Safe do
   @moduledoc """
   Defines the HTML safe protocol.
 
@@ -14,30 +14,32 @@ defprotocol Phoenix.HTML.Safe do
   def to_iodata(data)
 end
 
-defimpl Phoenix.HTML.Safe, for: Atom do
+alias Combo.SafeHTML.Escape
+
+defimpl Combo.SafeHTML.Safe, for: Atom do
   def to_iodata(nil), do: ""
-  def to_iodata(atom), do: Combo.HTML.Escape.escape_html(Atom.to_string(atom))
+  def to_iodata(atom), do: Escape.escape_html(Atom.to_string(atom))
 end
 
-defimpl Phoenix.HTML.Safe, for: BitString do
+defimpl Combo.SafeHTML.Safe, for: BitString do
   def to_iodata(""), do: ""
-  defdelegate to_iodata(data), to: Combo.HTML.Escape, as: :escape_html
+  defdelegate to_iodata(data), to: Escape, as: :escape_html
 end
 
-defimpl Phoenix.HTML.Safe, for: Integer do
+defimpl Combo.SafeHTML.Safe, for: Integer do
   defdelegate to_iodata(data), to: Integer, as: :to_string
 end
 
-defimpl Phoenix.HTML.Safe, for: Float do
+defimpl Combo.SafeHTML.Safe, for: Float do
   defdelegate to_iodata(data), to: Float, as: :to_string
 end
 
-defimpl Phoenix.HTML.Safe, for: Tuple do
+defimpl Combo.SafeHTML.Safe, for: Tuple do
   def to_iodata({:safe, iodata}), do: iodata
   def to_iodata(value), do: raise(Protocol.UndefinedError, protocol: @protocol, value: value)
 end
 
-defimpl Phoenix.HTML.Safe, for: List do
+defimpl Combo.SafeHTML.Safe, for: List do
   def to_iodata(list), do: recur(list)
 
   defp recur([h | t]), do: [recur(h) | recur(t)]
@@ -60,7 +62,7 @@ defimpl Phoenix.HTML.Safe, for: List do
   end
 
   defp recur(h) when is_binary(h) do
-    Combo.HTML.Escape.escape_html(h)
+    Escape.escape_html(h)
   end
 
   defp recur({:safe, data}) do
@@ -74,32 +76,32 @@ defimpl Phoenix.HTML.Safe, for: List do
   end
 end
 
-defimpl Phoenix.HTML.Safe, for: Time do
+defimpl Combo.SafeHTML.Safe, for: Time do
   defdelegate to_iodata(data), to: Time, as: :to_iso8601
 end
 
-defimpl Phoenix.HTML.Safe, for: Date do
+defimpl Combo.SafeHTML.Safe, for: Date do
   defdelegate to_iodata(data), to: Date, as: :to_iso8601
 end
 
-defimpl Phoenix.HTML.Safe, for: NaiveDateTime do
+defimpl Combo.SafeHTML.Safe, for: NaiveDateTime do
   defdelegate to_iodata(data), to: NaiveDateTime, as: :to_iso8601
 end
 
-defimpl Phoenix.HTML.Safe, for: DateTime do
+defimpl Combo.SafeHTML.Safe, for: DateTime do
   def to_iodata(data) do
     # Call escape in case someone can inject reserved
     # characters in the timezone or its abbreviation
-    Combo.HTML.Escape.escape_html(DateTime.to_iso8601(data))
+    Escape.escape_html(DateTime.to_iso8601(data))
   end
 end
 
 if Code.ensure_loaded?(Duration) do
-  defimpl Phoenix.HTML.Safe, for: Duration do
+  defimpl Combo.SafeHTML.Safe, for: Duration do
     defdelegate to_iodata(data), to: Duration, as: :to_iso8601
   end
 end
 
-defimpl Phoenix.HTML.Safe, for: URI do
-  def to_iodata(data), do: Combo.HTML.Escape.escape_html(URI.to_string(data))
+defimpl Combo.SafeHTML.Safe, for: URI do
+  def to_iodata(data), do: Escape.escape_html(URI.to_string(data))
 end

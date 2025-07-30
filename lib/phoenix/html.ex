@@ -2,9 +2,8 @@ defmodule Phoenix.HTML do
   @moduledoc """
   Building blocks for working with HTML.
 
-  It provides three main functionalities:
+  It provides following main functionalities:
 
-    * HTML safety
     * Form handling
     * A tiny JavaScript library to enhance applications
 
@@ -97,48 +96,6 @@ defmodule Phoenix.HTML do
     """
   end
 
-  @typedoc "Guaranteed to be safe"
-  @type safe :: {:safe, iodata}
-
-  @typedoc "May be safe or unsafe (i.e. it needs to be converted)"
-  @type unsafe :: Phoenix.HTML.Safe.t()
-
-  @doc """
-  Converts unsafe content into safe tuple.
-
-      iex> to_safe("<hello>")
-      {:safe, [[[] | "&lt;"], "hello" | "&gt;"]}
-
-      iex> to_safe(~c"<hello>")
-      {:safe, ["&lt;", 104, 101, 108, 108, 111, "&gt;"]}
-
-      iex> to_safe(1)
-      {:safe, "1"}
-
-      iex> to_safe({:safe, "<hello>"})
-      {:safe, "<hello>"}
-
-  """
-  @spec to_safe(unsafe()) :: safe()
-  def to_safe({:safe, _} = safe), do: safe
-  def to_safe(other), do: {:safe, Phoenix.HTML.Safe.to_iodata(other)}
-
-  @doc """
-  Converts a safe tuple into a string.
-
-  Fails if the result is not safe. In such cases, you can invoke `to_safe/1`
-  or `raw/1` accordingly.
-
-  You can combine `to_safe/1` and `safe_to_string/1`   to convert a data
-  structure to an escaped string:
-
-      data |> to_safe() |> safe_to_string()
-
-  """
-  @spec safe_to_string(safe) :: String.t()
-  def safe_to_string({:safe, iodata}) do
-    IO.iodata_to_binary(iodata)
-  end
 
   @doc """
   Marks the given content as raw.
@@ -156,7 +113,7 @@ defmodule Phoenix.HTML do
       {:safe, ""}
 
   """
-  @spec raw(safe() | iodata() | nil) :: safe()
+  @spec raw(Combo.SafeHTML.safe() | iodata() | nil) :: Combo.SafeHTML.safe()
   def raw({:safe, _} = safe), do: safe
   def raw(nil), do: {:safe, ""}
   def raw(value) when is_binary(value) or is_list(value), do: {:safe, value}

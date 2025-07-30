@@ -1,17 +1,9 @@
-defmodule Combo.HTML.Escape do
+defmodule Combo.SafeHTML.Escape do
   @moduledoc false
 
-  @doc """
-  Escapes given string for use as HTML content.
+  alias Combo.SafeHTML.Safe
 
-      iex> escape_html("hello")
-      "hello"
-
-      iex> escape_html("<hello>")
-      [[[] | "&lt;"], "hello" | "&gt;"]
-
-  """
-  @spec escape_html(String.t()) :: String.t()
+  @doc false
   def escape_html(bin) when is_binary(bin) do
     escape_html(bin, 0, bin, [])
   end
@@ -57,44 +49,7 @@ defmodule Combo.HTML.Escape do
     [acc | binary_part(original, skip, len)]
   end
 
-  @doc ~S"""
-  Escapes an enumerable of attributes, returning iodata.
-
-  The attributes are rendered in the given order. Note if
-  a map is given, the key ordering is not guaranteed.
-
-  The keys and values can be of any shape, as long as they
-  implement the `Phoenix.HTML.Safe` protocol. In addition,
-  if the key is an atom, it will be "dasherized". In other
-  words, `:phx_value_id` will be converted to `phx-value-id`.
-
-  Furthermore, the following attributes provide behaviour:
-
-    * `:aria`, `:data`, and `:phx` - they accept a keyword list as
-      value. `data: [confirm: "are you sure?"]` is converted to
-      `data-confirm="are you sure?"`.
-
-    * `:class` - it accepts a list of classes as argument. Each
-      element in the list is separated by space. `nil` and `false`
-      elements are discarded. `class: ["foo", nil, "bar"]` then
-      becomes `class="foo bar"`.
-
-    * `:id` - it is validated raise if a number is given as ID,
-      which is not allowed by the HTML spec and leads to unpredictable
-      behaviour.
-
-  ## Examples
-
-      iex> IO.iodata_to_binary escape_attrs(title: "the title", id: "the id", selected: true)
-      " title=\"the title\" id=\"the id\" selected"
-
-      iex> IO.iodata_to_binary escape_attrs(%{data: [confirm: "Are you sure?"]})
-      " data-confirm=\"Are you sure?\""
-
-      iex> IO.iodata_to_binary escape_attrs(%{phx: [value: [foo: "bar"]]})
-      " phx-value-foo=\"bar\""
-
-  """
+  @doc false
   def escape_attrs(attrs) when is_list(attrs) do
     build_attrs(attrs)
   end
@@ -199,18 +154,8 @@ defmodule Combo.HTML.Escape do
 
   defp escape_attr({:safe, data}), do: data
   defp escape_attr(nil), do: []
-  defp escape_attr(other), do: Phoenix.HTML.Safe.to_iodata(other)
+  defp escape_attr(other), do: Safe.to_iodata(other)
 
-  @doc """
-  Escapes given string for use as a JavaScript string.
-
-  This function is useful in JavaScript responses when there is a need
-  to escape HTML rendered from other templates, like in the following:
-
-      $("#container").append("<%= escape_js(render("post.html", post: @post)) %>");
-
-  It escapes quotes (double and single), double backslashes and others.
-  """
   @spec escape_js(String.t()) :: String.t()
   def escape_js(string) when is_binary(string),
     do: escape_js(string, "")
@@ -241,19 +186,7 @@ defmodule Combo.HTML.Escape do
 
   defp escape_js(<<>>, acc), do: acc
 
-  @doc """
-  Escapes given string for use as a CSS identifier.
-
-  ## Examples
-
-      iex> escape_css("hello world")
-      "hello\\\\ world"
-
-      iex> escape_css("-123")
-      "-\\\\31 23"
-
-  """
-  @spec escape_css(String.t()) :: String.t()
+  @doc false
   def escape_css(string) when is_binary(string) do
     # This is a direct translation of
     # https://github.com/mathiasbynens/CSS.escape/blob/master/css.escape.js

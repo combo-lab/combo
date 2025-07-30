@@ -1,7 +1,7 @@
-defmodule Phoenix.HTML.SafeTest do
+defmodule Combo.SafeHTML.SafeTest do
   use ExUnit.Case, async: true
 
-  alias Phoenix.HTML.Safe
+  alias Combo.SafeHTML.Safe
 
   test "impl for atoms" do
     assert Safe.to_iodata(nil) == ""

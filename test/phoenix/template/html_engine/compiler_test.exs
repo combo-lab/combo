@@ -1,6 +1,8 @@
 defmodule Phoenix.Template.HTMLEngine.CompilerTest do
   use ExUnit.Case, async: true
 
+  alias Combo.SafeHTML
+
   import Phoenix.Template.HTMLEngine.Component
   alias Phoenix.Template.HTMLEngine.Compiler
   alias Phoenix.Template.HTMLEngine.Tokenizer.ParseError
@@ -23,7 +25,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
   defp render(source, assigns \\ %{}, opts \\ []) do
     source
     |> eval_string(assigns, opts)
-    |> Phoenix.HTML.Safe.to_iodata()
+    |> SafeHTML.to_iodata()
     |> IO.iodata_to_binary()
   end
 
@@ -37,7 +39,7 @@ defmodule Phoenix.Template.HTMLEngine.CompilerTest do
 
     quote do
       unquote(compiled)
-      |> Phoenix.HTML.Safe.to_iodata()
+      |> SafeHTML.to_iodata()
       |> IO.iodata_to_binary()
     end
   end

@@ -1,6 +1,8 @@
 defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
   use ExUnit.Case, async: true
 
+  alias Combo.SafeHTML
+
   import Phoenix.Template.HTMLEngine.Sigil
   alias Phoenix.Template.HTMLEngine.DeclarativeAssigns
 
@@ -69,8 +71,8 @@ defmodule Phoenix.Template.HTMLEngine.DeclarativeAssignsTest do
 
   defp rendered_to_string(rendered) do
     rendered
-    |> Phoenix.HTML.to_safe()
-    |> Phoenix.HTML.safe_to_string()
+    |> SafeHTML.to_safe()
+    |> SafeHTML.safe_to_string()
   end
 
   defp render_string(mod, func, assigns) do
