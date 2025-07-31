@@ -97,28 +97,25 @@ defmodule Combo.SafeHTML do
   @doc ~S"""
   Escapes an enumerable of attributes, returning iodata.
 
-  The attributes are rendered in the given order. Note if
-  a map is given, the key ordering is not guaranteed.
+  The attributes are rendered in the given order. Note if a map is given,
+  the key ordering is not guaranteed.
 
-  The keys and values can be of any shape, as long as they
-  implement the `Phoenix.HTML.Safe` protocol. In addition,
-  if the key is an atom, it will be "dasherized". In other
-  words, `:phx_value_id` will be converted to `phx-value-id`.
+  The keys and values can be of any shape, as long as they implement the
+  `Combo.SafeHTML.Safe` protocol.
 
   Furthermore, the following attributes provide behaviour:
 
-    * `:aria`, `:data`, and `:phx` - they accept a keyword list as
-      value. `data: [confirm: "are you sure?"]` is converted to
+    * `:data` and `:aria` - they accept a keyword list as value.
+      `data: [confirm: "are you sure?"]` is converted to
       `data-confirm="are you sure?"`.
 
-    * `:class` - it accepts a list of classes as argument. Each
-      element in the list is separated by space. `nil` and `false`
-      elements are discarded. `class: ["foo", nil, "bar"]` then
-      becomes `class="foo bar"`.
+    * `:class` - it also accepts a list of classes as argument. Each element
+      in the list is separated by space. `nil` and `false` elements are
+      discarded. `class: ["foo", nil, "bar"]` is converted to
+      `class="foo bar"`.
 
-    * `:id` - it is validated raise if a number is given as ID,
-      which is not allowed by the HTML spec and leads to unpredictable
-      behaviour.
+    * `:id` - it is validated raise if a number is given as ID, which is not
+      allowed by the HTML spec and leads to unpredictable behaviour.
 
   ## Examples
 
@@ -127,9 +124,6 @@ defmodule Combo.SafeHTML do
 
       iex> IO.iodata_to_binary escape_attrs(%{data: [confirm: "Are you sure?"]})
       " data-confirm=\"Are you sure?\""
-
-      iex> IO.iodata_to_binary escape_attrs(%{phx: [value: [foo: "bar"]]})
-      " phx-value-foo=\"bar\""
 
   """
   @spec escape_attrs(keyword() | map()) :: String.t()

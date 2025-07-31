@@ -24,7 +24,7 @@ defmodule Combo.SafeHTMLTest do
     end
 
     test "convert snake_case keys into kebab-case when key is atom" do
-      assert escape_attrs([{:my_attr, "value"}]) |> IO.iodata_to_binary() == ~s( my-attr="value")
+      assert escape_attrs([{:my_attr, "value"}]) |> IO.iodata_to_binary() == ~s( my_attr="value")
     end
 
     test "keep snake_case keys when key is string" do
@@ -51,16 +51,6 @@ defmodule Combo.SafeHTMLTest do
 
       assert escape_attrs([{:aria, [a: "1", b: "2"]}]) |> IO.iodata_to_binary() ==
                ~s( aria-a="1" aria-b="2")
-
-      assert escape_attrs([{:phx, [click: "save", value: [user_id: 1, foo: :bar]]}])
-             |> IO.iodata_to_binary() ==
-               ~s( phx-click="save" phx-value-user-id="1" phx-value-foo="bar")
-
-      assert escape_attrs([
-               {"phx", [{"click", "save"}, {"value", [{"user_id", 1}, {"foo", "bar"}]}]}
-             ])
-             |> IO.iodata_to_binary() ==
-               ~s( phx-click="save" phx-value-user_id="1" phx-value-foo="bar")
     end
 
     test "handle class value as string" do

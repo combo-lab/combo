@@ -70,32 +70,26 @@ defmodule Combo.SafeHTML.Escape do
   defp build_attrs([{:id, v} | t]),
     do: [" id=\"", id_value(v), ?" | build_attrs(t)]
 
-  defp build_attrs([{:class, v} | t]),
-    do: [" class=\"", class_value(v), ?" | build_attrs(t)]
-
-  defp build_attrs([{:aria, v} | t]) when is_list(v),
-    do: nested_attrs(v, " aria", t)
-
-  defp build_attrs([{:data, v} | t]) when is_list(v),
-    do: nested_attrs(v, " data", t)
-
-  defp build_attrs([{:phx, v} | t]) when is_list(v),
-    do: nested_attrs(v, " phx", t)
-
   defp build_attrs([{"id", v} | t]),
     do: [" id=\"", id_value(v), ?" | build_attrs(t)]
+
+  defp build_attrs([{:class, v} | t]),
+    do: [" class=\"", class_value(v), ?" | build_attrs(t)]
 
   defp build_attrs([{"class", v} | t]),
     do: [" class=\"", class_value(v), ?" | build_attrs(t)]
 
-  defp build_attrs([{"aria", v} | t]) when is_list(v),
-    do: nested_attrs(v, " aria", t)
+  defp build_attrs([{:data, v} | t]) when is_list(v),
+    do: nested_attrs(v, " data", t)
 
   defp build_attrs([{"data", v} | t]) when is_list(v),
     do: nested_attrs(v, " data", t)
 
-  defp build_attrs([{"phx", v} | t]) when is_list(v),
-    do: nested_attrs(v, " phx", t)
+  defp build_attrs([{:aria, v} | t]) when is_list(v),
+    do: nested_attrs(v, " aria", t)
+
+  defp build_attrs([{"aria", v} | t]) when is_list(v),
+    do: nested_attrs(v, " aria", t)
 
   defp build_attrs([{k, v} | t]),
     do: [?\s, escape_key(k), ?=, ?", escape_attr(v), ?" | build_attrs(t)]
@@ -130,7 +124,7 @@ defmodule Combo.SafeHTML.Escape do
 
   defp class_value(value) when is_list(value) do
     value
-    |> list_class_value()
+    |> class_list_value()
     |> escape_attr()
   end
 
@@ -138,19 +132,20 @@ defmodule Combo.SafeHTML.Escape do
     escape_attr(value)
   end
 
-  defp list_class_value(value) do
+  defp class_list_value(value) do
     value
     |> Enum.flat_map(fn
       nil -> []
       false -> []
-      inner when is_list(inner) -> [list_class_value(inner)]
+      inner when is_list(inner) -> [class_list_value(inner)]
       other -> [other]
     end)
     |> Enum.join(" ")
   end
 
-  defp escape_key(value) when is_atom(value), do: String.replace(Atom.to_string(value), "_", "-")
-  defp escape_key(value), do: escape_attr(value)
+  defp escape_key({:safe, data}), do: data
+  defp escape_key(nil), do: []
+  defp escape_key(other), do: Safe.to_iodata(other)
 
   defp escape_attr({:safe, data}), do: data
   defp escape_attr(nil), do: []
