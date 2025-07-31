@@ -83,7 +83,7 @@ defmodule Phoenix.Template.CEExEngine.Compiler.IOBuilder do
 
   # do the conversion at runtime
   defp to_safe(list, line) when is_list(list) do
-    quote line: line, do: Phoenix.HTML.Safe.List.to_iodata(unquote(list))
+    quote line: line, do: Combo.SafeHTML.Safe.List.to_iodata(unquote(list))
   end
 
   # do the convertion at runtime, and optimize common cases
