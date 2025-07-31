@@ -999,7 +999,6 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssigns do
               merged =
                 %{unquote_splicing(defaults)}
                 |> Map.merge(assigns)
-                |> Map.put(:__given__, assigns)
 
               super(
                 Assigns.assign(
@@ -1014,7 +1013,6 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssigns do
               merged =
                 %{unquote_splicing(defaults)}
                 |> Map.merge(assigns)
-                |> Map.put(:__given__, assigns)
 
               super(merged)
             end

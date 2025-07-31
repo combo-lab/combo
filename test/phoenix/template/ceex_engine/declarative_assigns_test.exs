@@ -716,9 +716,11 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
     assert render_string(AttrDefaults, :example, %{}) == "nil"
     assert render_string(AttrDefaults, :no_default, %{value: 123}) == "123"
 
-    assert_raise KeyError, ~r":value not found", fn ->
-      render_string(AttrDefaults, :no_default, %{}) |> IO.inspect()
-    end
+    assert_raise KeyError,
+                 "assign @value not available in template.\n\nAvailable assigns: []\n",
+                 fn ->
+                   render_string(AttrDefaults, :no_default, %{}) |> IO.inspect()
+                 end
   end
 
   test "provides slot defaults" do
