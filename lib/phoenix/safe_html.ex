@@ -118,32 +118,4 @@ defmodule Combo.SafeHTML do
   """
   @spec escape_attrs(keyword() | map()) :: String.t()
   defdelegate escape_attrs(keyword_or_map), to: Escape
-
-  @doc """
-  Escapes given string for use as a JavaScript string.
-
-  This function is useful in JavaScript responses when there is a need
-  to escape HTML rendered from other templates, like in the following:
-
-      $("#container").append("<%= escape_js(render("post.html", post: @post)) %>");
-
-  It escapes quotes (double and single), double backslashes and others.
-  """
-  @spec escape_js(String.t()) :: String.t()
-  defdelegate escape_js(string), to: Escape
-
-  @doc """
-  Escapes given string for use as a CSS identifier.
-
-  ## Examples
-
-      iex> escape_css("hello world")
-      "hello\\\\ world"
-
-      iex> escape_css("-123")
-      "-\\\\31 23"
-
-  """
-  @spec escape_css(String.t()) :: String.t()
-  defdelegate escape_css(string), to: Escape
 end
