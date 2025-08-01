@@ -1,6 +1,6 @@
 defmodule Phoenix.Template.ExsEngine do
   @moduledoc """
-  The template engine that handles the `.exs` extension.
+  The template engine that handles Elixir script template.
   """
 
   @behaviour Phoenix.Template.Engine

@@ -1,9 +1,9 @@
 defmodule Phoenix.Template.EExEngine do
   @moduledoc """
-  The template engine that handles the `.eex` extension.
+  The template engine that handles EEx templates.
 
   Warning: Do not use this function with user-generated content, as it does not
-  escape HTML, hence it provides no XSS protection.
+  escape HTML, hence it doesn't provides XSS protection.
   """
 
   @behaviour Phoenix.Template.Engine
