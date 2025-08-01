@@ -105,25 +105,15 @@ defmodule Combo.SafeHTML do
 
   Furthermore, the following attributes provide behaviour:
 
-    * `:data` and `:aria` - they accept a keyword list as value.
-      `data: [confirm: "are you sure?"]` is converted to
-      `data-confirm="are you sure?"`.
-
     * `:class` - it also accepts a list of classes as argument. Each element
       in the list is separated by space. `nil` and `false` elements are
       discarded. `class: ["foo", nil, "bar"]` is converted to
       `class="foo bar"`.
 
-    * `:id` - it is validated raise if a number is given as ID, which is not
-      allowed by the HTML spec and leads to unpredictable behaviour.
-
   ## Examples
 
       iex> IO.iodata_to_binary escape_attrs(title: "the title", id: "the id", selected: true)
       " title=\"the title\" id=\"the id\" selected"
-
-      iex> IO.iodata_to_binary escape_attrs(%{data: [confirm: "Are you sure?"]})
-      " data-confirm=\"Are you sure?\""
 
   """
   @spec escape_attrs(keyword() | map()) :: String.t()

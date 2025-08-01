@@ -74,29 +74,6 @@ defmodule Combo.SafeHTMLTest do
       assert escape_attrs([{:title, "the title"}, {:id, "the id"}]) |> IO.iodata_to_binary() ==
                ~s( title="the title" id="the id")
     end
-
-    test "handle nested value" do
-      assert escape_attrs([{"data", [{"a", "1"}, {"b", "2"}]}]) |> IO.iodata_to_binary() ==
-               ~s( data-a="1" data-b="2")
-
-      assert escape_attrs([{:data, [a: "1", b: "2"]}]) |> IO.iodata_to_binary() ==
-               ~s( data-a="1" data-b="2")
-
-      assert escape_attrs([{:data, [a: false, b: true, c: nil]}]) |> IO.iodata_to_binary() ==
-               ~s( data-b)
-
-      assert escape_attrs([{"aria", [{"a", "1"}, {"b", "2"}]}]) |> IO.iodata_to_binary() ==
-               ~s( aria-a="1" aria-b="2")
-
-      assert escape_attrs([{:aria, [a: "1", b: "2"]}]) |> IO.iodata_to_binary() ==
-               ~s( aria-a="1" aria-b="2")
-    end
-
-    test "raises on number id" do
-      assert_raise ArgumentError, ~r/attempting to set id attribute to 3/, fn ->
-        escape_attrs([{"id", 3}])
-      end
-    end
   end
 
   test "escape_js/1" do

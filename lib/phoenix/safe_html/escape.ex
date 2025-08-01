@@ -67,54 +67,10 @@ defmodule Combo.SafeHTML.Escape do
   defp build_attrs([{_, nil} | t]),
     do: build_attrs(t)
 
-  defp build_attrs([{:id, v} | t]),
-    do: [" id=\"", id_value(v), ?" | build_attrs(t)]
-
-  defp build_attrs([{"id", v} | t]),
-    do: [" id=\"", id_value(v), ?" | build_attrs(t)]
-
-  defp build_attrs([{:data, v} | t]) when is_list(v),
-    do: nested_attrs(v, " data", t)
-
-  defp build_attrs([{"data", v} | t]) when is_list(v),
-    do: nested_attrs(v, " data", t)
-
-  defp build_attrs([{:aria, v} | t]) when is_list(v),
-    do: nested_attrs(v, " aria", t)
-
-  defp build_attrs([{"aria", v} | t]) when is_list(v),
-    do: nested_attrs(v, " aria", t)
-
   defp build_attrs([{k, v} | t]),
     do: [?\s, escape_key(k), ?=, ?", escape_value(v), ?" | build_attrs(t)]
 
   defp build_attrs([]), do: []
-
-  defp nested_attrs([{k, true} | kv], attr, t),
-    do: [attr, ?-, escape_key(k) | nested_attrs(kv, attr, t)]
-
-  defp nested_attrs([{_, falsy} | kv], attr, t) when falsy in [false, nil],
-    do: nested_attrs(kv, attr, t)
-
-  defp nested_attrs([{k, v} | kv], attr, t) when is_list(v),
-    do: [nested_attrs(v, "#{attr}-#{escape_key(k)}", []) | nested_attrs(kv, attr, t)]
-
-  defp nested_attrs([{k, v} | kv], attr, t),
-    do: [attr, ?-, escape_key(k), ?=, ?", escape_value(v), ?" | nested_attrs(kv, attr, t)]
-
-  defp nested_attrs([], _attr, t),
-    do: build_attrs(t)
-
-  defp id_value(value) when is_number(value) do
-    raise ArgumentError,
-          "attempting to set id attribute to #{value}, " <>
-            "but setting the DOM ID to a number can lead to unpredictable behaviour. " <>
-            "Instead consider prefixing the id with a string, such as \"user-#{value}\" or similar"
-  end
-
-  defp id_value(value) do
-    escape_value(value)
-  end
 
   defp escape_key({:safe, data}), do: data
   defp escape_key(nil), do: []
