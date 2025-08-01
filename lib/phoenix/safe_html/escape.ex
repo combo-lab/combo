@@ -92,7 +92,7 @@ defmodule Combo.SafeHTML.Escape do
     do: nested_attrs(v, " aria", t)
 
   defp build_attrs([{k, v} | t]),
-    do: [?\s, escape_key(k), ?=, ?", escape_attr(v), ?" | build_attrs(t)]
+    do: [?\s, escape_key(k), ?=, ?", escape_value(v), ?" | build_attrs(t)]
 
   defp build_attrs([]), do: []
 
@@ -106,7 +106,7 @@ defmodule Combo.SafeHTML.Escape do
     do: [nested_attrs(v, "#{attr}-#{escape_key(k)}", []) | nested_attrs(kv, attr, t)]
 
   defp nested_attrs([{k, v} | kv], attr, t),
-    do: [attr, ?-, escape_key(k), ?=, ?", escape_attr(v), ?" | nested_attrs(kv, attr, t)]
+    do: [attr, ?-, escape_key(k), ?=, ?", escape_value(v), ?" | nested_attrs(kv, attr, t)]
 
   defp nested_attrs([], _attr, t),
     do: build_attrs(t)
@@ -119,17 +119,17 @@ defmodule Combo.SafeHTML.Escape do
   end
 
   defp id_value(value) do
-    escape_attr(value)
+    escape_value(value)
   end
 
   defp class_value(value) when is_list(value) do
     value
     |> class_list_value()
-    |> escape_attr()
+    |> escape_value()
   end
 
   defp class_value(value) do
-    escape_attr(value)
+    escape_value(value)
   end
 
   defp class_list_value(value) do
@@ -147,9 +147,9 @@ defmodule Combo.SafeHTML.Escape do
   defp escape_key(nil), do: []
   defp escape_key(other), do: Safe.to_iodata(other)
 
-  defp escape_attr({:safe, data}), do: data
-  defp escape_attr(nil), do: []
-  defp escape_attr(other), do: Safe.to_iodata(other)
+  defp escape_value({:safe, data}), do: data
+  defp escape_value(nil), do: []
+  defp escape_value(other), do: Safe.to_iodata(other)
 
   @spec escape_js(String.t()) :: String.t()
   def escape_js(string) when is_binary(string),
