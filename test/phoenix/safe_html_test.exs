@@ -23,12 +23,51 @@ defmodule Combo.SafeHTMLTest do
                ~s( title="the title")
     end
 
-    test "convert snake_case keys into kebab-case when key is atom" do
+    test "keep the case style of keys unchanged" do
       assert escape_attrs([{:my_attr, "value"}]) |> IO.iodata_to_binary() == ~s( my_attr="value")
+      assert escape_attrs([{"my_attr", "value"}]) |> IO.iodata_to_binary() == ~s( my_attr="value")
+
+      assert escape_attrs([{:"my-attr", "value"}]) |> IO.iodata_to_binary() ==
+               ~s( my-attr="value")
+
+      assert escape_attrs([{"my-attr", "value"}]) |> IO.iodata_to_binary() ==
+               ~s( my-attr="value")
     end
 
-    test "keep snake_case keys when key is string" do
-      assert escape_attrs([{"my_attr", "value"}]) |> IO.iodata_to_binary() == ~s( my_attr="value")
+    test "value as string" do
+      assert escape_attrs([{:class, "btn"}]) |> IO.iodata_to_binary() == ~s( class="btn")
+
+      assert escape_attrs([{:class, "<active>"}]) |> IO.iodata_to_binary() ==
+               ~s( class="&lt;active&gt;")
+    end
+
+    test "value as list" do
+      assert escape_attrs([{:class, ["btn", nil, false, "<active>"]}]) |> IO.iodata_to_binary() ==
+               ~s( class="btn &lt;active&gt;")
+
+      assert escape_attrs([{:style, ["background-color: red;", nil, false, "font-size: 40px;"]}])
+             |> IO.iodata_to_binary() ==
+               ~s( style="background-color: red; font-size: 40px;")
+    end
+
+    test "value as nested list" do
+      assert escape_attrs([{:class, ["btn", nil, false, ["<active>", "small"]]}])
+             |> IO.iodata_to_binary() ==
+               ~s( class="btn &lt;active&gt; small")
+
+      assert escape_attrs([{:class, ["btn", nil, [false, ["<active>", "small"]]]}])
+             |> IO.iodata_to_binary() ==
+               ~s( class="btn &lt;active&gt; small")
+    end
+
+    test "suppress value when value is true" do
+      assert escape_attrs([{"required", true}]) |> IO.iodata_to_binary() == ~s( required)
+      assert escape_attrs([{"selected", true}]) |> IO.iodata_to_binary() == ~s( selected)
+    end
+
+    test "suppress attribute when value is falsy" do
+      assert escape_attrs([{"title", nil}]) |> IO.iodata_to_binary() == ~s()
+      assert escape_attrs([{"title", false}]) |> IO.iodata_to_binary() == ~s()
     end
 
     test "multiple attributes" do
@@ -36,7 +75,7 @@ defmodule Combo.SafeHTMLTest do
                ~s( title="the title" id="the id")
     end
 
-    test "handle nested data" do
+    test "handle nested value" do
       assert escape_attrs([{"data", [{"a", "1"}, {"b", "2"}]}]) |> IO.iodata_to_binary() ==
                ~s( data-a="1" data-b="2")
 
@@ -53,51 +92,10 @@ defmodule Combo.SafeHTMLTest do
                ~s( aria-a="1" aria-b="2")
     end
 
-    test "handle class value as string" do
-      assert escape_attrs([{:class, "btn"}]) |> IO.iodata_to_binary() == ~s( class="btn")
-
-      assert escape_attrs([{:class, "<active>"}]) |> IO.iodata_to_binary() ==
-               ~s( class="&lt;active&gt;")
-    end
-
-    test "handle class value as list" do
-      assert escape_attrs([{:class, ["btn", nil, false, "<active>"]}]) |> IO.iodata_to_binary() ==
-               ~s( class="btn &lt;active&gt;")
-    end
-
-    test "handle class value list with nested lists" do
-      assert escape_attrs([{:class, ["btn", nil, false, ["<active>", "small"]]}])
-             |> IO.iodata_to_binary() ==
-               ~s( class="btn &lt;active&gt; small")
-
-      assert escape_attrs([{:class, ["btn", nil, [false, ["<active>", "small"]]]}])
-             |> IO.iodata_to_binary() ==
-               ~s( class="btn &lt;active&gt; small")
-    end
-
-    test "handle class value as false/nil/true" do
-      assert escape_attrs([{:class, false}]) |> IO.iodata_to_binary() == ~s()
-      assert escape_attrs([{:class, nil}]) |> IO.iodata_to_binary() == ~s()
-      assert escape_attrs([{:class, true}]) |> IO.iodata_to_binary() == ~s( class)
-    end
-
-    test "handle class key as string" do
-      assert escape_attrs([{"class", "btn"}]) |> IO.iodata_to_binary() == ~s( class="btn")
-    end
-
     test "raises on number id" do
       assert_raise ArgumentError, ~r/attempting to set id attribute to 3/, fn ->
         escape_attrs([{"id", 3}])
       end
-    end
-
-    test "suppress attribute when value is falsy" do
-      assert escape_attrs([{"title", nil}]) |> IO.iodata_to_binary() == ~s()
-      assert escape_attrs([{"title", false}]) |> IO.iodata_to_binary() == ~s()
-    end
-
-    test "suppress value when value is true" do
-      assert escape_attrs([{"selected", true}]) |> IO.iodata_to_binary() == ~s( selected)
     end
   end
 

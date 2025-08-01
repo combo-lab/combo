@@ -73,12 +73,6 @@ defmodule Combo.SafeHTML.Escape do
   defp build_attrs([{"id", v} | t]),
     do: [" id=\"", id_value(v), ?" | build_attrs(t)]
 
-  defp build_attrs([{:class, v} | t]),
-    do: [" class=\"", class_value(v), ?" | build_attrs(t)]
-
-  defp build_attrs([{"class", v} | t]),
-    do: [" class=\"", class_value(v), ?" | build_attrs(t)]
-
   defp build_attrs([{:data, v} | t]) when is_list(v),
     do: nested_attrs(v, " data", t)
 
@@ -122,34 +116,25 @@ defmodule Combo.SafeHTML.Escape do
     escape_value(value)
   end
 
-  defp class_value(value) when is_list(value) do
-    value
-    |> class_list_value()
-    |> escape_value()
-  end
+  defp escape_key({:safe, data}), do: data
+  defp escape_key(nil), do: []
+  defp escape_key(value), do: Safe.to_iodata(value)
 
-  defp class_value(value) do
-    escape_value(value)
-  end
+  defp escape_value({:safe, data}), do: data
+  defp escape_value(nil), do: []
+  defp escape_value(value) when is_list(value), do: value |> encode_list() |> Safe.to_iodata()
+  defp escape_value(value), do: Safe.to_iodata(value)
 
-  defp class_list_value(value) do
+  defp encode_list(value) do
     value
     |> Enum.flat_map(fn
       nil -> []
       false -> []
-      inner when is_list(inner) -> [class_list_value(inner)]
+      inner when is_list(inner) -> [encode_list(inner)]
       other -> [other]
     end)
     |> Enum.join(" ")
   end
-
-  defp escape_key({:safe, data}), do: data
-  defp escape_key(nil), do: []
-  defp escape_key(other), do: Safe.to_iodata(other)
-
-  defp escape_value({:safe, data}), do: data
-  defp escape_value(nil), do: []
-  defp escape_value(other), do: Safe.to_iodata(other)
 
   @spec escape_js(String.t()) :: String.t()
   def escape_js(string) when is_binary(string),
