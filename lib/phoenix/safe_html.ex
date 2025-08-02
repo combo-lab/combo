@@ -116,6 +116,12 @@ defmodule Combo.SafeHTML do
       " title=\"the title\" id=\"the id\" selected"
 
   """
-  @spec escape_attrs(keyword() | map()) :: String.t()
+  @spec escape_attrs(keyword() | map()) :: iodata()
   defdelegate escape_attrs(keyword_or_map), to: Escape
+
+  @spec escape_attr_key(term()) :: iodata()
+  defdelegate escape_attr_key(term), to: Escape, as: :escape_key
+
+  @spec escape_attr_value(term()) :: iodata()
+  defdelegate escape_attr_value(term), to: Escape, as: :escape_value
 end
