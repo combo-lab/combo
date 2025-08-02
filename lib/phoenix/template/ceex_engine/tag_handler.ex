@@ -25,19 +25,6 @@ defmodule Phoenix.Template.CEExEngine.TagHandler do
   @callback void?(name :: binary()) :: boolean()
 
   @doc """
-  Handles attributes.
-
-  It returns a quoted expression or attributes. If attributes are returned,
-  the second element is a list where each element in the list represents
-  one attribute.If the list element is a two-element tuple, it is assumed
-  the key is the name to be statically written in the template. The second
-  element is the value which is also statically written to the template whenever
-  possible (such as binaries or binaries inside a list).
-  """
-  @callback handle_attributes(ast :: Macro.t(), meta :: keyword) ::
-              {:attributes, [{binary(), Macro.t()} | Macro.t()]} | {:quoted, Macro.t()}
-
-  @doc """
   Gets annotation around the whole body of a template.
   """
   # TODO: change the name to get_body_annotation

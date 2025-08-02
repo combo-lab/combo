@@ -4,6 +4,7 @@ defmodule Phoenix.Template.CEExEngine.Compiler.Engine do
   alias Phoenix.Template.CEExEngine.Tokenizer
   alias Phoenix.Template.CEExEngine.Tokenizer.ParseError
   alias Phoenix.Template.CEExEngine.TagHandler.HTML, as: TagHandler
+  alias Phoenix.Template.CEExEngine.Compiler.Attrs
   alias Phoenix.Template.CEExEngine.Compiler.Assigns
   alias Phoenix.Template.CEExEngine.Compiler.IOBuilder
 
@@ -798,10 +799,10 @@ defmodule Phoenix.Template.CEExEngine.Compiler.Engine do
   defp acc_attrs(state, t_attrs, t_meta) do
     Enum.reduce(t_attrs, state, fn
       {:root, {:quoted, quoted, _}, _a_meta}, state ->
-        state |> acc_quoted_attrs(quoted, t_meta)
+        state |> acc_quoted_attr({:global, quoted}, t_meta)
 
       {name, {:quoted, quoted, _}, _a_meta}, state ->
-        state |> acc_quoted_attrs([{name, quoted}], t_meta)
+        state |> acc_quoted_attr({:local, name, quoted}, t_meta)
 
       {name, {:string, value, %{delimiter: ?"}}, _a_meta}, state ->
         state |> iob_acc_text(~s| #{name}="#{value}"|)
@@ -814,32 +815,24 @@ defmodule Phoenix.Template.CEExEngine.Compiler.Engine do
     end)
   end
 
-  defp acc_quoted_attrs(state, ast, meta) do
-    # It is safe to List.wrap/1 because if we receive nil,
-    # it would become the interpolation of nil, which is an
-    # empty string anyway.
-    case TagHandler.handle_attributes(ast, meta) do
-      {:attributes, attrs} ->
-        Enum.reduce(attrs, state, fn
-          {name, value}, state ->
-            state = state |> iob_acc_text(~s| #{name}="|)
+  defp acc_quoted_attr(state, pattern, meta) do
+    case Attrs.handle_attr(pattern, meta) do
+      {:attr, name, quoted} ->
+        state
+        |> iob_acc_text(~s| #{name}="|)
+        |> then(fn state ->
+          # It is safe to List.wrap/1 because if we receive nil,
+          # it would become the interpolation of nil, which is an
+          # empty string anyway.
+          Enum.reduce(List.wrap(quoted), state, fn
+            binary, acc when is_binary(binary) ->
+              acc |> iob_acc_text(binary)
 
-            state =
-              value
-              |> List.wrap()
-              |> Enum.reduce(state, fn
-                binary, state when is_binary(binary) ->
-                  state |> iob_acc_text(binary)
-
-                expr, state ->
-                  state |> iob_acc_expr(expr)
-              end)
-
-            state |> iob_acc_text(~s|"|)
-
-          quoted, state ->
-            state |> iob_acc_expr(quoted)
+            quoted, acc ->
+              acc |> iob_acc_expr(quoted)
+          end)
         end)
+        |> iob_acc_text(~s|"|)
 
       {:quoted, quoted} ->
         state |> iob_acc_expr(quoted)
