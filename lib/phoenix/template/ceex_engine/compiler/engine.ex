@@ -3,10 +3,11 @@ defmodule Phoenix.Template.CEExEngine.Compiler.Engine do
 
   alias Phoenix.Template.CEExEngine.Tokenizer
   alias Phoenix.Template.CEExEngine.Tokenizer.ParseError
-  alias Phoenix.Template.CEExEngine.TagHandler.HTML, as: TagHandler
+  alias Phoenix.Template.CEExEngine.TagHandler
+  alias Phoenix.Template.CEExEngine.Compiler.IOBuilder
   alias Phoenix.Template.CEExEngine.Compiler.Attrs
   alias Phoenix.Template.CEExEngine.Compiler.Assigns
-  alias Phoenix.Template.CEExEngine.Compiler.IOBuilder
+  alias Phoenix.Template.CEExEngine.Compiler.Annotation
 
   @doc false
   def __reserved_assigns__, do: [:__slot__, :inner_block]
@@ -80,7 +81,7 @@ defmodule Phoenix.Template.CEExEngine.Compiler.Engine do
     quoted = Assigns.traverse(quoted)
 
     quoted =
-      if body_annotation = caller && TagHandler.annotate_body(caller) do
+      if body_annotation = caller && Annotation.annotate_body(caller) do
         annotate_body(quoted, body_annotation)
       else
         quoted
@@ -787,7 +788,7 @@ defmodule Phoenix.Template.CEExEngine.Compiler.Engine do
   end
 
   defp closing_void_hint(t_name) do
-    if TagHandler.void?(t_name) do
+    if TagHandler.void_tag?(t_name) do
       " (note <#{t_name}> is a void tag and cannot have any content)"
     else
       ""
@@ -1196,7 +1197,7 @@ defmodule Phoenix.Template.CEExEngine.Compiler.Engine do
     %{file: file} = state
     %{line: line} = t_meta
 
-    if anno = TagHandler.annotate_caller(file, line) do
+    if anno = Annotation.annotate_caller(file, line) do
       state |> iob_acc_text(anno)
     else
       state

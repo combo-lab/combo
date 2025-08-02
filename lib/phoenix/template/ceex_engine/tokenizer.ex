@@ -1,7 +1,7 @@
 defmodule Phoenix.Template.CEExEngine.Tokenizer do
   @moduledoc false
 
-  alias Phoenix.Template.CEExEngine.TagHandler.HTML, as: TagHandler
+  alias Phoenix.Template.CEExEngine.TagHandler
 
   @space_chars ~c"\s\t\f"
   @quote_chars ~c"\"'"
@@ -303,7 +303,7 @@ defmodule Phoenix.Template.CEExEngine.Tokenizer do
       {:ok, name, new_column, rest} ->
         meta = %{line: line, column: column - 1, inner_location: nil, tag_name: name}
 
-        case TagHandler.classify_type(name) do
+        case TagHandler.classify_tag(name) do
           {:error, message} ->
             raise_syntax_error!(message, %{line: line, column: column}, state)
 
@@ -334,7 +334,7 @@ defmodule Phoenix.Template.CEExEngine.Tokenizer do
           tag_name: name
         }
 
-        case TagHandler.classify_type(name) do
+        case TagHandler.classify_tag(name) do
           {:error, message} ->
             raise_syntax_error!(message, meta, state)
 
@@ -731,7 +731,7 @@ defmodule Phoenix.Template.CEExEngine.Tokenizer do
 
     meta =
       cond do
-        type == :tag and TagHandler.void?(name) -> Map.put(meta, :closing, :void)
+        type == :tag and TagHandler.void_tag?(name) -> Map.put(meta, :closing, :void)
         self_close? -> Map.put(meta, :closing, :self)
         true -> meta
       end

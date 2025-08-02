@@ -1,52 +1,33 @@
 defmodule Phoenix.Template.CEExEngine.TagHandler do
   @moduledoc false
 
-  # The behaviour for implementing tag handler.
+  @doc """
+  Classifies tag from a given tag.
+
+  It returns a tuple containing the type of tag and the name of tag, such as
+  `{:tag, "div"}`. It can also return `{:error, reason}`, so that the compiler
+  will display this error.
+  """
+  @spec classify_tag(name :: binary()) ::
+          {type :: atom(), name :: binary()} | {:error, reason :: binary()}
+  def classify_tag(<<first, _::binary>> = name) when first in ?A..?Z,
+    do: {:remote_component, name}
+
+  def classify_tag("."), do: {:error, "a component name is required after ."}
+  def classify_tag("." <> name), do: {:local_component, name}
+
+  def classify_tag(":inner_block"), do: {:error, "the slot name :inner_block is reserved"}
+  def classify_tag(":" <> name), do: {:slot, name}
+
+  def classify_tag(name), do: {:tag, name}
 
   @doc """
-  Classifies the type and the name of tag from the given binary.
-
-  It must return a tuple containing the type of the tag and the name of tag.
-  For instance, in a tag handler for HTML this would return `{:tag, "div"}`
-  in case the given binary is identified as HTML tag.
-
-  You can also return `{:error, reason}` so that the compiler will display this
-  error.
+  Checks if a given tag is a void tag.
   """
-  @callback classify_type(name :: binary()) ::
-              {type :: atom(), name :: binary()} | {:error, reason :: binary()}
+  @spec void_tag?(name :: binary()) :: boolean()
+  for name <- ~w(area base br col hr img input link meta param command keygen source) do
+    def void_tag?(unquote(name)), do: true
+  end
 
-  @doc """
-  Checks if the given binary is either void or not.
-
-  That's mainly useful for HTML tags and used internally by the compiler. You
-  can just implement as `def void?(_), do: false` if you want to ignore this.
-  """
-  @callback void?(name :: binary()) :: boolean()
-
-  @doc """
-  Gets annotation around the whole body of a template.
-  """
-  # TODO: change the name to get_body_annotation
-  @callback annotate_body(caller :: Macro.Env.t()) :: {String.t(), String.t()} | nil
-
-  @doc """
-  Gets annotation around each slot of a template.
-
-  In case the slot is an implicit inner block, the tag meta points to
-  the component.
-  """
-  @callback annotate_slot(
-              name :: atom(),
-              tag_meta :: %{line: non_neg_integer(), column: non_neg_integer()},
-              close_tag_meta :: %{line: non_neg_integer(), column: non_neg_integer()},
-              caller :: Macro.Env.t()
-            ) :: {String.t(), String.t()} | nil
-
-  @doc """
-  Gets annotation which is added at the beginning of a component.
-  """
-  # TODO: change the name to get_caller_annotation
-  # TODO: change file and line to caller, just like annotate_body
-  @callback annotate_caller(file :: String.t(), line :: integer()) :: String.t() | nil
+  def void_tag?(_), do: false
 end
