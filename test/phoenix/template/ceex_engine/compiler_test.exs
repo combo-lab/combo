@@ -279,26 +279,32 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
     end
   end
 
-  describe "optimizes special attributes" do
-    test "class attributes" do
+  describe "handling attributes" do
+    test "attributes" do
       assigns = %{
-        nil_assign: nil,
         true_assign: true,
         false_assign: false,
+        nil_assign: nil,
         unsafe: "<foo>",
         safe: {:safe, "<foo>"},
         list: ["safe", false, nil, "<unsafe>"],
-        recursive_list: ["safe", false, [nil, "<unsafe>"]]
+        recursive_list: ["safe", false, [nil, "<unsafe>"]],
+        global: [
+          {"key1", "value1"},
+          {"key2", "<value2>"},
+          {"key3", {:safe, "<value3>"}},
+          {"key4", ["value4.1", "<value4.2>"]}
+        ]
       }
 
-      template = ~S(<div class={@nil_assign} />)
-      assert render(template, assigns) == ~S(<div class=""></div>)
-
       template = ~S(<div class={@true_assign} />)
-      assert render(template, assigns) == ~S(<div class=""></div>)
+      assert render(template, assigns) == ~S(<div class></div>)
 
       template = ~S(<div class={@false_assign} />)
-      assert render(template, assigns) == ~S(<div class=""></div>)
+      assert render(template, assigns) == ~S(<div></div>)
+
+      template = ~S(<div class={@nil_assign} />)
+      assert render(template, assigns) == ~S(<div></div>)
 
       template = ~S(<div class={@unsafe} />)
       assert render(template, assigns) == ~S(<div class="&lt;foo&gt;"></div>)
@@ -311,32 +317,11 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
 
       template = ~S(<div class={@recursive_list} />)
       assert render(template, assigns) == ~S(<div class="safe &lt;unsafe&gt;"></div>)
-    end
 
-    test "attributes which can be empty" do
-      assigns = %{
-        nil_assign: nil,
-        true_assign: true,
-        false_assign: false,
-        unsafe: "<foo>",
-        safe: {:safe, "<foo>"},
-        list: ["safe", false, nil, "<unsafe>"]
-      }
+      template = ~S(<div {@global} />)
 
-      template = ~S(<div style={@nil_assign} />)
-      assert render(template, assigns) == ~S(<div style=""></div>)
-
-      template = ~S(<div style={@true_assign} />)
-      assert render(template, assigns) == ~S(<div style=""></div>)
-
-      template = ~S(<div style={@false_assign} />)
-      assert render(template, assigns) == ~S(<div style=""></div>)
-
-      template = ~S(<div style={@unsafe} />)
-      assert render(template, assigns) == ~S(<div style="&lt;foo&gt;"></div>)
-
-      template = ~S(<div style={@safe} />)
-      assert render(template, assigns) == ~S(<div style="<foo>"></div>)
+      assert render(template, assigns) ==
+               ~S(<div key1="value1" key2="&lt;value2&gt;" key3="<value3>" key4="value4.1 &lt;value4.2&gt;"></div>)
     end
   end
 

@@ -5,7 +5,7 @@ defmodule Phoenix.Template.CEExEngine.Compiler.Engine do
   alias Phoenix.Template.CEExEngine.Tokenizer.ParseError
   alias Phoenix.Template.CEExEngine.TagHandler
   alias Phoenix.Template.CEExEngine.Compiler.IOBuilder
-  alias Phoenix.Template.CEExEngine.Compiler.Attrs
+  alias Phoenix.Template.CEExEngine.Compiler.Attr
   alias Phoenix.Template.CEExEngine.Compiler.Assigns
   alias Phoenix.Template.CEExEngine.Compiler.Annotation
 
@@ -817,7 +817,7 @@ defmodule Phoenix.Template.CEExEngine.Compiler.Engine do
   end
 
   defp acc_quoted_attr(state, pattern, meta) do
-    case Attrs.handle_attr(pattern, meta) do
+    case Attr.handle_attr(pattern, meta) do
       {:attr, name, quoted} ->
         state
         |> iob_acc_text(~s| #{name}="|)
