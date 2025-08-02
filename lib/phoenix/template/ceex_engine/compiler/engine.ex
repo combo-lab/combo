@@ -133,7 +133,7 @@ defmodule Phoenix.Template.CEExEngine.Compiler.Engine do
   end
 
   defp preprocess_token({t_type, _t_name, _t_attrs, _t_meta} = token, state)
-       when t_type in [:tag, :remote_component, :local_component, :slot] do
+       when t_type in [:html_tag, :remote_component, :local_component, :slot] do
     rules = [
       &remove_phx_attr/3,
       &validate_attr!/3,
@@ -186,7 +186,7 @@ defmodule Phoenix.Template.CEExEngine.Compiler.Engine do
   end
 
   defp validate_supported_attr!(
-         {:tag = t_type, t_name, _, _},
+         {:html_tag = t_type, t_name, _, _},
          {":" <> _ = a_name, _, a_meta},
          state
        ) do
@@ -391,7 +391,7 @@ defmodule Phoenix.Template.CEExEngine.Compiler.Engine do
 
   # HTML tag (self-closing)
 
-  defp handle_token({:tag, name, attrs, %{closing: closing} = meta} = tag, state) do
+  defp handle_token({:html_tag, name, attrs, %{closing: closing} = meta} = tag, state) do
     suffix = if closing == :void, do: ">", else: "></#{name}>"
 
     if should_wrap?(tag) do
@@ -420,7 +420,7 @@ defmodule Phoenix.Template.CEExEngine.Compiler.Engine do
 
   # HTML tag
 
-  defp handle_token({:tag, name, attrs, meta} = tag, state) do
+  defp handle_token({:html_tag, name, attrs, meta} = tag, state) do
     if should_wrap?(tag) do
       state
       |> push_tag(tag)
@@ -437,7 +437,7 @@ defmodule Phoenix.Template.CEExEngine.Compiler.Engine do
     end
   end
 
-  defp handle_token({:close, :tag, name, _meta} = tag, state) do
+  defp handle_token({:close, :html_tag, name, _meta} = tag, state) do
     {open_tag, state} = pop_tag!(state, tag)
 
     if should_wrap?(open_tag) do
@@ -1224,7 +1224,7 @@ defmodule Phoenix.Template.CEExEngine.Compiler.Engine do
     Code.string_to_quoted!(source, line: line, column: column, file: file)
   end
 
-  defp humanize_t_type(:tag), do: "tag"
+  defp humanize_t_type(:html_tag), do: "tag"
   defp humanize_t_type(:remote_component), do: "remote component"
   defp humanize_t_type(:local_component), do: "local component"
   defp humanize_t_type(:slot), do: "slot"

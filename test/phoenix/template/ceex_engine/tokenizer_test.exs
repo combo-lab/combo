@@ -45,7 +45,7 @@ defmodule Phoenix.Template.CEExEngine.TokenizerTest do
     test "multiple lines" do
       assert tokenize("<!DOCTYPE\nhtml\n>  <br />") == [
                {:text, "<!DOCTYPE\nhtml\n>  ", %{line_end: 3, column_end: 4}},
-               {:tag, "br", [],
+               {:html_tag, "br", [],
                 %{column: 4, line: 3, closing: :void, tag_name: "br", inner_location: {3, 10}}}
              ]
     end
@@ -84,10 +84,10 @@ defmodule Phoenix.Template.CEExEngine.TokenizerTest do
       """
 
       assert [
-               {:tag, "p", [], %{line: 1, column: 1}},
+               {:html_tag, "p", [], %{line: 1, column: 1}},
                {:text, "\n<!--\n<div>\n-->\n", %{line_end: 5, column_end: 1}},
-               {:close, :tag, "p", %{line: 5, column: 1}},
-               {:tag, "br", [], %{line: 5, column: 5}}
+               {:close, :html_tag, "p", %{line: 5, column: 1}},
+               {:html_tag, "br", [], %{line: 5, column: 5}}
              ] = tokenize(code)
     end
 
@@ -114,20 +114,20 @@ defmodule Phoenix.Template.CEExEngine.TokenizerTest do
         Tokenizer.tokenize(second_part, [], first_tokens, cont, tokenizer_state(second_part))
 
       assert Enum.reverse(tokens) == [
-               {:tag, "p", [], %{column: 1, line: 1, inner_location: {1, 4}, tag_name: "p"}},
+               {:html_tag, "p", [], %{column: 1, line: 1, inner_location: {1, 4}, tag_name: "p"}},
                {:text, "\n<!--\n<div>\n",
                 %{column_end: 1, context: [:comment_start], line_end: 4}},
                {:text, "</div>\n-->\n", %{column_end: 1, context: [:comment_end], line_end: 3}},
-               {:close, :tag, "p", %{column: 1, line: 3, inner_location: {3, 1}, tag_name: "p"}},
+               {:close, :html_tag, "p", %{column: 1, line: 3, inner_location: {3, 1}, tag_name: "p"}},
                {:text, "\n", %{column_end: 1, line_end: 4}},
-               {:tag, "div", [], %{column: 1, line: 4, inner_location: {4, 6}, tag_name: "div"}},
+               {:html_tag, "div", [], %{column: 1, line: 4, inner_location: {4, 6}, tag_name: "div"}},
                {:text, "\n  ", %{column_end: 3, line_end: 5}},
-               {:tag, "p", [], %{column: 3, line: 5, inner_location: {5, 6}, tag_name: "p"}},
+               {:html_tag, "p", [], %{column: 3, line: 5, inner_location: {5, 6}, tag_name: "p"}},
                {:text, "Hello", %{column_end: 11, line_end: 5}},
-               {:close, :tag, "p",
+               {:close, :html_tag, "p",
                 %{column: 11, line: 5, inner_location: {5, 11}, tag_name: "p"}},
                {:text, "\n", %{column_end: 1, line_end: 6}},
-               {:close, :tag, "div",
+               {:close, :html_tag, "div",
                 %{column: 1, line: 6, inner_location: {6, 1}, tag_name: "div"}},
                {:text, "\n", %{column_end: 1, line_end: 7}}
              ]
@@ -163,43 +163,43 @@ defmodule Phoenix.Template.CEExEngine.TokenizerTest do
         Tokenizer.tokenize(third_part, [], second_tokens, cont, tokenizer_state(third_part))
 
       assert Enum.reverse(tokens) == [
-               {:tag, "p", [], %{column: 1, line: 1, inner_location: {1, 4}, tag_name: "p"}},
+               {:html_tag, "p", [], %{column: 1, line: 1, inner_location: {1, 4}, tag_name: "p"}},
                {:text, "\n<!--\n<%= \"Hello\" %>\n",
                 %{column_end: 1, context: [:comment_start], line_end: 4}},
                {:text, "-->\n<!--\n<p><%= \"World\"</p>\n",
                 %{column_end: 1, context: [:comment_end, :comment_start], line_end: 4}},
                {:text, "-->\n", %{column_end: 1, context: [:comment_end], line_end: 2}},
-               {:tag, "div", [], %{column: 1, line: 2, inner_location: {2, 6}, tag_name: "div"}},
+               {:html_tag, "div", [], %{column: 1, line: 2, inner_location: {2, 6}, tag_name: "div"}},
                {:text, "\n  ", %{column_end: 3, line_end: 3}},
-               {:tag, "p", [], %{column: 3, line: 3, inner_location: {3, 6}, tag_name: "p"}},
+               {:html_tag, "p", [], %{column: 3, line: 3, inner_location: {3, 6}, tag_name: "p"}},
                {:text, "Hi", %{column_end: 8, line_end: 3}},
-               {:close, :tag, "p", %{column: 8, line: 3, inner_location: {3, 8}, tag_name: "p"}},
+               {:close, :html_tag, "p", %{column: 8, line: 3, inner_location: {3, 8}, tag_name: "p"}},
                {:text, "\n", %{column_end: 1, line_end: 4}},
-               {:close, :tag, "p", %{column: 1, line: 4, inner_location: {4, 1}, tag_name: "p"}},
+               {:close, :html_tag, "p", %{column: 1, line: 4, inner_location: {4, 1}, tag_name: "p"}},
                {:text, "\n", %{column_end: 1, line_end: 5}}
              ]
     end
   end
 
   describe "opening tag" do
-    test "represented as {:tag, name, attrs, meta}" do
+    test "represented as {:html_tag, name, attrs, meta}" do
       tokens = tokenize("<div>")
-      assert [{:tag, "div", [], %{}}] = tokens
+      assert [{:html_tag, "div", [], %{}}] = tokens
     end
 
     test "with space after name" do
       tokens = tokenize("<div >")
-      assert [{:tag, "div", [], %{}}] = tokens
+      assert [{:html_tag, "div", [], %{}}] = tokens
     end
 
     test "with line break after name" do
       tokens = tokenize("<div\n>")
-      assert [{:tag, "div", [], %{}}] = tokens
+      assert [{:html_tag, "div", [], %{}}] = tokens
     end
 
     test "self close" do
       tokens = tokenize("<div/>")
-      assert [{:tag, "div", [], %{closing: :self}}] = tokens
+      assert [{:html_tag, "div", [], %{closing: :self}}] = tokens
     end
 
     test "compute line and column" do
@@ -212,12 +212,12 @@ defmodule Phoenix.Template.CEExEngine.TokenizerTest do
         """)
 
       assert [
-               {:tag, "div", [], %{line: 1, column: 1}},
+               {:html_tag, "div", [], %{line: 1, column: 1}},
                {:text, _, %{line_end: 2, column_end: 3}},
-               {:tag, "span", [], %{line: 2, column: 3}},
+               {:html_tag, "span", [], %{line: 2, column: 3}},
                {:text, _, %{line_end: 4, column_end: 1}},
-               {:tag, "p", [], %{column: 1, line: 4, closing: :self}},
-               {:tag, "br", [], %{column: 5, line: 4}}
+               {:html_tag, "p", [], %{column: 1, line: 4, closing: :self}},
+               {:html_tag, "br", [], %{column: 5, line: 4}}
              ] = tokens
     end
 
@@ -509,8 +509,8 @@ defmodule Phoenix.Template.CEExEngine.TokenizerTest do
         """)
 
       assert [
-               {:tag, "div", [{"title", {:string, "first\n  second\nthird", _meta}, %{}}], %{}},
-               {:tag, "span", [], %{line: 3, column: 8}}
+               {:html_tag, "div", [{"title", {:string, "first\n  second\nthird", _meta}, %{}}], %{}},
+               {:html_tag, "span", [], %{line: 3, column: 8}}
              ] = tokens
     end
 
@@ -555,8 +555,8 @@ defmodule Phoenix.Template.CEExEngine.TokenizerTest do
         """)
 
       assert [
-               {:tag, "div", [{"title", {:string, "first\n  second\nthird", _meta}, %{}}], %{}},
-               {:tag, "span", [], %{line: 3, column: 8}}
+               {:html_tag, "div", [{"title", {:string, "first\n  second\nthird", _meta}, %{}}], %{}},
+               {:html_tag, "span", [], %{line: 3, column: 8}}
              ] = tokens
     end
 
@@ -730,9 +730,9 @@ defmodule Phoenix.Template.CEExEngine.TokenizerTest do
   end
 
   describe "closing tag" do
-    test "represented as {:close, :tag, name, meta}" do
+    test "represented as {:close, :html_tag, name, meta}" do
       tokens = tokenize("</div>")
-      assert [{:close, :tag, "div", %{}}] = tokens
+      assert [{:close, :html_tag, "div", %{}}] = tokens
     end
 
     test "compute line and columns" do
@@ -743,10 +743,10 @@ defmodule Phoenix.Template.CEExEngine.TokenizerTest do
         """)
 
       assert [
-               {:tag, "div", [], _meta},
+               {:html_tag, "div", [], _meta},
                {:text, "\n", %{column_end: 1, line_end: 2}},
-               {:close, :tag, "div", %{line: 2, column: 1}},
-               {:tag, "br", [], %{line: 2, column: 7}}
+               {:close, :html_tag, "div", %{line: 2, column: 1}},
+               {:html_tag, "br", [], %{line: 2, column: 7}}
              ] = tokens
     end
 
@@ -790,7 +790,7 @@ defmodule Phoenix.Template.CEExEngine.TokenizerTest do
       assert tokenize("""
              <script src="foo.js" />
              """) == [
-               {:tag, "script",
+               {:html_tag, "script",
                 [{"src", {:string, "foo.js", %{delimiter: 34}}, %{column: 9, line: 1}}],
                 %{
                   column: 1,
@@ -809,10 +809,10 @@ defmodule Phoenix.Template.CEExEngine.TokenizerTest do
                a = "<a>Link</a>"
              </script>
              """) == [
-               {:tag, "script", [],
+               {:html_tag, "script", [],
                 %{column: 1, line: 1, inner_location: {1, 9}, tag_name: "script"}},
                {:text, "\n  a = \"<a>Link</a>\"\n", %{column_end: 1, line_end: 3}},
-               {:close, :tag, "script", %{column: 1, line: 3, inner_location: {3, 1}}},
+               {:close, :html_tag, "script", %{column: 1, line: 3, inner_location: {3, 1}}},
                {:text, "\n", %{column_end: 1, line_end: 4}}
              ]
     end
@@ -823,7 +823,7 @@ defmodule Phoenix.Template.CEExEngine.TokenizerTest do
       assert tokenize("""
              <style src="foo.js" />
              """) == [
-               {:tag, "style",
+               {:html_tag, "style",
                 [{"src", {:string, "foo.js", %{delimiter: 34}}, %{column: 8, line: 1}}],
                 %{
                   column: 1,
@@ -842,10 +842,10 @@ defmodule Phoenix.Template.CEExEngine.TokenizerTest do
                a = "<a>Link</a>"
              </style>
              """) == [
-               {:tag, "style", [],
+               {:html_tag, "style", [],
                 %{column: 1, line: 1, inner_location: {1, 8}, tag_name: "style"}},
                {:text, "\n  a = \"<a>Link</a>\"\n", %{column_end: 1, line_end: 3}},
-               {:close, :tag, "style", %{column: 1, line: 3, inner_location: {3, 1}}},
+               {:close, :html_tag, "style", %{column: 1, line: 3, inner_location: {3, 1}}},
                {:text, "\n", %{column_end: 1, line_end: 4}}
              ]
     end
@@ -974,15 +974,15 @@ defmodule Phoenix.Template.CEExEngine.TokenizerTest do
 
     assert [
              {:text, "text before\n", %{line_end: 2, column_end: 1}},
-             {:tag, "div", [], %{}},
+             {:html_tag, "div", [], %{}},
              {:text, "\n  text\n", %{line_end: 4, column_end: 1}},
-             {:close, :tag, "div", %{line: 4, column: 1}},
+             {:close, :html_tag, "div", %{line: 4, column: 1}},
              {:text, "\ntext after\n", %{line_end: 6, column_end: 1}}
            ] = tokens
   end
 
   defp tokenize_attrs(code) do
-    [{:tag, "div", attrs, %{}}] = tokenize(code)
+    [{:html_tag, "div", attrs, %{}}] = tokenize(code)
     attrs
   end
 end

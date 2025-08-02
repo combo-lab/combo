@@ -5,8 +5,8 @@ defmodule Phoenix.Template.CEExEngine.TagHandler do
   Classifies tag from a given tag.
 
   It returns a tuple containing the type of tag and the name of tag, such as
-  `{:tag, "div"}`. It can also return `{:error, reason}`, so that the compiler
-  will display this error.
+  `{:html_tag, "div"}`. It can also return `{:error, reason}`, so that the
+  compiler will display this error.
   """
   @spec classify_tag(name :: binary()) ::
           {type :: atom(), name :: binary()} | {:error, reason :: binary()}
@@ -19,7 +19,7 @@ defmodule Phoenix.Template.CEExEngine.TagHandler do
   def classify_tag(":inner_block"), do: {:error, "the slot name :inner_block is reserved"}
   def classify_tag(":" <> name), do: {:slot, name}
 
-  def classify_tag(name), do: {:tag, name}
+  def classify_tag(name), do: {:html_tag, name}
 
   @doc """
   Checks if a given tag is a void tag.

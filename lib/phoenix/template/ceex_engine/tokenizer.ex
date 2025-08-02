@@ -93,9 +93,9 @@ defmodule Phoenix.Template.CEExEngine.Tokenizer do
 
       iex> Tokenizer.tokenize(state)
       {[
-         {:close, :tag, "section", %{column: 16, line: 1}},
-         {:tag, "div", [], %{column: 10, line: 1, closing: :self}},
-         {:tag, "section", [], %{column: 1, line: 1}}
+         {:close, :html_tag, "section", %{column: 16, line: 1}},
+         {:html_tag, "div", [], %{column: 10, line: 1, closing: :self}},
+         {:html_tag, "section", [], %{column: 1, line: 1}}
        ], {:text, :enabled}}
 
   """
@@ -210,7 +210,7 @@ defmodule Phoenix.Template.CEExEngine.Tokenizer do
 
   defp handle_style("</style>" <> rest, line, column, buffer, tokens, state) do
     tokens = [
-      {:close, :tag, "style", %{line: line, column: column, inner_location: {line, column}}}
+      {:close, :html_tag, "style", %{line: line, column: column, inner_location: {line, column}}}
       | tokenize_buffer(buffer, tokens, line, column, [])
     ]
 
@@ -237,7 +237,7 @@ defmodule Phoenix.Template.CEExEngine.Tokenizer do
 
   defp handle_script("</script>" <> rest, line, column, buffer, tokens, state) do
     tokens = [
-      {:close, :tag, "script", %{line: line, column: column, inner_location: {line, column}}}
+      {:close, :html_tag, "script", %{line: line, column: column, inner_location: {line, column}}}
       | tokenize_buffer(buffer, tokens, line, column, [])
     ]
 
@@ -400,10 +400,10 @@ defmodule Phoenix.Template.CEExEngine.Tokenizer do
 
   defp handle_maybe_tag_open_end(">" <> rest, line, column, tokens, state) do
     case normalize_tag(tokens, line, column + 1, false) do
-      [{:tag, "script", _, _} | _] = tokens ->
+      [{:html_tag, "script", _, _} | _] = tokens ->
         handle_script(rest, line, column + 1, [], tokens, state)
 
-      [{:tag, "style", _, _} | _] = tokens ->
+      [{:html_tag, "style", _, _} | _] = tokens ->
         handle_style(rest, line, column + 1, [], tokens, state)
 
       tokens ->
@@ -473,7 +473,7 @@ defmodule Phoenix.Template.CEExEngine.Tokenizer do
     end
   end
 
-  defp script_or_style?([{:tag, name, _, _} | _]) when name in ~w(script style), do: true
+  defp script_or_style?([{:html_tag, name, _, _} | _]) when name in ~w(script style), do: true
   defp script_or_style?(_), do: false
 
   ## handle_root_attribute
@@ -731,7 +731,7 @@ defmodule Phoenix.Template.CEExEngine.Tokenizer do
 
     meta =
       cond do
-        type == :tag and TagHandler.void_tag?(name) -> Map.put(meta, :closing, :void)
+        type == :html_tag and TagHandler.void_tag?(name) -> Map.put(meta, :closing, :void)
         self_close? -> Map.put(meta, :closing, :self)
         true -> meta
       end

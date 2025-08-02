@@ -5,6 +5,9 @@ defmodule Phoenix.Template.CEExEngine.Sigil do
 
   alias Phoenix.Template.CEExEngine.Compiler
 
+  @doc """
+  The `~CE` sigil for creating inline templates.
+  """
   defmacro sigil_CE({:<<>>, meta, [expr]}, modifiers)
            when modifiers == [] or modifiers == ~c"noformat" do
     if not Macro.Env.has_var?(__CALLER__, {:assigns, nil}) do
