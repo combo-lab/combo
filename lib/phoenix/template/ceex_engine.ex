@@ -2,17 +2,29 @@ defmodule Phoenix.Template.CEExEngine do
   @moduledoc """
   The template engine that handles CEEx templates.
 
+  ## Features
+
+    * syntax checking
+    * protection on XSS
+    * `assigns` enhancement:
+      - `@` syntax
+      - declarative API
+    * declarative component system
+    * code formatter
+
+  ## Modules
+
   The core feature is implemented by `Phoenix.Template.CEExEngine.Compiler`.
 
   And, other additional features are implemented by following modules:
 
-  - `Phoenix.Template.CEExEngine.Sigil`
-  - `Phoenix.Template.CEExEngine.Slot`
-  - `Phoenix.Template.CEExEngine.Assigns`
-  - `Phoenix.Template.CEExEngine.DeclarativeAssigns`
+    * `Phoenix.Template.CEExEngine.Sigil`
+    * `Phoenix.Template.CEExEngine.Slot`
+    * `Phoenix.Template.CEExEngine.Assigns`
+    * `Phoenix.Template.CEExEngine.DeclarativeAssigns`
 
-  In practice, we don't use these modules directly. Instead, we use
-  `Phoenix.HTML` which is built on top of them.
+  In practice, we rarely use these modules directly. Instead, we use
+  `Combo.HTML` which is built on top of them.
   """
 
   @doc """
