@@ -1,17 +1,17 @@
 defmodule Phoenix.Template.CEExEngine do
   @moduledoc """
-  The template engine that handles the `.ceex` extension.
+  The template engine that handles CEEx templates.
 
   The core feature is implemented by `Phoenix.Template.CEExEngine.Compiler`.
 
   And, other additional features are implemented by following modules:
 
   - `Phoenix.Template.CEExEngine.Sigil`
+  - `Phoenix.Template.CEExEngine.Slot`
   - `Phoenix.Template.CEExEngine.Assigns`
   - `Phoenix.Template.CEExEngine.DeclarativeAssigns`
-  - `Phoenix.Template.CEExEngine.Slot`
 
-  In practice, you don't use these modules directly. Instead, you use
+  In practice, we don't use these modules directly. Instead, we use
   `Phoenix.HTML` which is built on top of them.
   """
 
@@ -20,12 +20,10 @@ defmodule Phoenix.Template.CEExEngine do
   """
   defmacro __using__(opts \\ []) do
     quote bind_quoted: [opts: opts] do
-      import Phoenix.Template, only: [embed_templates: 1]
-
       import Phoenix.Template.CEExEngine.Sigil
+      import Phoenix.Template.CEExEngine.Slot
       import Phoenix.Template.CEExEngine.Assigns
       use Phoenix.Template.CEExEngine.DeclarativeAssigns, opts
-      import Phoenix.Template.CEExEngine.Slot
     end
   end
 
