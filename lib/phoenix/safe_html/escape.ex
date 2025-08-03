@@ -73,13 +73,9 @@ defmodule Combo.SafeHTML.Escape do
   defp build_attrs([]), do: []
 
   @doc false
-  def escape_key({:safe, data}), do: data
-  def escape_key(nil), do: []
   def escape_key(value), do: Safe.to_iodata(value)
 
   @doc false
-  def escape_value({:safe, data}), do: data
-  def escape_value(nil), do: []
   def escape_value(value) when is_list(value), do: value |> encode_list() |> Safe.to_iodata()
   def escape_value(value), do: Safe.to_iodata(value)
 
