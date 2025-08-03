@@ -2,65 +2,81 @@ defmodule Phoenix.Template do
   @moduledoc """
   Compiling and rendering templates.
 
-  In practice, developers rarely use `Phoenix.Template` directly.
+  > In practice, we rarely use `Combo.Template` directly. Instead, we use
+  > `Combo.HTML` which is built on top of it.
+
+  ## Template languages
+
+  A template language is a specialized markup language for building templates.
 
   ## Templates
 
-  Templates are markup languages that are compiled to Elixir code.
+  Templates are the content written in various template languages.
+
+  ## Template files
+
+  A template file is a file containing template, and filename has the following
+  structure: `<NAME>.<FORMAT>.<ENGINE>`, such as `welcome.html.eex`.
 
   ## Template engines
 
-  A markup language is compiled to Elixir code via an engine. Engines specify
-  the method of converting a template path into quoted expressions.
+  A template engine is a module for compiling template files into Elixir's
+  quoted expressions.
+
+  > And, some engines supports template sigils, which are for compiling
+  > inline templates into Elixir's quoted expressions.
 
   ### Custom template engines
 
-  Phoenix supports custom template engines.
+  Combo supports custom template engines.
 
-  See `Phoenix.Template.Engine` for more information on the API required to
+  See `Combo.Template.Engine` for more information on the API required to
   be implemented by custom engines.
 
-  Once a template engine is defined, you can use it via the template engines
+  Once template engines are defined, you can use them via the `:engines`
   option:
 
-      config :phoenix, :template,
-        engines: [
-          eex: CustomEExEngine,
-          exs: CustomExsEngine
-        ]
+  ```elixir
+  config :combo, :template,
+    engines: [
+      eex: CustomEExEngine,
+      exs: CustomExsEngine
+    ]
+  ```
 
   ## Format encoders
 
-  Besides template engines, Phoenix has the concept of format encoders.
+  Besides template engines, Combo has the concept of format encoders.
 
   Format encoders work per format and are responsible for encoding a given
-  format to a string. For example, when rendering JSON, your templates may
-  return a regular Elixir map. Then, the JSON format encoder is invoked to
-  convert it to JSON.
+  format to a string. For example, when rendering JSON, templates may return
+  a regular Elixir map. Then, the JSON format encoder is invoked to convert
+  it to JSON.
 
-  See `Phoenix.Template.FormatEncoder` for more information on the API
-  required to be implemented by custom format encoders.
+  See `Combo.Template.FormatEncoder` for more information on the API required
+  to be implemented by custom format encoders.
 
-  Once a template engine is defined, you can use it via the forman encoders
+  Once format encoders are defined, you can use them via the `:format_encoders`
   option:
 
-      config :phoenix, :template,
-        format_encoders: [
-          html: CustomHTMLEncoder
-          json: CustomJSONEncoder
-        ]
-
+  ```elixir
+  config :combo, :template,
+    format_encoders: [
+      html: CustomHTMLEncoder
+      json: CustomJSONEncoder
+    ]
+  ```
   """
 
   alias Phoenix.Env
 
-  @type path :: binary
-  @type root :: binary
+  @type path :: binary()
+  @type root :: binary()
 
   @default_pattern "*"
 
   @doc """
-  Ensure `__mix_recompile__?/0` will be defined.
+  Ensures that `__mix_recompile__?/0` will be defined.
   """
   defmacro __using__(_opts) do
     quote do
@@ -71,44 +87,50 @@ defmodule Phoenix.Template do
   @doc """
   Embeds external template files into the module as functions.
 
-  This macro is built on top of the more general `compile_all/3`
-  functionality.
+  This macro is built on top of `compile_all/3`.
 
   ## Options
 
-    * `:root` - The root directory to embed files. Defaults to the current
-      module's directory (`__DIR__`)
-    * `:suffix` - The string value to append to embedded function names. By
-      default, function names will be the name of the template file excluding
-      the format and engine.
+    * `:root` - The root directory to embed template files. Defaults to the
+      directory of current module (`__DIR__`).
+    * `:suffix` - The string value to append to the embedded function names.
+      By default, function names will be the name of the template file
+      excluding the format and engine.
 
-  A wildcard pattern may be used to select all files within a directory tree.
-  For example, imagine a directory listing:
+  ## Examples
+
+  Imagine a directory listing:
 
       ├── pages
-      │   ├── about.html.heex
+      │   ├── about.html.ceex
       │   └── sitemap.xml.eex
 
-  Then to embed the templates in your module:
+  To embed the templates into a module, we can define a module like this:
 
-      defmodule MyAppWeb.Renderer do
-        import Phoenix.Template, only: [embed_templates: 1]
-        embed_templates "pages/*"
-      end
+  ```elixir
+  defmodule DemoWeb.Pages do
+    import Combo.Template, only: [embed_templates: 1]
 
-  Now, your module will have a `about/1` and `sitemap/1` functions.
+    # a wildcard pattern is used to select all files within a directory
+    embed_templates "pages/*"
+  end
+  ```
+
+  Now, the module will have `about/1` and `sitemap/1` functions.
 
   Multiple invocations of `embed_templates` is also supported, which can be
-  useful if you have more than one template format. For example:
+  useful if we have more than one template format. For example:
 
-      defmodule MyAppWeb.Emails do
-        import Phoenix.Template, only: [embed_templates: 2]
+  ```elixir
+  defmodule DemoWeb.Pages do
+    import Combo.Template, only: [embed_templates: 2]
 
-        embed_templates "pages/*.html", suffix: "_html"
-        embed_templates "pages/*.xml", suffix: "_xml"
-      end
+    embed_templates "pages/*.html", suffix: "_html"
+    embed_templates "pages/*.xml", suffix: "_xml"
+  end
+  ```
 
-  Now the functions will be `about_html` and `sitemap_xml`.
+  Now, the module will have `about_html` and `sitemap_xml` functions.
   """
   @doc type: :macro
   defmacro embed_templates(pattern, opts \\ []) do
@@ -151,47 +173,45 @@ defmodule Phoenix.Template do
   @doc """
   Renders template from module.
 
-  For a module called `MyApp.FooHTML` and template "index.html.heex",
+  For a module called `DemoWeb.UserHTML` and template "index.html.ceex",
   it will:
 
-    * First attempt to call `MyApp.FooHTML.index(assigns)`
+    * First attempt to call `DemoWeb.UserHTML.index(assigns)`
 
-    * Then fallback to `MyApp.FooHTML.render("index.html", assigns)`
+    * Then fallback to `DemoWeb.UserHTML.render("index.html", assigns)`
 
     * Raise otherwise
 
-  It expects the HTML module, the template as a string, the format, and a
+  It expects the the module, the template as a string, the format, and a
   set of assigns.
 
-  Notice that this function returns the inner representation of a
-  template. If you want the encoded template as a result, use
-  `render_to_iodata/4` instead.
+  Notice that this function returns the inner representation of a template.
+  If you want the encoded template as a result, use `render_to_iodata/4`
+  instead.
 
   ## Examples
 
-      Phoenix.Template.render(DemoWeb.UserHTML, "index", "html", name: "John Doe")
-      #=> {:safe, "Hello John Doe"}
+      Combo.Template.render(DemoWeb.UserHTML, "index", "html", name: "Charie Brown")
+      #=> {:safe, "Hello, Charlie Brown"}
 
-  ## Assigns
+  ## Preserved assigns
 
-  Assigns are meant to be user data that will be available in templates.
-  However, there are keys under assigns that are specially handled by
-  Phoenix, they are:
+  There are keys under assigns that are specially handled by Combo, they are:
 
-    * `:layout` - tells Phoenix to wrap the rendered result in the
-      given layout. See next section
+    * `:layout` - tells Combo to wrap the rendered result in the given layout.
+      See next section.
 
   ## Layouts
 
-  Templates can be rendered within other templates using the `:layout`
-  option. `:layout` accepts a tuple of the form
-  `{LayoutModule, "template.extension"}`.
+  Templates can be rendered within other templates using the `:layout` option.
+  `:layout` accepts a tuple of the form `{LayoutModule, "template.extension"}`.
 
-  To template that goes inside the layout will be placed in the `@inner_content`
-  assign:
+  The rendered template content is injected into the layout via the
+  `@inner_content` assign:
 
-      <%= @inner_content %>
-
+  ```eex
+  <%= @inner_content %>
+  ```
   """
   def render(module, template, format, assigns) do
     assigns
@@ -359,7 +379,7 @@ defmodule Phoenix.Template do
   @doc """
   Returns the hash of all template paths in the given root.
 
-  Used by Phoenix to check if a given root path requires recompilation.
+  Used by Combo to check if a given root path requires recompilation.
   """
   @spec hash(root, pattern :: String.t(), %{atom => module}) :: binary
   def hash(root, pattern \\ @default_pattern, engines \\ engines()) do
@@ -371,17 +391,19 @@ defmodule Phoenix.Template do
   @doc """
   Compiles a function for each template in the given `root`.
 
-  `converter` is an anonymous function that receives the template path
-  and returns the function name (as a string).
+  `converter` is an anonymous function that receives the template path and
+  returns the function name (as a string).
 
-  For example, to compile all `.eex` templates in a given directory,
-  you might do:
+  For example, to compile all `.eex` templates in a given directory, you might
+  do:
 
-      Phoenix.Template.compile_all(
-        &(&1 |> Path.basename() |> Path.rootname(".eex")),
-        __DIR__,
-        "*.eex"
-      )
+  ```elixir
+  Combo.Template.compile_all(
+    &(&1 |> Path.basename() |> Path.rootname(".eex")),
+    __DIR__,
+    "*.eex"
+  )
+  ```
 
   If the directory has templates named `foo.eex` and `bar.eex`,
   they will be compiled into the functions `foo/1` and `bar/1`
