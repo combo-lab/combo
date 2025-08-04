@@ -836,6 +836,7 @@ defmodule Phoenix.HTML do
   defmacro __using__(opts \\ []) do
     default =
       quote bind_quoted: [opts: opts] do
+        import Phoenix.HTML
         import Phoenix.Template, only: [embed_templates: 1]
         use Phoenix.Template.CEExEngine, opts
       end
