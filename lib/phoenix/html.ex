@@ -638,6 +638,24 @@ defmodule Phoenix.HTML do
   See `Phoenix.Template.CEExEngine.DeclarativeAssigns.slot/3` for more
   information.
 
+  ### Embedded templates
+
+  Declarative API of assigns can be used for embedded templates, too.
+
+  For example:
+
+      defmodule DemoWeb.Components do
+        use Combo.HTML
+
+        embed_templates "pages/*"
+
+        attr :name, :string, required: true
+        def welcome(assigns)
+
+        slot :header
+        def about(assigns)
+      end
+
   ## Dynamic Component Rendering
 
   Sometimes you might need to decide at runtime which component to render.
