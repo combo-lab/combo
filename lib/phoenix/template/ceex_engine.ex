@@ -2,6 +2,12 @@ defmodule Phoenix.Template.CEExEngine do
   @moduledoc """
   The template engine that handles CEEx templates.
 
+  > CEEx is a template language forked from Phoenix's HEEx, which strips out
+  > code related to LiveView, aiming solely at traditional page rendering.
+  >
+  > CEEx stands for "Combo EEx". Maybe the name isn't very descriptive, but
+  > at least it clearly distinguishes itself from HEEx.
+
   ## Features
 
     * syntax checking

@@ -7,12 +7,6 @@ defmodule Phoenix.HTML do
     * `Phoenix.Template`
     * `Phoenix.Template.CEExEngine`
 
-  > CEEx is a template language forked from Phoenix's HEEx, which strips out
-  > code related to LiveView, aiming solely at traditional page rendering.
-  >
-  > CEEx stands for "Combo EEx". Maybe the name isn't very descriptive, but
-  > at least it clearly distinguishes itself from HEEx.
-
   ## Syntax
 
   ### EEx
@@ -28,7 +22,7 @@ defmodule Phoenix.HTML do
       doesn't insert the value.
     * `<%!-- comments --%>` - comment tag, which is removed from the final
       output.
-    * `<%% content %>` - quotation tag, which inserts libteral `<% content %>`.
+    * `<%% content %>` - quotation tag, which inserts literal `<% content %>`.
 
   #### Interpolating blocks
 
@@ -57,21 +51,15 @@ defmodule Phoenix.HTML do
   <% end %>
   ```
 
-  ### `assigns` and `@` symbol
-
-  `assigns` refers to the external data which is available in templates. If we
-  want to pass external data into templates, we put data into `assigns`.
-
-  And, when accessing external data, we can use `assigns` directly, or its
-  syntax sugar `@`.
-
   ### CEEx extensions
 
   #### Curly-interpolation
 
   Besides EEx's intepolation syntax - `<%= expression %>`, CEEx introduces a
   syntax for HTML-aware interpolation - `{expression}`. It can be used within
-  HTML tag attributes and HTML tag content:
+  HTML tag attributes and HTML tag contents.
+
+  ##### Interpolating the value of tag attributes
 
   To interpolate the value of an tag attribute, use `{}` to assign an
   expression to the tag attribute:
@@ -82,7 +70,7 @@ defmodule Phoenix.HTML do
   </div>
   ```
 
-  Additionally, there are values which have special meaning when they are used
+  Additionally, there are values which have special meanings when they are used
   as the values of tag attributes:
 
     * if a value is `true`, the attribute is treated as boolean attribute, and
@@ -91,16 +79,17 @@ defmodule Phoenix.HTML do
 
     * if a value is `false` or `nil`, the attribute is treated as boolean
       attribute, and it won't be rendered at all.
-      For example `<input required={false}>` is rendered as `<input>`.
+      For example, `<input required={false}>` is rendered as `<input>`.
 
     * if a value a list, the attribute's value is built by joining all truthy
       elements in the list with `" "`.
       For example: `<input class={["btn", nil, false, "btn-primary"]}>` is
       rendered as `<input class="btn btn-primary">`.
 
+  ##### Interpolating multiple attributes
+
   To interpolate multiple attributes, use `{}` without assigning expression
-  to any specific attribute. And the expression must be either a keyword list
-  or a map containing the key-value pairs representing the attributes:
+  to any specific attribute:
 
   ```ceex
   <div {expression}>
@@ -108,20 +97,27 @@ defmodule Phoenix.HTML do
   </div>
   ```
 
-  To interpolate tag content:
+  And the `expression` must be either a keyword list or a map containing the
+  key-value pairs representing the attributes.
+
+  ##### Interpolating tag contents
+
+  To interpolate a tag content:
 
   ```ceex
   <p>Hello, {expression}</p>
   ```
 
-  Curly-interpolation is easy to use, but it has some limitations:
+  ##### Limitations
+
+  Curly-interpolation is easy to use, but it has limitations:
 
     * it can't be used inside `<script>` and `<style>` tags, as that would make
       writing JS and CSS quite tedious.
 
     * it doesn't support interpolating blocks, such as `if`, `for` or `case`
       blocks. (But, for conditionals and for-comprehensions, there are built-in
-      support in CEEx, which we will explore when introducing special attributes.)
+      support in CEEx, which we will explained later.)
 
   For these cases, you have to use EEx tags as the workaround. For example:
 
@@ -160,7 +156,7 @@ defmodule Phoenix.HTML do
 
   ##### :if and :for
 
-  It is a syntax sugar for `<%= if ... do %>` and `<%= for ... do %>` that can
+  They are syntax sugar for `<%= if ... do %>` and `<%= for ... do %>`. They can
   be used in HTML tags, components and slots.
 
   ```ceex
@@ -208,12 +204,15 @@ defmodule Phoenix.HTML do
   <table>
   ```
 
-  These syntax sugars is easy to use, but it still has some limitations:
+  These syntax sugars is easy to use, but it still has limitations:
 
     * Unlike Elixir's regular `for`, `:for` does not support multiple
       generators in one expression.
 
   ##### :let
+
+  It's used to yield a value back to the caller of component. They can
+  be used by components and slots.
 
   This is used by components and slots which want to yield a value back to the
   caller. For an example:
@@ -226,6 +225,14 @@ defmodule Phoenix.HTML do
   ```
 
   We'll talk about it when introducing slots.
+
+  ### `assigns` and `@` symbol
+
+  `assigns` refers to the external data which is available in templates. If we
+  want to pass external data into templates, we put data into `assigns`.
+
+  And, when accessing external data, we can use `assigns` directly, or its
+  syntax sugar `@`.
 
   ## Creating templates
 
