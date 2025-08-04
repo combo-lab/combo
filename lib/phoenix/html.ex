@@ -839,17 +839,28 @@ defmodule Phoenix.HTML do
 
   @doc false
   defmacro __using__(opts \\ []) do
-    quote bind_quoted: [opts: opts] do
-      import Phoenix.Template, only: [embed_templates: 1]
-      use Phoenix.Template.CEExEngine, opts
-    end
+    default =
+      quote bind_quoted: [opts: opts] do
+        import Phoenix.Template, only: [embed_templates: 1]
+        use Phoenix.Template.CEExEngine, opts
+      end
+
+    conditional =
+      if __CALLER__.module != Phoenix.HTML.Components do
+        quote do
+          import Phoenix.HTML.Components
+        end
+      end
+
+    [default, conditional]
   end
 
   @doc """
   Marks the given content as raw.
 
-  This means any HTML code inside the given
-  string won't be escaped.
+  This means any HTML code inside the given string won't be escaped.
+
+  ## Examples
 
       iex> raw({:safe, "<hello>"})
       {:safe, "<hello>"}
