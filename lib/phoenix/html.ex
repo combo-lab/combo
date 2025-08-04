@@ -81,11 +81,6 @@ defmodule Phoenix.HTML do
       attribute, and it won't be rendered at all.
       For example, `<input required={false}>` is rendered as `<input>`.
 
-    * if a value a list, the attribute's value is built by joining all truthy
-      elements in the list with `" "`.
-      For example: `<input class={["btn", nil, false, "btn-primary"]}>` is
-      rendered as `<input class="btn btn-primary">`.
-
   ##### Interpolating multiple attributes
 
   To interpolate multiple attributes, use `{}` without assigning expression
@@ -876,4 +871,33 @@ defmodule Phoenix.HTML do
   def raw({:safe, _} = safe), do: safe
   def raw(nil), do: {:safe, ""}
   def raw(value) when is_binary(value) or is_list(value), do: {:safe, value}
+
+  @doc """
+  Merge values in a list as a string, which can be used as the value of
+  attributes.
+
+  This function bulits the final string by by joining all truthy elements in
+  the list with `" "`.
+
+  ## Examples
+
+      iex> ml(["btn", nil, false, "btn-primary"])
+      "btn btn-primary"
+
+      iex> ml(["btn", nil, false, [nil, "btn-primary"]])
+      "btn btn-primary"
+
+  """
+  def ml(list) when is_list(list), do: ml_encode(list)
+
+  defp ml_encode(value) do
+    value
+    |> Enum.flat_map(fn
+      nil -> []
+      false -> []
+      inner when is_list(inner) -> [ml_encode(inner)]
+      other -> [other]
+    end)
+    |> Enum.join(" ")
+  end
 end

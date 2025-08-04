@@ -172,7 +172,7 @@ defmodule Phoenix.HTML.Components do
   end
 
   defp valid_destination!({other, to}, _context) when is_atom(other) do
-    IO.iodata_to_binary([Atom.to_string(other), ?:, to])
+    [Atom.to_string(other), ?:, to]
   end
 
   defp valid_destination!(to, context) do

@@ -76,17 +76,5 @@ defmodule Combo.SafeHTML.Escape do
   def escape_key(value), do: Safe.to_iodata(value)
 
   @doc false
-  def escape_value(value) when is_list(value), do: value |> encode_list() |> Safe.to_iodata()
   def escape_value(value), do: Safe.to_iodata(value)
-
-  defp encode_list(value) do
-    value
-    |> Enum.flat_map(fn
-      nil -> []
-      false -> []
-      inner when is_list(inner) -> [encode_list(inner)]
-      other -> [other]
-    end)
-    |> Enum.join(" ")
-  end
 end

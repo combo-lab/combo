@@ -41,25 +41,6 @@ defmodule Combo.SafeHTMLTest do
                ~s( class="&lt;active&gt;")
     end
 
-    test "value as list" do
-      assert escape_attrs([{:class, ["btn", nil, false, "<active>"]}]) |> IO.iodata_to_binary() ==
-               ~s( class="btn &lt;active&gt;")
-
-      assert escape_attrs([{:style, ["background-color: red;", nil, false, "font-size: 40px;"]}])
-             |> IO.iodata_to_binary() ==
-               ~s( style="background-color: red; font-size: 40px;")
-    end
-
-    test "value as nested list" do
-      assert escape_attrs([{:class, ["btn", nil, false, ["<active>", "small"]]}])
-             |> IO.iodata_to_binary() ==
-               ~s( class="btn &lt;active&gt; small")
-
-      assert escape_attrs([{:class, ["btn", nil, [false, ["<active>", "small"]]]}])
-             |> IO.iodata_to_binary() ==
-               ~s( class="btn &lt;active&gt; small")
-    end
-
     test "suppress value when value is true" do
       assert escape_attrs([{"required", true}]) |> IO.iodata_to_binary() == ~s( required)
       assert escape_attrs([{"selected", true}]) |> IO.iodata_to_binary() == ~s( selected)

@@ -287,13 +287,10 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
         nil_assign: nil,
         unsafe: "<foo>",
         safe: {:safe, "<foo>"},
-        list: ["safe", false, nil, "<unsafe>"],
-        recursive_list: ["safe", false, [nil, "<unsafe>"]],
         global: [
           {"key1", "value1"},
           {"key2", "<value2>"},
           {"key3", {:safe, "<value3>"}},
-          {"key4", ["value4.1", "<value4.2>"]}
         ]
       }
 
@@ -312,16 +309,10 @@ defmodule Phoenix.Template.CEExEngine.CompilerTest do
       template = ~S(<div class={@safe} />)
       assert render(template, assigns) == ~S(<div class="<foo>"></div>)
 
-      template = ~S(<div class={@list} />)
-      assert render(template, assigns) == ~S(<div class="safe &lt;unsafe&gt;"></div>)
-
-      template = ~S(<div class={@recursive_list} />)
-      assert render(template, assigns) == ~S(<div class="safe &lt;unsafe&gt;"></div>)
-
       template = ~S(<div {@global} />)
 
       assert render(template, assigns) ==
-               ~S(<div key1="value1" key2="&lt;value2&gt;" key3="<value3>" key4="value4.1 &lt;value4.2&gt;"></div>)
+               ~S(<div key1="value1" key2="&lt;value2&gt;" key3="<value3>"></div>)
     end
   end
 
