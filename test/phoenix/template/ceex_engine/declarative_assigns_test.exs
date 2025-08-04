@@ -89,9 +89,8 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
     refute DeclarativeAssigns.__global__?("not-global")
 
     # prefixes
-    assert DeclarativeAssigns.__global__?("aria-label")
+    assert DeclarativeAssigns.__global__?("aria-whatever")
     assert DeclarativeAssigns.__global__?("data-whatever")
-    assert DeclarativeAssigns.__global__?("phx-click")
   end
 
   defmodule RemoteFunctionComponentWithAttrs do

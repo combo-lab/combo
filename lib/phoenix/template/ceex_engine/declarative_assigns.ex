@@ -79,18 +79,17 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssigns do
   | `:map`          | any map of any arbitrary types                                       |
   | `:fun`          | any function                                                         |
   | `{:fun, arity}` | any function of arity                                                |
-  | `:global`       | any common HTML attributes, plus those defined by `:global_prefixes` |
   | A struct module | any module that defines a struct with `defstruct/1`                  |
+  | `:global`       | any common HTML attributes, plus those defined by `:global_prefixes` |
 
   Note only `:any` and `:atom` expect the value to be set to `nil`.
 
   ### Options
 
   * `:required` - marks an attribute as required. If a caller does not pass
-    the given attribute, a compile warning is issued.
+    the given attribute, a compile-time warning is issued.
 
-
-  * `:default` - the default value for the attribute if not provided. If this
+  * `:default` - the default value if the attribute if not set. If this
     option is not set and the attribute is not given, accessing the attribute
     will fail unless a value is explicitly set with
     `Phoenix.Template.CEExEngine.Assigns.assign_new/3`.
@@ -347,10 +346,10 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssigns do
   ## Global
 
   @global_prefixes ~w(
-    phx-
-    aria-
     data-
+    aria-
   )
+
   @globals ~w(
     accesskey
     alt
