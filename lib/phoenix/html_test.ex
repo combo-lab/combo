@@ -1,5 +1,13 @@
 defmodule Combo.HTMLTest do
-  @moduledoc false
+  @moduledoc """
+  Provides helpers for testing HTML.
+
+  All these helpers converts different data structure into a tree structure,
+  which represents the essential structure of HTML.
+
+  The tree structure is abbreviated as "x". That's the reason why these helpers
+  are named like this.
+  """
 
   alias Combo.SafeHTML
   alias Combo.HTMLTest.DOM
