@@ -1,4 +1,4 @@
-defmodule Phoenix.Debug do
+defmodule Combo.Debug do
   @moduledoc """
   Functions for runtime introspection and debugging of Phoenix applications.
 
@@ -26,11 +26,11 @@ defmodule Phoenix.Debug do
   For example, when using Phoenix LiveView, the browser establishes a socket
   connection when initially navigating to the page, and each live navigation
   retains the same socket connection. Nested LiveViews also share the same
-  connection, each being a different channel. See `Phoenix.Debug.channels/1`.
+  connection, each being a different channel. See `Combo.Debug.channels/1`.
 
   ## Examples
 
-      iex> Phoenix.Debug.list_sockets()
+      iex> Combo.Debug.list_sockets()
       [%{pid: #PID<0.123.0>, module: Phoenix.LiveView.Socket, id: nil}]
 
   """
@@ -67,7 +67,7 @@ defmodule Phoenix.Debug do
 
   ## Examples
 
-      iex> Phoenix.Debug.list_sockets() |> Enum.at(0) |> Map.fetch!(:pid) |> socket_process?()
+      iex> Combo.Debug.list_sockets() |> Enum.at(0) |> Map.fetch!(:pid) |> socket_process?()
       true
 
       iex> socket_process?(pid(0,456,0))
@@ -110,15 +110,15 @@ defmodule Phoenix.Debug do
 
   ## Examples
 
-      iex> pid = Phoenix.Debug.list_sockets() |> Enum.at(0) |> Map.fetch!(:pid)
-      iex> Phoenix.Debug.list_channels(pid)
+      iex> pid = Combo.Debug.list_sockets() |> Enum.at(0) |> Map.fetch!(:pid)
+      iex> Combo.Debug.list_channels(pid)
       {:ok,
        [
          %{pid: #PID<0.1702.0>, status: :joined, topic: "lv:phx-GDp9a9UZPiTxcgnE"},
          %{pid: #PID<0.1727.0>, status: :joined, topic: "lv:sidebar"}
        ]}
 
-      iex> Phoenix.Debug.list_channels(pid(0,456,0))
+      iex> Combo.Debug.list_channels(pid(0,456,0))
       {:error, :not_alive}
 
   """
@@ -147,8 +147,8 @@ defmodule Phoenix.Debug do
 
   ## Examples
 
-      iex> pid = Phoenix.Debug.list_sockets() |> Enum.at(0) |> Map.fetch!(:pid)
-      iex> {:ok, channels} = Phoenix.Debug.list_channels(pid)
+      iex> pid = Combo.Debug.list_sockets() |> Enum.at(0) |> Map.fetch!(:pid)
+      iex> {:ok, channels} = Combo.Debug.list_channels(pid)
       iex> channels |> Enum.at(0) |> Map.fetch!(:pid) |> socket()
       {:ok, %Combo.Socket{...}}
 

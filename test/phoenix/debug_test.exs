@@ -1,9 +1,9 @@
-defmodule Phoenix.DebugTest do
+defmodule Combo.DebugTest do
   use ExUnit.Case, async: true
 
-  alias Phoenix.Debug
+  alias Combo.Debug
 
-  # we cannot easily test the Phoenix.Debug functions with the regular
+  # we cannot easily test the Combo.Debug functions with the regular
   # Combo.ChannelTest functions, because they use the test process
   # itself as the transport process
   defmodule FakeSocket do
