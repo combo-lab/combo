@@ -31,7 +31,7 @@ defmodule Combo.Router.Resource do
     path    = Combo.Router.Scope.validate_path(path)
     alias   = Keyword.get(options, :alias)
     param   = Keyword.get(options, :param, @default_param_key)
-    name    = Keyword.get(options, :name, Phoenix.Naming.resource_name(controller, "Controller"))
+    name    = Keyword.get(options, :name, Combo.Naming.resource_name(controller, "Controller"))
     as      = Keyword.get(options, :as, name)
     private = Keyword.get(options, :private, %{})
     assigns = Keyword.get(options, :assigns, %{})

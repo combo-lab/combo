@@ -1,6 +1,6 @@
-defmodule Phoenix.NamingTest do
+defmodule Combo.NamingTest do
   use ExUnit.Case, async: true
-  alias Phoenix.Naming
+  alias Combo.Naming
 
   doctest Naming
 

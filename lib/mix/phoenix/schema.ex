@@ -77,7 +77,7 @@ defmodule Mix.Phoenix.Schema do
     otp_app = Mix.Phoenix.otp_app()
     opts = Keyword.merge(Application.get_env(otp_app, :generators, []), opts)
     base = Mix.Phoenix.context_base(ctx_app)
-    basename = Phoenix.Naming.underscore(schema_name)
+    basename = Combo.Naming.underscore(schema_name)
     module = Module.concat([base, schema_name])
     repo = opts[:repo] || Module.concat([base, "Repo"])
     repo_alias = if String.ends_with?(Atom.to_string(repo), ".Repo"), do: "", else: ", as: Repo"
@@ -87,8 +87,8 @@ defmodule Mix.Phoenix.Schema do
     {cli_attrs, uniques, redacts} = extract_attr_flags(cli_attrs)
     {assocs, attrs} = partition_attrs_and_assocs(module, attrs(cli_attrs))
     types = types(attrs)
-    web_namespace = opts[:web] && Phoenix.Naming.camelize(opts[:web])
-    web_path = web_namespace && Phoenix.Naming.underscore(web_namespace)
+    web_namespace = opts[:web] && Combo.Naming.camelize(opts[:web])
+    web_path = web_namespace && Combo.Naming.underscore(web_namespace)
     api_prefix = Application.get_env(otp_app, :generators)[:api_prefix] || "/api"
     embedded? = Keyword.get(opts, :embedded, false)
     generate? = Keyword.get(opts, :schema, true)
@@ -97,7 +97,7 @@ defmodule Mix.Phoenix.Schema do
       module
       |> Module.split()
       |> List.last()
-      |> Phoenix.Naming.underscore()
+      |> Combo.Naming.underscore()
 
     collection = if schema_plural == singular, do: singular <> "_collection", else: schema_plural
     string_attr = string_attr(types)
@@ -134,8 +134,8 @@ defmodule Mix.Phoenix.Schema do
       uniques: uniques,
       redacts: redacts,
       indexes: indexes(table, assocs, uniques),
-      human_singular: Phoenix.Naming.humanize(singular),
-      human_plural: Phoenix.Naming.humanize(schema_plural),
+      human_singular: Combo.Naming.humanize(singular),
+      human_plural: Combo.Naming.humanize(schema_plural),
       binary_id: opts[:binary_id],
       timestamp_type: opts[:timestamp_type] || :naive_datetime,
       migration_defaults: migration_defaults(attrs),
@@ -472,7 +472,7 @@ defmodule Mix.Phoenix.Schema do
       Enum.map(assocs, fn {key_id, {:references, source}} ->
         key = String.replace(Atom.to_string(key_id), "_id", "")
         base = schema_module |> Module.split() |> Enum.drop(-1)
-        module = Module.concat(base ++ [Phoenix.Naming.camelize(key)])
+        module = Module.concat(base ++ [Combo.Naming.camelize(key)])
         {String.to_atom(key), key_id, inspect(module), source}
       end)
 

@@ -37,7 +37,7 @@ defmodule Combo.Router.Scope do
     path = validate_path(path)
     private = Keyword.get(opts, :private, %{})
     assigns = Keyword.get(opts, :assigns, %{})
-    as = Keyword.get_lazy(opts, :as, fn -> Phoenix.Naming.resource_name(plug, "Controller") end)
+    as = Keyword.get_lazy(opts, :as, fn -> Combo.Naming.resource_name(plug, "Controller") end)
     alias? = Keyword.get(opts, :alias, true)
     trailing_slash? = deprecated_trailing_slash(opts, top)
     warn_on_verify? = Keyword.get(opts, :warn_on_verify, false)

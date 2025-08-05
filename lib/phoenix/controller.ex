@@ -1894,7 +1894,7 @@ defmodule Phoenix.Controller do
   @doc false
   def __plugs__(controller_module, opts) do
     if Keyword.get(opts, :put_default_views, true) do
-      base = Phoenix.Naming.unsuffix(controller_module, "Controller")
+      base = Combo.Naming.unsuffix(controller_module, "Controller")
 
       view =
         case Keyword.fetch(opts, :formats) do

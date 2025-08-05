@@ -204,7 +204,7 @@ defmodule Phoenix.MixProject do
     # Combo.Channel
     # Phoenix.Controller
     # Phoenix.Endpoint
-    # Phoenix.Naming
+    # Combo.Naming
     # Phoenix.Logger
     # Combo.Param
     # Combo.Presence

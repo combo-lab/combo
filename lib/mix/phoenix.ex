@@ -104,12 +104,12 @@ defmodule Mix.Phoenix do
   def inflect(singular) do
     base = Mix.Phoenix.base()
     web_module = base |> web_module() |> inspect()
-    scoped = Phoenix.Naming.camelize(singular)
-    path = Phoenix.Naming.underscore(scoped)
+    scoped = Combo.Naming.camelize(singular)
+    path = Combo.Naming.underscore(scoped)
     singular = String.split(path, "/") |> List.last()
     module = Module.concat(base, scoped) |> inspect
     alias = String.split(module, ".") |> List.last()
-    human = Phoenix.Naming.humanize(singular)
+    human = Combo.Naming.humanize(singular)
 
     [
       alias: alias,
@@ -158,7 +158,7 @@ defmodule Mix.Phoenix do
 
   defp app_base(app) do
     case Application.get_env(app, :namespace, app) do
-      ^app -> app |> to_string() |> Phoenix.Naming.camelize()
+      ^app -> app |> to_string() |> Combo.Naming.camelize()
       mod -> mod |> inspect()
     end
   end

@@ -13,6 +13,6 @@
   </.header>
 
   <.list><%= for {k, _} <- schema.attrs do %>
-    <:item title="<%= Phoenix.Naming.humanize(Atom.to_string(k)) %>">{@<%= schema.singular %>.<%= k %>}</:item><% end %>
+    <:item title="<%= Combo.Naming.humanize(Atom.to_string(k)) %>">{@<%= schema.singular %>.<%= k %>}</:item><% end %>
   </.list>
 </Layouts.app>

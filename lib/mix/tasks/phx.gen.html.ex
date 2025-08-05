@@ -304,7 +304,7 @@ defmodule Mix.Tasks.Phx.Gen.Html do
 
   defp default_options({:array, _}), do: []
 
-  defp label(key), do: Phoenix.Naming.humanize(to_string(key))
+  defp label(key), do: Combo.Naming.humanize(to_string(key))
 
   defp scope_assign_route_prefix(
          %{scope: %{route_prefix: route_prefix, assign_key: assign_key}} = schema

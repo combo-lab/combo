@@ -32,7 +32,7 @@ defmodule Mix.Phoenix.Context do
     base = Module.concat([Mix.Phoenix.context_base(ctx_app)])
     module = Module.concat(base, context_name)
     alias = Module.concat([module |> Module.split() |> List.last()])
-    basedir = Phoenix.Naming.underscore(context_name)
+    basedir = Combo.Naming.underscore(context_name)
     basename = Path.basename(basedir)
     dir = Mix.Phoenix.context_lib_path(ctx_app, basedir)
     file = dir <> ".ex"

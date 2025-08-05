@@ -255,7 +255,7 @@ defmodule Mix.Tasks.Phx.Gen.Auth do
   defp web_app_name(%Context{} = context) do
     context.web_module
     |> inspect()
-    |> Phoenix.Naming.underscore()
+    |> Combo.Naming.underscore()
   end
 
   defp validate_args!([_, _, _]), do: :ok

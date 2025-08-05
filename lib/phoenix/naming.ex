@@ -1,4 +1,4 @@
-defmodule Phoenix.Naming do
+defmodule Combo.Naming do
   @moduledoc """
   Conveniences for inflecting and working with names in Phoenix.
   """
@@ -8,10 +8,10 @@ defmodule Phoenix.Naming do
 
   ## Examples
 
-      iex> Phoenix.Naming.resource_name(MyApp.User)
+      iex> Combo.Naming.resource_name(MyApp.User)
       "user"
 
-      iex> Phoenix.Naming.resource_name(MyApp.UserView, "View")
+      iex> Combo.Naming.resource_name(MyApp.UserView, "View")
       "user"
 
   """
@@ -30,10 +30,10 @@ defmodule Phoenix.Naming do
 
   ## Examples
 
-      iex> Phoenix.Naming.unsuffix("MyApp.User", "View")
+      iex> Combo.Naming.unsuffix("MyApp.User", "View")
       "MyApp.User"
 
-      iex> Phoenix.Naming.unsuffix("MyApp.UserView", "View")
+      iex> Combo.Naming.unsuffix("MyApp.UserView", "View")
       "MyApp.User"
 
   """
@@ -53,14 +53,14 @@ defmodule Phoenix.Naming do
 
   ## Examples
 
-      iex> Phoenix.Naming.underscore("MyApp")
+      iex> Combo.Naming.underscore("MyApp")
       "my_app"
 
   In general, `underscore` can be thought of as the reverse of
   `camelize`, however, in some cases formatting may be lost:
 
-      Phoenix.Naming.underscore "SAPExample"  #=> "sap_example"
-      Phoenix.Naming.camelize   "sap_example" #=> "SapExample"
+      Combo.Naming.underscore "SAPExample"  #=> "sap_example"
+      Combo.Naming.camelize   "sap_example" #=> "SapExample"
 
   """
   @spec underscore(String.t) :: String.t
@@ -77,17 +77,17 @@ defmodule Phoenix.Naming do
 
   ## Examples
 
-      iex> Phoenix.Naming.camelize("my_app")
+      iex> Combo.Naming.camelize("my_app")
       "MyApp"
 
-      iex> Phoenix.Naming.camelize("my_app", :lower)
+      iex> Combo.Naming.camelize("my_app", :lower)
       "myApp"
 
   In general, `camelize` can be thought of as the reverse of
   `underscore`, however, in some cases formatting may be lost:
 
-      Phoenix.Naming.underscore "SAPExample"  #=> "sap_example"
-      Phoenix.Naming.camelize   "sap_example" #=> "SapExample"
+      Combo.Naming.underscore "SAPExample"  #=> "sap_example"
+      Combo.Naming.camelize   "sap_example" #=> "SapExample"
 
   """
   @spec camelize(String.t) :: String.t
@@ -108,11 +108,11 @@ defmodule Phoenix.Naming do
 
   ## Examples
 
-      iex> Phoenix.Naming.humanize(:username)
+      iex> Combo.Naming.humanize(:username)
       "Username"
-      iex> Phoenix.Naming.humanize(:created_at)
+      iex> Combo.Naming.humanize(:created_at)
       "Created at"
-      iex> Phoenix.Naming.humanize("user_id")
+      iex> Combo.Naming.humanize("user_id")
       "User"
 
   """

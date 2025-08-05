@@ -262,7 +262,7 @@ defmodule Mix.Tasks.Phx.Gen.Schema do
     cond do
       not Schema.valid?(schema) ->
         help.raise_with_help "Expected the schema argument, #{inspect schema}, to be a valid module name"
-      String.contains?(plural, ":") or plural != Phoenix.Naming.underscore(plural) ->
+      String.contains?(plural, ":") or plural != Combo.Naming.underscore(plural) ->
         help.raise_with_help "Expected the plural argument, #{inspect plural}, to be all lowercase using snake_case convention"
       true ->
         args
