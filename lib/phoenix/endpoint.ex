@@ -1,66 +1,59 @@
 defmodule Combo.Endpoint do
   @moduledoc ~S"""
-  Defines a Phoenix endpoint.
+  Defines an endpoint.
 
-  The endpoint is the boundary where all requests to your
-  web application start. It is also the interface your
-  application provides to the underlying web servers.
+  The endpoint is the boundary where all requests to a web application start.
+  It is also the interface a application provides to the underlying web servers.
 
   Overall, an endpoint has three responsibilities:
 
-    * to provide a wrapper for starting and stopping the
-      endpoint as part of a supervision tree
+    * to provide a wrapper for starting and stopping the endpoint as part of
+      a supervision tree
 
-    * to define an initial plug pipeline for requests
-      to pass through
+    * to define an initial plug pipeline for requests to pass through
 
-    * to host web specific configuration for your
-      application
+    * to host web specific configuration for your application
 
   ## Endpoints
 
-  An endpoint is simply a module defined with the help
-  of `Combo.Endpoint`. If you have used the `mix phx.new`
-  generator, an endpoint was automatically generated as
-  part of your application:
+  An endpoint is a module defined with the help of `Combo.Endpoint`.
 
-      defmodule YourAppWeb.Endpoint do
+      defmodule DemoWeb.Endpoint do
         use Combo.Endpoint, otp_app: :your_app
 
         # plug ...
         # plug ...
 
-        plug YourApp.Router
+        plug DemoWeb.Router
       end
 
-  Endpoints must be explicitly started as part of your application
-  supervision tree. Endpoints are added by default
-  to the supervision tree in generated applications. Endpoints can be
-  added to the supervision tree as follows:
+  Endpoints can be added to the supervision tree as following:
 
       children = [
-        YourAppWeb.Endpoint
+        DemoWeb.Endpoint
       ]
 
   ## Endpoint configuration
 
-  All endpoints are configured in your application environment.
-  For example:
+  Endpoints are configured in your application environment. For example:
 
-      config :your_app, YourAppWeb.Endpoint,
+      config :demo, DemoWeb.Endpoint,
         secret_key_base: "kjoy3o1zeidquwy1398juxzldjlksahdk3"
 
-  Endpoint configuration is split into two categories. Compile-time
-  configuration means the configuration is read during compilation
-  and changing it at runtime has no effect. The compile-time
-  configuration is mostly related to error handling.
+  Endpoint configuration is split into two categories:
 
-  Runtime configuration, instead, is accessed during or
-  after your application is started and can be read through the
-  `c:config/2` function:
+    * Compile-time configuration
+    * Runtime configuretion
 
-      YourAppWeb.Endpoint.config(:port)
-      YourAppWeb.Endpoint.config(:some_config, :default_value)
+  Compile-time configuration means the configuration is read during compilation
+  and changing it at runtime has no effect. The compile-time configuration is
+  mostly related to error handling.
+
+  Runtime configuration, instead, is read during or after your application is
+  started and can be read through the `c:config/2` function:
+
+      DemoWeb.Endpoint.config(:port)
+      DemoWeb.Endpoint.config(:some_config, :default_value)
 
   ### Compile-time configuration
 
@@ -96,7 +89,7 @@ defmodule Combo.Endpoint do
   and so on, as well as on `config/runtime.exs`. Typically, if you need to
   configure them with system environment variables, you set them in
   `config/runtime.exs`. These options may also be set when starting the
-  endpoint in your supervision tree, such as `{MyApp.Endpoint, options}`.
+  endpoint in your supervision tree, such as `{DemoWeb.Endpoint, options}`.
 
     * `:adapter` - which webserver adapter to use for serving web requests.
       See the "Adapter configuration" section below
@@ -104,14 +97,13 @@ defmodule Combo.Endpoint do
     * `:cache_static_manifest` - a path to a json manifest file that contains
       static files and their digested version. This is typically set to
       "priv/static/cache_manifest.json" which is the file automatically generated
-      by `mix phx.digest`. It can be either: a string containing a file system path
+      by `mix combo.digest`. It can be either: a string containing a file system path
       or a tuple containing the application name and the path within that application.
 
     * `:cache_static_manifest_latest` - a map of the static files pointing to their
       digest version. This is automatically loaded from `cache_static_manifest` on
       boot. However, if you have your own static handling mechanism, you may want to
-      set this value explicitly. This is used by projects such as `LiveView` to
-      detect if the client is running on the latest version of all assets.
+      set this value explicitly.
 
     * `:cache_manifest_skip_vsn` - when true, skips the appended query string
       "?vsn=d" when generating paths to static assets. This query string is used
@@ -144,7 +136,7 @@ defmodule Combo.Endpoint do
 
       The `:scheme` option accepts `"http"` and `"https"` values. Default value
       is inferred from top level `:http` or `:https` option. It is useful
-      when hosting Phoenix behind a load balancer or reverse proxy and
+      when hosting Combo behind a load balancer or reverse proxy and
       terminating SSL there.
 
       The `:path` option can be used to override root path. Useful when hosting
@@ -172,19 +164,20 @@ defmodule Combo.Endpoint do
             ]
           ]
 
-      The `:cd` and `:env` options can be given at the end of the list to customize
-      the watcher:
+      The `:cd` and `:env` options can be given at the end of the list to
+      customize the watcher:
 
-          [node: [..., cd: "assets", env: [{"TAILWIND_MODE", "watch"}]]]
+          [node: [..., cd: "assets", env: [{"BUILD_MODE", "debug"}]]]
 
-      A watcher can also be a module-function-args tuple that will be invoked accordingly:
+      A watcher can also be a module-function-args tuple that will be invoked
+      accordingly:
 
           [another: {Mod, :fun, [arg1, arg2]}]
 
       When `false`, watchers can be disabled.
 
-    * `:force_watchers` - when `true`, forces your watchers to start
-      even when the `:server` option is set to `false`.
+    * `:force_watchers` - when `true`, forces your watchers to start even when
+      the `:server` option is set to `false`.
 
     * `:live_reload` - configuration for the live reload option.
       Configuration requires a `:patterns` option which should be a list of
@@ -194,8 +187,8 @@ defmodule Combo.Endpoint do
             url: "ws://localhost:4000",
             patterns: [
               ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$",
-              ~r"lib/app_web/(live|views)/.*(ex)$",
-              ~r"lib/app_web/templates/.*(eex)$"
+              ~r"lib/demo_web/.*(ex)$",
+              ~r"lib/demo_web/templates/.*(eex)$"
             ]
           ]
 
@@ -210,14 +203,11 @@ defmodule Combo.Endpoint do
       A `:formats` list can be provided to specify a module per format to handle
       error rendering. Example:
 
-          [formats: [html: MyApp.ErrorHTML], layout: false, log: :debug]
+          [formats: [html: DemoWeb.ErrorHTML], layout: false, log: :debug]
 
     * `:log_access_url` - log the access url once the server boots
 
   Note that you can also store your own configurations in the Combo.Endpoint.
-  For example, [Phoenix LiveView](https://hexdocs.pm/phoenix_live_view) expects
-  its own configuration under the `:live_view` key. In such cases, you should
-  consult the documentation of the respective projects.
 
   ### Adapter configuration
 

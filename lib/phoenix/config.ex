@@ -1,16 +1,15 @@
 defmodule Combo.Config do
-  # Handles Phoenix configuration.
+  # Handles configuration.
   #
-  # This module is private to Phoenix and should not be accessed
-  # directly. The Phoenix endpoint configuration can be accessed
-  # at runtime using the `config/2` function.
+  # This module is private and should not be accessed directly. The endpoint
+  # configuration can be accessed at runtime using the `config/2` function.
   @moduledoc false
 
   require Logger
   use GenServer
 
   @doc """
-  Starts a Phoenix configuration handler.
+  Starts a configuration handler.
   """
   def start_link({module, config, defaults, opts}) do
     permanent = Keyword.keys(defaults)
@@ -35,14 +34,14 @@ defmodule Combo.Config do
   end
 
   @doc """
-  Caches a value in Phoenix configuration handler for the module.
+  Caches a value in configuration handler for the module.
 
-  The given function needs to return a tuple with `:cache` if the
-  value should be cached or `:nocache` if the value should not be
-  cached because it can be consequently considered stale.
+  The given function needs to return a tuple with `:cache` if the value should
+  be cached or `:nocache` if the value should not be cached because it can be
+  consequently considered stale.
 
-  Notice writes are not serialized to the server, we expect the
-  function that generates the cache to be idempotent.
+  Notice writes are not serialized to the server, we expect the function that
+  generates the cache to be idempotent.
   """
   @spec cache(module, term, (module -> {:cache | :nocache, term})) :: term
   def cache(module, key, fun) do
@@ -52,7 +51,11 @@ defmodule Combo.Config do
       e ->
         case :ets.info(module) do
           :undefined ->
-            raise "could not find ets table for endpoint #{inspect(module)}. Make sure your endpoint is started and note you cannot access endpoint functions at compile-time"
+            raise """
+            could not find ets table for endpoint #{inspect(module)}. \
+            Make sure your endpoint is started and note you cannot access endpoint functions \
+            at compile-time\
+            """
 
           _ ->
             reraise e, __STACKTRACE__
@@ -118,18 +121,16 @@ defmodule Combo.Config do
   @doc """
   Changes the configuration for the given module.
 
-  It receives a keyword list with changed config and another
-  with removed ones. The changed config are updated while the
-  removed ones stop the configuration server, effectively removing
-  the table.
+  It receives a keyword list with changed config and another with removed ones.
+  The changed config are updated while the removed ones stop the configuration
+  server, effectively removing the table.
   """
   def config_change(module, changed, removed) do
     pid = :ets.lookup_element(module, :__config__, 2)
     GenServer.call(pid, {:config_change, changed, removed})
   end
 
-  # Callbacks
-
+  @impl true
   def init({module, config, permanent}) do
     :ets.new(module, [:named_table, :public, read_concurrency: true])
     update(module, config, [])
@@ -137,11 +138,13 @@ defmodule Combo.Config do
     {:ok, {module, [:__config__ | permanent]}}
   end
 
+  @impl true
   def handle_call({:permanent, key, value}, _from, {module, permanent}) do
     :ets.insert(module, {key, value})
     {:reply, :ok, {module, [key | permanent]}}
   end
 
+  @impl true
   def handle_call({:config_change, changed, removed}, _from, {module, permanent}) do
     cond do
       changed = changed[module] ->

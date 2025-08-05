@@ -1,6 +1,6 @@
 defmodule Combo.Channel do
   @moduledoc ~S"""
-  Defines a Phoenix Channel.
+  Defines a channel.
 
   Channels provide a means for bidirectional communication from clients that
   integrate with the `Phoenix.PubSub` layer for soft-realtime functionality.
