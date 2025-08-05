@@ -1,4 +1,4 @@
-defmodule Phoenix.Presence do
+defmodule Combo.Presence do
   @moduledoc """
   Provides Presence tracking to processes and channels.
 
@@ -10,7 +10,7 @@ defmodule Phoenix.Presence do
   broadcast presence updates.
 
   In case you want to use only a subset of the functionality
-  provided by `Phoenix.Presence`, such as tracking processes
+  provided by `Combo.Presence`, such as tracking processes
   but without broadcasting updates, we recommend that you look
   at the `Phoenix.Tracker` functionality from the `phoenix_pubsub`
   project.
@@ -18,11 +18,11 @@ defmodule Phoenix.Presence do
   ## Example Usage
 
   Start by defining a presence module within your application
-  which uses `Phoenix.Presence` and provide the `:otp_app` which
+  which uses `Combo.Presence` and provide the `:otp_app` which
   holds your configuration, as well as the `:pubsub_server`.
 
       defmodule MyAppWeb.Presence do
-        use Phoenix.Presence,
+        use Combo.Presence,
           otp_app: :my_app,
           pubsub_server: MyApp.PubSub
       end
@@ -132,7 +132,7 @@ defmodule Phoenix.Presence do
   about users joining and leaving:
 
       defmodule MyApp.Presence do
-        use Phoenix.Presence,
+        use Combo.Presence,
           otp_app: :my_app,
           pubsub_server: MyApp.PubSub
 
@@ -351,11 +351,11 @@ defmodule Phoenix.Presence do
 
   defmacro __using__(opts) do
     quote location: :keep, bind_quoted: [opts: opts] do
-      @behaviour Phoenix.Presence
+      @behaviour Combo.Presence
       @opts opts
       @task_supervisor Module.concat(__MODULE__, "TaskSupervisor")
 
-      _ = opts[:otp_app] || raise "use Phoenix.Presence expects :otp_app to be given"
+      _ = opts[:otp_app] || raise "use Combo.Presence expects :otp_app to be given"
 
       # User defined
       def fetch(_topic, presences), do: presences
@@ -368,7 +368,7 @@ defmodule Phoenix.Presence do
 
         %{
           id: __MODULE__,
-          start: {Phoenix.Presence, :start_link, [__MODULE__, @task_supervisor, opts]},
+          start: {Combo.Presence, :start_link, [__MODULE__, @task_supervisor, opts]},
           type: :supervisor
         }
       end
@@ -400,10 +400,10 @@ defmodule Phoenix.Presence do
       end
 
       def list(%Combo.Socket{topic: topic}), do: list(topic)
-      def list(topic), do: Phoenix.Presence.list(__MODULE__, topic)
+      def list(topic), do: Combo.Presence.list(__MODULE__, topic)
 
       def get_by_key(%Combo.Socket{topic: topic}, key), do: get_by_key(topic, key)
-      def get_by_key(topic, key), do: Phoenix.Presence.get_by_key(__MODULE__, topic, key)
+      def get_by_key(topic, key), do: Combo.Presence.get_by_key(__MODULE__, topic, key)
 
       def fetchers_pids(), do: Task.Supervisor.children(@task_supervisor)
     end
@@ -415,7 +415,7 @@ defmodule Phoenix.Presence do
 
     def start_link({module, task_supervisor, opts}) do
       pubsub_server =
-        opts[:pubsub_server] || raise "use Phoenix.Presence expects :pubsub_server to be given"
+        opts[:pubsub_server] || raise "use Combo.Presence expects :pubsub_server to be given"
 
       Phoenix.Tracker.start_link(
         __MODULE__,
@@ -424,12 +424,12 @@ defmodule Phoenix.Presence do
       )
     end
 
-    def init(state), do: Phoenix.Presence.init(state)
+    def init(state), do: Combo.Presence.init(state)
 
-    def handle_diff(diff, state), do: Phoenix.Presence.handle_diff(diff, state)
+    def handle_diff(diff, state), do: Combo.Presence.handle_diff(diff, state)
 
     def handle_info(msg, state),
-      do: Phoenix.Presence.handle_info(msg, state)
+      do: Combo.Presence.handle_info(msg, state)
   end
 
   @doc false
@@ -606,8 +606,8 @@ defmodule Phoenix.Presence do
       Task.Supervisor.async(state.task_supervisor, fn ->
         computed_diffs =
           Enum.map(diff, fn {topic, {joins, leaves}} ->
-            joins = module.fetch(topic, Phoenix.Presence.group(joins))
-            leaves = module.fetch(topic, Phoenix.Presence.group(leaves))
+            joins = module.fetch(topic, Combo.Presence.group(joins))
+            leaves = module.fetch(topic, Combo.Presence.group(leaves))
             {topic, %{joins: joins, leaves: leaves}}
           end)
 

@@ -207,7 +207,7 @@ defmodule Phoenix.MixProject do
     # Phoenix.Naming
     # Phoenix.Logger
     # Phoenix.Param
-    # Phoenix.Presence
+    # Combo.Presence
     # Combo.Router
     # Combo.Socket
     # Combo.Token

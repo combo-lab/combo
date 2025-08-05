@@ -1,13 +1,13 @@
-defmodule Phoenix.PresenceTest do
+defmodule Combo.PresenceTest do
   use ExUnit.Case, async: true
   alias Combo.Socket.Broadcast
 
   defmodule DefaultPresence do
-    use Phoenix.Presence, otp_app: :phoenix
+    use Combo.Presence, otp_app: :phoenix
   end
 
   defmodule MyPresence do
-    use Phoenix.Presence, otp_app: :phoenix
+    use Combo.Presence, otp_app: :phoenix
 
     def fetch(_topic, entries) do
       for {key, %{metas: metas}} <- entries, into: %{} do
@@ -17,7 +17,7 @@ defmodule Phoenix.PresenceTest do
   end
 
   defmodule MetasPresence do
-    use Phoenix.Presence, otp_app: :phoenix
+    use Combo.Presence, otp_app: :phoenix
 
     def init(state), do: {:ok, state}
 
@@ -28,10 +28,10 @@ defmodule Phoenix.PresenceTest do
   end
 
   defmodule MetasMissingInitPresence do
-    use Phoenix.Presence, otp_app: :phoenix
+    use Combo.Presence, otp_app: :phoenix
 
     def init_presence do
-      Phoenix.Presence.init({
+      Combo.Presence.init({
         __MODULE__,
         __MODULE__.TaskSupervisor,
         PresPub
@@ -61,10 +61,10 @@ defmodule Phoenix.PresenceTest do
     assert DefaultPresence.child_spec([]) == %{
              id: DefaultPresence,
              start:
-               {Phoenix.Presence, :start_link,
+               {Combo.Presence, :start_link,
                 [
-                  Phoenix.PresenceTest.DefaultPresence,
-                  Phoenix.PresenceTest.DefaultPresence.TaskSupervisor,
+                  Combo.PresenceTest.DefaultPresence,
+                  Combo.PresenceTest.DefaultPresence.TaskSupervisor,
                   [otp_app: :phoenix]
                 ]},
              type: :supervisor
@@ -251,7 +251,7 @@ defmodule Phoenix.PresenceTest do
   describe "Presence behaviour when handle_metas is defined" do
     test "raises when missing init/1" do
       assert_raise ArgumentError,
-                   ~r|missing Phoenix.PresenceTest.MetasMissingInitPresence.init/1 callback for client state|,
+                   ~r|missing Combo.PresenceTest.MetasMissingInitPresence.init/1 callback for client state|,
                    fn ->
                      MetasMissingInitPresence.init_presence()
                    end

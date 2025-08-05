@@ -15,7 +15,7 @@ defmodule Mix.Tasks.Phx.Gen.PresenceTest do
 
       assert_file("lib/phoenix_web/channels/my_presence.ex", fn file ->
         assert file =~ ~S|defmodule PhoenixWeb.MyPresence do|
-        assert file =~ ~S|use Phoenix.Presence|
+        assert file =~ ~S|use Combo.Presence|
         assert file =~ ~S|otp_app: :phoenix|
         assert file =~ ~S|pubsub_server: Phoenix.PubSub|
       end)
@@ -28,7 +28,7 @@ defmodule Mix.Tasks.Phx.Gen.PresenceTest do
 
       assert_file("lib/phoenix_web/channels/presence.ex", fn file ->
         assert file =~ ~S|defmodule PhoenixWeb.Presence do|
-        assert file =~ ~S|use Phoenix.Presence|
+        assert file =~ ~S|use Combo.Presence|
         assert file =~ ~S|otp_app: :phoenix|
         assert file =~ ~S|pubsub_server: Phoenix.PubSub|
       end)
@@ -41,7 +41,7 @@ defmodule Mix.Tasks.Phx.Gen.PresenceTest do
       Mix.Tasks.Phx.Gen.Presence.run([])
       assert_file("lib/phoenix/channels/presence.ex", fn file ->
         assert file =~ ~S|defmodule PhoenixWeb.Presence do|
-        assert file =~ ~S|use Phoenix.Presence|
+        assert file =~ ~S|use Combo.Presence|
         assert file =~ ~S|otp_app: :phoenix|
         assert file =~ ~S|pubsub_server: AnotherApp.PubSub|
       end)

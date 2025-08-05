@@ -34,14 +34,14 @@ in lib/hello/application.ex:
       HelloWeb.Presence,
     ]
 
-You're all set! See the Phoenix.Presence docs for more details:
-https://hexdocs.pm/phoenix/Phoenix.Presence.html
+You're all set! See the Combo.Presence docs for more details:
+https://hexdocs.pm/phoenix/Combo.Presence.html
 ```
 
 If we open up the `lib/hello_web/channels/presence.ex` file, we will see the following line:
 
 ```elixir
-use Phoenix.Presence,
+use Combo.Presence,
   otp_app: :hello,
   pubsub_server: Hello.PubSub
 ```

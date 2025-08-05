@@ -58,8 +58,8 @@ defmodule Mix.Tasks.Phx.Gen.Presence do
           #{binding[:module]}
         ]
 
-    You're all set! See the Phoenix.Presence docs for more details:
-    https://hexdocs.pm/phoenix/Phoenix.Presence.html
+    You're all set! See the Combo.Presence docs for more details:
+    https://hexdocs.pm/phoenix/Combo.Presence.html
     """)
   end
 
