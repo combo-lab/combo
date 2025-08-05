@@ -210,7 +210,7 @@ defmodule Combo.Router.Helpers do
         defp to_param(bin) when is_binary(bin), do: bin
         defp to_param(false), do: "false"
         defp to_param(true), do: "true"
-        defp to_param(data), do: Phoenix.Param.to_param(data)
+        defp to_param(data), do: Combo.Param.to_param(data)
 
         defp segments(segments, [], _reserved, trailing_slash?, _opts) do
           maybe_append_slash(segments, trailing_slash?)

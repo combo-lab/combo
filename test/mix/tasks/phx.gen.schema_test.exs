@@ -412,7 +412,7 @@ defmodule Mix.Tasks.Phx.Gen.SchemaTest do
       )
 
       assert_file("lib/phoenix/blog/post.ex", fn file ->
-        assert file =~ "@derive {Phoenix.Param, key: :post_id}"
+        assert file =~ "@derive {Combo.Param, key: :post_id}"
         assert file =~ "@primary_key {:post_id, :binary_id, autogenerate: true}"
         assert file =~ "field :user_id, :binary_id"
       end)

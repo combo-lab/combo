@@ -153,7 +153,7 @@ defmodule Phoenix.Integration.CodeGeneration.AppWithScopesTest do
           import Ecto.Changeset
           alias Scopes.Accounts.User
 
-          @derive {Phoenix.Param, key: :slug}
+          @derive {Combo.Param, key: :slug}
           schema "organizations" do
             field :name, :string
             field :slug, :string

@@ -3,7 +3,7 @@ defmodule <%= inspect schema.module %> do
   import Ecto.Changeset
 <%= if schema.prefix do %>
   @schema_prefix :<%= schema.prefix %><% end %><%= if schema.opts[:primary_key] do %>
-  @derive {Phoenix.Param, key: :<%= schema.opts[:primary_key] %>}<% end %><%= if schema.binary_id do %>
+  @derive {Combo.Param, key: :<%= schema.opts[:primary_key] %>}<% end %><%= if schema.binary_id do %>
   @primary_key {:<%= primary_key %>, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id<% else %><%= if schema.opts[:primary_key] do %>
   @primary_key {:<%= schema.opts[:primary_key] %>, :id, autogenerate: true}<% end %><% end %>

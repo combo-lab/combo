@@ -36,7 +36,7 @@ defmodule Combo.VerifiedRoutesTest do
   use ExUnit.Case, async: true
   import Plug.Test
 
-  @derive {Phoenix.Param, key: :slug}
+  @derive {Combo.Param, key: :slug}
   defstruct [:id, :slug]
 
   defmodule AdminRouter do
@@ -138,7 +138,7 @@ defmodule Combo.VerifiedRoutesTest do
     assert ~p"/posts/1?foo=bar" == "/posts/1?foo=bar"
   end
 
-  test "~p with dynamic string uses Phoenix.Param" do
+  test "~p with dynamic string uses Combo.Param" do
     struct = %__MODULE__{id: 123, slug: "post-123"}
     assert ~p"/posts/#{struct}" == "/posts/post-123"
     assert ~p"/posts/#{123}" == "/posts/123"

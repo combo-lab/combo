@@ -1,4 +1,4 @@
-defprotocol Phoenix.Param do
+defprotocol Combo.Param do
   @moduledoc ~S"""
   A protocol that converts data structures into URL parameters.
 
@@ -24,7 +24,7 @@ defprotocol Phoenix.Param do
   In order to customize the parameter for any struct,
   one can simply implement this protocol. For example for a `Date` struct:
 
-      defimpl Phoenix.Param, for: Date do
+      defimpl Combo.Param, for: Date do
         def to_param(date) do
           Date.to_string(date)
         end
@@ -34,7 +34,7 @@ defprotocol Phoenix.Param do
   derivable. For example:
 
       defmodule User do
-        @derive Phoenix.Param
+        @derive Combo.Param
         defstruct [:id, :username]
       end
 
@@ -43,7 +43,7 @@ defprotocol Phoenix.Param do
   `:id` key, the key can be specified with an option:
 
       defmodule User do
-        @derive {Phoenix.Param, key: :username}
+        @derive {Combo.Param, key: :username}
         defstruct [:username]
       end
 
@@ -52,7 +52,7 @@ defprotocol Phoenix.Param do
   When using Ecto, you must call `@derive` before
   your `schema` call:
 
-      @derive {Phoenix.Param, key: :username}
+      @derive {Combo.Param, key: :username}
       schema "users" do
 
   """
@@ -63,19 +63,19 @@ defprotocol Phoenix.Param do
   def to_param(term)
 end
 
-defimpl Phoenix.Param, for: Integer do
+defimpl Combo.Param, for: Integer do
   def to_param(int), do: Integer.to_string(int)
 end
 
-defimpl Phoenix.Param, for: Float do
+defimpl Combo.Param, for: Float do
   def to_param(float), do: Float.to_string(float)
 end
 
-defimpl Phoenix.Param, for: BitString do
+defimpl Combo.Param, for: BitString do
   def to_param(bin) when is_binary(bin), do: bin
 end
 
-defimpl Phoenix.Param, for: Atom do
+defimpl Combo.Param, for: Atom do
   def to_param(nil) do
     raise ArgumentError, "cannot convert nil to param"
   end
@@ -85,26 +85,26 @@ defimpl Phoenix.Param, for: Atom do
   end
 end
 
-defimpl Phoenix.Param, for: Map do
+defimpl Combo.Param, for: Map do
   def to_param(map) do
     raise ArgumentError,
           "maps cannot be converted to_param. A struct was expected, got: #{inspect(map)}"
   end
 end
 
-defimpl Phoenix.Param, for: Any do
+defimpl Combo.Param, for: Any do
   defmacro __deriving__(module, struct, options) do
     key = Keyword.get(options, :key, :id)
 
     unless Map.has_key?(struct, key) do
       raise ArgumentError,
-            "cannot derive Phoenix.Param for struct #{inspect(module)} " <>
+            "cannot derive Combo.Param for struct #{inspect(module)} " <>
               "because it does not have key #{inspect(key)}. Please pass " <>
               "the :key option when deriving"
     end
 
     quote do
-      defimpl Phoenix.Param, for: unquote(module) do
+      defimpl Combo.Param, for: unquote(module) do
         def to_param(%{unquote(key) => nil}) do
           raise ArgumentError,
                 "cannot convert #{inspect(unquote(module))} to param, " <>
@@ -113,7 +113,7 @@ defimpl Phoenix.Param, for: Any do
 
         def to_param(%{unquote(key) => key}) when is_integer(key), do: Integer.to_string(key)
         def to_param(%{unquote(key) => key}) when is_binary(key), do: key
-        def to_param(%{unquote(key) => key}), do: Phoenix.Param.to_param(key)
+        def to_param(%{unquote(key) => key}), do: Combo.Param.to_param(key)
       end
     end
   end
@@ -124,12 +124,12 @@ defimpl Phoenix.Param, for: Any do
 
   def to_param(%{id: id}) when is_integer(id), do: Integer.to_string(id)
   def to_param(%{id: id}) when is_binary(id), do: id
-  def to_param(%{id: id}), do: Phoenix.Param.to_param(id)
+  def to_param(%{id: id}), do: Combo.Param.to_param(id)
 
   def to_param(map) when is_map(map) do
     raise ArgumentError,
           "structs expect an :id key when converting to_param or a custom implementation " <>
-            "of the Phoenix.Param protocol (read Phoenix.Param docs for more information), " <>
+            "of the Combo.Param protocol (read Combo.Param docs for more information), " <>
             "got: #{inspect(map)}"
   end
 

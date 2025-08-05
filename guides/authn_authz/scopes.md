@@ -202,7 +202,7 @@ In this example, the scope is called `user` and it is the `default` scope that i
 
 * `route_prefix` - (optional) a path template string for how resources should be nested. For example, `/orgs/:org` would generate routes like `/orgs/:org/posts`. The parameter segment (`:org`) will be replaced with the appropriate scope access value in templates and LiveViews.
 
-* `route_access_path` - (optional) list of keys that define the path to the field used in route generation (if `route_prefix` is set). This is particularly useful for user-friendly URLs where you might want to use a slug instead of an ID. If not specified, it defaults to `Enum.drop(scope.access_path, -1)` or `access_path` if the former is empty. For example, if the `access_path` is `[:organization, :id]`, it defaults to `[:organization]`, assuming that the value at `scope.organization` implements the `Phoenix.Param` protocol.
+* `route_access_path` - (optional) list of keys that define the path to the field used in route generation (if `route_prefix` is set). This is particularly useful for user-friendly URLs where you might want to use a slug instead of an ID. If not specified, it defaults to `Enum.drop(scope.access_path, -1)` or `access_path` if the former is empty. For example, if the `access_path` is `[:organization, :id]`, it defaults to `[:organization]`, assuming that the value at `scope.organization` implements the `Combo.Param` protocol.
 
 * `schema_key` - the foreign key that ties the resource to the scope. New scoped schemas are created with a foreign key field named `schema_key` of type `schema_type` to the `schema_table` table.
 
@@ -327,7 +327,7 @@ defmodule MyApp.Accounts.Organization do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @derive {Phoenix.Param, key: :slug}
+  @derive {Combo.Param, key: :slug}
   schema "organizations" do
     field :name, :string
     field :slug, :string

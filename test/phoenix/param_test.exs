@@ -1,7 +1,7 @@
-defmodule Phoenix.ParamTest do
+defmodule Combo.ParamTest do
   use ExUnit.Case, async: true
 
-  import Phoenix.Param
+  import Combo.Param
 
   test "to_param for integers" do
     assert to_param(1) == "1"
@@ -38,29 +38,29 @@ defmodule Phoenix.ParamTest do
   end
 
   test "to_param for derivable structs without id" do
-    msg = ~r"cannot derive Phoenix.Param for struct Phoenix.ParamTest.Bar"
+    msg = ~r"cannot derive Combo.Param for struct Combo.ParamTest.Bar"
     assert_raise ArgumentError, msg, fn ->
       defmodule Bar do
-        @derive Phoenix.Param
+        @derive Combo.Param
         defstruct [:uuid]
       end
     end
 
     defmodule Bar do
-      @derive {Phoenix.Param, key: :uuid}
+      @derive {Combo.Param, key: :uuid}
       defstruct [:uuid]
     end
 
     assert to_param(struct(Bar, uuid: 1)) == "1"
     assert to_param(struct(Bar, uuid: "foo")) == "foo"
 
-    msg = ~r"cannot convert Phoenix.ParamTest.Bar to param, key :uuid contains a nil value"
+    msg = ~r"cannot convert Combo.ParamTest.Bar to param, key :uuid contains a nil value"
     assert_raise ArgumentError, msg, fn ->
       to_param(struct(Bar, uuid: nil))
     end
   after
-    :code.purge(Module.concat(Phoenix.Param, __MODULE__.Bar))
-    :code.delete(Module.concat(Phoenix.Param, __MODULE__.Bar))
+    :code.purge(Module.concat(Combo.Param, __MODULE__.Bar))
+    :code.delete(Module.concat(Combo.Param, __MODULE__.Bar))
     :code.purge(__MODULE__.Bar)
     :code.delete(__MODULE__.Bar)
   end

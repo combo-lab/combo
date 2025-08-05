@@ -24,11 +24,11 @@ defmodule Combo.VerifiedRoutes do
     lib/app_web/controllers/post_controller.ex:100: AppWeb.PostController.show/2
   ```
 
-  Additionally, interpolated ~p values are encoded via the `Phoenix.Param` protocol.
-  For example, a `%Post{}` struct in your application may derive the `Phoenix.Param`
+  Additionally, interpolated ~p values are encoded via the `Combo.Param` protocol.
+  For example, a `%Post{}` struct in your application may derive the `Combo.Param`
   protocol to generate slug-based paths rather than ID based ones. This allows you to
   use `~p"/posts/#{post}"` rather than `~p"/posts/#{post.slug}"` throughout your
-  application. See the `Phoenix.Param` documentation for more details.
+  application. See the `Combo.Param` documentation for more details.
 
   Finally, query strings are also supported in verified routes, either in traditional form:
 
@@ -331,7 +331,7 @@ defmodule Combo.VerifiedRoutes do
   @doc ~S'''
   Generates the router path with route verification.
 
-  Interpolated named parameters are encoded via the `Phoenix.Param` protocol.
+  Interpolated named parameters are encoded via the `Combo.Param` protocol.
 
   Warns when the provided path does not match against the router specified
   in `use Combo.VerifiedRoutes` or the `@router` module attribute.
@@ -742,7 +742,7 @@ defmodule Combo.VerifiedRoutes do
 
   defp encode_segment(data) do
     data
-    |> Phoenix.Param.to_param()
+    |> Combo.Param.to_param()
     |> URI.encode(&URI.char_unreserved?/1)
   end
 
@@ -889,7 +889,7 @@ defmodule Combo.VerifiedRoutes do
   defp to_param(bin) when is_binary(bin), do: bin
   defp to_param(false), do: "false"
   defp to_param(true), do: "true"
-  defp to_param(data), do: Phoenix.Param.to_param(data)
+  defp to_param(data), do: Combo.Param.to_param(data)
 
   defp build_route(route_ast, sigil_p, env, endpoint_ctx, router) do
     config = Module.get_attribute(env.module, :phoenix_verified_config, [])
