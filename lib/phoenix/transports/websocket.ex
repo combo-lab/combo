@@ -1,4 +1,4 @@
-defmodule Phoenix.Transports.WebSocket do
+defmodule Combo.Transports.WebSocket do
   @moduledoc false
   #
   # How WebSockets Work In Phoenix

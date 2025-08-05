@@ -1,4 +1,4 @@
-defmodule Phoenix.Transports.LongPoll.Server do
+defmodule Combo.Transports.LongPoll.Server do
   @moduledoc false
 
   use GenServer, restart: :temporary

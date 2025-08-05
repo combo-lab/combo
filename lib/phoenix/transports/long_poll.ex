@@ -1,4 +1,4 @@
-defmodule Phoenix.Transports.LongPoll do
+defmodule Combo.Transports.LongPoll do
   @moduledoc false
   @behaviour Plug
 
@@ -144,9 +144,9 @@ defmodule Phoenix.Transports.LongPoll do
       Transport.connect_info(conn, endpoint, keys, Keyword.take(opts, @connect_info_opts))
 
     arg = {endpoint, handler, opts, conn.params, priv_topic, connect_info}
-    spec = {Phoenix.Transports.LongPoll.Server, arg}
+    spec = {Combo.Transports.LongPoll.Server, arg}
 
-    case DynamicSupervisor.start_child(Phoenix.Transports.LongPoll.Supervisor, spec) do
+    case DynamicSupervisor.start_child(Combo.Transports.LongPoll.Supervisor, spec) do
       :ignore ->
         conn |> put_status(:forbidden) |> status_json()
 

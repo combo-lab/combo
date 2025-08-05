@@ -743,10 +743,10 @@ defmodule Phoenix.Endpoint do
     paths =
       if websocket do
         websocket = put_auth_token(websocket, opts[:auth_token])
-        config = Phoenix.Socket.Transport.load_config(websocket, Phoenix.Transports.WebSocket)
+        config = Phoenix.Socket.Transport.load_config(websocket, Combo.Transports.WebSocket)
         plug_init = {endpoint, socket, config}
         {conn_ast, match_path} = socket_path(path, config)
-        [{match_path, Phoenix.Transports.WebSocket, conn_ast, plug_init} | paths]
+        [{match_path, Combo.Transports.WebSocket, conn_ast, plug_init} | paths]
       else
         paths
       end
@@ -754,10 +754,10 @@ defmodule Phoenix.Endpoint do
     paths =
       if longpoll do
         longpoll = put_auth_token(longpoll, opts[:auth_token])
-        config = Phoenix.Socket.Transport.load_config(longpoll, Phoenix.Transports.LongPoll)
+        config = Phoenix.Socket.Transport.load_config(longpoll, Combo.Transports.LongPoll)
         plug_init = {endpoint, socket, config}
         {conn_ast, match_path} = socket_path(path, config)
-        [{match_path, Phoenix.Transports.LongPoll, conn_ast, plug_init} | paths]
+        [{match_path, Combo.Transports.LongPoll, conn_ast, plug_init} | paths]
       else
         paths
       end

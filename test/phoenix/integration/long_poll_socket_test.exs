@@ -83,8 +83,8 @@ defmodule Phoenix.Integration.LongPollSocketTest do
   end
 
   setup do
-    for {_, pid, _, _} <- DynamicSupervisor.which_children(Phoenix.Transports.LongPoll.Supervisor) do
-      DynamicSupervisor.terminate_child(Phoenix.Transports.LongPoll.Supervisor, pid)
+    for {_, pid, _, _} <- DynamicSupervisor.which_children(Combo.Transports.LongPoll.Supervisor) do
+      DynamicSupervisor.terminate_child(Combo.Transports.LongPoll.Supervisor, pid)
     end
 
     :ok
