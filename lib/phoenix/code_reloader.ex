@@ -1,4 +1,4 @@
-defmodule Phoenix.CodeReloader do
+defmodule Combo.CodeReloader do
   @moduledoc """
   A plug and module to handle automatic code reloading.
 
@@ -37,7 +37,7 @@ defmodule Phoenix.CodeReloader do
       def project do
         [
           ...,
-          listeners: [Phoenix.CodeReloader]
+          listeners: [Combo.CodeReloader]
         ]
       end
 
@@ -60,7 +60,7 @@ defmodule Phoenix.CodeReloader do
   Same as `reload/1` but it will raise if Mix is not available.
   """
   @spec reload!(module, keyword) :: :ok | {:error, binary()}
-  defdelegate reload!(endpoint, opts), to: Phoenix.CodeReloader.Server
+  defdelegate reload!(endpoint, opts), to: Combo.CodeReloader.Server
 
   @doc """
   Synchronizes with the code server if it is alive.
@@ -68,11 +68,11 @@ defmodule Phoenix.CodeReloader do
   It returns `:ok`. If it is not running, it also returns `:ok`.
   """
   @spec sync :: :ok
-  defdelegate sync, to: Phoenix.CodeReloader.Server
+  defdelegate sync, to: Combo.CodeReloader.Server
 
   @doc false
   @spec child_spec(keyword) :: Supervisor.child_spec()
-  defdelegate child_spec(opts), to: Phoenix.CodeReloader.MixListener
+  defdelegate child_spec(opts), to: Combo.CodeReloader.MixListener
 
   ## Plug
 
@@ -103,7 +103,7 @@ defmodule Phoenix.CodeReloader do
   API used by Plug to start the code reloader.
   """
   def init(opts) do
-    Keyword.put_new(opts, :reloader, &Phoenix.CodeReloader.reload/2)
+    Keyword.put_new(opts, :reloader, &Combo.CodeReloader.reload/2)
   end
 
   @doc """

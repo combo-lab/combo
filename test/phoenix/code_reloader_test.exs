@@ -1,4 +1,4 @@
-defmodule Phoenix.CodeReloaderTest do
+defmodule Combo.CodeReloaderTest do
   use ExUnit.Case, async: true
   use RouterHelper
 
@@ -13,36 +13,36 @@ defmodule Phoenix.CodeReloaderTest do
 
   @tag :capture_log
   test "syncs with code server" do
-    assert Phoenix.CodeReloader.sync() == :ok
+    assert Combo.CodeReloader.sync() == :ok
 
     # Suspend so we can monitor the process until we get a reply.
     # There is an inherent race condition here in that the process
     # may die before we request but the code should work in both
     # cases, so we are fine.
-    :sys.suspend(Phoenix.CodeReloader.Server)
-    ref = Process.monitor(Phoenix.CodeReloader.Server)
+    :sys.suspend(Combo.CodeReloader.Server)
+    ref = Process.monitor(Combo.CodeReloader.Server)
 
     Task.start_link(fn ->
-      Phoenix.CodeReloader.Server
+      Combo.CodeReloader.Server
       |> Process.whereis()
       |> Process.exit(:kill)
     end)
 
-    assert Phoenix.CodeReloader.sync() == :ok
+    assert Combo.CodeReloader.sync() == :ok
     assert_receive {:DOWN, ^ref, _, _, _}
-    wait_until_is_up(Phoenix.CodeReloader.Server)
+    wait_until_is_up(Combo.CodeReloader.Server)
   end
 
   test "reloads on every request" do
-    pid = Process.whereis(Phoenix.CodeReloader.Server)
+    pid = Process.whereis(Combo.CodeReloader.Server)
     :erlang.trace(pid, true, [:receive])
 
-    opts = Phoenix.CodeReloader.init([])
+    opts = Combo.CodeReloader.init([])
 
     conn =
       conn(:get, "/")
       |> Plug.Conn.put_private(:phoenix_endpoint, Endpoint)
-      |> Phoenix.CodeReloader.call(opts)
+      |> Combo.CodeReloader.call(opts)
 
     assert conn.state == :unset
 
@@ -50,12 +50,12 @@ defmodule Phoenix.CodeReloaderTest do
   end
 
   test "renders compilation error on failure" do
-    opts = Phoenix.CodeReloader.init(reloader: &__MODULE__.reload/2)
+    opts = Combo.CodeReloader.init(reloader: &__MODULE__.reload/2)
 
     conn =
       conn(:get, "/")
       |> Plug.Conn.put_private(:phoenix_endpoint, Endpoint)
-      |> Phoenix.CodeReloader.call(opts)
+      |> Combo.CodeReloader.call(opts)
 
     assert conn.state == :sent
     assert conn.status == 500

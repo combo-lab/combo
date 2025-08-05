@@ -1,4 +1,4 @@
-defmodule Phoenix.CodeReloader.MixListener do
+defmodule Combo.CodeReloader.MixListener do
   @moduledoc false
 
   use GenServer
@@ -12,7 +12,7 @@ defmodule Phoenix.CodeReloader.MixListener do
 
   @spec started? :: boolean()
   def started? do
-    Process.whereis(Phoenix.CodeReloader.MixListener) != nil
+    Process.whereis(Combo.CodeReloader.MixListener) != nil
   end
 
   @doc """

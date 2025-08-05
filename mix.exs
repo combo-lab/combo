@@ -244,7 +244,7 @@ defmodule Phoenix.MixProject do
         Combo.ConnTest
       ],
       "Adapters and Plugs": [
-        Phoenix.CodeReloader,
+        Combo.CodeReloader,
         Combo.Endpoint.Cowboy2Adapter,
         Combo.Endpoint.SyncCodeReloadPlug
       ],

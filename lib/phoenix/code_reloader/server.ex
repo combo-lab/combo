@@ -1,9 +1,9 @@
-defmodule Phoenix.CodeReloader.Server do
+defmodule Combo.CodeReloader.Server do
   @moduledoc false
   use GenServer
 
   require Logger
-  alias Phoenix.CodeReloader.Proxy
+  alias Combo.CodeReloader.Proxy
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
@@ -69,8 +69,8 @@ defmodule Phoenix.CodeReloader.Server do
     {backup, res, out} =
       with_build_lock(fn ->
         purge_fallback? =
-          if Phoenix.CodeReloader.MixListener.started?() do
-            Phoenix.CodeReloader.MixListener.purge(apps)
+          if Combo.CodeReloader.MixListener.started?() do
+            Combo.CodeReloader.MixListener.purge(apps)
             false
           else
             warn_missing_mix_listener()
@@ -187,14 +187,14 @@ defmodule Phoenix.CodeReloader.Server do
     defp warn_missing_mix_listener do
       if Mix.Project.get() != Phoenix.MixProject do
         IO.warn("""
-        a Mix listener expected by Phoenix.CodeReloader is missing.
+        a Mix listener expected by Combo.CodeReloader is missing.
 
         Please add the listener to your mix.exs configuration, like so:
 
             def project do
               [
                 ...,
-                listeners: [Phoenix.CodeReloader]
+                listeners: [Combo.CodeReloader]
               ]
             end
 

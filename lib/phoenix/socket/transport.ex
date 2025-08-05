@@ -306,7 +306,7 @@ defmodule Combo.Socket.Transport do
   """
   def code_reload(conn, endpoint, opts) do
     if Keyword.get(opts, :code_reloader, endpoint.config(:code_reloader)) do
-      Phoenix.CodeReloader.reload(endpoint)
+      Combo.CodeReloader.reload(endpoint)
     end
 
     conn

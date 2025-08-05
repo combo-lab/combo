@@ -1,6 +1,6 @@
 # A tiny proxy that stores all output sent to the group leader
 # while forwarding all requests to it.
-defmodule Phoenix.CodeReloader.Proxy do
+defmodule Combo.CodeReloader.Proxy do
   @moduledoc false
   use GenServer
 

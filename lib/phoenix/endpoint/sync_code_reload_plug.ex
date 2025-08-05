@@ -25,7 +25,7 @@ defmodule Combo.Endpoint.SyncCodeReloadPlug do
         case exception do
           %UndefinedFunctionError{module: ^endpoint} when retry? ->
             # Sync with the code reloader and retry once
-            Phoenix.CodeReloader.sync()
+            Combo.CodeReloader.sync()
             do_call(conn, endpoint, opts, false)
 
           exception ->

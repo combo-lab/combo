@@ -167,7 +167,7 @@ In the middle of the endpoint, there is also a conditional block:
   if code_reloading? do
     socket "/phoenix/live_reload/socket", Phoenix.LiveReloader.Socket
     plug Phoenix.LiveReloader
-    plug Phoenix.CodeReloader
+    plug Combo.CodeReloader
     plug Phoenix.Ecto.CheckRepoStatus, otp_app: :hello
   end
 ```
@@ -175,7 +175,7 @@ In the middle of the endpoint, there is also a conditional block:
 This block is only executed in development. It enables:
 
 * live reloading - if you change a CSS file, they are updated in-browser without refreshing the page;
-* [code reloading](`Phoenix.CodeReloader`) - so we can see changes to our application without restarting the server;
+* [code reloading](`Combo.CodeReloader`) - so we can see changes to our application without restarting the server;
 * check repo status - which makes sure our database is up to date, raising a readable and actionable error otherwise.
 
 ### Router plugs

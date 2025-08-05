@@ -89,7 +89,7 @@ defmodule Combo.Endpoint.Supervisor do
     end
 
     if server? and conf[:code_reloader] do
-      Phoenix.CodeReloader.Server.check_symlinks()
+      Combo.CodeReloader.Server.check_symlinks()
     end
 
     # TODO: Remove this once {:system, env_var} tuples are removed
