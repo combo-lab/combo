@@ -34,7 +34,6 @@ defmodule Combo.HTMLTest do
     Macro.escape(normalize_to_tree(binary, sort_attributes: true))
   end
 
-
   @doc ~S"""
   Parses and normalizes HTML into a tree structure at runtime.
 
