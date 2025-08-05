@@ -1,10 +1,10 @@
-defmodule Phoenix.Template.CEExEngine.FormatterTest do
+defmodule Combo.Template.CEExEngine.FormatterTest do
   use ExUnit.Case, async: true
 
   use ExUnit.Case, async: true
 
-  alias Phoenix.Template.CEExEngine.Formatter
-  alias Phoenix.Template.CEExEngine.Tokenizer.ParseError
+  alias Combo.Template.CEExEngine.Formatter
+  alias Combo.Template.CEExEngine.Tokenizer.ParseError
 
   defp assert_formatter_output(input, expected, dot_formatter_opts \\ []) do
     dot_formatter_opts =

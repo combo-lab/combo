@@ -1,9 +1,9 @@
-defmodule Phoenix.Template.CEExEngine.Sigil do
+defmodule Combo.Template.CEExEngine.Sigil do
   @moduledoc """
   Provides `~CE` sigil.
   """
 
-  alias Phoenix.Template.CEExEngine.Compiler
+  alias Combo.Template.CEExEngine.Compiler
 
   @doc """
   The `~CE` sigil for creating inline templates.

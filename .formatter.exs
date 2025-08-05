@@ -63,11 +63,11 @@ locals_without_parens = [
   # Phoenix.ConnTest
   assert_error_sent: 2,
 
-  # Phoenix.Template
+  # Combo.Template
   embed_templates: 1,
   embed_templates: 2,
 
-  # Phoenix.Template.CEExEngine.DeclarativeAssigns
+  # Combo.Template.CEExEngine.DeclarativeAssigns
   attr: 2,
   attr: 3,
   slot: 1,

@@ -1,7 +1,7 @@
-defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
+defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
   use ExUnit.Case, async: true
 
-  import Phoenix.Template.CEExEngine.Sigil
+  import Combo.Template.CEExEngine.Sigil
   alias Combo.SafeHTML
 
   def parse_fragment(html) do
@@ -82,7 +82,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
   end
 
   test "__global__?" do
-    alias Phoenix.Template.CEExEngine.DeclarativeAssigns
+    alias Combo.Template.CEExEngine.DeclarativeAssigns
 
     assert DeclarativeAssigns.__global__?("id")
     refute DeclarativeAssigns.__global__?("idnope")
@@ -94,7 +94,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
   end
 
   defmodule RemoteFunctionComponentWithAttrs do
-    use Phoenix.Template.CEExEngine
+    use Combo.Template.CEExEngine
 
     attr :id, :any, required: true
     slot :inner_block
@@ -102,7 +102,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
   end
 
   defmodule FunctionComponentWithAttrs do
-    use Phoenix.Template.CEExEngine
+    use Combo.Template.CEExEngine
 
     import RemoteFunctionComponentWithAttrs
     alias RemoteFunctionComponentWithAttrs, as: Remote
@@ -417,7 +417,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
   end
 
   defmodule FunctionComponentWithSlots do
-    use Phoenix.Template.CEExEngine
+    use Combo.Template.CEExEngine
 
     def fun_with_slot_line, do: __ENV__.line + 3
 
@@ -610,7 +610,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
   test "stores components for bodyless clauses" do
     defmodule Bodyless do
-      use Phoenix.Template.CEExEngine
+      use Combo.Template.CEExEngine
 
       def example_line, do: __ENV__.line + 2
 
@@ -669,7 +669,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
   test "matches on struct types" do
     defmodule StructTypes do
-      use Phoenix.Template.CEExEngine
+      use Combo.Template.CEExEngine
 
       attr :uri, URI, required: true
       attr :other, :any
@@ -687,7 +687,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
   test "provides attr defaults" do
     defmodule AttrDefaults do
-      use Phoenix.Template.CEExEngine
+      use Combo.Template.CEExEngine
 
       attr :one, :integer, default: 1
       attr :two, :integer, default: 2
@@ -724,7 +724,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
   test "provides slot defaults" do
     defmodule SlotDefaults do
-      use Phoenix.Template.CEExEngine
+      use Combo.Template.CEExEngine
 
       slot :inner_block
       def func(assigns), do: ~CE[{render_slot(@inner_block)}]
@@ -740,7 +740,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
   test "slots with rest" do
     defmodule SlotWithGlobal do
-      use Phoenix.Template.CEExEngine
+      use Combo.Template.CEExEngine
 
       attr :rest, :global
       slot :inner_block, required: true
@@ -788,7 +788,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
   test "does not raise when there is a nested module" do
     mod = fn ->
       defmodule NestedModules do
-        use Phoenix.Template.CEExEngine
+        use Combo.Template.CEExEngine
 
         defmodule Nested do
           def fun(arg), do: arg
@@ -801,7 +801,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
   test "supports :doc for attr and slot documentation" do
     defmodule AttrDocs do
-      use Phoenix.Template.CEExEngine
+      use Combo.Template.CEExEngine
 
       def attr_line, do: __ENV__.line
       attr :single, :any, doc: "a single line description"
@@ -1696,7 +1696,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
   test "does not raise if multiple slots with different names share the same attr names" do
     defmodule MultipleSlotAttrs do
-      use Phoenix.Template.CEExEngine
+      use Combo.Template.CEExEngine
 
       slot :foo do
         attr :attr, :any

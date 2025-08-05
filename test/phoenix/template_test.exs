@@ -1,8 +1,8 @@
-defmodule Phoenix.TemplateTest do
+defmodule Combo.TemplateTest do
   use ExUnit.Case, async: true
 
-  doctest Phoenix.Template
-  require Phoenix.Template, as: Template
+  doctest Combo.Template
+  require Combo.Template, as: Template
   import Combo.SafeHTML, only: [safe_to_string: 1]
 
   @templates Path.expand("../fixtures/templates", __DIR__)
@@ -16,8 +16,8 @@ defmodule Phoenix.TemplateTest do
   end
 
   test "format_encoder/1 returns the format encoder for a given format" do
-    assert Template.format_encoder("html") == Phoenix.Template.HTMLEncoder
-    assert Template.format_encoder("js") == Phoenix.Template.HTMLEncoder
+    assert Template.format_encoder("html") == Combo.Template.HTMLEncoder
+    assert Template.format_encoder("js") == Combo.Template.HTMLEncoder
     assert Template.format_encoder("unknown") == nil
   end
 
@@ -35,7 +35,7 @@ defmodule Phoenix.TemplateTest do
 
   describe "embed_templates/2" do
     defmodule EmbedTemplates do
-      import Phoenix.Template, only: [embed_templates: 1, embed_templates: 2]
+      import Combo.Template, only: [embed_templates: 1, embed_templates: 2]
 
       embed_templates("../fixtures/templates/*.html")
       embed_templates("../fixtures/templates/*.json", suffix: "_json")
@@ -105,7 +105,7 @@ defmodule Phoenix.TemplateTest do
           &(&1 |> Path.basename() |> String.replace(".", "3")),
           Path.expand("../fixtures/templates", __DIR__),
           "*",
-          %{foo: Phoenix.Template.EExEngine}
+          %{foo: Combo.Template.EExEngine}
         )
     end
 
@@ -138,7 +138,7 @@ defmodule Phoenix.TemplateTest do
     end
 
     test "render/4 with bad layout" do
-      msg = ~r/no "bad_layout" html template defined for Phoenix.TemplateTest.AllTemplates/
+      msg = ~r/no "bad_layout" html template defined for Combo.TemplateTest.AllTemplates/
 
       assert_raise ArgumentError, msg, fn ->
         assigns = %{message: "hello!", layout: {AllTemplates, "bad_layout"}}
@@ -161,7 +161,7 @@ defmodule Phoenix.TemplateTest do
     end
 
     test "render_to_iodata/4 with bad layout" do
-      msg = ~r/no "bad_layout" html template defined for Phoenix.TemplateTest.AllTemplates/
+      msg = ~r/no "bad_layout" html template defined for Combo.TemplateTest.AllTemplates/
 
       assert_raise ArgumentError, msg, fn ->
         assigns = %{message: "hello!", layout: {AllTemplates, "bad_layout"}}

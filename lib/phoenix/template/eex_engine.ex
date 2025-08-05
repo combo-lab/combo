@@ -1,4 +1,4 @@
-defmodule Phoenix.Template.EExEngine do
+defmodule Combo.Template.EExEngine do
   @moduledoc """
   The template engine that handles EEx templates.
 
@@ -6,7 +6,7 @@ defmodule Phoenix.Template.EExEngine do
   escape HTML, hence it doesn't provides XSS protection.
   """
 
-  @behaviour Phoenix.Template.Engine
+  @behaviour Combo.Template.Engine
 
   def compile(path, _name) do
     opts = [

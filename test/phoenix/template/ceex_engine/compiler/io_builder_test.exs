@@ -1,8 +1,8 @@
-defmodule Phoenix.Template.CEExEngine.Compiler.IOBuilderTest do
+defmodule Combo.Template.CEExEngine.Compiler.IOBuilderTest do
   use ExUnit.Case, async: true
 
   alias Combo.SafeHTML
-  alias Phoenix.Template.CEExEngine.Compiler.IOBuilder
+  alias Combo.Template.CEExEngine.Compiler.IOBuilder
 
   defmodule Engine do
     @moduledoc false
@@ -87,10 +87,10 @@ defmodule Phoenix.Template.CEExEngine.Compiler.IOBuilderTest do
       #     v0 = 0
       #
       #     v2 =
-      #       Phoenix.Template.CEExEngine.IOBuilder.to_iodata(
+      #       Combo.Template.CEExEngine.IOBuilder.to_iodata(
       #         for i <- 1..3 do
-      #           v0 = Phoenix.Template.CEExEngine.Compiler.IOBuilder.to_safe(i)
-      #           v1 = Phoenix.Template.CEExEngine.Compiler.IOBuilder.to_safe(v0)
+      #           v0 = Combo.Template.CEExEngine.Compiler.IOBuilder.to_safe(i)
+      #           v1 = Combo.Template.CEExEngine.Compiler.IOBuilder.to_safe(v0)
       #           {:safe, [v0, v1]}
       #         end
       #       )

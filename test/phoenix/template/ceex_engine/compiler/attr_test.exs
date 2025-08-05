@@ -4,10 +4,10 @@
 # And, we only test whether right quoted expressions are generated.
 # The results of evaluating the quoted expressions will be tested by
 # upper-level tests.
-defmodule Phoenix.Template.CEExEngine.Compiler.AttrTest do
+defmodule Combo.Template.CEExEngine.Compiler.AttrTest do
   use ExUnit.Case, async: true
 
-  alias Phoenix.Template.CEExEngine.Compiler.Attr
+  alias Combo.Template.CEExEngine.Compiler.Attr
 
   defp handle_attr(pattern) do
     Attr.handle_attr(pattern, line: 1)

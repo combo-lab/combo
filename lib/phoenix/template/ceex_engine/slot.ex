@@ -1,9 +1,9 @@
-defmodule Phoenix.Template.CEExEngine.Slot do
+defmodule Combo.Template.CEExEngine.Slot do
   @moduledoc """
   Provides slot related helpers.
   """
 
-  import Phoenix.Template.CEExEngine.Sigil
+  import Combo.Template.CEExEngine.Sigil
 
   @doc ~S'''
   Renders a slot entry with the given optional `arg`.

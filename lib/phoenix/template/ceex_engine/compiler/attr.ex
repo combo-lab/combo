@@ -1,4 +1,4 @@
-defmodule Phoenix.Template.CEExEngine.Compiler.Attr do
+defmodule Combo.Template.CEExEngine.Compiler.Attr do
   @moduledoc false
 
   alias Combo.SafeHTML

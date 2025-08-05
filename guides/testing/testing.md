@@ -141,7 +141,7 @@ defmodule HelloWeb.ErrorHTMLTest do
   use HelloWeb.ConnCase, async: true
 
   # Bring render_to_string/4 for testing custom views
-  import Phoenix.Template
+  import Combo.Template
 
   test "renders 404.html" do
     assert render_to_string(HelloWeb.ErrorHTML, "404", "html", []) == "Not Found"
@@ -155,7 +155,7 @@ end
 
 `HelloWeb.ErrorHTMLTest` sets `async: true` which means that this test case will be run in parallel with other test cases. While individual tests within the case still run serially, this can greatly increase overall test speeds.
 
-It also imports `Phoenix.Template` in order to use the `render_to_string/4` function. With that, all the assertions can be simple string equality tests.
+It also imports `Combo.Template` in order to use the `render_to_string/4` function. With that, all the assertions can be simple string equality tests.
 
 ## Running tests per directory/file
 
@@ -332,7 +332,7 @@ defmodule HelloWeb.ErrorHTMLTest do
   @moduletag :error_view_case
 
   # Bring render/4 and render_to_string/4 for testing custom views
-  import Phoenix.Template
+  import Combo.Template
 
   @tag individual_test: "yup"
   test "renders 404.html" do

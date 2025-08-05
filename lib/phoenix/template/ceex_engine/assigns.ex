@@ -1,9 +1,9 @@
-defmodule Phoenix.Template.CEExEngine.Assigns do
+defmodule Combo.Template.CEExEngine.Assigns do
   @moduledoc """
   Provides `assigns` related helpers.
   """
 
-  alias Phoenix.Template.CEExEngine.Compiler
+  alias Combo.Template.CEExEngine.Compiler
 
   @doc """
   Adds a key-value pair to `assigns`.
@@ -112,7 +112,7 @@ defmodule Phoenix.Template.CEExEngine.Assigns do
   by the component.
 
   > It is recommended to use `attr` macro of `:global` type provided by
-  > `Phoenix.Template.CEExEngine.DeclarativeAssigns` rather than this function.
+  > `Combo.Template.CEExEngine.DeclarativeAssigns` rather than this function.
 
   ## Examples
 

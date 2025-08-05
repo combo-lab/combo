@@ -1,7 +1,7 @@
-defmodule Phoenix.Template.CEExEngine.CompilerTest.Component do
+defmodule Combo.Template.CEExEngine.CompilerTest.Component do
   @moduledoc false
 
-  import Phoenix.Template.CEExEngine.Sigil
+  import Combo.Template.CEExEngine.Sigil
 
   def link(assigns) do
     ~CE""

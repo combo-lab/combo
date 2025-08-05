@@ -1271,7 +1271,7 @@ defmodule Combo.HTML.VerificationTest do
 
     assigns = %{attrs: %{id: "abc", form: "my-form"}}
 
-    import Phoenix.Template.CEExEngine.Sigil
+    import Combo.Template.CEExEngine.Sigil
     assert to_x(~CE|<GlobalIncludes.button {@attrs}/>|) ==
              ~X(<button id="abc" form="my-form">button</button>)
   end

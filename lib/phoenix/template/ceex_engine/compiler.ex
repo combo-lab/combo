@@ -1,10 +1,10 @@
-defmodule Phoenix.Template.CEExEngine.Compiler do
+defmodule Combo.Template.CEExEngine.Compiler do
   @moduledoc """
-  The compiler for `Phoenix.Template.CEExEngine`.
+  The compiler for `Combo.Template.CEExEngine`.
   """
 
   alias Phoenix.Env
-  alias Phoenix.Template.CEExEngine.Compiler.Engine
+  alias Combo.Template.CEExEngine.Compiler.Engine
 
   @doc false
   defmacro compile_file(path, opts \\ []) do

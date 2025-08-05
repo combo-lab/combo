@@ -1,4 +1,4 @@
-defmodule Phoenix.Template do
+defmodule Combo.Template do
   @moduledoc """
   Compiling and rendering templates.
 
@@ -80,7 +80,7 @@ defmodule Phoenix.Template do
   """
   defmacro __using__(_opts) do
     quote do
-      Phoenix.Template.__idempotent_setup__(__MODULE__, %{})
+      Combo.Template.__idempotent_setup__(__MODULE__, %{})
     end
   end
 
@@ -135,8 +135,8 @@ defmodule Phoenix.Template do
   @doc type: :macro
   defmacro embed_templates(pattern, opts \\ []) do
     quote bind_quoted: [pattern: pattern, opts: opts] do
-      Phoenix.Template.compile_all(
-        &Phoenix.Template.__embed__(&1, opts[:suffix]),
+      Combo.Template.compile_all(
+        &Combo.Template.__embed__(&1, opts[:suffix]),
         Path.expand(opts[:root] || __DIR__, __DIR__),
         pattern
       )
@@ -233,7 +233,7 @@ defmodule Phoenix.Template do
 
   defp render_within_layout({layout, _assigns}, _module, _template, _format) do
     raise ArgumentError, """
-    invalid value for reserved key :layout in Phoenix.Template.render/4 assigns.
+    invalid value for reserved key :layout in Combo.Template.render/4 assigns.
     :layout accepts a tuple of the form {LayoutModule, "template.extension"},
     got: #{inspect(layout)}
     """
@@ -313,9 +313,9 @@ defmodule Phoenix.Template do
 
   defp default_engines do
     [
-      exs: Phoenix.Template.ExsEngine,
-      eex: Phoenix.Template.EExEngine,
-      ceex: Phoenix.Template.CEExEngine
+      exs: Combo.Template.ExsEngine,
+      eex: Combo.Template.EExEngine,
+      ceex: Combo.Template.CEExEngine
     ]
   end
 
@@ -356,9 +356,9 @@ defmodule Phoenix.Template do
 
   defp default_encoders do
     [
-      html: Phoenix.Template.HTMLEncoder,
+      html: Combo.Template.HTMLEncoder,
       json: Phoenix.json_library(),
-      js: Phoenix.Template.HTMLEncoder
+      js: Combo.Template.HTMLEncoder
     ]
   end
 
@@ -417,7 +417,7 @@ defmodule Phoenix.Template do
   defmacro compile_all(converter, root, pattern \\ @default_pattern, engines \\ nil) do
     quote bind_quoted: binding() do
       for {path, name, body} <-
-            Phoenix.Template.__compile_all__(__MODULE__, converter, root, pattern, engines) do
+            Combo.Template.__compile_all__(__MODULE__, converter, root, pattern, engines) do
         @external_resource path
         @file path
         def unquote(String.to_atom(name))(var!(assigns)) do
@@ -467,7 +467,7 @@ defmodule Phoenix.Template do
     else
       Module.register_attribute(module, :phoenix_template_hashes, accumulate: true)
       Module.put_attribute(module, :phoenix_template_engines, engines)
-      Module.put_attribute(module, :before_compile, Phoenix.Template)
+      Module.put_attribute(module, :before_compile, Combo.Template)
     end
   end
 
@@ -479,7 +479,7 @@ defmodule Phoenix.Template do
     body =
       Enum.reduce(hashes, false, fn {hash, args}, acc ->
         quote do
-          unquote(acc) or unquote(hash) != Phoenix.Template.hash(unquote_splicing(args))
+          unquote(acc) or unquote(hash) != Combo.Template.hash(unquote_splicing(args))
         end
       end)
 

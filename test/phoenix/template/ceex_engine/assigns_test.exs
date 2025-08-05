@@ -1,7 +1,7 @@
-defmodule Phoenix.Template.CEExEngine.AssignsTest do
+defmodule Combo.Template.CEExEngine.AssignsTest do
   use ExUnit.Case, async: true
 
-  import Phoenix.Template.CEExEngine.Assigns
+  import Combo.Template.CEExEngine.Assigns
 
   @assigns %{k1: "v1"}
 

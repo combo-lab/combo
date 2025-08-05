@@ -4,8 +4,8 @@ defmodule Combo.HTML do
 
   This module is built on top of:
 
-    * `Phoenix.Template`
-    * `Phoenix.Template.CEExEngine`
+    * `Combo.Template`
+    * `Combo.Template.CEExEngine`
 
   ## Syntax
 
@@ -360,7 +360,7 @@ defmodule Combo.HTML do
   end
   ```
 
-  See `Phoenix.Template.CEExEngine.DeclarativeAssigns.attr/3` for more
+  See `Combo.Template.CEExEngine.DeclarativeAssigns.attr/3` for more
   information.
 
   #### Global attributes
@@ -635,7 +635,7 @@ defmodule Combo.HTML do
   </table>
   ```
 
-  See `Phoenix.Template.CEExEngine.DeclarativeAssigns.slot/3` for more
+  See `Combo.Template.CEExEngine.DeclarativeAssigns.slot/3` for more
   information.
 
   ### Embedded templates
@@ -855,8 +855,8 @@ defmodule Combo.HTML do
     default =
       quote bind_quoted: [opts: opts] do
         import Combo.HTML
-        import Phoenix.Template, only: [embed_templates: 1]
-        use Phoenix.Template.CEExEngine, opts
+        import Combo.Template, only: [embed_templates: 1]
+        use Combo.Template.CEExEngine, opts
       end
 
     conditional =

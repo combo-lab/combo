@@ -1,8 +1,8 @@
-defmodule Phoenix.Template.CEExEngine.TokenizerTest do
+defmodule Combo.Template.CEExEngine.TokenizerTest do
   use ExUnit.Case, async: true
 
-  alias Phoenix.Template.CEExEngine.Tokenizer
-  alias Phoenix.Template.CEExEngine.Tokenizer.ParseError
+  alias Combo.Template.CEExEngine.Tokenizer
+  alias Combo.Template.CEExEngine.Tokenizer.ParseError
 
   defp tokenizer_state(text), do: Tokenizer.init(text, "nofile", 0)
 

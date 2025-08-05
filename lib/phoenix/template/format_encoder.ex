@@ -1,8 +1,8 @@
-defmodule Phoenix.Template.FormatEncoder do
+defmodule Combo.Template.FormatEncoder do
   @moduledoc """
   The behaviour for implementing format encoders.
 
-  Check out `Phoenix.Template` for more details.
+  Check out `Combo.Template` for more details.
   """
 
   @doc """

@@ -1006,7 +1006,7 @@ defmodule Phoenix.Controller do
     metadata = %{view: view, template: template, format: format}
 
     :telemetry.span([:phoenix, :controller, :render], metadata, fn ->
-      {Phoenix.Template.render(view, template, format, assigns), metadata}
+      {Combo.Template.render(view, template, format, assigns), metadata}
     end)
   end
 
@@ -1014,7 +1014,7 @@ defmodule Phoenix.Controller do
     metadata = %{view: view, template: template, format: format}
 
     :telemetry.span([:phoenix, :controller, :render], metadata, fn ->
-      {Phoenix.Template.render_to_iodata(view, template, format, assigns), metadata}
+      {Combo.Template.render_to_iodata(view, template, format, assigns), metadata}
     end)
   end
 

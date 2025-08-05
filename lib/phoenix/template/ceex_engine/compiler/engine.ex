@@ -1,13 +1,13 @@
-defmodule Phoenix.Template.CEExEngine.Compiler.Engine do
+defmodule Combo.Template.CEExEngine.Compiler.Engine do
   @moduledoc false
 
-  alias Phoenix.Template.CEExEngine.Tokenizer
-  alias Phoenix.Template.CEExEngine.Tokenizer.ParseError
-  alias Phoenix.Template.CEExEngine.TagHandler
-  alias Phoenix.Template.CEExEngine.Compiler.IOBuilder
-  alias Phoenix.Template.CEExEngine.Compiler.Attr
-  alias Phoenix.Template.CEExEngine.Compiler.Assigns
-  alias Phoenix.Template.CEExEngine.Compiler.Annotation
+  alias Combo.Template.CEExEngine.Tokenizer
+  alias Combo.Template.CEExEngine.Tokenizer.ParseError
+  alias Combo.Template.CEExEngine.TagHandler
+  alias Combo.Template.CEExEngine.Compiler.IOBuilder
+  alias Combo.Template.CEExEngine.Compiler.Attr
+  alias Combo.Template.CEExEngine.Compiler.Assigns
+  alias Combo.Template.CEExEngine.Compiler.Annotation
 
   @doc false
   def __reserved_assigns__, do: [:__slot__, :inner_block]

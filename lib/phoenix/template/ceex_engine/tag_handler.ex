@@ -1,4 +1,4 @@
-defmodule Phoenix.Template.CEExEngine.TagHandler do
+defmodule Combo.Template.CEExEngine.TagHandler do
   @moduledoc false
 
   @doc """

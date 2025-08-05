@@ -1,8 +1,8 @@
-defmodule Phoenix.Template.Engine do
+defmodule Combo.Template.Engine do
   @moduledoc """
   The behaviour for implementing template engines.
 
-  Check out `Phoenix.Template` for more details.
+  Check out `Combo.Template` for more details.
   """
 
   @doc """

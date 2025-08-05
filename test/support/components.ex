@@ -1,5 +1,5 @@
 defmodule Phoenix.LiveViewTest.Support.FunctionComponent do
-  use Phoenix.Template.CEExEngine
+  use Combo.Template.CEExEngine
 
   def render(assigns) do
     ~CE"""
@@ -15,7 +15,7 @@ defmodule Phoenix.LiveViewTest.Support.FunctionComponent do
 end
 
 defmodule Phoenix.LiveViewTest.Support.FunctionComponentWithAttrs do
-  use Phoenix.Template.CEExEngine
+  use Combo.Template.CEExEngine
 
   defmodule Struct do
     defstruct []

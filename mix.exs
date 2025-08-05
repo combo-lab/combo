@@ -219,19 +219,19 @@ defmodule Phoenix.MixProject do
         Combo.SafeHTML.Safe
       ],
       Template: [
-        Phoenix.Template,
-        Phoenix.Template.Engine,
-        Phoenix.Template.FormatEncoder,
-        Phoenix.Template.ExsEngine,
-        Phoenix.Template.EExEngine,
-        Phoenix.Template.CEExEngine,
-        Phoenix.Template.CEExEngine.Compiler,
-        Phoenix.Template.CEExEngine.Sigil,
-        Phoenix.Template.CEExEngine.Assigns,
-        Phoenix.Template.CEExEngine.DeclarativeAssigns,
-        Phoenix.Template.CEExEngine.Slot,
-        Phoenix.Template.CEExEngine.Formatter,
-        Phoenix.Template.HTMLEncoder
+        Combo.Template,
+        Combo.Template.Engine,
+        Combo.Template.FormatEncoder,
+        Combo.Template.ExsEngine,
+        Combo.Template.EExEngine,
+        Combo.Template.CEExEngine,
+        Combo.Template.CEExEngine.Compiler,
+        Combo.Template.CEExEngine.Sigil,
+        Combo.Template.CEExEngine.Assigns,
+        Combo.Template.CEExEngine.DeclarativeAssigns,
+        Combo.Template.CEExEngine.Slot,
+        Combo.Template.CEExEngine.Formatter,
+        Combo.Template.HTMLEncoder
       ],
       HTML: [
         Combo.HTML,

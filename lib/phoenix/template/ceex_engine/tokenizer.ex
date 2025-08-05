@@ -1,7 +1,7 @@
-defmodule Phoenix.Template.CEExEngine.Tokenizer do
+defmodule Combo.Template.CEExEngine.Tokenizer do
   @moduledoc false
 
-  alias Phoenix.Template.CEExEngine.TagHandler
+  alias Combo.Template.CEExEngine.TagHandler
 
   @space_chars ~c"\s\t\f"
   @quote_chars ~c"\"'"

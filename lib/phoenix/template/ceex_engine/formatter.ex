@@ -1,4 +1,4 @@
-defmodule Phoenix.Template.CEExEngine.Formatter do
+defmodule Combo.Template.CEExEngine.Formatter do
   @moduledoc """
   Format HEEx templates from `.heex` files or `~CE` sigils.
 
@@ -198,9 +198,9 @@ defmodule Phoenix.Template.CEExEngine.Formatter do
 
   require Logger
 
-  alias Phoenix.Template.CEExEngine.Formatter.HTMLAlgebra
-  alias Phoenix.Template.CEExEngine.Tokenizer
-  alias Phoenix.Template.CEExEngine.Tokenizer.ParseError
+  alias Combo.Template.CEExEngine.Formatter.HTMLAlgebra
+  alias Combo.Template.CEExEngine.Tokenizer
+  alias Combo.Template.CEExEngine.Tokenizer.ParseError
 
   defguard is_tag_open(tag_type)
            when tag_type in [:html_tag, :remote_component, :local_component, :slot]

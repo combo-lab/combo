@@ -1,4 +1,4 @@
-defmodule Phoenix.Template.CEExEngine.Compiler.Annotation do
+defmodule Combo.Template.CEExEngine.Compiler.Annotation do
   @moduledoc false
 
   @doc """

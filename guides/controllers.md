@@ -54,13 +54,13 @@ end
 
 While we can name our actions whatever we like, there are conventions for action names which we should follow whenever possible. We went over these in the [routing guide](routing.html), but we'll take another quick look here.
 
-- index   - renders a list of all items of the given resource type
-- show    - renders an individual item by ID
-- new     - renders a form for creating a new item
-- create  - receives parameters for one new item and saves it in a data store
-- edit    - retrieves an individual item by ID and displays it in a form for editing
-- update  - receives parameters for one edited item and saves the item to a data store
-- delete  - receives an ID for an item to be deleted and deletes it from a data store
+- index - renders a list of all items of the given resource type
+- show - renders an individual item by ID
+- new - renders a form for creating a new item
+- create - receives parameters for one new item and saves it in a data store
+- edit - retrieves an individual item by ID and displays it in a form for editing
+- update - receives parameters for one edited item and saves the item to a data store
+- delete - receives an ID for an item to be deleted and deletes it from a data store
 
 Each of these actions takes two parameters, which will be provided by Phoenix behind the scenes.
 
@@ -105,7 +105,7 @@ end
 If we again visit [`/hello/Frank`] in the browser, we should see a block of JSON with the key `id` mapped to the string `"Frank"`.
 
 ```json
-{"id": "Frank"}
+{ "id": "Frank" }
 ```
 
 The [`json/2`] function is useful for writing APIs and there is also the [`html/2`] function for rendering HTML, but most of the times we use Phoenix views to build our responses. For this, Phoenix includes the [`render/3`] function. It is specially important for HTML responses, as Phoenix Views provide performance and security benefits.
@@ -165,7 +165,7 @@ Generally speaking, once all assigns are configured, we invoke the view layer. T
 
 Rendering HTML through a template is fine, but what if we need to change the rendering format on the fly? Let's say that sometimes we need HTML, sometimes we need plain text, and sometimes we need JSON. Then what?
 
-The view's job is not only to render HTML templates. Views are about data presentation. Given a bag of data, the view's purpose is to present that in a meaningful way given some format, be it HTML, JSON, CSV, or others. Many web apps today return JSON to remote clients, and Phoenix views are *great* for JSON rendering.
+The view's job is not only to render HTML templates. Views are about data presentation. Given a bag of data, the view's purpose is to present that in a meaningful way given some format, be it HTML, JSON, CSV, or others. Many web apps today return JSON to remote clients, and Phoenix views are _great_ for JSON rendering.
 
 As an example, let's take `PageController`'s `home` action from a newly generated app. Out of the box, this has the right view `PageHTML`, the embedded templates from (`lib/hello_web/controllers/page_html`), and the right template for rendering HTML (`home.html.heex`.)
 
@@ -393,8 +393,8 @@ Phoenix does not enforce which keys are stored in the flash. As long as we are i
 
 Phoenix has two views called `ErrorHTML` and `ErrorJSON` which live in `lib/hello_web/controllers/`. The purpose of these views is to handle errors in a general way for incoming HTML or JSON requests. Similar to the views we built in this guide, error views can return both HTML and JSON responses. See the [Custom Error Pages How-To](custom_error_pages.html) for more information.
 
-[`render/4`]: `Phoenix.Template.render/4`
-[`/hello/Frank`]:  http://localhost:4000/hello/Frank
+[`render/4`]: `Combo.Template.render/4`
+[`/hello/Frank`]: http://localhost:4000/hello/Frank
 [`assign/3`]: `Plug.Conn.assign/3`
 [`clear_flash/1`]: `Phoenix.Controller.clear_flash/1`
 [`Phoenix.Flash.get/2`]: `Phoenix.Flash.get/2`

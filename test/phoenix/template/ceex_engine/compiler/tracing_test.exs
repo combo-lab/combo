@@ -1,11 +1,11 @@
-defmodule Phoenix.Template.CEExEngine.Compiler.TracingTest do
+defmodule Combo.Template.CEExEngine.Compiler.TracingTest do
   use ExUnit.Case, async: true
 
-  import Phoenix.Template.CEExEngine.CompilerTest.Component, warn: false
-  alias Phoenix.Template.CEExEngine.CompilerTest.Component, as: C, warn: false
+  import Combo.Template.CEExEngine.CompilerTest.Component, warn: false
+  alias Combo.Template.CEExEngine.CompilerTest.Component, as: C, warn: false
 
   defp eval_string(source, assigns, opts) do
-    alias Phoenix.Template.CEExEngine.Compiler
+    alias Combo.Template.CEExEngine.Compiler
 
     {env, opts} = Keyword.pop(opts, :env, __ENV__)
     opts = Keyword.merge([caller: env, file: env.file], opts)
@@ -39,16 +39,16 @@ defmodule Phoenix.Template.CEExEngine.Compiler.TracingTest do
 
   test "handles remote calls" do
     tracer_eval(__ENV__.line, """
-    <Phoenix.Template.CEExEngine.CompilerTest.Component.link>OK</Phoenix.Template.CEExEngine.CompilerTest.Component.link>
+    <Combo.Template.CEExEngine.CompilerTest.Component.link>OK</Combo.Template.CEExEngine.CompilerTest.Component.link>
     """)
 
-    assert_receive {:alias_reference, meta, Phoenix.Template.CEExEngine.CompilerTest.Component}
+    assert_receive {:alias_reference, meta, Combo.Template.CEExEngine.CompilerTest.Component}
     assert meta[:line] == __ENV__.line - 4
     assert meta[:column] == 5
 
-    assert_receive {:remote_function, meta, Phoenix.Template.CEExEngine.CompilerTest.Component, :link, 1}
+    assert_receive {:remote_function, meta, Combo.Template.CEExEngine.CompilerTest.Component, :link, 1}
     assert meta[:line] == __ENV__.line - 8
-    assert meta[:column] == 57
+    assert meta[:column] == 55
   end
 
   test "handles imports" do
@@ -56,7 +56,7 @@ defmodule Phoenix.Template.CEExEngine.Compiler.TracingTest do
     <.link>OK</.link>
     """)
 
-    assert_receive {:imported_function, meta, Phoenix.Template.CEExEngine.CompilerTest.Component, :link, 1}
+    assert_receive {:imported_function, meta, Combo.Template.CEExEngine.CompilerTest.Component, :link, 1}
     assert meta[:line] == __ENV__.line - 4
     assert meta[:column] == 5
   end
@@ -66,15 +66,15 @@ defmodule Phoenix.Template.CEExEngine.Compiler.TracingTest do
     <C.link>Ok</C.link>
     """)
 
-    assert_receive {:alias_expansion, meta, Elixir.C, Phoenix.Template.CEExEngine.CompilerTest.Component}
+    assert_receive {:alias_expansion, meta, Elixir.C, Combo.Template.CEExEngine.CompilerTest.Component}
     assert meta[:line] == __ENV__.line - 4
     assert meta[:column] == 5
 
-    assert_receive {:alias_reference, meta, Phoenix.Template.CEExEngine.CompilerTest.Component}
+    assert_receive {:alias_reference, meta, Combo.Template.CEExEngine.CompilerTest.Component}
     assert meta[:line] == __ENV__.line - 8
     assert meta[:column] == 5
 
-    assert_receive {:remote_function, meta, Phoenix.Template.CEExEngine.CompilerTest.Component, :link, 1}
+    assert_receive {:remote_function, meta, Combo.Template.CEExEngine.CompilerTest.Component, :link, 1}
     assert meta[:line] == __ENV__.line - 12
     assert meta[:column] == 8
   end

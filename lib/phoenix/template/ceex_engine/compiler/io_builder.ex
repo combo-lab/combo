@@ -1,4 +1,4 @@
-defmodule Phoenix.Template.CEExEngine.Compiler.IOBuilder do
+defmodule Combo.Template.CEExEngine.Compiler.IOBuilder do
   @moduledoc false
 
   # The module for building IO data.

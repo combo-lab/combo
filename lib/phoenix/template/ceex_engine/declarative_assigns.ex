@@ -1,10 +1,10 @@
-defmodule Phoenix.Template.CEExEngine.DeclarativeAssigns do
+defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
   @moduledoc """
   The declarative API of assigns.
   """
 
-  alias Phoenix.Template.CEExEngine.Compiler
-  alias Phoenix.Template.CEExEngine.Assigns
+  alias Combo.Template.CEExEngine.Compiler
+  alias Combo.Template.CEExEngine.Assigns
 
   @doc """
   The macro for setting up declarative assigns.
@@ -20,11 +20,11 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssigns do
   ## Examples
 
   ```elixir
-  use Phoenix.Template.CEExEngine.DeclarativeAssigns
+  use Combo.Template.CEExEngine.DeclarativeAssigns
   ```
 
   ```elixir
-  use Phoenix.Template.CEExEngine.DeclarativeAssigns, global_prefixes: ~w(x-)
+  use Combo.Template.CEExEngine.DeclarativeAssigns, global_prefixes: ~w(x-)
   ```
 
   """
@@ -92,7 +92,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssigns do
   * `:default` - the default value if the attribute if not set. If this
     option is not set and the attribute is not given, accessing the attribute
     will fail unless a value is explicitly set with
-    `Phoenix.Template.CEExEngine.Assigns.assign_new/3`.
+    `Combo.Template.CEExEngine.Assigns.assign_new/3`.
 
   * `:examples` - a non-exhaustive list of values accepted by the attribute,
     used for documentation purposes.
