@@ -4,7 +4,7 @@ defmodule Phoenix.Controller.FlashTest do
 
   import Phoenix.Controller
 
-  alias Phoenix.Flash
+  alias Combo.Flash
 
   setup do
     Logger.disable(self())

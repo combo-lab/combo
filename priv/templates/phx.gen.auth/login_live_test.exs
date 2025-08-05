@@ -70,7 +70,7 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
       render_submit(form, %{user: %{remember_me: true}})
 
       conn = follow_trigger_action(form, conn)
-      assert Phoenix.Flash.get(conn.assigns.flash, :error) == "Invalid email or password"
+      assert Combo.Flash.get(conn.assigns.flash, :error) == "Invalid email or password"
       assert redirected_to(conn) == ~p"<%= schema.route_prefix %>/log-in"
     end
   end

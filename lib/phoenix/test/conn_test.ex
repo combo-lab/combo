@@ -281,9 +281,9 @@ defmodule Combo.ConnTest do
   Gets the given key from the flash storage.
   """
   @spec get_flash(Conn.t, term) :: term
-  @deprecated "get_flash/2 is deprecated. Use Phoenix.Flash.get/2 instead"
+  @deprecated "get_flash/2 is deprecated. Use Combo.Flash.get/2 instead"
   def get_flash(conn, key) do
-    Phoenix.Flash.get(conn.assigns.flash, key)
+    Combo.Flash.get(conn.assigns.flash, key)
   end
 
   @doc """

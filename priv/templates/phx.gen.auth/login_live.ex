@@ -93,7 +93,7 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
 
   def mount(_params, _session, socket) do
     email =
-      Phoenix.Flash.get(socket.assigns.flash, :email) ||
+      Combo.Flash.get(socket.assigns.flash, :email) ||
         get_in(socket.assigns, [:<%= scope_config.scope.assign_key %>, Access.key(:<%= schema.singular %>), Access.key(:email)])
 
     form = to_form(%{"email" => email}, as: "<%= schema.singular %>")

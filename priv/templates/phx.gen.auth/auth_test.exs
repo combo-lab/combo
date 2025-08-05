@@ -339,7 +339,7 @@ defmodule <%= inspect auth_module %>Test do
 
       assert redirected_to(conn) == ~p"<%= schema.route_prefix %>/log-in"
 
-      assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
+      assert Combo.Flash.get(conn.assigns.flash, :error) ==
                "You must re-authenticate to access this page."
     end
   end
@@ -377,7 +377,7 @@ defmodule <%= inspect auth_module %>Test do
 
       assert redirected_to(conn) == ~p"<%= schema.route_prefix %>/log-in"
 
-      assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
+      assert Combo.Flash.get(conn.assigns.flash, :error) ==
                "You must log in to access this page."
     end
 

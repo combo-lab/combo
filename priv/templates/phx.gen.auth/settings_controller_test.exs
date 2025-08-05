@@ -24,7 +24,7 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
       conn = get(conn, ~p"<%= schema.route_prefix %>/settings")
       assert redirected_to(conn) == ~p"<%= schema.route_prefix %>/log-in"
 
-      assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
+      assert Combo.Flash.get(conn.assigns.flash, :error) ==
                "You must re-authenticate to access this page."
     end
   end
@@ -44,7 +44,7 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
 
       assert get_session(new_password_conn, :<%= schema.singular %>_token) != get_session(conn, :<%= schema.singular %>_token)
 
-      assert Phoenix.Flash.get(new_password_conn.assigns.flash, :info) =~
+      assert Combo.Flash.get(new_password_conn.assigns.flash, :info) =~
                "Password updated successfully"
 
       assert <%= inspect context.alias %>.get_<%= schema.singular %>_by_email_and_password(<%= schema.singular %>.email, "new valid password")
@@ -80,7 +80,7 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
 
       assert redirected_to(conn) == ~p"<%= schema.route_prefix %>/settings"
 
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
+      assert Combo.Flash.get(conn.assigns.flash, :info) =~
                "A link to confirm your email"
 
       assert <%= inspect context.alias %>.get_<%= schema.singular %>_by_email(<%= schema.singular %>.email)
@@ -115,7 +115,7 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
       conn = get(conn, ~p"<%= schema.route_prefix %>/settings/confirm-email/#{token}")
       assert redirected_to(conn) == ~p"<%= schema.route_prefix %>/settings"
 
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
+      assert Combo.Flash.get(conn.assigns.flash, :info) =~
                "Email changed successfully"
 
       refute <%= inspect context.alias %>.get_<%= schema.singular %>_by_email(<%= schema.singular %>.email)
@@ -125,7 +125,7 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
 
       assert redirected_to(conn) == ~p"<%= schema.route_prefix %>/settings"
 
-      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
+      assert Combo.Flash.get(conn.assigns.flash, :error) =~
                "Email change link is invalid or it has expired"
     end
 
@@ -133,7 +133,7 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
       conn = get(conn, ~p"<%= schema.route_prefix %>/settings/confirm-email/oops")
       assert redirected_to(conn) == ~p"<%= schema.route_prefix %>/settings"
 
-      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
+      assert Combo.Flash.get(conn.assigns.flash, :error) =~
                "Email change link is invalid or it has expired"
 
       assert <%= inspect context.alias %>.get_<%= schema.singular %>_by_email(<%= schema.singular %>.email)

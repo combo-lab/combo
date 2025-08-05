@@ -1675,7 +1675,7 @@ defmodule Phoenix.Controller do
   ## Examples
 
       iex> conn = merge_flash(conn, info: "Welcome Back!")
-      iex> Phoenix.Flash.get(conn.assigns.flash, :info)
+      iex> Combo.Flash.get(conn.assigns.flash, :info)
       "Welcome Back!"
 
   """
@@ -1696,7 +1696,7 @@ defmodule Phoenix.Controller do
   ## Examples
 
       iex> conn = put_flash(conn, :info, "Welcome Back!")
-      iex> Phoenix.Flash.get(conn.assigns.flash, :info)
+      iex> Combo.Flash.get(conn.assigns.flash, :info)
       "Welcome Back!"
 
   """
@@ -1737,7 +1737,7 @@ defmodule Phoenix.Controller do
       "Welcome Back!"
 
   """
-  @deprecated "get_flash/2 is deprecated. Use Phoenix.Flash.get(@flash, key) instead"
+  @deprecated "get_flash/2 is deprecated. Use Combo.Flash.get(@flash, key) instead"
   def get_flash(conn, key) do
     get_flash(conn)[flash_key(key)]
   end

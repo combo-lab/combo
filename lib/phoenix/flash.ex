@@ -1,4 +1,4 @@
-defmodule Phoenix.Flash do
+defmodule Combo.Flash do
   @moduledoc """
   Provides shared flash access.
   """
@@ -9,8 +9,8 @@ defmodule Phoenix.Flash do
   ## Examples
 
   ```heex
-  <div id="info"><%= Phoenix.Flash.get(@flash, :info) %></div>
-  <div id="error"><%= Phoenix.Flash.get(@flash, :error) %></div>
+  <div id="info"><%= Combo.Flash.get(@flash, :info) %></div>
+  <div id="error"><%= Combo.Flash.get(@flash, :error) %></div>
   ```
   """
   def get(%mod{}, key) when is_atom(key) or is_binary(key) do
@@ -19,7 +19,7 @@ defmodule Phoenix.Flash do
 
     Use the @flash assign set by the :fetch_flash plug instead:
 
-        <%= Phoenix.Flash.get(@flash, :#{key}) %>
+        <%= Combo.Flash.get(@flash, :#{key}) %>
     """
   end
 

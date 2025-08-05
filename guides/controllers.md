@@ -363,7 +363,7 @@ defmodule HelloWeb.PageController do
 end
 ```
 
-In order to see our flash messages, we need to be able to retrieve them and display them in a template layout. We can do that using [`Phoenix.Flash.get/2`] which takes the flash data and the key we care about. It then returns the value for that key.
+In order to see our flash messages, we need to be able to retrieve them and display them in a template layout. We can do that using [`Combo.Flash.get/2`] which takes the flash data and the key we care about. It then returns the value for that key.
 
 For our convenience, a `flash_group` component is already available and added to the beginning of our [welcome page]
 
@@ -397,7 +397,7 @@ Phoenix has two views called `ErrorHTML` and `ErrorJSON` which live in `lib/hell
 [`/hello/Frank`]: http://localhost:4000/hello/Frank
 [`assign/3`]: `Plug.Conn.assign/3`
 [`clear_flash/1`]: `Phoenix.Controller.clear_flash/1`
-[`Phoenix.Flash.get/2`]: `Phoenix.Flash.get/2`
+[`Combo.Flash.get/2`]: `Combo.Flash.get/2`
 [`html/2`]: `Phoenix.Controller.html/2`
 [`json/2`]: `Phoenix.Controller.json/2`
 [`put_flash/3`]: `Phoenix.Controller.put_flash/3`
