@@ -62,7 +62,7 @@ get "/", PageController, :home
 >
 >   * They define the routing engine, used on every request, to choose which controller to dispatch the request to. Thanks to macros, Phoenix compiles all of your routes to a huge case-statement with pattern matching rules, which is heavily optimized by the Erlang VM
 >
->   * For each route you define, we also define metadata to implement `Phoenix.VerifiedRoutes`. As we will soon learn, verified routes allow us to reference any route as if it were a plain looking string, except that it is verified by the compiler to be valid (making it much harder to ship broken links, forms, mails, etc to production)
+>   * For each route you define, we also define metadata to implement `Combo.VerifiedRoutes`. As we will soon learn, verified routes allow us to reference any route as if it were a plain looking string, except that it is verified by the compiler to be valid (making it much harder to ship broken links, forms, mails, etc to production)
 >
 > In other words, the router relies on macros to build applications that are faster and safer. Also remember that macros in Elixir are compile-time only, which gives plenty of stability after the code is compiled. As we will learn next, Phoenix also provides introspection for all defined routes via `mix phx.routes`.
 
@@ -159,7 +159,7 @@ The `Phoenix.Router.resources/4` macro describes additional options for customiz
 
 ## Verified Routes
 
-Phoenix includes `Phoenix.VerifiedRoutes` module which provides compile-time checks of router paths against your router by using the `~p` sigil. For example, you can write paths in controllers, tests, and templates and the compiler will make sure those actually match routes defined in your router.
+Phoenix includes `Combo.VerifiedRoutes` module which provides compile-time checks of router paths against your router by using the `~p` sigil. For example, you can write paths in controllers, tests, and templates and the compiler will make sure those actually match routes defined in your router.
 
 Let's see it in action. Run `iex -S mix` at the root of the project. We'll define a throwaway example module that builds a couple `~p` route paths.
 
@@ -211,7 +211,7 @@ What about paths with query strings? You can add query string key values directl
 "/users/17?admin=true"
 ```
 
-What if we need a full URL instead of a path? Just wrap your path with a call to `Phoenix.VerifiedRoutes.url/1`, which is imported everywhere that `~p` is available:
+What if we need a full URL instead of a path? Just wrap your path with a call to `Combo.VerifiedRoutes.url/1`, which is imported everywhere that `~p` is available:
 
 ```elixir
 url(~p"/users")

@@ -1,4 +1,4 @@
-defmodule Phoenix.VerifiedRoutes do
+defmodule Combo.VerifiedRoutes do
   @moduledoc ~S'''
   Provides route generation with compile-time verification.
 
@@ -75,7 +75,7 @@ defmodule Phoenix.VerifiedRoutes do
   ## Options
 
   To verify routes in your application modules, such as controller, templates, and views,
-  `use Phoenix.VerifiedRoutes`, which supports the following options:
+  `use Combo.VerifiedRoutes`, which supports the following options:
 
     * `:router` - The required router to verify `~p` paths against
     * `:endpoint` - Optional endpoint for URL generation
@@ -85,7 +85,7 @@ defmodule Phoenix.VerifiedRoutes do
 
   For example:
 
-      use Phoenix.VerifiedRoutes,
+      use Combo.VerifiedRoutes,
         router: AppWeb.Router,
         endpoint: AppWeb.Endpoint,
         statics: ~w(images)
@@ -95,7 +95,7 @@ defmodule Phoenix.VerifiedRoutes do
   The majority of path and URL generation needs your application will be met
   with `~p` and `url/1`, where all information necessary to construct the path
   or URL is provided by the compile-time information stored in the Endpoint
-  and Router passed to `use Phoenix.VerifiedRoutes`.
+  and Router passed to `use Combo.VerifiedRoutes`.
 
   That said, there are some circumstances where `path/2`, `path/3`, `url/2`, and `url/3`
   are required:
@@ -106,7 +106,7 @@ defmodule Phoenix.VerifiedRoutes do
       - `Phoenix.Controller.put_router_url/2` is used to override the endpoint's URL
       - `Phoenix.Controller.put_static_url/2` is used to override the endpoint's static URL
 
-    * When the Router module differs from the one passed to `use Phoenix.VerifiedRoutes`,
+    * When the Router module differs from the one passed to `use Combo.VerifiedRoutes`,
       such as library code, or application code that relies on multiple routers. In such cases,
       the router module can be provided explicitly to `path/3` and `url/3`.
 
@@ -158,18 +158,18 @@ defmodule Phoenix.VerifiedRoutes do
   For such cases, VerifiedRoutes allow you to configure a `path_prefixes` option, which
   is a list of segments to prepend to the URL. For example:
 
-      use Phoenix.VerifiedRoutes,
+      use Combo.VerifiedRoutes,
         router: AppWeb.Router,
         endpoint: AppWeb.Endpoint,
         path_prefixes: [{Gettext, :get_locale, []}]
 
   The above will prepend `"/#{Gettext.get_locale()}"` to every path and url generated with
   `~p`. If your website has a handful of URLs that do not require the locale prefix, then
-  we suggest defining them in a separate module, where you use `Phoenix.VerifiedRoutes`
+  we suggest defining them in a separate module, where you use `Combo.VerifiedRoutes`
   without the prefix option:
 
       defmodule UnlocalizedRoutes do
-        use Phoenix.VerifiedRoutes,
+        use Combo.VerifiedRoutes,
           router: AppWeb.Router,
           endpoint: AppWeb.Endpoint,
 
@@ -186,12 +186,12 @@ defmodule Phoenix.VerifiedRoutes do
 
   Sometimes, when we want to do dynamic routing, we will forward to custom plugs.
   It is possible to make these dynamic routers support `mix phx.routes` and verified
-  routes at compile time by adopting the `Phoenix.VerifiedRoutes` behaviour.
+  routes at compile time by adopting the `Combo.VerifiedRoutes` behaviour.
   For example:
 
       defmodule MyApp.LocaleRouter do
         use Plug.Router
-        @behaviour Phoenix.VerifiedRoutes
+        @behaviour Combo.VerifiedRoutes
 
         # custom routing rules
 
@@ -334,11 +334,11 @@ defmodule Phoenix.VerifiedRoutes do
   Interpolated named parameters are encoded via the `Phoenix.Param` protocol.
 
   Warns when the provided path does not match against the router specified
-  in `use Phoenix.VerifiedRoutes` or the `@router` module attribute.
+  in `use Combo.VerifiedRoutes` or the `@router` module attribute.
 
   ## Examples
 
-      use Phoenix.VerifiedRoutes, endpoint: MyAppWeb.Endpoint, router: MyAppWeb.Router
+      use Combo.VerifiedRoutes, endpoint: MyAppWeb.Endpoint, router: MyAppWeb.Router
 
       redirect(to: ~p"/users/top")
 
@@ -411,7 +411,7 @@ defmodule Phoenix.VerifiedRoutes do
 
   ## Examples
 
-      import Phoenix.VerifiedRoutes
+      import Combo.VerifiedRoutes
 
       redirect(to: path(conn, MyAppWeb.Router, ~p"/users/top"))
 
@@ -442,11 +442,11 @@ defmodule Phoenix.VerifiedRoutes do
   See `sigil_p/2` for more information.
 
   Warns when the provided path does not match against the router specified
-  in `use Phoenix.VerifiedRoutes` or the `@router` module attribute.
+  in `use Combo.VerifiedRoutes` or the `@router` module attribute.
 
   ## Examples
 
-      import Phoenix.VerifiedRoutes
+      import Combo.VerifiedRoutes
 
       redirect(to: path(conn, ~p"/users/top"))
 
@@ -477,11 +477,11 @@ defmodule Phoenix.VerifiedRoutes do
   See `sigil_p/2` for more information.
 
   Warns when the provided path does not match against the router specified
-  in `use Phoenix.VerifiedRoutes` or the `@router` module attribute.
+  in `use Combo.VerifiedRoutes` or the `@router` module attribute.
 
   ## Examples
 
-      use Phoenix.VerifiedRoutes, endpoint: MyAppWeb.Endpoint, router: MyAppWeb.Router
+      use Combo.VerifiedRoutes, endpoint: MyAppWeb.Endpoint, router: MyAppWeb.Router
 
       redirect(to: url(conn, ~p"/users/top"))
 
@@ -492,7 +492,7 @@ defmodule Phoenix.VerifiedRoutes do
       """
 
   The router may also be provided in cases where you want to verify routes for a
-  router other than the one passed to `use Phoenix.VerifiedRoutes`:
+  router other than the one passed to `use Combo.VerifiedRoutes`:
 
       redirect(to: url(conn, OtherRouter, ~p"/users"))
 
@@ -979,7 +979,7 @@ defmodule Phoenix.VerifiedRoutes do
   end
 
   defp attr!(%{function: nil}, _) do
-    raise "Phoenix.VerifiedRoutes can only be used inside functions, please move your usage of ~p to functions"
+    raise "Combo.VerifiedRoutes can only be used inside functions, please move your usage of ~p to functions"
   end
 
   defp attr!(env, :endpoint) do

@@ -116,7 +116,7 @@ defmodule Phoenix.Router do
   >   all of your routes to a single case-statement with pattern matching rules,
   >   which is heavily optimized by the Erlang VM
   >
-  > * For each route you define, we also define metadata to implement `Phoenix.VerifiedRoutes`.
+  > * For each route you define, we also define metadata to implement `Combo.VerifiedRoutes`.
   >   As we will soon learn, verified routes allows to us to reference any route
   >   as if it is a plain looking string, except it is verified by the compiler
   >   to be valid (making it much harder to ship broken links, forms, mails, etc
@@ -129,7 +129,7 @@ defmodule Phoenix.Router do
 
   ## Generating routes
 
-  For generating routes inside your application,  see the `Phoenix.VerifiedRoutes`
+  For generating routes inside your application,  see the `Combo.VerifiedRoutes`
   documentation for `~p` based route generation which is the preferred way to
   generate route paths and URLs with compile-time verification.
 
@@ -472,7 +472,7 @@ defmodule Phoenix.Router do
 
   defp verified_routes() do
     quote location: :keep, generated: true do
-      @behaviour Phoenix.VerifiedRoutes
+      @behaviour Combo.VerifiedRoutes
 
       def formatted_routes(_) do
         Phoenix.Router.__formatted_routes__(__MODULE__)
@@ -695,7 +695,7 @@ defmodule Phoenix.Router do
       `route_info/4`. The `:mfa` field is used by telemetry to print logs and by the
       router to emit compile time checks. Custom fields may be added.
     * `:warn_on_verify` - the boolean for whether matches to this route trigger
-      an unmatched route warning for `Phoenix.VerifiedRoutes`. It is useful to ignore
+      an unmatched route warning for `Combo.VerifiedRoutes`. It is useful to ignore
       an otherwise catch-all route definition from being matched when verifying routes.
       Defaults `false`.
 

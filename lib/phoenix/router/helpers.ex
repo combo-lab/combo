@@ -172,35 +172,35 @@ defmodule Phoenix.Router.Helpers do
         Generates the path information including any necessary prefix.
         """
         def path(data, path) do
-          Phoenix.VerifiedRoutes.unverified_path(data, unquote(env.module), path)
+          Combo.VerifiedRoutes.unverified_path(data, unquote(env.module), path)
         end
 
         @doc """
         Generates the connection/endpoint base URL without any path information.
         """
         def url(data) do
-          Phoenix.VerifiedRoutes.unverified_url(data, "")
+          Combo.VerifiedRoutes.unverified_url(data, "")
         end
 
         @doc """
         Generates path to a static asset given its file path.
         """
         def static_path(conn_or_endpoint_ctx, path) do
-          Phoenix.VerifiedRoutes.static_path(conn_or_endpoint_ctx, path)
+          Combo.VerifiedRoutes.static_path(conn_or_endpoint_ctx, path)
         end
 
         @doc """
         Generates url to a static asset given its file path.
         """
         def static_url(conn_or_endpoint_ctx, path) do
-          Phoenix.VerifiedRoutes.static_url(conn_or_endpoint_ctx, path)
+          Combo.VerifiedRoutes.static_url(conn_or_endpoint_ctx, path)
         end
 
         @doc """
         Generates an integrity hash to a static asset given its file path.
         """
         def static_integrity(conn_or_endpoint_ctx, path) do
-          Phoenix.VerifiedRoutes.static_integrity(conn_or_endpoint_ctx, path)
+          Combo.VerifiedRoutes.static_integrity(conn_or_endpoint_ctx, path)
         end
 
         # Functions used by generated helpers

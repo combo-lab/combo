@@ -211,7 +211,7 @@ defmodule Phoenix.MixProject do
     # Phoenix.Router
     # Phoenix.Socket
     # Combo.Token
-    # Phoenix.VerifiedRoutes
+    # Combo.VerifiedRoutes
 
     [
       "Safe HTML": [

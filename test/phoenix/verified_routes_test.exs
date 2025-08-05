@@ -1,6 +1,6 @@
 modules = [
-  Phoenix.VerifiedRoutesTest.PostController,
-  Phoenix.VerifiedRoutesTest.UserController
+  Combo.VerifiedRoutesTest.PostController,
+  Combo.VerifiedRoutesTest.UserController
 ]
 
 for module <- modules do
@@ -13,26 +13,26 @@ end
 defmodule PlugRouterWithVerifiedRoutes do
   use Plug.Router
 
-  @behaviour Phoenix.VerifiedRoutes
+  @behaviour Combo.VerifiedRoutes
 
   get "/foo" do
     send_resp(conn, 200, "ok")
   end
 
-  @impl Phoenix.VerifiedRoutes
+  @impl Combo.VerifiedRoutes
   def formatted_routes(_plug_opts) do
     [
       %{verb: "GET", path: "/foo", label: "Hello"}
     ]
   end
 
-  @impl Phoenix.VerifiedRoutes
+  @impl Combo.VerifiedRoutes
   def verified_route?(_plug_opts, path) do
     path == ["foo"]
   end
 end
 
-defmodule Phoenix.VerifiedRoutesTest do
+defmodule Combo.VerifiedRoutesTest do
   use ExUnit.Case, async: true
   import Plug.Test
 
@@ -42,12 +42,12 @@ defmodule Phoenix.VerifiedRoutesTest do
   defmodule AdminRouter do
     use Phoenix.Router
 
-    get "/dashboard", Phoenix.VerifiedRoutesTest.UserController, :index
+    get "/dashboard", Combo.VerifiedRoutesTest.UserController, :index
   end
 
   defmodule Router do
     use Phoenix.Router
-    alias Phoenix.VerifiedRoutesTest.{PostController, UserController}
+    alias Combo.VerifiedRoutesTest.{PostController, UserController}
 
     get "/posts/top", PostController, :top
     get "/posts/bottom/:order/:count", PostController, :bottom
@@ -78,7 +78,7 @@ defmodule Phoenix.VerifiedRoutesTest do
 
   defmodule CatchAllWarningRouter do
     use Phoenix.Router
-    alias Phoenix.VerifiedRoutesTest.PostController
+    alias Combo.VerifiedRoutesTest.PostController
 
     get "/", PostController, :root
     get "/*path", PostController, :root, warn_on_verify: true
@@ -131,7 +131,7 @@ defmodule Phoenix.VerifiedRoutesTest do
     %URI{scheme: "https", host: "example.com", port: 123, path: "/api"}
   end
 
-  use Phoenix.VerifiedRoutes, statics: ~w(images), endpoint: Endpoint, router: Router
+  use Combo.VerifiedRoutes, statics: ~w(images), endpoint: Endpoint, router: Router
 
   test "~p with static string" do
     assert ~p"/posts/1" == "/posts/1"
@@ -213,7 +213,7 @@ defmodule Phoenix.VerifiedRoutesTest do
     warnings =
       ExUnit.CaptureIO.capture_io(:stderr, fn ->
         defmodule Hash do
-          use Phoenix.VerifiedRoutes, endpoint: unquote(@endpoint), router: unquote(@router)
+          use Combo.VerifiedRoutes, endpoint: unquote(@endpoint), router: unquote(@router)
 
           def test, do: ~p"/posts/123/info#bar"
         end
@@ -227,7 +227,7 @@ defmodule Phoenix.VerifiedRoutesTest do
 
   test ":path_prefixes" do
     defmodule PathPrefixes do
-      use Phoenix.VerifiedRoutes,
+      use Combo.VerifiedRoutes,
         endpoint: unquote(@endpoint),
         router: unquote(@router),
         path_prefixes: [{__MODULE__, :locale, [{1, 2, 3}]}]
@@ -258,7 +258,7 @@ defmodule Phoenix.VerifiedRoutesTest do
   test "~p raises on leftover sigil" do
     assert_raise ArgumentError, "~p does not support modifiers after closing, got: foo", fn ->
       defmodule LeftOver do
-        use Phoenix.VerifiedRoutes, endpoint: unquote(@endpoint), router: unquote(@router)
+        use Combo.VerifiedRoutes, endpoint: unquote(@endpoint), router: unquote(@router)
         def test, do: ~p"/posts/1"foo
       end
     end
@@ -272,7 +272,7 @@ defmodule Phoenix.VerifiedRoutesTest do
 
     assert_raise ArgumentError, msg, fn ->
       defmodule DynamicDynamic do
-        use Phoenix.VerifiedRoutes, endpoint: unquote(@endpoint), router: unquote(@router)
+        use Combo.VerifiedRoutes, endpoint: unquote(@endpoint), router: unquote(@router)
         def test, do: ~p"/posts/#{1}#{2}"
       end
     end
@@ -286,7 +286,7 @@ defmodule Phoenix.VerifiedRoutesTest do
                  ~s|paths must begin with /, got: "posts/1"|,
                  fn ->
                    defmodule SigilPPrefix do
-                     use Phoenix.VerifiedRoutes,
+                     use Combo.VerifiedRoutes,
                        endpoint: unquote(@endpoint),
                        router: unquote(@router)
 
@@ -319,7 +319,7 @@ defmodule Phoenix.VerifiedRoutesTest do
   test "path raises when non ~p is passed" do
     assert_raise ArgumentError, ~r|expected compile-time ~p path string, got: "/posts/1"|, fn ->
       defmodule MissingPathPrefix do
-        use Phoenix.VerifiedRoutes, endpoint: unquote(@endpoint), router: unquote(@router)
+        use Combo.VerifiedRoutes, endpoint: unquote(@endpoint), router: unquote(@router)
         def test, do: path(%URI{}, "/posts/1")
       end
     end
@@ -331,7 +331,7 @@ defmodule Phoenix.VerifiedRoutesTest do
   test "url raises when non ~p is passed" do
     assert_raise ArgumentError, ~r|expected compile-time ~p path string, got: "/posts/1"|, fn ->
       defmodule MissingURLPrefix do
-        use Phoenix.VerifiedRoutes, endpoint: unquote(@endpoint), router: unquote(@router)
+        use Combo.VerifiedRoutes, endpoint: unquote(@endpoint), router: unquote(@router)
         def test, do: url("/posts/1")
       end
     end
@@ -392,7 +392,7 @@ defmodule Phoenix.VerifiedRoutesTest do
 
     assert_raise ArgumentError, msg, fn ->
       defmodule InvalidQuery do
-        use Phoenix.VerifiedRoutes,
+        use Combo.VerifiedRoutes,
           endpoint: unquote(@endpoint),
           router: unquote(@router)
 
@@ -550,7 +550,7 @@ defmodule Phoenix.VerifiedRoutesTest do
       warnings =
         ExUnit.CaptureIO.capture_io(:stderr, fn ->
           defmodule Forwards do
-            use Phoenix.VerifiedRoutes, endpoint: unquote(@endpoint), router: unquote(@router)
+            use Combo.VerifiedRoutes, endpoint: unquote(@endpoint), router: unquote(@router)
 
             def test do
               "/router_forward/dashboard" = ~p"/router_forward/dashboard"
@@ -565,10 +565,10 @@ defmodule Phoenix.VerifiedRoutesTest do
       warnings = String.replace(warnings, ~r/(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]/, "")
 
       assert warnings =~
-               "warning: no route path for Phoenix.VerifiedRoutesTest.Router matches \"/router_forward/warn\""
+               "warning: no route path for Combo.VerifiedRoutesTest.Router matches \"/router_forward/warn\""
 
       assert warnings =~
-               ~r"test/phoenix/verified_routes_test.exs:#{line}:(\d+:)? Phoenix.VerifiedRoutesTest.Forwards.test/0"
+               ~r"test/phoenix/verified_routes_test.exs:#{line}:(\d+:)? Combo.VerifiedRoutesTest.Forwards.test/0"
     after
       :code.purge(__MODULE__.Forwards)
       :code.delete(__MODULE__.Forwards)
@@ -578,7 +578,7 @@ defmodule Phoenix.VerifiedRoutesTest do
       warnings =
         ExUnit.CaptureIO.capture_io(:stderr, fn ->
           defmodule Unmatched do
-            use Phoenix.VerifiedRoutes, endpoint: unquote(@endpoint), router: unquote(@router)
+            use Combo.VerifiedRoutes, endpoint: unquote(@endpoint), router: unquote(@router)
 
             def test do
               ~p"/unknown"
@@ -589,13 +589,13 @@ defmodule Phoenix.VerifiedRoutesTest do
         end)
 
       assert warnings =~
-               ~s|no route path for Phoenix.VerifiedRoutesTest.Router matches "/unknown"|
+               ~s|no route path for Combo.VerifiedRoutesTest.Router matches "/unknown"|
 
       assert warnings =~
-               ~s|no route path for Phoenix.VerifiedRoutesTest.Router matches "/unknown/123"|
+               ~s|no route path for Combo.VerifiedRoutesTest.Router matches "/unknown/123"|
 
       assert warnings =~
-               ~s|no route path for Phoenix.VerifiedRoutesTest.Router matches "/unknown/#{123}"|
+               ~s|no route path for Combo.VerifiedRoutesTest.Router matches "/unknown/#{123}"|
     after
       :code.purge(__MODULE__.Unmatched)
       :code.delete(__MODULE__.Unmatched)
@@ -605,14 +605,14 @@ defmodule Phoenix.VerifiedRoutesTest do
       warnings =
         ExUnit.CaptureIO.capture_io(:stderr, fn ->
           defmodule VerifyFalse do
-            use Phoenix.VerifiedRoutes, endpoint: unquote(@endpoint), router: unquote(@router)
+            use Combo.VerifiedRoutes, endpoint: unquote(@endpoint), router: unquote(@router)
 
             def test, do: ~p"/should-warn/foobar"
           end
         end)
 
       assert warnings =~
-               ~s|no route path for Phoenix.VerifiedRoutesTest.Router matches "/should-warn/foobar"|
+               ~s|no route path for Combo.VerifiedRoutesTest.Router matches "/should-warn/foobar"|
     after
       :code.purge(__MODULE__.VerifyFalse)
       :code.delete(__MODULE__.VerifyFalse)
@@ -622,7 +622,7 @@ defmodule Phoenix.VerifiedRoutesTest do
       warnings =
         ExUnit.CaptureIO.capture_io(:stderr, fn ->
           defmodule VerifyFalseTrueMatchesFirst do
-            use Phoenix.VerifiedRoutes,
+            use Combo.VerifiedRoutes,
               endpoint: unquote(@endpoint),
               router: CatchAllWarningRouter
 
@@ -640,7 +640,7 @@ defmodule Phoenix.VerifiedRoutesTest do
       warnings =
         ExUnit.CaptureIO.capture_io(:stderr, fn ->
           defmodule VerifyForwardedRouter do
-            use Phoenix.VerifiedRoutes,
+            use Combo.VerifiedRoutes,
               endpoint: unquote(@endpoint),
               router: PlugRouterWithVerifiedRoutes
 

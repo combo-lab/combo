@@ -2,7 +2,7 @@ defprotocol Phoenix.Param do
   @moduledoc ~S"""
   A protocol that converts data structures into URL parameters.
 
-  This protocol is used by `Phoenix.VerifiedRoutes` and other parts of the
+  This protocol is used by `Combo.VerifiedRoutes` and other parts of the
   Phoenix stack. For example, when you write:
 
       ~p"/user/#{@user}/edit"

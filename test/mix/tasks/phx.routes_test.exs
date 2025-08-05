@@ -33,20 +33,20 @@ end
 defmodule PhoenixTestWeb.PlugRouterWithVerifiedRoutes do
   use Plug.Router
 
-  @behaviour Phoenix.VerifiedRoutes
+  @behaviour Combo.VerifiedRoutes
 
   get "/foo" do
     send_resp(conn, 200, "ok")
   end
 
-  @impl Phoenix.VerifiedRoutes
+  @impl Combo.VerifiedRoutes
   def formatted_routes(_plug_opts) do
     [
       %{verb: "GET", path: "/foo", label: "Hello"}
     ]
   end
 
-  @impl Phoenix.VerifiedRoutes
+  @impl Combo.VerifiedRoutes
   def verified_route?(_plug_opts, path) do
     path == ["foo"]
   end

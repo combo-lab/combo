@@ -322,7 +322,7 @@ end
 
 ```
 
-We made use of `Phoenix.VerifiedRoutes.sigil_p/2` to build our redirect path, which is the preferred approach to reference any path within our application. We learned about verified routes in the [routing guide](routing.html).
+We made use of `Combo.VerifiedRoutes.sigil_p/2` to build our redirect path, which is the preferred approach to reference any path within our application. We learned about verified routes in the [routing guide](routing.html).
 
 Finally, let's define in the same file the action we redirect to, which simply renders the home, but now under a new address:
 

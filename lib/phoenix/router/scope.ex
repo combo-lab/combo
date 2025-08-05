@@ -180,8 +180,8 @@ defmodule Phoenix.Router.Scope do
       {:ok, value} ->
         IO.warn(
           "the :trailing_slash option in the router is deprecated. " <>
-            "If you are using Phoenix.VerifiedRoutes, it has no effect. " <>
-            "If you are using the generated helpers, migrate to Phoenix.VerifiedRoutes"
+            "If you are using Combo.VerifiedRoutes, it has no effect. " <>
+            "If you are using the generated helpers, migrate to Combo.VerifiedRoutes"
         )
 
         value == true
