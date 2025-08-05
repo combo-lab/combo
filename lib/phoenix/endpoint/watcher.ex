@@ -1,4 +1,4 @@
-defmodule Phoenix.Endpoint.Watcher do
+defmodule Combo.Endpoint.Watcher do
   @moduledoc false
   require Logger
 

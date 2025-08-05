@@ -1,6 +1,6 @@
-defmodule Phoenix.Endpoint.SupervisorTest do
+defmodule Combo.Endpoint.SupervisorTest do
   use ExUnit.Case, async: false
-  alias Phoenix.Endpoint.Supervisor
+  alias Combo.Endpoint.Supervisor
 
   defmodule HTTPSEndpoint do
     def config(:otp_app), do: :phoenix
@@ -56,7 +56,7 @@ defmodule Phoenix.Endpoint.SupervisorTest do
     :ok
   end
 
-  defp persistent!(endpoint), do: :persistent_term.get({Phoenix.Endpoint, endpoint})
+  defp persistent!(endpoint), do: :persistent_term.get({Combo.Endpoint, endpoint})
 
   test "generates the static url based on the static host configuration" do
     assert persistent!(StaticURLEndpoint).static_url == "http://static.example.com"
@@ -131,7 +131,7 @@ defmodule Phoenix.Endpoint.SupervisorTest do
       {:ok, {_, children}} = Supervisor.init({:phoenix, WatchersEndpoint, []})
 
       assert Enum.any?(children, fn
-               %{start: {Phoenix.Endpoint.Watcher, :start_link, _config}} -> true
+               %{start: {Combo.Endpoint.Watcher, :start_link, _config}} -> true
                _ -> false
              end)
     end
@@ -141,7 +141,7 @@ defmodule Phoenix.Endpoint.SupervisorTest do
       {:ok, {_, children}} = Supervisor.init({:phoenix, WatchersEndpoint, []})
 
       refute Enum.any?(children, fn
-               %{start: {Phoenix.Endpoint.Watcher, :start_link, _config}} -> true
+               %{start: {Combo.Endpoint.Watcher, :start_link, _config}} -> true
                _ -> false
              end)
     end
@@ -151,7 +151,7 @@ defmodule Phoenix.Endpoint.SupervisorTest do
       {:ok, {_, children}} = Supervisor.init({:phoenix, WatchersEndpoint, []})
 
       refute Enum.any?(children, fn
-               %{start: {Phoenix.Endpoint.Watcher, :start_link, _config}} -> true
+               %{start: {Combo.Endpoint.Watcher, :start_link, _config}} -> true
                _ -> false
              end)
     end
@@ -166,7 +166,7 @@ defmodule Phoenix.Endpoint.SupervisorTest do
       {:ok, {_, children}} = Supervisor.init({:phoenix, WatchersEndpoint, []})
 
       assert Enum.any?(children, fn
-               %{start: {Phoenix.Endpoint.Watcher, :start_link, _config}} -> true
+               %{start: {Combo.Endpoint.Watcher, :start_link, _config}} -> true
                _ -> false
              end)
     end
@@ -184,7 +184,7 @@ defmodule Phoenix.Endpoint.SupervisorTest do
     end
 
     defmodule SocketEndpoint do
-      use Phoenix.Endpoint, otp_app: :phoenix
+      use Combo.Endpoint, otp_app: :phoenix
 
       socket "/ws", TestSocket, websocket: [check_csrf: false, check_origin: false]
     end
@@ -198,7 +198,7 @@ defmodule Phoenix.Endpoint.SupervisorTest do
     end
 
     defmodule SocketEndpointOriginCheckDisabled do
-      use Phoenix.Endpoint, otp_app: :phoenix
+      use Combo.Endpoint, otp_app: :phoenix
 
       socket "/ws", TestSocket, websocket: [check_csrf: false]
     end

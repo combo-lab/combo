@@ -1,4 +1,4 @@
-defmodule Phoenix.Endpoint do
+defmodule Combo.Endpoint do
   @moduledoc ~S"""
   Defines a Phoenix endpoint.
 
@@ -20,12 +20,12 @@ defmodule Phoenix.Endpoint do
   ## Endpoints
 
   An endpoint is simply a module defined with the help
-  of `Phoenix.Endpoint`. If you have used the `mix phx.new`
+  of `Combo.Endpoint`. If you have used the `mix phx.new`
   generator, an endpoint was automatically generated as
   part of your application:
 
       defmodule YourAppWeb.Endpoint do
-        use Phoenix.Endpoint, otp_app: :your_app
+        use Combo.Endpoint, otp_app: :your_app
 
         # plug ...
         # plug ...
@@ -214,7 +214,7 @@ defmodule Phoenix.Endpoint do
 
     * `:log_access_url` - log the access url once the server boots
 
-  Note that you can also store your own configurations in the Phoenix.Endpoint.
+  Note that you can also store your own configurations in the Combo.Endpoint.
   For example, [Phoenix LiveView](https://hexdocs.pm/phoenix_live_view) expects
   its own configuration under the `:live_view` key. In such cases, you should
   consult the documentation of the respective projects.
@@ -225,7 +225,7 @@ defmodule Phoenix.Endpoint do
   applications created via the `phx.new` Mix task use the
   [`Bandit`](https://github.com/mtrudel/bandit) webserver via the
   `Bandit.PhoenixAdapter` adapter. If not otherwise specified via the `adapter`
-  option Phoenix will fall back to the `Phoenix.Endpoint.Cowboy2Adapter` for
+  option Phoenix will fall back to the `Combo.Endpoint.Cowboy2Adapter` for
   backwards compatibility with applications generated prior to Phoenix 1.7.8.
 
   Both adapters can be configured in a similar manner using the following two
@@ -409,7 +409,7 @@ defmodule Phoenix.Endpoint do
   @doc false
   defmacro __using__(opts) do
     quote do
-      @behaviour Phoenix.Endpoint
+      @behaviour Combo.Endpoint
 
       unquote(config(opts))
       unquote(pubsub())
@@ -478,11 +478,11 @@ defmodule Phoenix.Endpoint do
   defp plug() do
     quote location: :keep do
       use Plug.Builder, init_mode: Phoenix.plug_init_mode()
-      import Phoenix.Endpoint
+      import Combo.Endpoint
 
       Module.register_attribute(__MODULE__, :phoenix_sockets, accumulate: true)
 
-      if force_ssl = Phoenix.Endpoint.__force_ssl__(__MODULE__, var!(force_ssl)) do
+      if force_ssl = Combo.Endpoint.__force_ssl__(__MODULE__, var!(force_ssl)) do
         plug Plug.SSL, force_ssl
       end
 
@@ -491,7 +491,7 @@ defmodule Phoenix.Endpoint do
 
         use Plug.Debugger,
           otp_app: @otp_app,
-          banner: {Phoenix.Endpoint.RenderErrors, :__debugger_banner__, []},
+          banner: {Combo.Endpoint.RenderErrors, :__debugger_banner__, []},
           style: [
             primary: "#EB532D",
             dark: [
@@ -505,7 +505,7 @@ defmodule Phoenix.Endpoint do
       plug :socket_dispatch
 
       # Compile after the debugger so we properly wrap it.
-      @before_compile Phoenix.Endpoint
+      @before_compile Combo.Endpoint
     end
   end
 
@@ -529,7 +529,7 @@ defmodule Phoenix.Endpoint do
       All other options are merged into the endpoint configuration.
       """
       def start_link(opts \\ []) do
-        Phoenix.Endpoint.Supervisor.start_link(@otp_app, __MODULE__, opts)
+        Combo.Endpoint.Supervisor.start_link(@otp_app, __MODULE__, opts)
       end
 
       @doc """
@@ -548,11 +548,11 @@ defmodule Phoenix.Endpoint do
       Reloads the configuration given the application environment changes.
       """
       def config_change(changed, removed) do
-        Phoenix.Endpoint.Supervisor.config_change(__MODULE__, changed, removed)
+        Combo.Endpoint.Supervisor.config_change(__MODULE__, changed, removed)
       end
 
       defp persistent!() do
-        :persistent_term.get({Phoenix.Endpoint, __MODULE__}, nil) ||
+        :persistent_term.get({Combo.Endpoint, __MODULE__}, nil) ||
           raise "could not find persistent term for endpoint #{inspect(__MODULE__)}. Make sure your endpoint is started and note you cannot access endpoint functions at compile-time"
       end
 
@@ -621,7 +621,7 @@ defmodule Phoenix.Endpoint do
         Phoenix.Config.cache(
           __MODULE__,
           {:__phoenix_static__, path},
-          &Phoenix.Endpoint.Supervisor.static_lookup(&1, path)
+          &Combo.Endpoint.Supervisor.static_lookup(&1, path)
         )
       end
 
@@ -667,7 +667,7 @@ defmodule Phoenix.Endpoint do
           e in Plug.Conn.WrapperError ->
             %{conn: conn, kind: kind, reason: reason, stack: stack} = e
 
-            Phoenix.Endpoint.RenderErrors.__catch__(
+            Combo.Endpoint.RenderErrors.__catch__(
               conn,
               kind,
               reason,
@@ -678,7 +678,7 @@ defmodule Phoenix.Endpoint do
           kind, reason ->
             stack = __STACKTRACE__
 
-            Phoenix.Endpoint.RenderErrors.__catch__(
+            Combo.Endpoint.RenderErrors.__catch__(
               conn,
               kind,
               reason,
@@ -1070,7 +1070,7 @@ defmodule Phoenix.Endpoint do
   end
 
   @doc false
-  @deprecated "Phoenix.Endpoint.instrument/4 is deprecated and has no effect. Use :telemetry instead"
+  @deprecated "Combo.Endpoint.instrument/4 is deprecated and has no effect. Use :telemetry instead"
   defmacro instrument(_endpoint_or_conn_or_socket, _event, _runtime, _fun) do
     :ok
   end
@@ -1083,11 +1083,11 @@ defmodule Phoenix.Endpoint do
 
   ## Examples
 
-      iex> Phoenix.Endpoint.server?(:my_app, MyAppWeb.Endpoint)
+      iex> Combo.Endpoint.server?(:my_app, MyAppWeb.Endpoint)
       true
 
   """
   def server?(otp_app, endpoint) when is_atom(otp_app) and is_atom(endpoint) do
-    Phoenix.Endpoint.Supervisor.server?(otp_app, endpoint)
+    Combo.Endpoint.Supervisor.server?(otp_app, endpoint)
   end
 end

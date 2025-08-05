@@ -11,7 +11,7 @@ defmodule Phoenix.Test.ChannelTest do
   )
 
   defmodule Endpoint do
-    use Phoenix.Endpoint, otp_app: :phoenix
+    use Combo.Endpoint, otp_app: :phoenix
 
     socket "/socket", UserSocket
   end

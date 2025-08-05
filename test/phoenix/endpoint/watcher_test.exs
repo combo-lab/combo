@@ -1,7 +1,7 @@
-defmodule Phoenix.Endpoint.WatcherTest do
+defmodule Combo.Endpoint.WatcherTest do
   use ExUnit.Case, async: true
 
-  alias Phoenix.Endpoint.Watcher
+  alias Combo.Endpoint.Watcher
   import ExUnit.CaptureIO
 
   test "starts watching and writes to stdio with args" do

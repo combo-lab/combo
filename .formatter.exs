@@ -34,7 +34,7 @@ locals_without_parens = [
   # Phoenix.Controller
   action_fallback: 1,
 
-  # Phoenix.Endpoint
+  # Combo.Endpoint
   plug: 1,
   plug: 2,
   socket: 2,

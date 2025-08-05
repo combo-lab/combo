@@ -3,7 +3,7 @@ System.put_env("ENDPOINT_TEST_PORT", "80")
 System.put_env("ENDPOINT_TEST_ASSET_HOST", "assets.example.com")
 System.put_env("ENDPOINT_TEST_ASSET_PORT", "443")
 
-defmodule Phoenix.Endpoint.EndpointTest do
+defmodule Combo.Endpoint.EndpointTest do
   use ExUnit.Case, async: true
   use RouterHelper
 
@@ -22,7 +22,7 @@ defmodule Phoenix.Endpoint.EndpointTest do
   Application.put_env(:phoenix, __MODULE__.Endpoint, @config)
 
   defmodule Endpoint do
-    use Phoenix.Endpoint, otp_app: :phoenix
+    use Combo.Endpoint, otp_app: :phoenix
 
     # Assert endpoint variables
     assert @otp_app == :phoenix
@@ -31,15 +31,15 @@ defmodule Phoenix.Endpoint.EndpointTest do
   end
 
   defmodule NoConfigEndpoint do
-    use Phoenix.Endpoint, otp_app: :phoenix
+    use Combo.Endpoint, otp_app: :phoenix
   end
 
   defmodule SystemTupleEndpoint do
-    use Phoenix.Endpoint, otp_app: :phoenix
+    use Combo.Endpoint, otp_app: :phoenix
   end
 
   defmodule TelemetryEventEndpoint do
-    use Phoenix.Endpoint, otp_app: :phoenix
+    use Combo.Endpoint, otp_app: :phoenix
   end
 
   setup_all do
@@ -208,7 +208,7 @@ defmodule Phoenix.Endpoint.EndpointTest do
     Application.put_env(:phoenix, __MODULE__.UrlEndpoint, url: [path: "/api"])
 
     defmodule UrlEndpoint do
-      use Phoenix.Endpoint, otp_app: :phoenix
+      use Combo.Endpoint, otp_app: :phoenix
     end
 
     UrlEndpoint.start_link()
@@ -224,7 +224,7 @@ defmodule Phoenix.Endpoint.EndpointTest do
     Application.put_env(:phoenix, __MODULE__.StaticEndpoint, static_url: [path: "/static"])
 
     defmodule StaticEndpoint do
-      use Phoenix.Endpoint, otp_app: :phoenix
+      use Combo.Endpoint, otp_app: :phoenix
     end
 
     StaticEndpoint.start_link()
@@ -243,7 +243,7 @@ defmodule Phoenix.Endpoint.EndpointTest do
     )
 
     defmodule AddressEndpoint do
-      use Phoenix.Endpoint, otp_app: :phoenix
+      use Combo.Endpoint, otp_app: :phoenix
     end
 
     AddressEndpoint.start_link()
@@ -321,28 +321,28 @@ defmodule Phoenix.Endpoint.EndpointTest do
   test "server?/2 returns true for explicitly true server", config do
     endpoint = Module.concat(__MODULE__, config.test)
     Application.put_env(:phoenix, endpoint, server: true)
-    assert Phoenix.Endpoint.server?(:phoenix, endpoint)
+    assert Combo.Endpoint.server?(:phoenix, endpoint)
   end
 
   test "server?/2 returns false for explicitly false server", config do
     Application.put_env(:phoenix, :serve_endpoints, true)
     endpoint = Module.concat(__MODULE__, config.test)
     Application.put_env(:phoenix, endpoint, server: false)
-    refute Phoenix.Endpoint.server?(:phoenix, endpoint)
+    refute Combo.Endpoint.server?(:phoenix, endpoint)
   end
 
   test "server?/2 returns true for global serve_endpoints as true", config do
     Application.put_env(:phoenix, :serve_endpoints, true)
     endpoint = Module.concat(__MODULE__, config.test)
     Application.put_env(:phoenix, endpoint, [])
-    assert Phoenix.Endpoint.server?(:phoenix, endpoint)
+    assert Combo.Endpoint.server?(:phoenix, endpoint)
   end
 
   test "server?/2 returns false for no global serve_endpoints config", config do
     Application.delete_env(:phoenix, :serve_endpoints)
     endpoint = Module.concat(__MODULE__, config.test)
     Application.put_env(:phoenix, endpoint, [])
-    refute Phoenix.Endpoint.server?(:phoenix, endpoint)
+    refute Combo.Endpoint.server?(:phoenix, endpoint)
   end
 
   test "static_path/1 validates paths are local/safe" do
@@ -374,7 +374,7 @@ defmodule Phoenix.Endpoint.EndpointTest do
   test "validates websocket and longpoll socket options" do
     assert_raise ArgumentError, ~r/unknown keys \[:invalid\]/, fn ->
       defmodule MyInvalidSocketEndpoint1 do
-        use Phoenix.Endpoint, otp_app: :phoenix
+        use Combo.Endpoint, otp_app: :phoenix
 
         socket "/ws", UserSocket, websocket: [path: "/ws", check_origin: false, invalid: true]
       end
@@ -382,7 +382,7 @@ defmodule Phoenix.Endpoint.EndpointTest do
 
     assert_raise ArgumentError, ~r/unknown keys \[:drainer\]/, fn ->
       defmodule MyInvalidSocketEndpoint2 do
-        use Phoenix.Endpoint, otp_app: :phoenix
+        use Combo.Endpoint, otp_app: :phoenix
 
         socket "/ws", UserSocket, longpoll: [path: "/ws", check_origin: false, drainer: []]
       end

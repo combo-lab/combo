@@ -1,4 +1,4 @@
-defmodule Phoenix.Endpoint.Cowboy2Adapter do
+defmodule Combo.Endpoint.Cowboy2Adapter do
   @moduledoc """
   The Cowboy2 adapter for Phoenix.
 
@@ -84,7 +84,7 @@ defmodule Phoenix.Endpoint.Cowboy2Adapter do
 
     plug =
       if code_reloader? do
-        {Phoenix.Endpoint.SyncCodeReloadPlug, {endpoint, []}}
+        {Combo.Endpoint.SyncCodeReloadPlug, {endpoint, []}}
       else
         {endpoint, []}
       end

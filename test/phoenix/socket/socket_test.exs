@@ -84,7 +84,7 @@ defmodule Combo.SocketTest do
 
   describe "drainer_spec/1" do
     defmodule Endpoint do
-      use Phoenix.Endpoint, otp_app: :phoenix
+      use Combo.Endpoint, otp_app: :phoenix
     end
 
     defmodule DrainerSpecSocket do

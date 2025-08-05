@@ -204,7 +204,7 @@ It will create two files, the client code in `assets/js/user_socket.js` and the 
 
 ```elixir
 defmodule HelloWeb.Endpoint do
-  use Phoenix.Endpoint, otp_app: :hello
+  use Combo.Endpoint, otp_app: :hello
 
   socket "/socket", HelloWeb.UserSocket,
     websocket: true,
@@ -392,7 +392,7 @@ Phoenix supports a transport agnostic way to pass an authentication token to the
 
 ```elixir
 defmodule HelloWeb.Endpoint do
-  use Phoenix.Endpoint, otp_app: :hello
+  use Combo.Endpoint, otp_app: :hello
 
   socket "/socket", HelloWeb.UserSocket,
     websocket: true,

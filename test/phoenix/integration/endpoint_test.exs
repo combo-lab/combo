@@ -90,7 +90,7 @@ defmodule Phoenix.Integration.EndpointTest do
 
   for mod <- [ProdEndpoint, DevEndpoint, ProdInet6Endpoint] do
     defmodule mod do
-      use Phoenix.Endpoint, otp_app: :endpoint_int
+      use Combo.Endpoint, otp_app: :endpoint_int
       @before_compile Wrapper
 
       plug :oops

@@ -163,7 +163,7 @@ defmodule Phoenix.Integration.WebSocketChannelsTest do
   end
 
   defmodule Endpoint do
-    use Phoenix.Endpoint, otp_app: :phoenix
+    use Combo.Endpoint, otp_app: :phoenix
 
     @session_config store: :cookie,
                     key: "_hello_key",
@@ -222,7 +222,7 @@ defmodule Phoenix.Integration.WebSocketChannelsTest do
 
   for %{adapter: adapter} <- [
         %{adapter: Bandit.PhoenixAdapter},
-        %{adapter: Phoenix.Endpoint.Cowboy2Adapter}
+        %{adapter: Combo.Endpoint.Cowboy2Adapter}
       ] do
     for {serializer, vsn, join_ref} <- [
           {V1.JSONSerializer, "1.0.0", nil},

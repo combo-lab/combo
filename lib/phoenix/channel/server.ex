@@ -3,7 +3,7 @@ defmodule Combo.Channel.Server do
   use GenServer, restart: :temporary
 
   require Logger
-  require Phoenix.Endpoint
+  require Combo.Endpoint
 
   alias Phoenix.PubSub
   alias Combo.Socket

@@ -1,4 +1,4 @@
-defmodule Phoenix.Endpoint.RenderErrorsTest do
+defmodule Combo.Endpoint.RenderErrorsTest do
   use ExUnit.Case, async: true
   use RouterHelper
 
@@ -61,7 +61,7 @@ defmodule Phoenix.Endpoint.RenderErrorsTest do
 
   defmodule Router do
     use Plug.Router
-    use Phoenix.Endpoint.RenderErrors, view: view, accepts: ~w(html json)
+    use Combo.Endpoint.RenderErrors, view: view, accepts: ~w(html json)
 
     plug :match
     plug :dispatch
@@ -100,7 +100,7 @@ defmodule Phoenix.Endpoint.RenderErrorsTest do
   end
 
   defmodule Endpoint do
-    use Phoenix.Endpoint, otp_app: :phoenix
+    use Combo.Endpoint, otp_app: :phoenix
   end
 
   setup do
@@ -179,7 +179,7 @@ defmodule Phoenix.Endpoint.RenderErrorsTest do
         kind, reason ->
           stack = __STACKTRACE__
           opts = [view: __MODULE__, accepts: ~w(html)]
-          Phoenix.Endpoint.RenderErrors.__catch__(conn, kind, reason, stack, opts)
+          Combo.Endpoint.RenderErrors.__catch__(conn, kind, reason, stack, opts)
       else
         _ -> flunk("function should have failed")
       end
@@ -209,7 +209,7 @@ defmodule Phoenix.Endpoint.RenderErrorsTest do
         catch
           kind, reason ->
             stack = __STACKTRACE__
-            Phoenix.Endpoint.RenderErrors.__catch__(conn, kind, reason, stack, opts)
+            Combo.Endpoint.RenderErrors.__catch__(conn, kind, reason, stack, opts)
         else
           _ -> flunk("function should have failed")
         end

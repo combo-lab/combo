@@ -86,7 +86,7 @@ defmodule Combo.Socket.Transport do
 
   ### Booting
 
-  When you list a socket under `Phoenix.Endpoint.socket/3`, Phoenix
+  When you list a socket under `Combo.Endpoint.socket/3`, Phoenix
   will automatically start the socket module under its supervision tree,
   however Phoenix does not manage any transport.
 

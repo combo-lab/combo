@@ -185,11 +185,11 @@ config :hello, Hello.Repo,
   pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
 ```
 
-Finally, if you plan on using websockets, then we will need to decrease the timeout for the websocket transport in `lib/hello_web/endpoint.ex`. If you do not plan on using websockets, then leaving it set to false is fine. You can find further explanation of the options available at the [documentation](https://hexdocs.pm/phoenix/Phoenix.Endpoint.html#socket/3-websocket-configuration).
+Finally, if you plan on using websockets, then we will need to decrease the timeout for the websocket transport in `lib/hello_web/endpoint.ex`. If you do not plan on using websockets, then leaving it set to false is fine. You can find further explanation of the options available at the [documentation](https://hexdocs.pm/phoenix/Combo.Endpoint.html#socket/3-websocket-configuration).
 
 ```elixir
 defmodule HelloWeb.Endpoint do
-  use Phoenix.Endpoint, otp_app: :hello
+  use Combo.Endpoint, otp_app: :hello
 
   socket "/socket", HelloWeb.UserSocket,
     websocket: [timeout: 45_000]

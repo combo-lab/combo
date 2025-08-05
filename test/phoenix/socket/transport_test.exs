@@ -15,7 +15,7 @@ defmodule Combo.Socket.TransportTest do
     secret_key_base: @secret_key_base
 
   defmodule Endpoint do
-    use Phoenix.Endpoint, otp_app: :phoenix
+    use Combo.Endpoint, otp_app: :phoenix
 
     @session_config [
       store: :cookie,

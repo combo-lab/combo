@@ -203,7 +203,7 @@ defmodule Phoenix.MixProject do
     # Phoenix
     # Combo.Channel
     # Phoenix.Controller
-    # Phoenix.Endpoint
+    # Combo.Endpoint
     # Combo.Naming
     # Phoenix.Logger
     # Combo.Param
@@ -245,8 +245,8 @@ defmodule Phoenix.MixProject do
       ],
       "Adapters and Plugs": [
         Phoenix.CodeReloader,
-        Phoenix.Endpoint.Cowboy2Adapter,
-        Phoenix.Endpoint.SyncCodeReloadPlug
+        Combo.Endpoint.Cowboy2Adapter,
+        Combo.Endpoint.SyncCodeReloadPlug
       ],
       Digester: [
         Phoenix.Digester.Compressor,

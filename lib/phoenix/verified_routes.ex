@@ -563,7 +563,7 @@ defmodule Combo.VerifiedRoutes do
   @doc """
   Generates url to a static asset given its file path.
 
-  See `c:Phoenix.Endpoint.static_url/0` and `c:Phoenix.Endpoint.static_path/1` for more information.
+  See `c:Combo.Endpoint.static_url/0` and `c:Combo.Endpoint.static_path/1` for more information.
 
   ## Examples
 
@@ -596,7 +596,7 @@ defmodule Combo.VerifiedRoutes do
   def static_url(other, path) do
     raise ArgumentError,
           "expected a %Plug.Conn{}, a %Combo.Socket{}, a struct with an :endpoint key, " <>
-            "or a Phoenix.Endpoint when building static url for #{path}, got: #{inspect(other)}"
+            "or a Combo.Endpoint when building static url for #{path}, got: #{inspect(other)}"
   end
 
   @doc """
@@ -637,7 +637,7 @@ defmodule Combo.VerifiedRoutes do
   defp guarded_unverified_url(other, path, _params) do
     raise ArgumentError,
           "expected a %Plug.Conn{}, a %Combo.Socket{}, a %URI{}, a struct with an :endpoint key, " <>
-            "or a Phoenix.Endpoint when building url at #{path}, got: #{inspect(other)}"
+            "or a Combo.Endpoint when building url at #{path}, got: #{inspect(other)}"
   end
 
   defp concat_url(url, path) when is_binary(path), do: url <> path
@@ -649,7 +649,7 @@ defmodule Combo.VerifiedRoutes do
   @doc """
   Generates path to a static asset given its file path.
 
-  See `c:Phoenix.Endpoint.static_path/1` for more information.
+  See `c:Combo.Endpoint.static_path/1` for more information.
 
   ## Examples
 
@@ -722,7 +722,7 @@ defmodule Combo.VerifiedRoutes do
   def unverified_path(other, router, path, _params) do
     raise ArgumentError,
           "expected a %Plug.Conn{}, a %Combo.Socket{}, a %URI{}, a struct with an :endpoint key, " <>
-            "or a Phoenix.Endpoint when building path for #{inspect(router)} at #{path}, got: #{inspect(other)}"
+            "or a Combo.Endpoint when building path for #{inspect(router)} at #{path}, got: #{inspect(other)}"
   end
 
   defp append_params(path, params) when params == %{} or params == [], do: path
@@ -848,7 +848,7 @@ defmodule Combo.VerifiedRoutes do
   @doc """
   Generates an integrity hash to a static asset given its file path.
 
-  See `c:Phoenix.Endpoint.static_integrity/1` for more information.
+  See `c:Combo.Endpoint.static_integrity/1` for more information.
 
   ## Examples
 

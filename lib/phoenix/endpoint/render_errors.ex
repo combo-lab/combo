@@ -1,7 +1,7 @@
-defmodule Phoenix.Endpoint.RenderErrors do
+defmodule Combo.Endpoint.RenderErrors do
   # This module is used to catch failures and render them using a view.
   #
-  # This module is automatically used in `Phoenix.Endpoint` where it
+  # This module is automatically used in `Combo.Endpoint` where it
   # overrides `call/2` to provide rendering. Once the error is
   # rendered, the error is reraised unless it is a NoRouteError.
   #
@@ -14,7 +14,7 @@ defmodule Phoenix.Endpoint.RenderErrors do
 
   import Plug.Conn
 
-  require Phoenix.Endpoint
+  require Combo.Endpoint
   require Logger
 
   alias Combo.Router.NoRouteError
@@ -25,7 +25,7 @@ defmodule Phoenix.Endpoint.RenderErrors do
   @doc false
   defmacro __using__(opts) do
     quote do
-      @before_compile Phoenix.Endpoint.RenderErrors
+      @before_compile Combo.Endpoint.RenderErrors
       @phoenix_render_errors unquote(opts)
     end
   end

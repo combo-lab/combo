@@ -1,5 +1,5 @@
-defmodule Phoenix.Endpoint.Supervisor do
-  # This module contains the logic used by most functions in Phoenix.Endpoint
+defmodule Combo.Endpoint.Supervisor do
+  # This module contains the logic used by most functions in Combo.Endpoint
   # as well the supervisor for sockets, adapters, watchers, etc.
   @moduledoc false
 
@@ -203,7 +203,7 @@ defmodule Phoenix.Endpoint.Supervisor do
     watchers = conf[:watchers] || []
 
     if server? || conf[:force_watchers] do
-      Enum.map(watchers, &{Phoenix.Endpoint.Watcher, &1})
+      Enum.map(watchers, &{Combo.Endpoint.Watcher, &1})
     else
       []
     end
@@ -236,7 +236,7 @@ defmodule Phoenix.Endpoint.Supervisor do
       # Even though Bandit is the default in apps generated via the installer,
       # we continue to use Cowboy as the default if not explicitly specified for
       # backwards compatibility. TODO: Change this to default to Bandit in 2.0
-      adapter: Phoenix.Endpoint.Cowboy2Adapter,
+      adapter: Combo.Endpoint.Cowboy2Adapter,
       cache_static_manifest: nil,
       check_origin: true,
       http: false,
@@ -377,7 +377,7 @@ defmodule Phoenix.Endpoint.Supervisor do
     static_url = build_url(endpoint, static_url_config) |> String.Chars.URI.to_string()
     static_path = empty_string_if_root(static_url_config[:path] || "/")
 
-    :persistent_term.put({Phoenix.Endpoint, endpoint}, %{
+    :persistent_term.put({Combo.Endpoint, endpoint}, %{
       struct_url: struct_url,
       url: String.Chars.URI.to_string(struct_url),
       host: host,

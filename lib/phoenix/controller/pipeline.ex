@@ -6,7 +6,7 @@ defmodule Phoenix.Controller.Pipeline do
     quote do
       @behaviour Plug
 
-      require Phoenix.Endpoint
+      require Combo.Endpoint
       import Phoenix.Controller.Pipeline
 
       Module.register_attribute(__MODULE__, :plugs, accumulate: true)

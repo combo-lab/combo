@@ -8,7 +8,7 @@ defmodule Combo.Socket do
 
   The same socket can be used to receive events from different transports.
   Phoenix supports `websocket` and `longpoll` options when invoking
-  `Phoenix.Endpoint.socket/3` in your endpoint. `websocket` is set by default
+  `Combo.Endpoint.socket/3` in your endpoint. `websocket` is set by default
   and `longpoll` can also be configured explicitly.
 
       socket "/socket", MyAppWeb.Socket, websocket: true, longpoll: false
@@ -89,7 +89,7 @@ defmodule Combo.Socket do
 
   Alternatively, you can configure your endpoint socket to trigger more
   fullsweep garbage collections more frequently, by setting the `:fullsweep_after`
-  option for websockets. See `Phoenix.Endpoint.socket/3` for more info.
+  option for websockets. See `Combo.Endpoint.socket/3` for more info.
 
   ## Client-server communication
 
@@ -196,7 +196,7 @@ defmodule Combo.Socket do
   """
 
   require Logger
-  require Phoenix.Endpoint
+  require Combo.Endpoint
   alias Combo.Socket
   alias Combo.Socket.{Broadcast, Message, Reply}
 
@@ -215,7 +215,7 @@ defmodule Combo.Socket do
   To deny connection, return `:error` or `{:error, term}`. To control the
   response the client receives in that case, [define an error handler in the
   websocket
-  configuration](https://hexdocs.pm/phoenix/Phoenix.Endpoint.html#socket/3-websocket-configuration).
+  configuration](https://hexdocs.pm/phoenix/Combo.Endpoint.html#socket/3-websocket-configuration).
 
   See `Combo.Token` documentation for examples in
   performing token verification on connect.

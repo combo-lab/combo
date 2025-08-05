@@ -116,7 +116,7 @@ defmodule Phoenix.Integration.LongPollChannelsTest do
   end
 
   defmodule Endpoint do
-    use Phoenix.Endpoint, otp_app: :phoenix
+    use Combo.Endpoint, otp_app: :phoenix
 
     socket "/ws", UserSocket,
       longpoll: [
@@ -312,7 +312,7 @@ defmodule Phoenix.Integration.LongPollChannelsTest do
 
   for %{adapter: adapter} <- [
         %{adapter: Bandit.PhoenixAdapter},
-        %{adapter: Phoenix.Endpoint.Cowboy2Adapter}
+        %{adapter: Combo.Endpoint.Cowboy2Adapter}
       ] do
     describe "adapter: #{inspect(adapter)}" do
       @describetag adapter: adapter

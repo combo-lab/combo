@@ -1,4 +1,4 @@
-defmodule Phoenix.Endpoint.SyncCodeReloadPlug do
+defmodule Combo.Endpoint.SyncCodeReloadPlug do
   @moduledoc ~S"""
   Wraps an Endpoint, attempting to sync with Phoenix's code reloader if 
   an exception is raised which indicates that we may be in the middle of a reload.

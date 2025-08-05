@@ -206,7 +206,7 @@ For now, it suffices to say that each plug defines a slice of request processing
 
 ```elixir
 defmodule HelloWeb.Endpoint do
-  use Phoenix.Endpoint, otp_app: :hello
+  use Combo.Endpoint, otp_app: :hello
 
   plug Plug.Static, ...
   plug Plug.RequestId
@@ -223,7 +223,7 @@ Each of these plugs have a specific responsibility that we will learn later. The
 
 At this moment, you may be thinking this can be a lot of steps to simply render a page. However, as our application grows in complexity, we will see that each layer serves a distinct purpose:
 
-  * endpoint (`Phoenix.Endpoint`) - the endpoint contains the common and initial path that all requests go through. If you want something to happen on all requests, it goes in the endpoint.
+  * endpoint (`Combo.Endpoint`) - the endpoint contains the common and initial path that all requests go through. If you want something to happen on all requests, it goes in the endpoint.
 
   * router (`Combo.Router`) - the router is responsible for dispatching verb/path pairs to controllers. The router also allows us to scope functionality. For example, some pages in your application may require user authentication, others may not.
 
