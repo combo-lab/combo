@@ -3,7 +3,7 @@ defmodule Combo.Template.CEExEngine.Compiler do
   The compiler for `Combo.Template.CEExEngine`.
   """
 
-  alias Phoenix.Env
+  alias Combo.Env
   alias Combo.Template.CEExEngine.Compiler.Engine
 
   @doc false

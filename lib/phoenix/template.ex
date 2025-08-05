@@ -68,7 +68,7 @@ defmodule Combo.Template do
   ```
   """
 
-  alias Phoenix.Env
+  alias Combo.Env
 
   @type path :: binary()
   @type root :: binary()

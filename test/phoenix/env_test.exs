@@ -1,7 +1,7 @@
-defmodule Phoenix.EnvTest do
+defmodule Combo.EnvTest do
   use ExUnit.Case
 
-  alias Phoenix.Env
+  alias Combo.Env
 
   @app :phoenix
 

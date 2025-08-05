@@ -1,4 +1,4 @@
-defmodule Phoenix.Env do
+defmodule Combo.Env do
   @moduledoc false
 
   def get_all_env(namespace) do
