@@ -1,11 +1,11 @@
-defmodule Phoenix.Digester.Compressor do
+defmodule Combo.Digester.Compressor do
   @moduledoc ~S"""
-  Defines the `Phoenix.Digester.Compressor` behaviour for
+  Defines the `Combo.Digester.Compressor` behaviour for
   implementing static file compressors.
 
   A custom compressor expects 2 functions to be implemented.
 
-  By default, Phoenix uses only `Phoenix.Digester.Gzip` to compress
+  By default, Phoenix uses only `Combo.Digester.Gzip` to compress
   static files, but additional compressors can be defined and added
   to the digest process.
 
@@ -16,7 +16,7 @@ defmodule Phoenix.Digester.Compressor do
   module to the list of configured Phoenix static compressors.
 
       defmodule MyApp.BrotliCompressor do
-        @behaviour Phoenix.Digester.Compressor
+        @behaviour Combo.Digester.Compressor
 
         def compress_file(file_path, content) do
           valid_extension = Path.extname(file_path) in Application.fetch_env!(:phoenix, :gzippable_exts)
@@ -36,7 +36,7 @@ defmodule Phoenix.Digester.Compressor do
 
       # config/config.exs
       config :phoenix,
-        static_compressors: [Phoenix.Digester.Gzip, MyApp.BrotliCompressor],
+        static_compressors: [Combo.Digester.Gzip, MyApp.BrotliCompressor],
         # ...
   """
   @callback compress_file(Path.t(), binary()) :: {:ok, binary()} | :error

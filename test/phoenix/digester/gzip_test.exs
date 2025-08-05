@@ -1,6 +1,6 @@
-defmodule Phoenix.Digester.GzipTest do
+defmodule Combo.Digester.GzipTest do
   use ExUnit.Case, async: true
-  alias Phoenix.Digester.Gzip
+  alias Combo.Digester.Gzip
 
   test "compress_file/2 compresses file" do
     file_path = "test/fixtures/digest/priv/static/css/app.css"

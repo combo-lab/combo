@@ -1,4 +1,4 @@
-defmodule Phoenix.Digester do
+defmodule Combo.Digester do
   @manifest_version 1
   @empty_manifest %{
     "version" => @manifest_version,

@@ -66,7 +66,7 @@ defmodule Phoenix.MixProject do
         filter_parameters: ["password"],
         serve_endpoints: false,
         gzippable_exts: ~w(.js .map .css .txt .text .html .json .svg .eot .ttf),
-        static_compressors: [Phoenix.Digester.Gzip]
+        static_compressors: [Combo.Digester.Gzip]
       ]
     ]
   end
@@ -249,8 +249,8 @@ defmodule Phoenix.MixProject do
         Combo.Endpoint.SyncCodeReloadPlug
       ],
       Digester: [
-        Phoenix.Digester.Compressor,
-        Phoenix.Digester.Gzip
+        Combo.Digester.Compressor,
+        Combo.Digester.Gzip
       ],
       Socket: [
         Combo.Socket.Broadcast,

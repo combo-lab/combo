@@ -1,8 +1,8 @@
-defmodule Phoenix.Digester.Gzip do
+defmodule Combo.Digester.Gzip do
   @moduledoc ~S"""
-  Gzip compressor for Phoenix.Digester
+  Gzip compressor for Combo.Digester
   """
-  @behaviour Phoenix.Digester.Compressor
+  @behaviour Combo.Digester.Compressor
 
   def compress_file(file_path, content) do
     if Path.extname(file_path) in Application.fetch_env!(:phoenix, :gzippable_exts) do

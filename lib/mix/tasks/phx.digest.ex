@@ -70,7 +70,7 @@ defmodule Mix.Tasks.Phx.Digest do
     output_path = opts[:output] || input_path
     with_vsn? = Keyword.merge(@default_opts, opts)[:vsn]
 
-    case Phoenix.Digester.compile(input_path, output_path, with_vsn?) do
+    case Combo.Digester.compile(input_path, output_path, with_vsn?) do
       :ok ->
         # We need to call build structure so everything we have
         # generated into priv is copied to _build in case we have

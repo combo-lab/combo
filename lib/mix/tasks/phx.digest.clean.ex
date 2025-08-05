@@ -58,8 +58,8 @@ defmodule Mix.Tasks.Phx.Digest.Clean do
 
     result =
       if all?,
-        do: Phoenix.Digester.clean_all(output_path),
-        else: Phoenix.Digester.clean(output_path, age, keep)
+        do: Combo.Digester.clean_all(output_path),
+        else: Combo.Digester.clean(output_path, age, keep)
 
     case result do
       :ok ->
