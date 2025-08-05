@@ -462,7 +462,7 @@ defmodule Phoenix.Controller.ControllerTest do
       assert conn.params["_format"] == "json"
 
       exception =
-        assert_raise Phoenix.NotAcceptableError, ~r/unknown format "json"/, fn ->
+        assert_raise Combo.NotAcceptableError, ~r/unknown format "json"/, fn ->
           accepts(conn(:get, "/", _format: "json"), ~w(html))
         end
 
@@ -550,7 +550,7 @@ defmodule Phoenix.Controller.ControllerTest do
       assert conn.params["_format"] == nil
 
       exception =
-        assert_raise Phoenix.NotAcceptableError, ~r/no supported media type in accept/, fn ->
+        assert_raise Combo.NotAcceptableError, ~r/no supported media type in accept/, fn ->
           accepts(with_accept("text/html; q=0.7, application/json; q=0.8"), ~w(xml))
         end
 
@@ -762,9 +762,9 @@ defmodule Phoenix.Controller.ControllerTest do
   end
 
   describe "scrub_params/2" do
-    test "raises Phoenix.MissingParamError for missing key" do
+    test "raises Combo.MissingParamError for missing key" do
       assert_raise(
-        Phoenix.MissingParamError,
+        Combo.MissingParamError,
         ~r"expected key \"foo\" to be present in params",
         fn ->
           conn(:get, "/") |> fetch_query_params |> scrub_params("foo")
@@ -772,7 +772,7 @@ defmodule Phoenix.Controller.ControllerTest do
       )
 
       assert_raise(
-        Phoenix.MissingParamError,
+        Combo.MissingParamError,
         ~r"expected key \"foo\" to be present in params",
         fn ->
           conn(:get, "/?foo=") |> fetch_query_params |> scrub_params("foo")

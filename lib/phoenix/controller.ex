@@ -1325,7 +1325,7 @@ defmodule Phoenix.Controller do
   is likely no need to invoke `scrub_params/2`.
 
   If the `required_key` is not present, it will
-  raise `Phoenix.MissingParamError`.
+  raise `Combo.MissingParamError`.
 
   ## Examples
 
@@ -1337,7 +1337,7 @@ defmodule Phoenix.Controller do
     param = Map.get(conn.params, required_key) |> scrub_param()
 
     unless param do
-      raise Phoenix.MissingParamError, key: required_key
+      raise Combo.MissingParamError, key: required_key
     end
 
     params = Map.put(conn.params, required_key, param)
@@ -1478,7 +1478,7 @@ defmodule Phoenix.Controller do
     * the accept header specified more than one media type preceded
       or followed by the wildcard media type "`*/*`"
 
-  This function raises `Phoenix.NotAcceptableError`, which is rendered
+  This function raises `Combo.NotAcceptableError`, which is rendered
   with status 406, whenever the server cannot serve a response in any
   of the formats expected by the client.
 
@@ -1534,7 +1534,7 @@ defmodule Phoenix.Controller do
     if format in accepted do
       put_format(conn, format)
     else
-      raise Phoenix.NotAcceptableError,
+      raise Combo.NotAcceptableError,
         message: "unknown format #{inspect(format)}, expected one of #{inspect(accepted)}",
         accepts: accepted
     end
@@ -1619,7 +1619,7 @@ defmodule Phoenix.Controller do
 
   @spec refuse(term(), [tuple], [binary]) :: no_return()
   defp refuse(_conn, given, accepted) do
-    raise Phoenix.NotAcceptableError,
+    raise Combo.NotAcceptableError,
       accepts: accepted,
       message: """
       no supported media type in accept header.

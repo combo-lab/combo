@@ -176,7 +176,7 @@ defmodule Phoenix.Endpoint.RenderErrors do
           |> Controller.put_view(fallback_view)
       end
     rescue
-      e in Phoenix.NotAcceptableError ->
+      e in Combo.NotAcceptableError ->
         Logger.debug(
           "Could not render errors due to #{Exception.message(e)}. " <>
             "Errors will be rendered using the first accepted format #{inspect(fallback_format)} as fallback. " <>

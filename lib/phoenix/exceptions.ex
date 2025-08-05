@@ -1,4 +1,4 @@
-defmodule Phoenix.NotAcceptableError do
+defmodule Combo.NotAcceptableError do
   @moduledoc """
   Raised when one of the `accept*` headers is not accepted by the server.
 
@@ -15,7 +15,7 @@ defmodule Phoenix.NotAcceptableError do
   defexception message: nil, accepts: [], plug_status: 406
 end
 
-defmodule Phoenix.MissingParamError do
+defmodule Combo.MissingParamError do
   @moduledoc """
   Raised when a key is expected to be present in the request parameters,
   but is not.
@@ -34,11 +34,11 @@ defmodule Phoenix.MissingParamError do
   def exception([key: value]) do
     msg = "expected key #{inspect value} to be present in params, " <>
           "please send the expected key or adapt your scrub_params/2 call"
-    %Phoenix.MissingParamError{message: msg}
+    %Combo.MissingParamError{message: msg}
   end
 end
 
-defmodule Phoenix.ActionClauseError do
+defmodule Combo.ActionClauseError do
   exception_keys =
     FunctionClauseError.__struct__()
     |> Map.keys()
@@ -66,7 +66,7 @@ defmodule Phoenix.ActionClauseError do
   end
 end
 
-defimpl Plug.Exception, for: Phoenix.ActionClauseError do
+defimpl Plug.Exception, for: Combo.ActionClauseError do
   def status(_), do: 400
   def actions(_), do: []
 end

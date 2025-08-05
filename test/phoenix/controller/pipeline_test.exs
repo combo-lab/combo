@@ -157,8 +157,8 @@ defmodule Phoenix.Controller.PipelineTest do
     assert layout(conn) == false
   end
 
-  test "transforms top-level function clause errors into Phoenix.ActionClauseError" do
-    assert_raise Phoenix.ActionClauseError, fn ->
+  test "transforms top-level function clause errors into Combo.ActionClauseError" do
+    assert_raise Combo.ActionClauseError, fn ->
       MyController.call(stack_conn(), :no_match)
     end
   end
@@ -174,7 +174,7 @@ defmodule Phoenix.Controller.PipelineTest do
     assert conn.status == 200
     assert conn.resp_body == "show"
 
-    assert_raise Phoenix.ActionClauseError, fn ->
+    assert_raise Combo.ActionClauseError, fn ->
       ActionController.call(stack_conn(), :no_match)
     end
   end
