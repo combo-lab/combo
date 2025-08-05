@@ -3,7 +3,7 @@ defmodule <%= web_module %>.ChannelCase do
   This module defines the test case to be used by
   channel tests.
 
-  Such tests rely on `Phoenix.ChannelTest` and also
+  Such tests rely on `Combo.ChannelTest` and also
   import other functionality to make it easier
   to build common data structures and query the data layer.
 
@@ -20,7 +20,7 @@ defmodule <%= web_module %>.ChannelCase do
   using do
     quote do
       # Import conveniences for testing with channels
-      import Phoenix.ChannelTest
+      import Combo.ChannelTest
       import <%= web_module %>.ChannelCase
 
       # The default endpoint for testing

@@ -24,7 +24,7 @@ defmodule Phoenix.Integration.LongPollChannelsTest do
   )
 
   defmodule RoomChannel do
-    use Phoenix.Channel, log_join: :info, log_handle_in: :info
+    use Combo.Channel, log_join: :info, log_handle_in: :info
 
     intercept ["new_msg", "bin_ack"]
 

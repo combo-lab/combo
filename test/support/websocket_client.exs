@@ -1,6 +1,6 @@
 defmodule Phoenix.Integration.WebsocketClient do
   @moduledoc """
-  A WebSocket client used to test Phoenix.Channel
+  A WebSocket client used to test Combo.Channel
   """
 
   use GenServer

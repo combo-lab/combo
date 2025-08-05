@@ -183,7 +183,7 @@ assert_error_sent 404, fn ->
 end
 ```
 
-`assert_error_sent` is a testing helper provided by `Phoenix.ConnTest`. In this case, it verifies that:
+`assert_error_sent` is a testing helper provided by `Combo.ConnTest`. In this case, it verifies that:
 
   1. An exception was raised
   2. The exception has a status code equivalent to 404 (which stands for Not Found)

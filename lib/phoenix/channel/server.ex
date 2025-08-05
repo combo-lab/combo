@@ -1,4 +1,4 @@
-defmodule Phoenix.Channel.Server do
+defmodule Combo.Channel.Server do
   @moduledoc false
   use GenServer, restart: :temporary
 
@@ -27,7 +27,7 @@ defmodule Phoenix.Channel.Server do
 
     case starter.(socket, from, child_spec) do
       {:ok, pid} ->
-        send(pid, {Phoenix.Channel, payload, from, socket})
+        send(pid, {Combo.Channel, payload, from, socket})
         mon_ref = Process.monitor(pid)
 
         receive do
@@ -289,14 +289,14 @@ defmodule Phoenix.Channel.Server do
   end
 
   @doc false
-  def handle_info({Phoenix.Channel, auth_payload, {pid, _} = from, socket}, ref) do
+  def handle_info({Combo.Channel, auth_payload, {pid, _} = from, socket}, ref) do
     Process.demonitor(ref)
     %{channel: channel, topic: topic, private: private} = socket
     Process.put(:"$initial_call", {channel, :join, 3})
     Process.put(:"$callers", [pid])
 
     # TODO: replace with Process.put_label/2 when we require Elixir 1.17
-    Process.put(:"$process_label", {Phoenix.Channel, channel, topic})
+    Process.put(:"$process_label", {Combo.Channel, channel, topic})
 
     socket = %{
       socket

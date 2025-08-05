@@ -28,7 +28,7 @@ defmodule Phoenix.Integration.WebSocketChannelsTest do
   end
 
   defmodule RoomChannel do
-    use Phoenix.Channel
+    use Combo.Channel
 
     intercept ["new_msg"]
 
@@ -80,7 +80,7 @@ defmodule Phoenix.Integration.WebSocketChannelsTest do
       {:ok, :init}
     end
 
-    def handle_info({Phoenix.Channel, payload, from, socket}, :init) do
+    def handle_info({Combo.Channel, payload, from, socket}, :init) do
       case payload["action"] do
         "ok" ->
           GenServer.reply(from, {:ok, %{"action" => "ok"}})
@@ -458,7 +458,7 @@ defmodule Phoenix.Integration.WebSocketChannelsTest do
         end
 
         test "transport session is extracted to the socket connect_info" do
-          import Phoenix.ConnTest
+          import Combo.ConnTest
           path = "ws://127.0.0.1:#{@port}/ws/connect_info/websocket?vsn=#{@vsn}"
 
           # GET the cookie and CSRF token

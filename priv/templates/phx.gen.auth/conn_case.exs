@@ -30,7 +30,7 @@
     maybe_set_token_authenticated_at(token, opts[:token_authenticated_at])
 
     conn
-    |> Phoenix.ConnTest.init_test_session(%{})
+    |> Combo.ConnTest.init_test_session(%{})
     |> Plug.Conn.put_session(:<%= schema.singular %>_token, token)
   end
 

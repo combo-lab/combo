@@ -1,8 +1,8 @@
-defmodule Phoenix.Channel.ChannelTest do
+defmodule Combo.Channel.ChannelTest do
   use ExUnit.Case, async: true
 
   @pubsub __MODULE__.PubSub
-  import Phoenix.Channel
+  import Combo.Channel
 
   setup_all do
     start_supervised! {Phoenix.PubSub, name: @pubsub, pool_size: 1}
@@ -97,7 +97,7 @@ defmodule Phoenix.Channel.ChannelTest do
 
   test "pushing to transport" do
     socket = %Phoenix.Socket{
-      serializer: Phoenix.ChannelTest.NoopSerializer,
+      serializer: Combo.ChannelTest.NoopSerializer,
       topic: "sometopic",
       transport_pid: self(),
       joined: true
@@ -114,7 +114,7 @@ defmodule Phoenix.Channel.ChannelTest do
 
   test "replying to transport" do
     socket = %Phoenix.Socket{
-      serializer: Phoenix.ChannelTest.NoopSerializer,
+      serializer: Combo.ChannelTest.NoopSerializer,
       ref: "123",
       topic: "sometopic",
       transport_pid: self(),
@@ -134,7 +134,7 @@ defmodule Phoenix.Channel.ChannelTest do
 
   test "replying just status to transport" do
     socket = %Phoenix.Socket{
-      serializer: Phoenix.ChannelTest.NoopSerializer,
+      serializer: Combo.ChannelTest.NoopSerializer,
       ref: "123",
       topic: "sometopic",
       transport_pid: self(),

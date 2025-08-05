@@ -608,7 +608,7 @@ defmodule Phoenix.Integration.CodeGeneration.AppWithScopesTest do
 
               conn =
                 conn
-                |> Phoenix.ConnTest.init_test_session(%{})
+                |> Combo.ConnTest.init_test_session(%{})
                 |> Plug.Conn.put_session(:user_id, id)
 
               %{conn: conn, scope: scope}

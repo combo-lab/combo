@@ -17,7 +17,7 @@ defmodule Phoenix.Test.ChannelTest do
   end
 
   defmodule EmptyChannel do
-    use Phoenix.Channel
+    use Combo.Channel
 
     def join(_, _, socket), do: {:ok, socket}
 
@@ -27,7 +27,7 @@ defmodule Phoenix.Test.ChannelTest do
   end
 
   defmodule Channel do
-    use Phoenix.Channel
+    use Combo.Channel
 
     intercept ["stop"]
 
@@ -145,7 +145,7 @@ defmodule Phoenix.Test.ChannelTest do
   end
 
   defmodule CodeChangeChannel do
-    use Phoenix.Channel
+    use Combo.Channel
 
     def join(_topic, _params, socket), do: {:ok, socket}
 
@@ -172,7 +172,7 @@ defmodule Phoenix.Test.ChannelTest do
 
   @endpoint Endpoint
   @moduletag :capture_log
-  import Phoenix.ChannelTest
+  import Combo.ChannelTest
 
   setup_all do
     start_supervised! @endpoint
@@ -191,7 +191,7 @@ defmodule Phoenix.Test.ChannelTest do
              endpoint: @endpoint,
              handler: UserSocket,
              pubsub_server: Phoenix.Test.ChannelTest.PubSub,
-             serializer: Phoenix.ChannelTest.NoopSerializer
+             serializer: Combo.ChannelTest.NoopSerializer
            } = socket(UserSocket)
   end
 
@@ -201,7 +201,7 @@ defmodule Phoenix.Test.ChannelTest do
              assigns: %{hello: :world},
              endpoint: @endpoint,
              pubsub_server: Phoenix.Test.ChannelTest.PubSub,
-             serializer: Phoenix.ChannelTest.NoopSerializer,
+             serializer: Combo.ChannelTest.NoopSerializer,
              handler: UserSocket
            } = socket(UserSocket, "user:id", %{hello: :world})
   end
@@ -216,7 +216,7 @@ defmodule Phoenix.Test.ChannelTest do
                  assigns: %{hello: :world},
                  endpoint: @endpoint,
                  pubsub_server: Phoenix.Test.ChannelTest.PubSub,
-                 serializer: Phoenix.ChannelTest.NoopSerializer,
+                 serializer: Combo.ChannelTest.NoopSerializer,
                  handler: UserSocket
                } = socket(UserSocket, "user:id", %{hello: :world}, test_process: pid)
       end)
@@ -234,9 +234,9 @@ defmodule Phoenix.Test.ChannelTest do
     assert socket.endpoint == @endpoint
     assert socket.pubsub_server == Phoenix.Test.ChannelTest.PubSub
     assert socket.topic == "foo:socket"
-    assert {Phoenix.ChannelTest, _} = socket.transport
+    assert {Combo.ChannelTest, _} = socket.transport
     assert socket.transport_pid == self()
-    assert socket.serializer == Phoenix.ChannelTest.NoopSerializer
+    assert socket.serializer == Combo.ChannelTest.NoopSerializer
     assert socket.assigns == %{hello: :world, original: :assign}
     assert %{socket | joined: true} == client
 
@@ -517,14 +517,14 @@ defmodule Phoenix.Test.ChannelTest do
   test "code_change/3 proxies to channel" do
     socket = %Socket{channel: Channel}
 
-    assert Phoenix.Channel.Server.code_change(:old, socket, :extra) ==
+    assert Combo.Channel.Server.code_change(:old, socket, :extra) ==
              {:ok, socket}
   end
 
   test "code_change/3 is overridable" do
     socket = %Socket{channel: CodeChangeChannel}
 
-    assert Phoenix.Channel.Server.code_change(:old, socket, :extra) ==
+    assert Combo.Channel.Server.code_change(:old, socket, :extra) ==
              {:error, :cant}
   end
 

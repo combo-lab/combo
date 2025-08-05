@@ -1,4 +1,4 @@
-defmodule Phoenix.Channel do
+defmodule Combo.Channel do
   @moduledoc ~S"""
   Defines a Phoenix Channel.
 
@@ -177,7 +177,7 @@ defmodule Phoenix.Channel do
   choose to intercept the event and have their `handle_out/3` callback triggered.
   This allows the event's payload to be customized on a socket by socket basis
   to append extra information, or conditionally filter the message from being
-  delivered. If the event is not intercepted with `Phoenix.Channel.intercept/1`,
+  delivered. If the event is not intercepted with `Combo.Channel.intercept/1`,
   then the message is pushed directly to the client:
 
       intercept ["new_msg", "user_joined"]
@@ -257,7 +257,7 @@ defmodule Phoenix.Channel do
   single channel to relevant notifications via your endpoint. For example:
 
       defmodule MyAppWeb.Endpoint.NotificationChannel do
-        use Phoenix.Channel
+        use Combo.Channel
 
         def join("notification:" <> user_id, %{"ids" => ids}, socket) do
           topics = for product_id <- ids, do: "product:#{product_id}"
@@ -303,9 +303,9 @@ defmodule Phoenix.Channel do
 
   From Erlang/OTP 20, channels automatically hibernate to save memory
   after 15_000 milliseconds of inactivity. This can be customized by
-  passing the `:hibernate_after` option to `use Phoenix.Channel`:
+  passing the `:hibernate_after` option to `use Combo.Channel`:
 
-      use Phoenix.Channel, hibernate_after: 60_000
+      use Combo.Channel, hibernate_after: 60_000
 
   You can also set it to `:infinity` to fully disable it.
 
@@ -314,7 +314,7 @@ defmodule Phoenix.Channel do
   You can configure the shutdown behavior of each channel used when your
   application is shutting down by setting the `:shutdown` value on use:
 
-      use Phoenix.Channel, shutdown: 5_000
+      use Combo.Channel, shutdown: 5_000
 
   It defaults to 5_000. The supported values are described under the
   in the `Supervisor` module docs.
@@ -324,17 +324,17 @@ defmodule Phoenix.Channel do
   By default, channel `"join"` and `"handle_in"` events are logged, using
   the level `:info` and `:debug`, respectively. You can change the level used
   for each event, or disable logs, per event type by setting the `:log_join`
-  and `:log_handle_in` options when using `Phoenix.Channel`. For example, the
+  and `:log_handle_in` options when using `Combo.Channel`. For example, the
   following configuration logs join events as `:info`, but disables logging for
   incoming events:
 
-      use Phoenix.Channel, log_join: :info, log_handle_in: false
+      use Combo.Channel, log_join: :info, log_handle_in: false
 
   Note that changing an event type's level doesn't affect what is logged,
   unless you set it to `false`, it affects the associated level.
   """
   alias Phoenix.Socket
-  alias Phoenix.Channel.Server
+  alias Combo.Channel.Server
 
   @type payload :: map | term | {:binary, binary}
   @type reply :: status :: atom | {status :: atom, response :: payload}
@@ -472,7 +472,7 @@ defmodule Phoenix.Channel do
       end
 
       def start_link(triplet) do
-        GenServer.start_link(Phoenix.Channel.Server, triplet,
+        GenServer.start_link(Combo.Channel.Server, triplet,
           hibernate_after: @phoenix_hibernate_after
         )
       end

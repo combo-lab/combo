@@ -1,5 +1,5 @@
 locals_without_parens = [
-  # Phoenix.Channel
+  # Combo.Channel
   intercept: 1,
 
   # Phoenix.Router
@@ -44,7 +44,7 @@ locals_without_parens = [
   channel: 2,
   channel: 3,
 
-  # Phoenix.ChannelTest
+  # Combo.ChannelTest
   assert_broadcast: 2,
   assert_broadcast: 3,
   assert_push: 2,
@@ -60,7 +60,7 @@ locals_without_parens = [
   refute_reply: 3,
   refute_reply: 4,
 
-  # Phoenix.ConnTest
+  # Combo.ConnTest
   assert_error_sent: 2,
 
   # Combo.Template

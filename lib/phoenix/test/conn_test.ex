@@ -1,4 +1,4 @@
-defmodule Phoenix.ConnTest do
+defmodule Combo.ConnTest do
   @moduledoc """
   Conveniences for testing Phoenix endpoints and connection related helpers.
 
@@ -8,7 +8,7 @@ defmodule Phoenix.ConnTest do
 
   ## Endpoint testing
 
-  `Phoenix.ConnTest` typically works against endpoints. That's the preferred way
+  `Combo.ConnTest` typically works against endpoints. That's the preferred way
   to test anything that your router dispatches to:
 
       @endpoint MyAppWeb.Endpoint
@@ -113,19 +113,19 @@ defmodule Phoenix.ConnTest do
   @doc false
   defmacro __using__(_) do
     IO.warn """
-    Using Phoenix.ConnTest is deprecated, instead of:
+    Using Combo.ConnTest is deprecated, instead of:
 
-        use Phoenix.ConnTest
+        use Combo.ConnTest
 
     do:
 
         import Plug.Conn
-        import Phoenix.ConnTest
+        import Combo.ConnTest
     """, Macro.Env.stacktrace(__CALLER__)
 
     quote do
       import Plug.Conn
-      import Phoenix.ConnTest
+      import Combo.ConnTest
     end
   end
 
@@ -165,7 +165,7 @@ defmodule Phoenix.ConnTest do
     defmacro unquote(method)(conn, path_or_action, params_or_body \\ nil) do
       method = unquote(method)
       quote do
-        Phoenix.ConnTest.dispatch(unquote(conn), @endpoint, unquote(method),
+        Combo.ConnTest.dispatch(unquote(conn), @endpoint, unquote(method),
                                   unquote(path_or_action), unquote(params_or_body))
       end
     end

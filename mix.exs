@@ -201,7 +201,7 @@ defmodule Phoenix.MixProject do
     # Ungrouped Modules:
     #
     # Phoenix
-    # Phoenix.Channel
+    # Combo.Channel
     # Phoenix.Controller
     # Phoenix.Endpoint
     # Phoenix.Naming
@@ -240,8 +240,8 @@ defmodule Phoenix.MixProject do
         Combo.HTML.FormField
       ],
       Testing: [
-        Phoenix.ChannelTest,
-        Phoenix.ConnTest
+        Combo.ChannelTest,
+        Combo.ConnTest
       ],
       "Adapters and Plugs": [
         Phoenix.CodeReloader,

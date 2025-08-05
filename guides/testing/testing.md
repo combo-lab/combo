@@ -94,14 +94,14 @@ defmodule HelloWeb.ConnCase do
 
       # Import conveniences for testing with connections
       import Plug.Conn
-      import Phoenix.ConnTest
+      import Combo.ConnTest
       import HelloWeb.ConnCase
     end
   end
   
   setup tags do
     Hello.DataCase.setup_sandbox(tags)
-    {:ok, conn: Phoenix.ConnTest.build_conn()}
+    {:ok, conn: Combo.ConnTest.build_conn()}
   end
 end
 ```
@@ -114,12 +114,12 @@ Now that we have made this module a case template, we can define callbacks that 
 
 Next, it wires up `:verified_routes` to allow us to use `~p` based paths in our test just like we do in the rest of our application to easily generate paths and URLs in our tests.
 
-Finally, we import [`Plug.Conn`](https://hexdocs.pm/plug/Plug.Conn.html), so all of the connection helpers available in controllers are also available in tests, and then imports [`Phoenix.ConnTest`](https://hexdocs.pm/phoenix/Phoenix.ConnTest.html). You can consult these modules to learn all functionality available.
+Finally, we import [`Plug.Conn`](https://hexdocs.pm/plug/Plug.Conn.html), so all of the connection helpers available in controllers are also available in tests, and then imports [`Combo.ConnTest`](https://hexdocs.pm/phoenix/Combo.ConnTest.html). You can consult these modules to learn all functionality available.
 
 Then our case template defines a `setup` block. The `setup` block will be called before test. Most of the setup block is on setting up the SQL Sandbox, which we will talk about later. In the last line of the `setup` block, we will find this:
 
 ```elixir
-{:ok, conn: Phoenix.ConnTest.build_conn()}
+{:ok, conn: Combo.ConnTest.build_conn()}
 ```
 
 The last line of `setup` can return test metadata that will be available in each test. The metadata we are passing forward here is a newly built `Plug.Conn`. In our test, we extract the connection out of this metadata at the very beginning of our test:

@@ -19,7 +19,7 @@ defmodule Phoenix.Socket do
 
       channel "room:lobby", MyAppWeb.LobbyChannel
 
-  See `Phoenix.Channel` for more information on channels.
+  See `Combo.Channel` for more information on channels.
 
   ## Socket Behaviour
 
@@ -139,7 +139,7 @@ defmodule Phoenix.Socket do
   Once the process is initialized, it will receive the following
   message:
 
-      {Phoenix.Channel, auth_payload, from, socket}
+      {Combo.Channel, auth_payload, from, socket}
 
   A custom channel implementation MUST invoke
   `GenServer.reply(from, {:ok | :error, reply_payload})` during its
@@ -192,7 +192,7 @@ defmodule Phoenix.Socket do
   a `{:socket_close, pid, reason}` message is sent to the socket before
   shutdown.
 
-  Custom channel implementations cannot be tested with `Phoenix.ChannelTest`.
+  Custom channel implementations cannot be tested with `Combo.ChannelTest`.
   """
 
   require Logger
@@ -384,7 +384,7 @@ defmodule Phoenix.Socket do
   match the channel handler. Most use-cases will use the `"topic:*"` pattern to
   allow more versatile topic scoping.
 
-  See `Phoenix.Channel` for more information
+  See `Combo.Channel` for more information
   """
   defmacro channel(topic_pattern, module, opts \\ []) do
     module = expand_alias(module, __CALLER__)
@@ -692,7 +692,7 @@ defmodule Phoenix.Socket do
        ) do
     case socket.handler.__channel__(topic) do
       {channel, opts} ->
-        case Phoenix.Channel.Server.join(socket, channel, message, opts) do
+        case Combo.Channel.Server.join(socket, channel, message, opts) do
           {:ok, reply, pid} ->
             reply = %Reply{
               join_ref: join_ref,

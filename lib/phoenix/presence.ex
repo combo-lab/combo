@@ -507,7 +507,7 @@ defmodule Phoenix.Presence do
     Task.shutdown(task)
 
     Enum.each(computed_diffs, fn {topic, presence_diff} ->
-      Phoenix.Channel.Server.local_broadcast(
+      Combo.Channel.Server.local_broadcast(
         state.pubsub_server,
         topic,
         "presence_diff",

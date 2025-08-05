@@ -3,7 +3,7 @@ defmodule Phoenix.Debug do
   Functions for runtime introspection and debugging of Phoenix applications.
 
   This module provides utilities for inspecting and debugging Phoenix applications.
-  At the moment, it only includes functions related to `Phoenix.Socket` and `Phoenix.Channel`
+  At the moment, it only includes functions related to `Phoenix.Socket` and `Combo.Channel`
   processes.
 
   It allows you to:
@@ -11,7 +11,7 @@ defmodule Phoenix.Debug do
     * List all currently connected `Phoenix.Socket` transport processes.
     * List all channels for a given `Phoenix.Socket` process.
     * Get the socket of a channel process.
-    * Check if a process is a `Phoenix.Socket` or `Phoenix.Channel`.
+    * Check if a process is a `Phoenix.Socket` or `Combo.Channel`.
 
   """
 
@@ -79,16 +79,16 @@ defmodule Phoenix.Debug do
   end
 
   @doc """
-  Checks if the given pid is a `Phoenix.Channel` process.
+  Checks if the given pid is a `Combo.Channel` process.
 
   Note: this function returns false for [custom channels](https://hexdocs.pm/phoenix/Phoenix.Socket.html#module-custom-channels).
   """
   def channel_process?(pid) do
-    # Phoenix.Channel sets the "$process_label" to {Phoenix.Socket, handler_module, id}
+    # Combo.Channel sets the "$process_label" to {Phoenix.Socket, handler_module, id}
     with info when is_list(info) <- Process.info(pid, [:dictionary]),
          dictionary when not is_nil(dictionary) <- keyfind(info, :dictionary),
          label when not is_nil(label) <- keyfind(dictionary, :"$process_label"),
-         {Phoenix.Channel, mod, topic} when is_atom(mod) and is_binary(topic) <- label do
+         {Combo.Channel, mod, topic} when is_atom(mod) and is_binary(topic) <- label do
       true
     else
       _ -> false
@@ -142,7 +142,7 @@ defmodule Phoenix.Debug do
   @doc """
   Returns the socket of the channel process.
 
-  Note: this only works for channels defined with `use Phoenix.Channel`.
+  Note: this only works for channels defined with `use Combo.Channel`.
   For LiveViews, use the functions defined in `Phoenix.LiveView.Debug` instead.
 
   ## Examples
@@ -158,7 +158,7 @@ defmodule Phoenix.Debug do
   """
   def socket(channel_pid) do
     if channel_process?(channel_pid) do
-      {:ok, Phoenix.Channel.Server.socket(channel_pid)}
+      {:ok, Combo.Channel.Server.socket(channel_pid)}
     else
       {:error, :not_alive_or_not_a_channel}
     end

@@ -4,7 +4,7 @@ defmodule Phoenix.DebugTest do
   alias Phoenix.Debug
 
   # we cannot easily test the Phoenix.Debug functions with the regular
-  # Phoenix.ChannelTest functions, because they use the test process
+  # Combo.ChannelTest functions, because they use the test process
   # itself as the transport process
   defmodule FakeSocket do
     use GenServer
@@ -28,7 +28,7 @@ defmodule Phoenix.DebugTest do
     use GenServer
 
     def init(state) do
-      Process.put(:"$process_label", {Phoenix.Channel, __MODULE__.Channel, "room:lobby"})
+      Process.put(:"$process_label", {Combo.Channel, __MODULE__.Channel, "room:lobby"})
       {:ok, state}
     end
 

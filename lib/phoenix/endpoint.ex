@@ -445,27 +445,27 @@ defmodule Phoenix.Endpoint do
       end
 
       def broadcast_from(from, topic, event, msg) do
-        Phoenix.Channel.Server.broadcast_from(pubsub_server!(), from, topic, event, msg)
+        Combo.Channel.Server.broadcast_from(pubsub_server!(), from, topic, event, msg)
       end
 
       def broadcast_from!(from, topic, event, msg) do
-        Phoenix.Channel.Server.broadcast_from!(pubsub_server!(), from, topic, event, msg)
+        Combo.Channel.Server.broadcast_from!(pubsub_server!(), from, topic, event, msg)
       end
 
       def broadcast(topic, event, msg) do
-        Phoenix.Channel.Server.broadcast(pubsub_server!(), topic, event, msg)
+        Combo.Channel.Server.broadcast(pubsub_server!(), topic, event, msg)
       end
 
       def broadcast!(topic, event, msg) do
-        Phoenix.Channel.Server.broadcast!(pubsub_server!(), topic, event, msg)
+        Combo.Channel.Server.broadcast!(pubsub_server!(), topic, event, msg)
       end
 
       def local_broadcast(topic, event, msg) do
-        Phoenix.Channel.Server.local_broadcast(pubsub_server!(), topic, event, msg)
+        Combo.Channel.Server.local_broadcast(pubsub_server!(), topic, event, msg)
       end
 
       def local_broadcast_from(from, topic, event, msg) do
-        Phoenix.Channel.Server.local_broadcast_from(pubsub_server!(), from, topic, event, msg)
+        Combo.Channel.Server.local_broadcast_from(pubsub_server!(), from, topic, event, msg)
       end
 
       defp pubsub_server! do

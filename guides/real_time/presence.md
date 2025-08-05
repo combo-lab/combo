@@ -62,7 +62,7 @@ Next, we will create the channel that we'll communicate presence over. After a u
 
 ```elixir
 defmodule HelloWeb.RoomChannel do
-  use Phoenix.Channel
+  use Combo.Channel
   alias HelloWeb.Presence
 
   def join("room:lobby", %{"name" => name}, socket) do

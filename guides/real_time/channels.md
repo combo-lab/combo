@@ -235,7 +235,7 @@ The first priority of your channels is to authorize clients to join a given topi
 
 ```elixir
 defmodule HelloWeb.RoomChannel do
-  use Phoenix.Channel
+  use Combo.Channel
 
   def join("room:lobby", _message, socket) do
     {:ok, socket}
@@ -344,7 +344,7 @@ We handle incoming events with `handle_in/3`. We can pattern match on the event 
 
 ```elixir
 defmodule HelloWeb.RoomChannel do
-  use Phoenix.Channel
+  use Combo.Channel
 
   def join("room:lobby", _message, socket) do
     {:ok, socket}

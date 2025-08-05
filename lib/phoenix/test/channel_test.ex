@@ -1,4 +1,4 @@
-defmodule Phoenix.ChannelTest do
+defmodule Combo.ChannelTest do
   @moduledoc """
   Conveniences for testing Phoenix channels.
 
@@ -154,7 +154,7 @@ defmodule Phoenix.ChannelTest do
 
   alias Phoenix.Socket
   alias Phoenix.Socket.{Broadcast, Message, Reply}
-  alias Phoenix.Channel.Server
+  alias Combo.Channel.Server
 
   defmodule NoopSerializer do
     @behaviour Phoenix.Socket.Serializer
@@ -176,17 +176,17 @@ defmodule Phoenix.ChannelTest do
   @doc false
   defmacro __using__(_) do
     IO.warn """
-    Using Phoenix.ChannelTest is deprecated, instead of:
+    Using Combo.ChannelTest is deprecated, instead of:
 
-        use Phoenix.ChannelTest
+        use Combo.ChannelTest
 
     do:
 
-        import Phoenix.ChannelTest
+        import Combo.ChannelTest
     """, Macro.Env.stacktrace(__CALLER__)
 
     quote do
-      import Phoenix.ChannelTest
+      import Combo.ChannelTest
     end
   end
 
@@ -290,13 +290,13 @@ defmodule Phoenix.ChannelTest do
   end
 
   @doc false
-  @deprecated "Phoenix.ChannelTest.socket/0 is deprecated, please call socket/1 instead"
+  @deprecated "Combo.ChannelTest.socket/0 is deprecated, please call socket/1 instead"
   defmacro socket() do
     socket(nil, nil, [], [], __CALLER__)
   end
 
   @doc false
-  @deprecated "Phoenix.ChannelTest.socket/2 is deprecated, please call socket/4 instead"
+  @deprecated "Combo.ChannelTest.socket/2 is deprecated, please call socket/4 instead"
   defmacro socket(id, assigns) do
     socket(nil, id, assigns, [], __CALLER__)
   end

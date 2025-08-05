@@ -56,7 +56,7 @@ defmodule HelloWeb.ChannelCase do
   using do
     quote do
       # Import conveniences for testing with channels
-      import Phoenix.ChannelTest
+      import Combo.ChannelTest
       import HelloWeb.ChannelCase
 
       # The default endpoint for testing
@@ -71,7 +71,7 @@ defmodule HelloWeb.ChannelCase do
 end
 ```
 
-It is very straight-forward. It sets up a case template that imports all of `Phoenix.ChannelTest` on use. In the `setup` block, it starts the SQL Sandbox, which we discussed in the [Testing contexts guide](testing_contexts.html).
+It is very straight-forward. It sets up a case template that imports all of `Combo.ChannelTest` on use. In the `setup` block, it starts the SQL Sandbox, which we discussed in the [Testing contexts guide](testing_contexts.html).
 
 ## Subscribe and joining
 
@@ -156,4 +156,4 @@ Since the `handle_out/3` event is only triggered when we call `broadcast/3` from
 
 The line `broadcast_from!(socket, "broadcast", %{"some" => "data"})` will trigger the `handle_out/3` callback which pushes the same event and payload back to the client. To test this, we do `assert_push "broadcast", %{"some" => "data"}`.
 
-That's it. Now you are ready to develop and fully test real-time applications. To learn more about other functionality provided when testing channels, check out the documentation for [`Phoenix.ChannelTest`](https://hexdocs.pm/phoenix/Phoenix.ChannelTest.html).
+That's it. Now you are ready to develop and fully test real-time applications. To learn more about other functionality provided when testing channels, check out the documentation for [`Combo.ChannelTest`](https://hexdocs.pm/phoenix/Combo.ChannelTest.html).

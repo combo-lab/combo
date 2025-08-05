@@ -52,7 +52,7 @@ end
 defmodule Phoenix.Test.ConnTest do
   use ExUnit.Case, async: true
   import Plug.Conn
-  import Phoenix.ConnTest
+  import Combo.ConnTest
   alias Phoenix.Test.ConnTest.{Router, RedirRouter}
 
   @moduletag :capture_log

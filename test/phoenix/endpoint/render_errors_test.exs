@@ -203,7 +203,7 @@ defmodule Phoenix.Endpoint.RenderErrorsTest do
       end
 
     {^status, _, body} =
-      Phoenix.ConnTest.assert_error_sent(status, fn ->
+      Combo.ConnTest.assert_error_sent(status, fn ->
         try do
           func.()
         catch
@@ -339,6 +339,6 @@ defmodule Phoenix.Endpoint.RenderErrorsTest do
 
   test "exception page for NoRouteError with plug_status 404 renders and does not reraise" do
     conn = call(Router, :get, "/unknown")
-    assert Phoenix.ConnTest.response(conn, 404) =~ "Got 404 from error with GET"
+    assert Combo.ConnTest.response(conn, 404) =~ "Got 404 from error with GET"
   end
 end
