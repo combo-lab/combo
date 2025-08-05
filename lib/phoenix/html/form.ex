@@ -1,14 +1,14 @@
-defmodule Phoenix.HTML.Form do
+defmodule Combo.HTML.Form do
   @moduledoc ~S"""
-  Define a `Phoenix.HTML.Form` struct and functions to interact with it.
+  Define a `Combo.HTML.Form` struct and functions to interact with it.
 
   For building actual forms in your Phoenix application, see
   [the `Phoenix.Component.form/1` component](https://hexdocs.pm/phoenix_live_view/Phoenix.Component.html#form/1).
 
   ## Access behaviour
 
-  The `Phoenix.HTML.Form` struct implements the `Access` behaviour.
-  When you do `form[field]`, it returns a `Phoenix.HTML.FormField`
+  The `Combo.HTML.Form` struct implements the `Access` behaviour.
+  When you do `form[field]`, it returns a `Combo.HTML.FormField`
   struct with the `id`, `name`, `value`, and `errors` prefilled.
 
   The field name can be either an atom or a string. If it is an atom,
@@ -17,20 +17,20 @@ defmodule Phoenix.HTML.Form do
   field. Forms backed by an `Ecto.Changeset` only support atom field names.
 
   It is possible to "access" fields which do not exist in the source data
-  structure. A `Phoenix.HTML.FormField` struct will be dynamically created
+  structure. A `Combo.HTML.FormField` struct will be dynamically created
   with some attributes such as `name` and `id` populated.
 
   ## Custom implementations
 
-  There is a protocol named `Phoenix.HTML.FormData` which can be implemented
-  by any data structure that wants to be cast to the `Phoenix.HTML.Form` struct.
+  There is a protocol named `Combo.HTML.FormData` which can be implemented
+  by any data structure that wants to be cast to the `Combo.HTML.Form` struct.
   """
 
   alias Combo.SafeHTML
-  alias Phoenix.HTML.Form
+  alias Combo.HTML.Form
 
   @doc """
-  Defines the Phoenix.HTML.Form struct.
+  Defines the Combo.HTML.Form struct.
 
   Its fields are:
 
@@ -75,7 +75,7 @@ defmodule Phoenix.HTML.Form do
             index: nil
 
   @type t :: %Form{
-          source: Phoenix.HTML.FormData.t(),
+          source: Combo.HTML.FormData.t(),
           name: String.t(),
           data: %{field => term},
           action: atom(),
@@ -106,7 +106,7 @@ defmodule Phoenix.HTML.Form do
 
   defp fetch(%{errors: errors} = form, field, field_as_string) do
     {:ok,
-     %Phoenix.HTML.FormField{
+     %Combo.HTML.FormField{
        errors: field_errors(errors, field),
        field: field,
        form: form,
@@ -119,7 +119,7 @@ defmodule Phoenix.HTML.Form do
   @doc """
   Returns a value of a corresponding form field.
 
-  The `form` should either be a `Phoenix.HTML.Form` or an atom.
+  The `form` should either be a `Combo.HTML.Form` or an atom.
   The field is either a string or an atom. If the field is given
   as an atom, it will attempt to look data with atom keys. If
   a string, it will look data with string keys.
@@ -146,7 +146,7 @@ defmodule Phoenix.HTML.Form do
   @doc """
   Returns an id of a corresponding form field.
 
-  The form should either be a `Phoenix.HTML.Form` or an atom.
+  The form should either be a `Combo.HTML.Form` or an atom.
   """
   @spec input_id(t | atom, field) :: String.t()
   def input_id(%{id: nil}, field), do: "#{field}"
@@ -164,7 +164,7 @@ defmodule Phoenix.HTML.Form do
 
   Useful for radio buttons and inputs like multiselect checkboxes.
   """
-  @spec input_id(t | atom, field, Phoenix.HTML.Safe.t()) :: String.t()
+  @spec input_id(t | atom, field, Combo.HTML.Safe.t()) :: String.t()
   def input_id(name, field, value) do
     {:safe, value} = SafeHTML.to_safe(value)
     value_id = value |> IO.iodata_to_binary() |> String.replace(~r/\W/u, "_")
@@ -174,12 +174,13 @@ defmodule Phoenix.HTML.Form do
   @doc """
   Returns a name of a corresponding form field.
 
-  The first argument should either be a `Phoenix.HTML.Form` or an atom.
+  The first argument should either be a `Combo.HTML.Form` or an atom.
 
   ## Examples
 
-      iex> Phoenix.HTML.Form.input_name(:user, :first_name)
+      iex> Combo.HTML.Form.input_name(:user, :first_name)
       "user[first_name]"
+
   """
   @spec input_name(t | atom, field) :: String.t()
   def input_name(form_or_name, field)

@@ -1,4 +1,4 @@
-defmodule Phoenix.HTML.FormField do
+defmodule Combo.HTML.FormField do
   @moduledoc """
   The struct returned by `form[field]`.
 
@@ -18,8 +18,8 @@ defmodule Phoenix.HTML.FormField do
           id: String.t(),
           name: String.t(),
           errors: [term],
-          field: Phoenix.HTML.Form.field(),
-          form: Phoenix.HTML.Form.t(),
+          field: Combo.HTML.Form.field(),
+          form: Combo.HTML.Form.t(),
           value: term
         }
 

@@ -1170,7 +1170,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrDocsInvalidType do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :invalid, :any, doc: :foo
         def func(assigns), do: ~CE[]
@@ -1183,7 +1183,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.SlotDocsInvalidType do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         slot :invalid, doc: :foo
         def func(assigns), do: ~CE[]
@@ -1194,7 +1194,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
   test "raise on invalid attr/2 args" do
     assert_raise FunctionClauseError, fn ->
       defmodule Phoenix.ComponentTest.AttrMacroInvalidName do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr "not an atom", :any
         def func(assigns), do: ~CE[]
@@ -1203,7 +1203,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise FunctionClauseError, fn ->
       defmodule Phoenix.ComponentTest.AttrMacroInvalidOpts do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :attr, :any, "not a list"
         def func(assigns), do: ~CE[]
@@ -1214,7 +1214,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
   test "raise on invalid slot/3 args" do
     assert_raise FunctionClauseError, fn ->
       defmodule Phoenix.ComponentTest.SlotMacroInvalidName do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         slot("not an atom")
         def func(assigns), do: ~CE[]
@@ -1223,7 +1223,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise FunctionClauseError, fn ->
       defmodule Phoenix.ComponentTest.SlotMacroInvalidOpts do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         slot :slot, "not a list"
         def func(assigns), do: ~CE[]
@@ -1236,7 +1236,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.MultiClauseWrong do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :foo, :any
         def func(assigns = %{foo: _}), do: ~CE[]
@@ -1253,7 +1253,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.MultiClauseWrong do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         slot :inner_block
         def func(assigns = %{foo: _}), do: ~CE[]
@@ -1271,7 +1271,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrOnInvalidFunction do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :foo, :any
         def func(a, b), do: a + b
@@ -1285,7 +1285,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.SlotOnInvalidFunction do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         slot :inner_block
         def func(a, b), do: a + b
@@ -1298,7 +1298,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrOnInvalidFunction do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         def func(assigns = %{baz: _}), do: ~CE[]
 
@@ -1312,7 +1312,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.SlotOnInvalidFunction do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         def func(assigns = %{baz: _}), do: ~CE[]
 
@@ -1326,7 +1326,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrTypeNotSupported do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :foo, :not_a_type
         def func(assigns), do: ~CE[]
@@ -1339,7 +1339,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrTypeNotSupported do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :foo, {:fun, "a"}
         def func(assigns), do: ~CE[]
@@ -1352,7 +1352,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrTypeNotSupported do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :foo, {:invalid, 1}
         def func(assigns), do: ~CE[]
@@ -1365,7 +1365,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.SlotAttrTypeNotSupported do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         slot :named do
           attr :foo, :not_a_type
@@ -1381,7 +1381,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.SlotAttrTypeNotSupported do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         slot :named do
           attr :foo, {:fun, "a"}
@@ -1397,7 +1397,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.SlotAttrTypeNotSupported do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         slot :named do
           attr :foo, {:invalid, 1}
@@ -1413,7 +1413,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.SlotAttrGlobalNotSupported do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         slot :named do
           attr :foo, :global
@@ -1427,7 +1427,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
   test "reraise exceptions in slot/3 blocks" do
     assert_raise RuntimeError, "boom!", fn ->
       defmodule Phoenix.ComponentTest.SlotExceptionRaised do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         slot :named do
           raise "boom!"
@@ -1443,7 +1443,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrValueTypeMismatch do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :foo, :string, values: ["a string", :not_a_string]
 
@@ -1457,7 +1457,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrExampleTypeMismatch do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :foo, :string, examples: ["a string", :not_a_string]
 
@@ -1471,7 +1471,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrsValuesNotAList do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :foo, :string, values: :ok
 
@@ -1485,7 +1485,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrsExamplesNotAList do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :foo, :string, examples: :ok
 
@@ -1499,7 +1499,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrsValuesEmptyList do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :foo, :string, values: []
 
@@ -1513,7 +1513,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrsExamplesEmptyList do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :foo, :string, examples: []
 
@@ -1527,7 +1527,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrDefaultTypeMismatch do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :foo, :string, values: ["a string"], examples: ["a string"]
 
@@ -1541,7 +1541,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrDefaultTypeMismatch do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :foo, :string, default: :not_a_string
 
@@ -1556,7 +1556,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrDefaultValuesMismatch do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :foo, :string, default: "boom", values: ["foo", "bar", "baz"]
 
@@ -1570,7 +1570,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrDefaultValuesMismatch do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :foo, :integer, default: 11, values: 1..10
         def func(assigns), do: ~CE[]
@@ -1583,7 +1583,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.SlotAttrDefault do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         slot :named do
           attr :foo, :any, default: :whatever
@@ -1599,7 +1599,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrOptionNotSupported do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :foo, :any, not_an_opt: true
         def func(assigns), do: ~CE[]
@@ -1612,7 +1612,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.SlotAttrOptionNotSupported do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         slot :named do
           attr :foo, :any, not_an_opt: true
@@ -1628,7 +1628,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.AttrDup do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :foo, :any, required: true
         attr :foo, :string
@@ -1642,7 +1642,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.SlotDup do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         slot :foo
         slot :foo
@@ -1656,7 +1656,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.SlotAttrDup do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         slot :named do
           attr :foo, :any, required: true
@@ -1673,7 +1673,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule SlotAttrNameConflict do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         slot :named
         attr :named, :any
@@ -1684,7 +1684,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule SlotAttrNameConflict do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :named, :any
         slot :named
@@ -1715,7 +1715,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule AttrsInDefaultSlot do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         slot :inner_block do
           attr :attr, :any
@@ -1731,7 +1731,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule InnerSlotAttr do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :inner_block, :string
         def func(assigns), do: ~CE[]
@@ -1744,7 +1744,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.MultiGlobal do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :rest, :global
         attr :rest2, :global
@@ -1758,7 +1758,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.GlobalRequiredOpts do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :rest, :global, required: true
         def func(assigns), do: ~CE[{@rest}]
@@ -1771,7 +1771,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.GlobalValueOpts do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :rest, :global, values: ["placeholder", "rel"]
         def func(assigns), do: ~CE[{@rest}]
@@ -1784,7 +1784,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.GlobalExampleOpts do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         attr :rest, :global, examples: ["placeholder", "rel"]
         def func(assigns), do: ~CE[{@rest}]
@@ -1797,7 +1797,7 @@ defmodule Phoenix.Template.CEExEngine.DeclarativeAssignsTest do
 
     assert_raise CompileError, msg, fn ->
       defmodule Phoenix.ComponentTest.InvalidSlotAttr do
-        use Elixir.Phoenix.HTML
+        use Elixir.Combo.HTML
 
         slot :foo, require: true
         def func(assigns), do: ~CE[]

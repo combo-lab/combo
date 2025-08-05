@@ -1,8 +1,7 @@
-defmodule Phoenix.HTML.ComponentsTest do
+defmodule Combo.HTML.ComponentsTest do
   use ExUnit.Case, async: true
 
-  use Phoenix.HTML
-
+  use Combo.HTML
   import Combo.HTMLTest, only: [to_x: 1, sigil_X: 2, sigil_x: 2]
 
   describe "link/1" do

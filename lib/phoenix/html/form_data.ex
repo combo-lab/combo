@@ -1,6 +1,6 @@
-defprotocol Phoenix.HTML.FormData do
+defprotocol Combo.HTML.FormData do
   @moduledoc """
-  Converts a data structure into a `Phoenix.HTML.Form` struct.
+  Converts a data structure into a `Combo.HTML.Form` struct.
 
   ## Ecto integration
 
@@ -11,7 +11,7 @@ defprotocol Phoenix.HTML.FormData do
   """
 
   @doc """
-  Converts a data structure into a [`Phoenix.HTML.Form`](`t:Phoenix.HTML.Form.t/0`) struct.
+  Converts a data structure into a [`Combo.HTML.Form`](`t:Combo.HTML.Form.t/0`) struct.
 
   The options have their meaning defined by the underlying
   implementation but all shared options below are expected to
@@ -26,12 +26,12 @@ defprotocol Phoenix.HTML.FormData do
       be prefixed by the given ID
 
   """
-  @spec to_form(t, Keyword.t()) :: Phoenix.HTML.Form.t()
+  @spec to_form(t, Keyword.t()) :: Combo.HTML.Form.t()
   def to_form(data, options)
 
   @doc """
   Converts the field in the given form based on the data structure
-  into a list of [`Phoenix.HTML.Form`](`t:Phoenix.HTML.Form.t/0`) structs.
+  into a list of [`Combo.HTML.Form`](`t:Combo.HTML.Form.t/0`) structs.
 
   The options have their meaning defined by the underlying
   implementation but all shared options below are expected to
@@ -59,25 +59,25 @@ defprotocol Phoenix.HTML.FormData do
     * `:action` - The user defined action being taken by the form, such
       as `:validate`, `:save`, etc.
   """
-  @spec to_form(t, Phoenix.HTML.Form.t(), Phoenix.HTML.Form.field(), Keyword.t()) ::
-          [Phoenix.HTML.Form.t()]
+  @spec to_form(t, Combo.HTML.Form.t(), Combo.HTML.Form.field(), Keyword.t()) ::
+          [Combo.HTML.Form.t()]
   def to_form(data, form, field, options)
 
   @doc """
   Returns the value for the given field.
   """
-  @spec input_value(t, Phoenix.HTML.Form.t(), Phoenix.HTML.Form.field()) :: term
+  @spec input_value(t, Combo.HTML.Form.t(), Combo.HTML.Form.field()) :: term
   def input_value(data, form, field)
 
   @doc """
   Returns the HTML5 validations that would apply to
   the given field.
   """
-  @spec input_validations(t, Phoenix.HTML.Form.t(), Phoenix.HTML.Form.field()) :: Keyword.t()
+  @spec input_validations(t, Combo.HTML.Form.t(), Combo.HTML.Form.field()) :: Keyword.t()
   def input_validations(data, form, field)
 end
 
-defimpl Phoenix.HTML.FormData, for: Map do
+defimpl Combo.HTML.FormData, for: Map do
   def to_form(map, opts) do
     {name, params, opts} = name_params_and_opts(map, opts)
     {errors, opts} = Keyword.pop(opts, :errors, [])
@@ -88,7 +88,7 @@ defimpl Phoenix.HTML.FormData, for: Map do
       raise ArgumentError, ":id option in form_for must be a binary/string, got: #{inspect(id)}"
     end
 
-    %Phoenix.HTML.Form{
+    %Combo.HTML.Form{
       source: map,
       impl: __MODULE__,
       id: id,
@@ -132,7 +132,7 @@ defimpl Phoenix.HTML.FormData, for: Map do
       # cardinality: one
       is_map(default) ->
         [
-          %Phoenix.HTML.Form{
+          %Combo.HTML.Form{
             source: map,
             impl: __MODULE__,
             id: id,
@@ -159,7 +159,7 @@ defimpl Phoenix.HTML.FormData, for: Map do
         for {{data, params}, index} <- Enum.with_index(entries) do
           index_string = Integer.to_string(index)
 
-          %Phoenix.HTML.Form{
+          %Combo.HTML.Form{
             source: map,
             impl: __MODULE__,
             index: index,

@@ -1,4 +1,4 @@
-defmodule Phoenix.HTML do
+defmodule Combo.HTML do
   @moduledoc ~S'''
   All the things about HTML templates.
 
@@ -809,7 +809,7 @@ defmodule Phoenix.HTML do
 
   ## Form handling
 
-  See `Phoenix.HTML.Form`.
+  See `Combo.HTML.Form`.
 
   ## JavaScript library
 
@@ -854,15 +854,15 @@ defmodule Phoenix.HTML do
   defmacro __using__(opts \\ []) do
     default =
       quote bind_quoted: [opts: opts] do
-        import Phoenix.HTML
+        import Combo.HTML
         import Phoenix.Template, only: [embed_templates: 1]
         use Phoenix.Template.CEExEngine, opts
       end
 
     conditional =
-      if __CALLER__.module != Phoenix.HTML.Components do
+      if __CALLER__.module != Combo.HTML.Components do
         quote do
-          import Phoenix.HTML.Components
+          import Combo.HTML.Components
         end
       end
 

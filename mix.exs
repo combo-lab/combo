@@ -234,10 +234,10 @@ defmodule Phoenix.MixProject do
         Phoenix.Template.HTMLEncoder
       ],
       HTML: [
-        Phoenix.HTML,
-        Phoenix.HTML.Form,
-        Phoenix.HTML.FormData,
-        Phoenix.HTML.FormField
+        Combo.HTML,
+        Combo.HTML.Form,
+        Combo.HTML.FormData,
+        Combo.HTML.FormField
       ],
       Testing: [
         Phoenix.ChannelTest,

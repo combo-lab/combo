@@ -1,4 +1,4 @@
-defmodule Phoenix.HTML.VerificationTest do
+defmodule Combo.HTML.VerificationTest do
   use ExUnit.Case, async: true
 
   import ExUnit.CaptureIO
@@ -12,7 +12,7 @@ defmodule Phoenix.HTML.VerificationTest do
     warnings =
       capture_io(:stderr, fn ->
         defmodule TypeAttrs do
-          use Phoenix.HTML, global_prefixes: ~w(myprefix-)
+          use Combo.HTML, global_prefixes: ~w(myprefix-)
 
           attr :any, :any
           attr :string, :string
@@ -161,7 +161,7 @@ defmodule Phoenix.HTML.VerificationTest do
 
     assert warnings =~ """
            global attribute "global" in component \
-           Phoenix.HTML.VerificationTest.TypeAttrs.func/1 \
+           Combo.HTML.VerificationTest.TypeAttrs.func/1 \
            may not be provided directly
            """
 
@@ -180,7 +180,7 @@ defmodule Phoenix.HTML.VerificationTest do
         ] do
       assert warnings =~ """
              attribute "string" in component \
-             Phoenix.HTML.VerificationTest.TypeAttrs.func/1 \
+             Combo.HTML.VerificationTest.TypeAttrs.func/1 \
              must be a :string, got: #{inspect(value)}
              """
 
@@ -198,7 +198,7 @@ defmodule Phoenix.HTML.VerificationTest do
         ] do
       assert warnings =~ """
              attribute "atom" in component \
-             Phoenix.HTML.VerificationTest.TypeAttrs.func/1 \
+             Combo.HTML.VerificationTest.TypeAttrs.func/1 \
              must be an :atom, got: #{inspect(value)}
              """
 
@@ -218,7 +218,7 @@ defmodule Phoenix.HTML.VerificationTest do
         ] do
       assert warnings =~ """
              attribute "boolean" in component \
-             Phoenix.HTML.VerificationTest.TypeAttrs.func/1 \
+             Combo.HTML.VerificationTest.TypeAttrs.func/1 \
              must be a :boolean, got: #{inspect(value)}
              """
 
@@ -238,7 +238,7 @@ defmodule Phoenix.HTML.VerificationTest do
         ] do
       assert warnings =~ """
              attribute "integer" in component \
-             Phoenix.HTML.VerificationTest.TypeAttrs.func/1 \
+             Combo.HTML.VerificationTest.TypeAttrs.func/1 \
              must be an :integer, got: #{inspect(value)}
              """
 
@@ -258,7 +258,7 @@ defmodule Phoenix.HTML.VerificationTest do
         ] do
       assert warnings =~ """
              attribute "float" in component \
-             Phoenix.HTML.VerificationTest.TypeAttrs.func/1 \
+             Combo.HTML.VerificationTest.TypeAttrs.func/1 \
              must be a :float, got: #{inspect(value)}
              """
 
@@ -278,7 +278,7 @@ defmodule Phoenix.HTML.VerificationTest do
         ] do
       assert warnings =~ """
              attribute "map" in component \
-             Phoenix.HTML.VerificationTest.TypeAttrs.func/1 \
+             Combo.HTML.VerificationTest.TypeAttrs.func/1 \
              must be a :map, got: #{inspect(value)}
              """
 
@@ -298,7 +298,7 @@ defmodule Phoenix.HTML.VerificationTest do
         ] do
       assert warnings =~ """
              attribute "list" in component \
-             Phoenix.HTML.VerificationTest.TypeAttrs.func/1 \
+             Combo.HTML.VerificationTest.TypeAttrs.func/1 \
              must be a :list, got: #{inspect(value)}
              """
 
@@ -310,7 +310,7 @@ defmodule Phoenix.HTML.VerificationTest do
     warnings =
       capture_io(:stderr, fn ->
         defmodule SlotStruct do
-          use Phoenix.HTML
+          use Combo.HTML
 
           attr :uri, URI
           def func(assigns), do: ~CE[]
@@ -332,7 +332,7 @@ defmodule Phoenix.HTML.VerificationTest do
     assert Regex.scan(~r/attribute "uri" in component/, warnings) |> length() == 1
 
     assert warnings =~ """
-           attribute "uri" in component Phoenix.HTML.VerificationTest.SlotStruct.func/1 \
+           attribute "uri" in component Combo.HTML.VerificationTest.SlotStruct.func/1 \
            must be a URI struct, got: 123
            """
 
@@ -343,7 +343,7 @@ defmodule Phoenix.HTML.VerificationTest do
     warnings =
       capture_io(:stderr, fn ->
         defmodule FunAttrs do
-          use Phoenix.HTML
+          use Combo.HTML
 
           attr :any_fun, :fun
           attr :arity_1, {:fun, 1}
@@ -399,14 +399,14 @@ defmodule Phoenix.HTML.VerificationTest do
     assert Regex.scan(~r/attribute "arity_2" in component/, warnings) |> length() == 4
 
     assert warnings =~ """
-           attribute "any_fun" in component Phoenix.HTML.VerificationTest.FunAttrs.func/1 \
+           attribute "any_fun" in component Combo.HTML.VerificationTest.FunAttrs.func/1 \
            must be a function, got: :foo
            """
 
     assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 5}: (file)"
 
     assert warnings =~ """
-           attribute "arity_1" in component Phoenix.HTML.VerificationTest.FunAttrs.func/1 \
+           attribute "arity_1" in component Combo.HTML.VerificationTest.FunAttrs.func/1 \
            must be a function of arity 1, got: a function of arity 2
            """
 
@@ -416,7 +416,7 @@ defmodule Phoenix.HTML.VerificationTest do
     assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 14}: (file)"
 
     assert warnings =~ """
-           attribute "arity_2" in component Phoenix.HTML.VerificationTest.FunAttrs.func/1 \
+           attribute "arity_2" in component Combo.HTML.VerificationTest.FunAttrs.func/1 \
            must be a function of arity 2, got: a function of arity 1
            """
 
@@ -426,7 +426,7 @@ defmodule Phoenix.HTML.VerificationTest do
     assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 23}: (file)"
 
     assert warnings =~ """
-           attribute "arity_1" in slot "myslot" for component Phoenix.HTML.VerificationTest.FunAttrs.func/1 \
+           attribute "arity_1" in slot "myslot" for component Combo.HTML.VerificationTest.FunAttrs.func/1 \
            must be a function of arity 1, got: a function of arity 2
            """
 
@@ -437,7 +437,7 @@ defmodule Phoenix.HTML.VerificationTest do
     warnings =
       capture_io(:stderr, fn ->
         defmodule RequiredAttrs do
-          use Phoenix.HTML
+          use Combo.HTML
 
           attr :name, :any, required: true
           attr :phone, :any
@@ -459,14 +459,14 @@ defmodule Phoenix.HTML.VerificationTest do
 
     assert warnings =~ """
            missing required attribute "email" for component \
-           Phoenix.HTML.VerificationTest.RequiredAttrs.func/1
+           Combo.HTML.VerificationTest.RequiredAttrs.func/1
            """
 
     assert warnings =~ "test/phoenix/html/verification_test.exs:#{line}: (file)"
 
     assert warnings =~ """
            missing required attribute "name" for component \
-           Phoenix.HTML.VerificationTest.RequiredAttrs.func/1
+           Combo.HTML.VerificationTest.RequiredAttrs.func/1
            """
 
     assert warnings =~ "test/phoenix/html/verification_test.exs:#{line}: (file)"
@@ -476,7 +476,7 @@ defmodule Phoenix.HTML.VerificationTest do
     warnings =
       capture_io(:stderr, fn ->
         defmodule UndefinedAttrs do
-          use Phoenix.HTML
+          use Combo.HTML
 
           attr :class, :any
           def func(assigns), do: ~CE[]
@@ -495,14 +495,14 @@ defmodule Phoenix.HTML.VerificationTest do
 
     assert warnings =~ """
            undefined attribute "size" for component \
-           Phoenix.HTML.VerificationTest.UndefinedAttrs.func/1
+           Combo.HTML.VerificationTest.UndefinedAttrs.func/1
            """
 
     assert warnings =~ "test/phoenix/html/verification_test.exs:#{line}: (file)"
 
     assert warnings =~ """
            undefined attribute "width" for component \
-           Phoenix.HTML.VerificationTest.UndefinedAttrs.func/1
+           Combo.HTML.VerificationTest.UndefinedAttrs.func/1
            """
 
     assert warnings =~ "test/phoenix/html/verification_test.exs:#{line}: (file)"
@@ -512,7 +512,7 @@ defmodule Phoenix.HTML.VerificationTest do
     warnings =
       capture_io(:stderr, fn ->
         defmodule AttrValues do
-          use Phoenix.HTML
+          use Combo.HTML
 
           attr :attr, :string, values: ["foo", "bar", "baz"]
           def func_string(assigns), do: ~CE[]
@@ -552,7 +552,7 @@ defmodule Phoenix.HTML.VerificationTest do
 
     assert warnings =~ """
            attribute "attr" in component \
-           Phoenix.HTML.VerificationTest.AttrValues.func_string/1 \
+           Combo.HTML.VerificationTest.AttrValues.func_string/1 \
            must be one of ["foo", "bar", "baz"], got: "boom"
            """
 
@@ -560,7 +560,7 @@ defmodule Phoenix.HTML.VerificationTest do
 
     assert warnings =~ """
            attribute "attr" in component \
-           Phoenix.HTML.VerificationTest.AttrValues.func_string/1 \
+           Combo.HTML.VerificationTest.AttrValues.func_string/1 \
            must be one of ["foo", "bar", "baz"], got: a function of arity 1
            """
 
@@ -568,7 +568,7 @@ defmodule Phoenix.HTML.VerificationTest do
 
     assert warnings =~ """
            attribute "attr" in component \
-           Phoenix.HTML.VerificationTest.AttrValues.func_string_no_values/1 \
+           Combo.HTML.VerificationTest.AttrValues.func_string_no_values/1 \
            must be a :string, got: a function of arity 1
            """
 
@@ -576,7 +576,7 @@ defmodule Phoenix.HTML.VerificationTest do
 
     assert warnings =~ """
            attribute "attr" in component \
-           Phoenix.HTML.VerificationTest.AttrValues.func_atom/1 \
+           Combo.HTML.VerificationTest.AttrValues.func_atom/1 \
            must be one of [:foo, :bar, :baz], got: :boom
            """
 
@@ -584,7 +584,7 @@ defmodule Phoenix.HTML.VerificationTest do
 
     assert warnings =~ """
            attribute "attr" in component \
-           Phoenix.HTML.VerificationTest.AttrValues.func_integer/1 \
+           Combo.HTML.VerificationTest.AttrValues.func_integer/1 \
            must be one of 1..10, got: 11
            """
 
@@ -595,7 +595,7 @@ defmodule Phoenix.HTML.VerificationTest do
     warnings =
       capture_io(:stderr, fn ->
         defmodule RequiredSlots do
-          use Phoenix.HTML
+          use Combo.HTML
 
           slot(:inner_block, required: true)
 
@@ -645,14 +645,14 @@ defmodule Phoenix.HTML.VerificationTest do
 
     assert warnings =~ """
            missing required slot "inner_block" for component \
-           Phoenix.HTML.VerificationTest.RequiredSlots.func/1
+           Combo.HTML.VerificationTest.RequiredSlots.func/1
            """
 
     assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 3}: (file)"
 
     assert warnings =~ """
            missing required slot "named" for component \
-           Phoenix.HTML.VerificationTest.RequiredSlots.func_named_slot/1
+           Combo.HTML.VerificationTest.RequiredSlots.func_named_slot/1
            """
 
     assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 9}: (file)"
@@ -662,7 +662,7 @@ defmodule Phoenix.HTML.VerificationTest do
     warnings =
       capture_io(:stderr, fn ->
         defmodule SlotAttrs do
-          use Phoenix.HTML
+          use Combo.HTML
 
           slot :slot do
             attr :any, :any
@@ -803,7 +803,7 @@ defmodule Phoenix.HTML.VerificationTest do
       assert warnings =~ """
              attribute "string" \
              in slot \"slot\" \
-             for component Phoenix.HTML.VerificationTest.SlotAttrs.func/1 \
+             for component Combo.HTML.VerificationTest.SlotAttrs.func/1 \
              must be a :string, got: #{inspect(value)}
              """
 
@@ -821,7 +821,7 @@ defmodule Phoenix.HTML.VerificationTest do
       assert warnings =~ """
              attribute "atom" \
              in slot \"slot\" \
-             for component Phoenix.HTML.VerificationTest.SlotAttrs.func/1 \
+             for component Combo.HTML.VerificationTest.SlotAttrs.func/1 \
              must be an :atom, got: #{inspect(value)}
              """
 
@@ -841,7 +841,7 @@ defmodule Phoenix.HTML.VerificationTest do
       assert warnings =~ """
              attribute "boolean" \
              in slot \"slot\" \
-             for component Phoenix.HTML.VerificationTest.SlotAttrs.func/1 \
+             for component Combo.HTML.VerificationTest.SlotAttrs.func/1 \
              must be a :boolean, got: #{inspect(value)}
              """
 
@@ -861,7 +861,7 @@ defmodule Phoenix.HTML.VerificationTest do
       assert warnings =~ """
              attribute "integer" \
              in slot \"slot\" \
-             for component Phoenix.HTML.VerificationTest.SlotAttrs.func/1 \
+             for component Combo.HTML.VerificationTest.SlotAttrs.func/1 \
              must be an :integer, got: #{inspect(value)}
              """
 
@@ -881,7 +881,7 @@ defmodule Phoenix.HTML.VerificationTest do
       assert warnings =~ """
              attribute "float" \
              in slot \"slot\" \
-             for component Phoenix.HTML.VerificationTest.SlotAttrs.func/1 \
+             for component Combo.HTML.VerificationTest.SlotAttrs.func/1 \
              must be a :float, got: #{inspect(value)}
              """
 
@@ -901,7 +901,7 @@ defmodule Phoenix.HTML.VerificationTest do
       assert warnings =~ """
              attribute "list" \
              in slot \"slot\" \
-             for component Phoenix.HTML.VerificationTest.SlotAttrs.func/1 \
+             for component Combo.HTML.VerificationTest.SlotAttrs.func/1 \
              must be a :list, got: #{inspect(value)}
              """
 
@@ -913,7 +913,7 @@ defmodule Phoenix.HTML.VerificationTest do
     warnings =
       capture_io(:stderr, fn ->
         defmodule SlotWithoutDoBlockValidateFalse do
-          use Phoenix.HTML
+          use Combo.HTML
 
           slot :item, validate_attrs: false
 
@@ -942,7 +942,7 @@ defmodule Phoenix.HTML.VerificationTest do
     warnings =
       capture_io(:stderr, fn ->
         defmodule SlotWithoutDoBlock do
-          use Phoenix.HTML
+          use Combo.HTML
 
           slot :item, validate_attrs: true
 
@@ -966,7 +966,7 @@ defmodule Phoenix.HTML.VerificationTest do
 
     assert warnings =~ """
            undefined attribute "class" in slot "item" for component \
-           Phoenix.HTML.VerificationTest.SlotWithoutDoBlock.func_slot_wo_do_block/1
+           Combo.HTML.VerificationTest.SlotWithoutDoBlock.func_slot_wo_do_block/1
            """
   end
 
@@ -974,7 +974,7 @@ defmodule Phoenix.HTML.VerificationTest do
     warnings =
       capture_io(:stderr, fn ->
         defmodule SlotAttrValues do
-          use Phoenix.HTML
+          use Combo.HTML
 
           slot :named do
             attr :string, :string, values: ["foo", "bar", "baz"]
@@ -1004,7 +1004,7 @@ defmodule Phoenix.HTML.VerificationTest do
 
     assert warnings =~ """
            attribute "string" in slot "named" for component \
-           Phoenix.HTML.VerificationTest.SlotAttrValues.func/1 \
+           Combo.HTML.VerificationTest.SlotAttrValues.func/1 \
            must be one of ["foo", "bar", "baz"], got: "boom"
            """
 
@@ -1012,7 +1012,7 @@ defmodule Phoenix.HTML.VerificationTest do
 
     assert warnings =~ """
            attribute "atom" in slot "named" for component \
-           Phoenix.HTML.VerificationTest.SlotAttrValues.func/1 \
+           Combo.HTML.VerificationTest.SlotAttrValues.func/1 \
            must be one of [:foo, :bar, :baz], got: :boom
            """
 
@@ -1020,7 +1020,7 @@ defmodule Phoenix.HTML.VerificationTest do
 
     assert warnings =~ """
            attribute "integer" in slot "named" for component \
-           Phoenix.HTML.VerificationTest.SlotAttrValues.func/1 \
+           Combo.HTML.VerificationTest.SlotAttrValues.func/1 \
            must be one of 1..10, got: 11
            """
 
@@ -1031,7 +1031,7 @@ defmodule Phoenix.HTML.VerificationTest do
     warnings =
       capture_io(:stderr, fn ->
         defmodule RequiredSlotAttrs do
-          use Phoenix.HTML
+          use Combo.HTML
 
           slot :slot do
             attr :attr, :string, required: true
@@ -1071,7 +1071,7 @@ defmodule Phoenix.HTML.VerificationTest do
            missing required attribute "attr" \
            in slot "slot" \
            for component \
-           Phoenix.HTML.VerificationTest.RequiredSlotAttrs.func/1
+           Combo.HTML.VerificationTest.RequiredSlotAttrs.func/1
            """
 
     assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 1}: (file)"
@@ -1080,7 +1080,7 @@ defmodule Phoenix.HTML.VerificationTest do
            missing required attribute "attr" \
            in slot "slot" \
            for component \
-           Phoenix.HTML.VerificationTest.RequiredSlotAttrs.func/1
+           Combo.HTML.VerificationTest.RequiredSlotAttrs.func/1
            """
 
     assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 3}: (file)"
@@ -1090,7 +1090,7 @@ defmodule Phoenix.HTML.VerificationTest do
     warnings =
       capture_io(:stderr, fn ->
         defmodule UndefinedSlots do
-          use Phoenix.HTML
+          use Combo.HTML
 
           attr :attr, :any
 
@@ -1130,14 +1130,14 @@ defmodule Phoenix.HTML.VerificationTest do
 
     assert warnings =~ """
            undefined slot "inner_block" for component \
-           Phoenix.HTML.VerificationTest.UndefinedSlots.fun_no_slots/1
+           Combo.HTML.VerificationTest.UndefinedSlots.fun_no_slots/1
            """
 
     assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 3}: (file)"
 
     assert warnings =~ """
            undefined slot "undefined" for component \
-           Phoenix.HTML.VerificationTest.UndefinedSlots.func/1
+           Combo.HTML.VerificationTest.UndefinedSlots.func/1
            """
 
     assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 8}: (file)"
@@ -1146,7 +1146,7 @@ defmodule Phoenix.HTML.VerificationTest do
            undefined attribute "undefined" \
            in slot "named" \
            for component \
-           Phoenix.HTML.VerificationTest.UndefinedSlots.func_undefined_slot_attrs/1
+           Combo.HTML.VerificationTest.UndefinedSlots.func_undefined_slot_attrs/1
            """
 
     assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 12}: (file)"
@@ -1155,7 +1155,7 @@ defmodule Phoenix.HTML.VerificationTest do
            undefined attribute "undefined" \
            in slot "named" \
            for component \
-           Phoenix.HTML.VerificationTest.UndefinedSlots.func_undefined_slot_attrs/1
+           Combo.HTML.VerificationTest.UndefinedSlots.func_undefined_slot_attrs/1
            """
 
     assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 13}: (file)"
@@ -1165,7 +1165,7 @@ defmodule Phoenix.HTML.VerificationTest do
     warnings =
       capture_io(:stderr, fn ->
         defmodule External do
-          use Phoenix.HTML
+          use Combo.HTML
           attr :id, :string, required: true
 
           slot :named do
@@ -1176,7 +1176,7 @@ defmodule Phoenix.HTML.VerificationTest do
         end
 
         defmodule ExternalCalls do
-          use Phoenix.HTML
+          use Combo.HTML
 
           def line, do: __ENV__.line + 4
 
@@ -1194,14 +1194,14 @@ defmodule Phoenix.HTML.VerificationTest do
 
     assert warnings =~ """
            missing required attribute "id" for component \
-           Phoenix.HTML.VerificationTest.External.render/1
+           Combo.HTML.VerificationTest.External.render/1
            """
 
     assert warnings =~ "test/phoenix/html/verification_test.exs:#{line}: (file)"
 
     assert warnings =~ """
            missing required attribute "attr" in slot "named" for component \
-           Phoenix.HTML.VerificationTest.External.render/1
+           Combo.HTML.VerificationTest.External.render/1
            """
 
     assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 1}: (file)"
@@ -1211,7 +1211,7 @@ defmodule Phoenix.HTML.VerificationTest do
     warnings =
       capture_io(:stderr, fn ->
         defmodule LocalComponents do
-          use Phoenix.HTML
+          use Combo.HTML
 
           attr :attr, :string, required: true
 
@@ -1245,7 +1245,7 @@ defmodule Phoenix.HTML.VerificationTest do
     assert warnings =~ """
            missing required attribute "attr" \
            for component \
-           Phoenix.HTML.VerificationTest.LocalComponents.public/1
+           Combo.HTML.VerificationTest.LocalComponents.public/1
            """
 
     assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 2}: (file)"
@@ -1253,7 +1253,7 @@ defmodule Phoenix.HTML.VerificationTest do
     assert warnings =~ """
            missing required attribute "attr" \
            for component \
-           Phoenix.HTML.VerificationTest.LocalComponents.private/1
+           Combo.HTML.VerificationTest.LocalComponents.private/1
            """
 
     assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 3}: (file)"
@@ -1261,7 +1261,7 @@ defmodule Phoenix.HTML.VerificationTest do
 
   test "global includes" do
     defmodule GlobalIncludes do
-      use Phoenix.HTML
+      use Combo.HTML
 
       attr :id, :any, required: true
       attr :rest, :global, include: ~w(form)
@@ -1280,7 +1280,7 @@ defmodule Phoenix.HTML.VerificationTest do
     warnings =
       capture_io(:stderr, fn ->
         defmodule UnloadedAttrs do
-          use Phoenix.HTML
+          use Combo.HTML
 
           def render(assigns) do
             ~CE"""

@@ -1,7 +1,7 @@
-defmodule Phoenix.HTML.Components do
+defmodule Combo.HTML.Components do
   @moduledoc false
 
-  use Phoenix.HTML
+  use Combo.HTML
   alias Combo.SafeHTML
 
   @doc """
@@ -26,7 +26,7 @@ defmodule Phoenix.HTML.Components do
   ## JavaScript dependency
 
   In order to support links where `:method` is not `"get"` or use the above data attributes,
-  `Phoenix.HTML` relies on JavaScript. You can load `priv/static/phoenix_html.js` into your
+  `Combo.HTML` relies on JavaScript. You can load `priv/static/phoenix_html.js` into your
   build tool.
 
   ### Data attributes
@@ -216,7 +216,7 @@ defmodule Phoenix.HTML.Components do
   end
 
   @doc """
-  Converts a given data structure to a `Phoenix.HTML.Form`.
+  Converts a given data structure to a `Combo.HTML.Form`.
 
   This is commonly used to convert a map or an Ecto changeset into a form to
   be given to the `form/1` component.
@@ -273,7 +273,7 @@ defmodule Phoenix.HTML.Components do
       into a form for validation, or submitting a form for a database insert.
       For example: `to_form(changeset, action: :validate)`,
       or `to_form(changeset, action: :save)`. The provided action is passed
-      to the underlying `Phoenix.HTML.FormData` implementation options.
+      to the underlying `Combo.HTML.FormData` implementation options.
 
   The underlying data may accept additional options when converted to forms.
   For example, a map accepts `:errors` to list errors, but such option is not
@@ -282,7 +282,7 @@ defmodule Phoenix.HTML.Components do
 
       to_form(%{"search" => nil}, errors: [search: {"Can't be blank", []}])
 
-  If an existing `Phoenix.HTML.Form` struct is given, the options above will
+  If an existing `Combo.HTML.Form` struct is given, the options above will
   override its existing values if given. Then the remaining options are merged
   with the existing form options.
 
@@ -293,11 +293,11 @@ defmodule Phoenix.HTML.Components do
   """
   def to_form(data_or_params, options \\ [])
 
-  def to_form(%Phoenix.HTML.Form{} = data, []) do
+  def to_form(%Combo.HTML.Form{} = data, []) do
     data
   end
 
-  def to_form(%Phoenix.HTML.Form{} = data, options) do
+  def to_form(%Combo.HTML.Form{} = data, options) do
     data =
       case Keyword.fetch(options, :as) do
         {:ok, as} ->
@@ -344,13 +344,13 @@ defmodule Phoenix.HTML.Components do
       """)
     end
 
-    Phoenix.HTML.FormData.to_form(data, options)
+    Combo.HTML.FormData.to_form(data, options)
   end
 
   @doc ~S'''
   Renders a form.
 
-  This function receives a `Phoenix.HTML.Form` struct, generally created with
+  This function receives a `Combo.HTML.Form` struct, generally created with
   `to_form/2`, and generates the relevant form tags.
 
   ## Examples
@@ -359,7 +359,7 @@ defmodule Phoenix.HTML.Components do
   the result of the `to_form/1` function.
 
   `to_form/1` expects either a map or an [`Ecto.Changeset`](https://hexdocs.pm/ecto/Ecto.Changeset.html)
-  as the source of data and normalizes it into `Phoenix.HTML.Form` structure.
+  as the source of data and normalizes it into `Combo.HTML.Form` structure.
 
   For example, you may use the parameters received in a controller's action
   to create an Ecto changeset and use `to_form/1` to convert it to a form.
@@ -495,7 +495,7 @@ defmodule Phoenix.HTML.Components do
     It is only used if an `:action` is given. If the method is not `get`
     nor `post`, an input tag with name `_method` is generated alongside the
     form tag. If an `:action` is given with no method, the method will default
-    to the return value of `Phoenix.HTML.FormData.to_form/2` (usually `post`).
+    to the return value of `Combo.HTML.FormData.to_form/2` (usually `post`).
     """
 
   attr :multipart, :boolean,
@@ -768,9 +768,9 @@ defmodule Phoenix.HTML.Components do
   > using `@form[:remaining].value`, avoiding the pitfalls of directly accessing complex field values.
   """
   @doc type: :component
-  attr :field, Phoenix.HTML.FormField,
+  attr :field, Combo.HTML.FormField,
     required: true,
-    doc: "A %Phoenix.HTML.Form{}/field name tuple, for example: {@form[:email]}."
+    doc: "A %Combo.HTML.Form{}/field name tuple, for example: {@form[:email]}."
 
   attr :id, :string,
     doc: """
@@ -816,7 +816,7 @@ defmodule Phoenix.HTML.Components do
   attr :options, :list,
     default: [],
     doc: """
-    Any additional options for the `Phoenix.HTML.FormData` protocol
+    Any additional options for the `Combo.HTML.FormData` protocol
     implementation.
     """
 
@@ -824,7 +824,7 @@ defmodule Phoenix.HTML.Components do
 
   @persistent_id "_persistent_id"
   def inputs_for(assigns) do
-    %Phoenix.HTML.FormField{field: field_name, form: parent_form} = assigns.field
+    %Combo.HTML.FormField{field: field_name, form: parent_form} = assigns.field
     options = assigns |> Map.take([:id, :as, :default, :append, :prepend]) |> Keyword.new()
 
     options =
@@ -870,7 +870,7 @@ defmodule Phoenix.HTML.Components do
 
     {forms, _} =
       Enum.map_reduce(forms, {seen_ids, 0}, fn
-        %Phoenix.HTML.Form{params: params} = form, {seen_ids, index} ->
+        %Combo.HTML.Form{params: params} = form, {seen_ids, index} ->
           id =
             case params do
               %{@persistent_id => id} -> id
@@ -912,11 +912,11 @@ defmodule Phoenix.HTML.Components do
   end
 
   defp name_for_value_or_values(form, field, values) when is_list(values) do
-    Phoenix.HTML.Form.input_name(form, field) <> "[]"
+    Combo.HTML.Form.input_name(form, field) <> "[]"
   end
 
   defp name_for_value_or_values(form, field, _value) do
-    Phoenix.HTML.Form.input_name(form, field)
+    Combo.HTML.Form.input_name(form, field)
   end
 
   @doc """

@@ -1,12 +1,12 @@
-defmodule Phoenix.HTML.FormTest do
+defmodule Combo.HTML.FormTest do
   use ExUnit.Case, async: true
 
   import Combo.SafeHTML, only: [safe_to_string: 1]
-  import Phoenix.HTML.Form
-  doctest Phoenix.HTML.Form
+  import Combo.HTML.Form
+  doctest Combo.HTML.Form
 
   defp form(map \\ %{}, opts \\ []) do
-    Phoenix.HTML.FormData.to_form(map, opts)
+    Combo.HTML.FormData.to_form(map, opts)
   end
 
   test "warns on string keys" do
@@ -151,7 +151,7 @@ defmodule Phoenix.HTML.FormTest do
         |> Map.replace!(:errors, atom: "oops")
         |> Map.replace!(:data, %{atom: "data"})
 
-      assert form[:key] == %Phoenix.HTML.FormField{
+      assert form[:key] == %Combo.HTML.FormField{
                field: :key,
                id: "key",
                form: form,
@@ -160,7 +160,7 @@ defmodule Phoenix.HTML.FormTest do
                errors: []
              }
 
-      assert form[:atom] == %Phoenix.HTML.FormField{
+      assert form[:atom] == %Combo.HTML.FormField{
                field: :atom,
                id: "atom",
                form: form,
@@ -179,7 +179,7 @@ defmodule Phoenix.HTML.FormTest do
         |> Map.replace!(:errors, atom: "oops")
         |> Map.replace!(:data, %{atom: "data"})
 
-      assert form[:key] == %Phoenix.HTML.FormField{
+      assert form[:key] == %Combo.HTML.FormField{
                field: :key,
                id: "search_key",
                form: form,
@@ -188,7 +188,7 @@ defmodule Phoenix.HTML.FormTest do
                errors: []
              }
 
-      assert form[:atom] == %Phoenix.HTML.FormField{
+      assert form[:atom] == %Combo.HTML.FormField{
                field: :atom,
                id: "search_atom",
                form: form,
@@ -207,7 +207,7 @@ defmodule Phoenix.HTML.FormTest do
         |> Map.replace!(:errors, [{"string", "oops"}])
         |> Map.replace!(:data, %{"string" => "data"})
 
-      assert form["key"] == %Phoenix.HTML.FormField{
+      assert form["key"] == %Combo.HTML.FormField{
                field: "key",
                id: "key",
                form: form,
@@ -216,7 +216,7 @@ defmodule Phoenix.HTML.FormTest do
                errors: []
              }
 
-      assert form["string"] == %Phoenix.HTML.FormField{
+      assert form["string"] == %Combo.HTML.FormField{
                field: "string",
                id: "string",
                form: form,
@@ -235,7 +235,7 @@ defmodule Phoenix.HTML.FormTest do
         |> Map.replace!(:errors, [{"string", "oops"}])
         |> Map.replace!(:data, %{"string" => "data"})
 
-      assert form["key"] == %Phoenix.HTML.FormField{
+      assert form["key"] == %Combo.HTML.FormField{
                field: "key",
                id: "search_key",
                form: form,
@@ -244,7 +244,7 @@ defmodule Phoenix.HTML.FormTest do
                errors: []
              }
 
-      assert form["string"] == %Phoenix.HTML.FormField{
+      assert form["string"] == %Combo.HTML.FormField{
                field: "string",
                id: "search_string",
                form: form,
@@ -329,8 +329,8 @@ defmodule Phoenix.HTML.FormTest do
         }
       }
 
-      form = Phoenix.HTML.FormData.to_form(map, as: "search", action: :validate)
-      Phoenix.HTML.FormData.to_form(map, form, field, opts)
+      form = Combo.HTML.FormData.to_form(map, as: "search", action: :validate)
+      Combo.HTML.FormData.to_form(map, form, field, opts)
     end
 
     ## Cardinality one
@@ -338,9 +338,9 @@ defmodule Phoenix.HTML.FormTest do
     test "one: without default and field is not present" do
       [f] = nested_form(:unknown)
       assert f.index == nil
-      assert f.impl == Phoenix.HTML.FormData.Map
+      assert f.impl == Combo.HTML.FormData.Map
 
-      assert %Phoenix.HTML.FormField{
+      assert %Combo.HTML.FormField{
                id: "search_unknown_year",
                name: "search[unknown][year]",
                field: :year,
@@ -352,7 +352,7 @@ defmodule Phoenix.HTML.FormTest do
     test "one: without default and field is present" do
       [f] = nested_form(:date)
 
-      assert %Phoenix.HTML.FormField{
+      assert %Combo.HTML.FormField{
                id: "search_date_year",
                name: "search[date][year]",
                field: :year,
@@ -364,7 +364,7 @@ defmodule Phoenix.HTML.FormTest do
     test "one: with default and field is not present" do
       [f] = nested_form(:unknown, default: %{year: 2015})
 
-      assert %Phoenix.HTML.FormField{
+      assert %Combo.HTML.FormField{
                id: "search_unknown_year",
                name: "search[unknown][year]",
                field: :year,
@@ -376,7 +376,7 @@ defmodule Phoenix.HTML.FormTest do
     test "one: with default and field is present" do
       [f] = nested_form(:date, default: %{year: 2015})
 
-      assert %Phoenix.HTML.FormField{
+      assert %Combo.HTML.FormField{
                id: "search_date_year",
                name: "search[date][year]",
                field: :year,
@@ -388,7 +388,7 @@ defmodule Phoenix.HTML.FormTest do
     test "one: with custom name, id, and action" do
       [f] = nested_form(:date, as: :foo, id: :bar, action: :another)
 
-      assert %Phoenix.HTML.FormField{
+      assert %Combo.HTML.FormField{
                id: "bar_year",
                name: "foo[year]",
                field: :year,
@@ -404,7 +404,7 @@ defmodule Phoenix.HTML.FormTest do
 
       assert f1.index == 0
 
-      assert %Phoenix.HTML.FormField{
+      assert %Combo.HTML.FormField{
                id: "search_unknown_0_year",
                name: "search[unknown][0][year]",
                field: :year,
@@ -413,7 +413,7 @@ defmodule Phoenix.HTML.FormTest do
 
       assert f2.index == 1
 
-      assert %Phoenix.HTML.FormField{
+      assert %Combo.HTML.FormField{
                id: "search_unknown_1_year",
                name: "search[unknown][1][year]",
                field: :year,
@@ -424,14 +424,14 @@ defmodule Phoenix.HTML.FormTest do
     test "many: with default and field is present" do
       [f1, f2] = nested_form(:dates, default: [%{year: 1000}, %{year: 1001}])
 
-      assert %Phoenix.HTML.FormField{
+      assert %Combo.HTML.FormField{
                id: "search_dates_0_year",
                name: "search[dates][0][year]",
                field: :year,
                value: "2010"
              } = f1[:year]
 
-      assert %Phoenix.HTML.FormField{
+      assert %Combo.HTML.FormField{
                id: "search_dates_1_year",
                name: "search[dates][1][year]",
                field: :year,
@@ -442,14 +442,14 @@ defmodule Phoenix.HTML.FormTest do
     test "many: with name and id" do
       [f1, f2] = nested_form(:dates, default: [%{year: 1000}, %{year: 1001}], as: :foo, id: :bar)
 
-      assert %Phoenix.HTML.FormField{
+      assert %Combo.HTML.FormField{
                id: "bar_0_year",
                name: "foo[0][year]",
                field: :year,
                value: "2010"
              } = f1[:year]
 
-      assert %Phoenix.HTML.FormField{
+      assert %Combo.HTML.FormField{
                id: "bar_1_year",
                name: "foo[1][year]",
                field: :year,
@@ -466,28 +466,28 @@ defmodule Phoenix.HTML.FormTest do
     test "many: inputs_for/4 with prepend/append and field is not present" do
       [f0, f1, f2, f3] = nested_form(:unknown, @prepend_append)
 
-      assert %Phoenix.HTML.FormField{
+      assert %Combo.HTML.FormField{
                id: "search_unknown_0_year",
                name: "search[unknown][0][year]",
                field: :year,
                value: 2008
              } = f0[:year]
 
-      assert %Phoenix.HTML.FormField{
+      assert %Combo.HTML.FormField{
                id: "search_unknown_1_year",
                name: "search[unknown][1][year]",
                field: :year,
                value: 2012
              } = f1[:year]
 
-      assert %Phoenix.HTML.FormField{
+      assert %Combo.HTML.FormField{
                id: "search_unknown_2_year",
                name: "search[unknown][2][year]",
                field: :year,
                value: 2018
              } = f2[:year]
 
-      assert %Phoenix.HTML.FormField{
+      assert %Combo.HTML.FormField{
                id: "search_unknown_3_year",
                name: "search[unknown][3][year]",
                field: :year,
@@ -498,14 +498,14 @@ defmodule Phoenix.HTML.FormTest do
     test "many: with prepend/append and field is present" do
       [f1, f2] = nested_form(:dates, @prepend_append)
 
-      assert %Phoenix.HTML.FormField{
+      assert %Combo.HTML.FormField{
                id: "search_dates_0_year",
                name: "search[dates][0][year]",
                field: :year,
                value: "2010"
              } = f1[:year]
 
-      assert %Phoenix.HTML.FormField{
+      assert %Combo.HTML.FormField{
                id: "search_dates_1_year",
                name: "search[dates][1][year]",
                field: :year,
