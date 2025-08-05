@@ -53,24 +53,24 @@ defmodule Phoenix.Logger do
       * Metadata: `%{conn: Plug.Conn.t, status: Plug.Conn.status, kind: Exception.kind, reason: term, stacktrace: Exception.stacktrace}`
       * Disable logging: Set `render_errors: [log: false]` on your endpoint configuration
 
-    * `[:phoenix, :socket_connected]` - dispatched by `Phoenix.Socket`, at the end of a socket connection
+    * `[:phoenix, :socket_connected]` - dispatched by `Combo.Socket`, at the end of a socket connection
       * Measurement: `%{duration: native_time}`
       * Metadata: `%{endpoint: atom, transport: atom, params: term, connect_info: map, vsn: binary, user_socket: atom, result: :ok | :error, serializer: atom, log: Logger.level | false}`
-      * Disable logging: `use Phoenix.Socket, log: false` or `socket "/foo", MySocket, websocket: [log: false]` in your endpoint
+      * Disable logging: `use Combo.Socket, log: false` or `socket "/foo", MySocket, websocket: [log: false]` in your endpoint
 
-    * `[:phoenix, :socket_drain]` - dispatched by `Phoenix.Socket` when using the `:drainer` option
+    * `[:phoenix, :socket_drain]` - dispatched by `Combo.Socket` when using the `:drainer` option
       * Measurement: `%{count: integer, total: integer, index: integer, rounds: integer}`
       * Metadata: `%{endpoint: atom, socket: atom, intervasl: integer, log: Logger.level | false}`
-      * Disable logging: `use Phoenix.Socket, log: false` in your endpoint or pass `:log` option in the `:drainer` option
+      * Disable logging: `use Combo.Socket, log: false` in your endpoint or pass `:log` option in the `:drainer` option
 
     * `[:phoenix, :channel_joined]` - dispatched at the end of a channel join
       * Measurement: `%{duration: native_time}`
-      * Metadata: `%{result: :ok | :error, params: term, socket: Phoenix.Socket.t}`
+      * Metadata: `%{result: :ok | :error, params: term, socket: Combo.Socket.t}`
       * Disable logging: This event cannot be disabled
 
     * `[:phoenix, :channel_handled_in]` - dispatched at the end of a channel handle in
       * Measurement: `%{duration: native_time}`
-      * Metadata: `%{event: binary, params: term, socket: Phoenix.Socket.t}`
+      * Metadata: `%{event: binary, params: term, socket: Combo.Socket.t}`
       * Disable logging: This event cannot be disabled
 
   To see an example of how Phoenix LiveDashboard uses these events to create

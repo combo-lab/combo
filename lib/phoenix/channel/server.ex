@@ -6,8 +6,8 @@ defmodule Combo.Channel.Server do
   require Phoenix.Endpoint
 
   alias Phoenix.PubSub
-  alias Phoenix.Socket
-  alias Phoenix.Socket.{Broadcast, Message, Reply, PoolSupervisor}
+  alias Combo.Socket
+  alias Combo.Socket.{Broadcast, Message, Reply, PoolSupervisor}
 
   ## Socket API
 
@@ -134,7 +134,7 @@ defmodule Combo.Channel.Server do
   Broadcasts on the given pubsub server with the given
   `topic`, `event` and `payload`.
 
-  The message is encoded as `Phoenix.Socket.Broadcast`.
+  The message is encoded as `Combo.Socket.Broadcast`.
   """
   def broadcast(pubsub_server, topic, event, payload)
       when is_binary(topic) and is_binary(event) do
@@ -168,7 +168,7 @@ defmodule Combo.Channel.Server do
   Broadcasts on the given pubsub server with the given
   `from`, `topic`, `event` and `payload`.
 
-  The message is encoded as `Phoenix.Socket.Broadcast`.
+  The message is encoded as `Combo.Socket.Broadcast`.
   """
   def broadcast_from(pubsub_server, from, topic, event, payload)
       when is_binary(topic) and is_binary(event) do
@@ -202,7 +202,7 @@ defmodule Combo.Channel.Server do
   Broadcasts on the given pubsub server with the given
   `topic`, `event` and `payload`.
 
-  The message is encoded as `Phoenix.Socket.Broadcast`.
+  The message is encoded as `Combo.Socket.Broadcast`.
   """
   def local_broadcast(pubsub_server, topic, event, payload)
       when is_binary(topic) and is_binary(event) do
@@ -219,7 +219,7 @@ defmodule Combo.Channel.Server do
   Broadcasts on the given pubsub server with the given
   `from`, `topic`, `event` and `payload`.
 
-  The message is encoded as `Phoenix.Socket.Broadcast`.
+  The message is encoded as `Combo.Socket.Broadcast`.
   """
   def local_broadcast_from(pubsub_server, from, topic, event, payload)
       when is_binary(topic) and is_binary(event) do

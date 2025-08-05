@@ -7,7 +7,7 @@ defmodule Phoenix.Integration.LongPollChannelsTest do
   import ExUnit.CaptureLog
 
   alias Phoenix.Integration.HTTPClient
-  alias Phoenix.Socket.{Broadcast, Message, V1, V2}
+  alias Combo.Socket.{Broadcast, Message, V1, V2}
   alias __MODULE__.Endpoint
 
   @moduletag :capture_log
@@ -61,7 +61,7 @@ defmodule Phoenix.Integration.LongPollChannelsTest do
   end
 
   defmodule UserSocketConnectInfo do
-    use Phoenix.Socket
+    use Combo.Socket
 
     channel "room:*", RoomChannel
 
@@ -93,7 +93,7 @@ defmodule Phoenix.Integration.LongPollChannelsTest do
   end
 
   defmodule UserSocket do
-    use Phoenix.Socket
+    use Combo.Socket
 
     channel "room:*", RoomChannel
 

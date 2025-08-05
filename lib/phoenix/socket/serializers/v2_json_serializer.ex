@@ -1,12 +1,12 @@
-defmodule Phoenix.Socket.V2.JSONSerializer do
+defmodule Combo.Socket.V2.JSONSerializer do
   @moduledoc false
-  @behaviour Phoenix.Socket.Serializer
+  @behaviour Combo.Socket.Serializer
 
   @push 0
   @reply 1
   @broadcast 2
 
-  alias Phoenix.Socket.{Broadcast, Message, Reply}
+  alias Combo.Socket.{Broadcast, Message, Reply}
 
   @impl true
   def fastlane!(%Broadcast{payload: {:binary, data}} = msg) do

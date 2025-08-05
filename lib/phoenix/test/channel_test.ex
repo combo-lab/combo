@@ -152,12 +152,12 @@ defmodule Combo.ChannelTest do
 
   """
 
-  alias Phoenix.Socket
-  alias Phoenix.Socket.{Broadcast, Message, Reply}
+  alias Combo.Socket
+  alias Combo.Socket.{Broadcast, Message, Reply}
   alias Combo.Channel.Server
 
   defmodule NoopSerializer do
-    @behaviour Phoenix.Socket.Serializer
+    @behaviour Combo.Socket.Serializer
     @moduledoc false
 
     def fastlane!(%Broadcast{} = msg) do
@@ -560,7 +560,7 @@ defmodule Combo.ChannelTest do
   """
   defmacro assert_push(event, payload, timeout \\ Application.fetch_env!(:ex_unit, :assert_receive_timeout)) do
     quote do
-      assert_receive %Phoenix.Socket.Message{
+      assert_receive %Combo.Socket.Message{
                         event: unquote(event),
                         payload: unquote(payload)}, unquote(timeout)
     end
@@ -580,7 +580,7 @@ defmodule Combo.ChannelTest do
   """
   defmacro refute_push(event, payload, timeout \\ Application.fetch_env!(:ex_unit, :refute_receive_timeout)) do
     quote do
-      refute_receive %Phoenix.Socket.Message{
+      refute_receive %Combo.Socket.Message{
                         event: unquote(event),
                         payload: unquote(payload)}, unquote(timeout)
     end
@@ -604,7 +604,7 @@ defmodule Combo.ChannelTest do
   defmacro assert_reply(ref, status, payload \\ Macro.escape(%{}), timeout \\ Application.fetch_env!(:ex_unit, :assert_receive_timeout)) do
     quote do
       ref = unquote(ref)
-      assert_receive %Phoenix.Socket.Reply{
+      assert_receive %Combo.Socket.Reply{
                         ref: ^ref,
                         status: unquote(status),
                         payload: unquote(payload)}, unquote(timeout)
@@ -626,7 +626,7 @@ defmodule Combo.ChannelTest do
   defmacro refute_reply(ref, status, payload \\ Macro.escape(%{}), timeout \\ Application.fetch_env!(:ex_unit, :refute_receive_timeout)) do
     quote do
       ref = unquote(ref)
-      refute_receive %Phoenix.Socket.Reply{
+      refute_receive %Combo.Socket.Reply{
                         ref: ^ref,
                         status: unquote(status),
                         payload: unquote(payload)}, unquote(timeout)
@@ -653,7 +653,7 @@ defmodule Combo.ChannelTest do
   """
   defmacro assert_broadcast(event, payload, timeout \\ Application.fetch_env!(:ex_unit, :assert_receive_timeout)) do
     quote do
-      assert_receive %Phoenix.Socket.Broadcast{event: unquote(event),
+      assert_receive %Combo.Socket.Broadcast{event: unquote(event),
                                                payload: unquote(payload)}, unquote(timeout)
     end
   end
@@ -671,7 +671,7 @@ defmodule Combo.ChannelTest do
   """
   defmacro refute_broadcast(event, payload, timeout \\ Application.fetch_env!(:ex_unit, :refute_receive_timeout)) do
     quote do
-      refute_receive %Phoenix.Socket.Broadcast{event: unquote(event),
+      refute_receive %Combo.Socket.Broadcast{event: unquote(event),
                                                payload: unquote(payload)}, unquote(timeout)
     end
   end

@@ -3,22 +3,22 @@ defmodule Phoenix.Debug do
   Functions for runtime introspection and debugging of Phoenix applications.
 
   This module provides utilities for inspecting and debugging Phoenix applications.
-  At the moment, it only includes functions related to `Phoenix.Socket` and `Combo.Channel`
+  At the moment, it only includes functions related to `Combo.Socket` and `Combo.Channel`
   processes.
 
   It allows you to:
 
-    * List all currently connected `Phoenix.Socket` transport processes.
-    * List all channels for a given `Phoenix.Socket` process.
+    * List all currently connected `Combo.Socket` transport processes.
+    * List all channels for a given `Combo.Socket` process.
     * Get the socket of a channel process.
-    * Check if a process is a `Phoenix.Socket` or `Combo.Channel`.
+    * Check if a process is a `Combo.Socket` or `Combo.Channel`.
 
   """
 
   @doc """
-  Returns a list of all currently connected `Phoenix.Socket` transport processes.
+  Returns a list of all currently connected `Combo.Socket` transport processes.
 
-  Note that custom sockets implementing the `Phoenix.Socket.Transport` behaviour
+  Note that custom sockets implementing the `Combo.Socket.Transport` behaviour
   are not listed.
 
   Each process corresponds to one connection that can have multiple channels.
@@ -36,7 +36,7 @@ defmodule Phoenix.Debug do
   """
   def list_sockets do
     for pid <- Process.list(), dict = socket_process_dict(pid), not is_nil(dict) do
-      {Phoenix.Socket, mod, id} = keyfind(dict, :"$process_label")
+      {Combo.Socket, mod, id} = keyfind(dict, :"$process_label")
       %{pid: pid, module: mod, id: id}
     end
   end
@@ -49,11 +49,11 @@ defmodule Phoenix.Debug do
   end
 
   defp socket_process_dict(pid) do
-    # Phoenix.Socket sets the "$process_label" to {Phoenix.Socket, handler_module, id}
+    # Combo.Socket sets the "$process_label" to {Combo.Socket, handler_module, id}
     with info when is_list(info) <- Process.info(pid, [:dictionary]),
          dictionary when not is_nil(dictionary) <- keyfind(info, :dictionary),
          label when not is_nil(label) <- keyfind(dictionary, :"$process_label"),
-         {Phoenix.Socket, mod, id} when is_atom(mod) and (is_binary(id) or is_nil(id)) <- label do
+         {Combo.Socket, mod, id} when is_atom(mod) and (is_binary(id) or is_nil(id)) <- label do
       dictionary
     else
       _ -> nil
@@ -61,9 +61,9 @@ defmodule Phoenix.Debug do
   end
 
   @doc """
-  Returns true if the given pid is a `Phoenix.Socket` transport process.
+  Returns true if the given pid is a `Combo.Socket` transport process.
 
-  It returns `false` for custom sockets implementing the `Phoenix.Socket.Transport` behaviour.
+  It returns `false` for custom sockets implementing the `Combo.Socket.Transport` behaviour.
 
   ## Examples
 
@@ -81,10 +81,10 @@ defmodule Phoenix.Debug do
   @doc """
   Checks if the given pid is a `Combo.Channel` process.
 
-  Note: this function returns false for [custom channels](https://hexdocs.pm/phoenix/Phoenix.Socket.html#module-custom-channels).
+  Note: this function returns false for [custom channels](https://hexdocs.pm/phoenix/Combo.Socket.html#module-custom-channels).
   """
   def channel_process?(pid) do
-    # Combo.Channel sets the "$process_label" to {Phoenix.Socket, handler_module, id}
+    # Combo.Channel sets the "$process_label" to {Combo.Socket, handler_module, id}
     with info when is_list(info) <- Process.info(pid, [:dictionary]),
          dictionary when not is_nil(dictionary) <- keyfind(info, :dictionary),
          label when not is_nil(label) <- keyfind(dictionary, :"$process_label"),
@@ -96,7 +96,7 @@ defmodule Phoenix.Debug do
   end
 
   @doc """
-  Returns a list of all currently connected channels for the given `Phoenix.Socket` pid.
+  Returns a list of all currently connected channels for the given `Combo.Socket` pid.
 
   Each channel is represented as a map with the following keys:
 
@@ -104,7 +104,7 @@ defmodule Phoenix.Debug do
     - `:status` - the status of the channel
     - `:topic` - the topic of the channel
 
-  Note that this list also contains [custom channels](https://hexdocs.pm/phoenix/Phoenix.Socket.html#module-custom-channels)
+  Note that this list also contains [custom channels](https://hexdocs.pm/phoenix/Combo.Socket.html#module-custom-channels)
   like LiveViews. You can check if a channel is a custom channel by using the `channel?/1`
   function, which returns `false` for custom channels.
 
@@ -150,7 +150,7 @@ defmodule Phoenix.Debug do
       iex> pid = Phoenix.Debug.list_sockets() |> Enum.at(0) |> Map.fetch!(:pid)
       iex> {:ok, channels} = Phoenix.Debug.list_channels(pid)
       iex> channels |> Enum.at(0) |> Map.fetch!(:pid) |> socket()
-      {:ok, %Phoenix.Socket{...}}
+      {:ok, %Combo.Socket{...}}
 
       iex> socket(pid(0,456,0))
       {:error, :not_alive_or_not_a_channel}

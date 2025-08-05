@@ -1,4 +1,4 @@
-defmodule Phoenix.Socket.Message do
+defmodule Combo.Socket.Message do
   @moduledoc """
   Defines a message dispatched over transport to channels and vice-versa.
 
@@ -13,17 +13,17 @@ defmodule Phoenix.Socket.Message do
 
   """
 
-  @type t :: %Phoenix.Socket.Message{}
+  @type t :: %Combo.Socket.Message{}
   defstruct topic: nil, event: nil, payload: nil, ref: nil, join_ref: nil
 
   @doc """
   Converts a map with string keys into a message struct.
 
-  Raises `Phoenix.Socket.InvalidMessageError` if not valid.
+  Raises `Combo.Socket.InvalidMessageError` if not valid.
   """
   def from_map!(map) when is_map(map) do
     try do
-      %Phoenix.Socket.Message{
+      %Combo.Socket.Message{
         topic: Map.fetch!(map, "topic"),
         event: Map.fetch!(map, "event"),
         payload: Map.fetch!(map, "payload"),
@@ -32,12 +32,12 @@ defmodule Phoenix.Socket.Message do
       }
     rescue
       err in [KeyError] ->
-        raise Phoenix.Socket.InvalidMessageError, "missing key #{inspect(err.key)}"
+        raise Combo.Socket.InvalidMessageError, "missing key #{inspect(err.key)}"
     end
   end
 
   defimpl Inspect do
-    def inspect(%Phoenix.Socket.Message{} = msg, opts) do
+    def inspect(%Combo.Socket.Message{} = msg, opts) do
       processed_msg = process_message(msg)
       Inspect.Any.inspect(processed_msg, opts)
     end
@@ -50,7 +50,7 @@ defmodule Phoenix.Socket.Message do
   end
 end
 
-defmodule Phoenix.Socket.Reply do
+defmodule Combo.Socket.Reply do
   @moduledoc """
   Defines a reply sent from channels to transports.
 
@@ -64,11 +64,11 @@ defmodule Phoenix.Socket.Reply do
 
   """
 
-  @type t :: %Phoenix.Socket.Reply{}
+  @type t :: %Combo.Socket.Reply{}
   defstruct topic: nil, status: nil, payload: nil, ref: nil, join_ref: nil
 end
 
-defmodule Phoenix.Socket.Broadcast do
+defmodule Combo.Socket.Broadcast do
   @moduledoc """
   Defines a message sent from pubsub to channels and vice-versa.
 
@@ -80,6 +80,6 @@ defmodule Phoenix.Socket.Broadcast do
 
   """
 
-  @type t :: %Phoenix.Socket.Broadcast{}
+  @type t :: %Combo.Socket.Broadcast{}
   defstruct topic: nil, event: nil, payload: nil
 end

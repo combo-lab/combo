@@ -132,7 +132,7 @@ defmodule <%= inspect auth_module %>Test do
       |> put_session(:live_socket_id, live_socket_id)
       |> <%= inspect(schema.alias) %>Auth.log_out_<%= schema.singular %>()
 
-      assert_receive %Phoenix.Socket.Broadcast{event: "disconnect", topic: ^live_socket_id}
+      assert_receive %Combo.Socket.Broadcast{event: "disconnect", topic: ^live_socket_id}
     end
 
     <% end %>test "works even if <%= schema.singular %> is already logged out", %{conn: conn} do
@@ -428,12 +428,12 @@ defmodule <%= inspect auth_module %>Test do
 
       <%= inspect schema.alias %>Auth.disconnect_sessions(tokens)
 
-      assert_receive %Phoenix.Socket.Broadcast{
+      assert_receive %Combo.Socket.Broadcast{
         event: "disconnect",
         topic: "<%= schema.plural %>_sessions:dG9rZW4x"
       }
 
-      assert_receive %Phoenix.Socket.Broadcast{
+      assert_receive %Combo.Socket.Broadcast{
         event: "disconnect",
         topic: "<%= schema.plural %>_sessions:dG9rZW4y"
       }

@@ -8,7 +8,7 @@ defmodule Combo.Transports.WebSocket do
   # Plug. These requests are then upgraded to WebSocket connections via
   # `WebSockAdapter.upgrade/4`, which takes as an argument the handler for a given socket endpoint
   # as configured in the application's Endpoint. This handler module must implement the
-  # transport-agnostic `Phoenix.Socket.Transport` behaviour (this same behaviour is also used for
+  # transport-agnostic `Combo.Socket.Transport` behaviour (this same behaviour is also used for
   # other transports such as long polling). Because this behaviour is a superset of the `WebSock`
   # behaviour, the `WebSock` library is able to use the callbacks in the `WebSock` behaviour to
   # call this handler module directly for the rest of the WebSocket connection's lifetime.
@@ -21,7 +21,7 @@ defmodule Combo.Transports.WebSocket do
 
   import Plug.Conn
 
-  alias Phoenix.Socket.{V1, V2, Transport}
+  alias Combo.Socket.{V1, V2, Transport}
 
   def default_config() do
     [

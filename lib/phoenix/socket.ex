@@ -1,10 +1,10 @@
-defmodule Phoenix.Socket do
+defmodule Combo.Socket do
   @moduledoc ~S"""
   A socket implementation that multiplexes messages over channels.
 
-  `Phoenix.Socket` is used as a module for establishing a connection
+  `Combo.Socket` is used as a module for establishing a connection
   between client and server. Once the connection is established,
-  the initial state is stored in the `Phoenix.Socket` struct.
+  the initial state is stored in the `Combo.Socket` struct.
 
   The same socket can be used to receive events from different transports.
   Phoenix supports `websocket` and `longpoll` options when invoking
@@ -26,7 +26,7 @@ defmodule Phoenix.Socket do
   Socket handlers are mounted in Endpoints and must define two callbacks:
 
     * `connect/3` - receives the socket params, connection info if any, and
-      authenticates the connection. Must return a `Phoenix.Socket` struct,
+      authenticates the connection. Must return a `Combo.Socket` struct,
       often with custom assigns
 
     * `id/1` - receives the socket returned by `connect/3` and returns the
@@ -37,7 +37,7 @@ defmodule Phoenix.Socket do
   ## Examples
 
       defmodule MyAppWeb.UserSocket do
-        use Phoenix.Socket
+        use Combo.Socket
 
         channel "room:*", MyAppWeb.RoomChannel
 
@@ -70,7 +70,7 @@ defmodule Phoenix.Socket do
 
   ## Using options
 
-  On `use Phoenix.Socket`, the following options are accepted:
+  On `use Combo.Socket`, the following options are accepted:
 
     * `:log` - the default level to log socket actions. Defaults
       to `:info`. May be set to `false` to disable it
@@ -94,10 +94,10 @@ defmodule Phoenix.Socket do
   ## Client-server communication
 
   The encoding of server data and the decoding of client data is done
-  according to a serializer, defined in `Phoenix.Socket.Serializer`.
+  according to a serializer, defined in `Combo.Socket.Serializer`.
   By default, JSON encoding is used to broker messages to and from clients.
 
-  The serializer `decode!` function must return a `Phoenix.Socket.Message`
+  The serializer `decode!` function must return a `Combo.Socket.Message`
   which is forwarded to channels except:
 
     * `"heartbeat"` events in the "phoenix" topic - should just emit an OK reply
@@ -111,7 +111,7 @@ defmodule Phoenix.Socket do
   the original message. Both data-types also include a join_ref that
   uniquely identifies the currently joined channel.
 
-  The `Phoenix.Socket` implementation may also send special messages
+  The `Combo.Socket` implementation may also send special messages
   and replies:
 
     * `"phx_error"` - in case of errors, such as a channel process
@@ -120,12 +120,12 @@ defmodule Phoenix.Socket do
     * `"phx_close"` - the channel was gracefully closed
 
   Phoenix ships with a JavaScript implementation of both websocket
-  and long polling that interacts with Phoenix.Socket and can be
+  and long polling that interacts with Combo.Socket and can be
   used as reference for those interested in implementing custom clients.
 
   ## Custom sockets and transports
 
-  See the `Phoenix.Socket.Transport` documentation for more information on
+  See the `Combo.Socket.Transport` documentation for more information on
   writing your own socket that does not leverage channels or for writing
   your own transports that interacts with other sockets.
 
@@ -146,10 +146,10 @@ defmodule Phoenix.Socket do
   initialization with a custom `reply_payload` that will be sent as
   a reply to the client. Failing to do so will block the socket forever.
 
-  A custom channel receives `Phoenix.Socket.Message` structs as regular
+  A custom channel receives `Combo.Socket.Message` structs as regular
   messages from the transport. Replies to those messages and custom
   messages can be sent to the socket at any moment by building an
-  appropriate `Phoenix.Socket.Reply` and `Phoenix.Socket.Message`
+  appropriate `Combo.Socket.Reply` and `Combo.Socket.Message`
   structs, encoding them with the serializer and dispatching the
   serialized result to the transport.
 
@@ -197,8 +197,8 @@ defmodule Phoenix.Socket do
 
   require Logger
   require Phoenix.Endpoint
-  alias Phoenix.Socket
-  alias Phoenix.Socket.{Broadcast, Message, Reply}
+  alias Combo.Socket
+  alias Combo.Socket.{Broadcast, Message, Reply}
 
   @doc """
   Receives the socket params and authenticates the connection.
@@ -292,40 +292,40 @@ defmodule Phoenix.Socket do
     quote do
       ## User API
 
-      import Phoenix.Socket
-      @behaviour Phoenix.Socket
-      @before_compile Phoenix.Socket
+      import Combo.Socket
+      @behaviour Combo.Socket
+      @before_compile Combo.Socket
       Module.register_attribute(__MODULE__, :phoenix_channels, accumulate: true)
       @phoenix_socket_options unquote(opts)
 
       ## Callbacks
 
-      @behaviour Phoenix.Socket.Transport
+      @behaviour Combo.Socket.Transport
 
       @doc false
       def child_spec(opts) do
-        Phoenix.Socket.__child_spec__(__MODULE__, opts, @phoenix_socket_options)
+        Combo.Socket.__child_spec__(__MODULE__, opts, @phoenix_socket_options)
       end
 
       @doc false
       def drainer_spec(opts) do
-        Phoenix.Socket.__drainer_spec__(__MODULE__, opts, @phoenix_socket_options)
+        Combo.Socket.__drainer_spec__(__MODULE__, opts, @phoenix_socket_options)
       end
 
       @doc false
-      def connect(map), do: Phoenix.Socket.__connect__(__MODULE__, map, @phoenix_socket_options)
+      def connect(map), do: Combo.Socket.__connect__(__MODULE__, map, @phoenix_socket_options)
 
       @doc false
-      def init(state), do: Phoenix.Socket.__init__(state)
+      def init(state), do: Combo.Socket.__init__(state)
 
       @doc false
-      def handle_in(message, state), do: Phoenix.Socket.__in__(message, state)
+      def handle_in(message, state), do: Combo.Socket.__in__(message, state)
 
       @doc false
-      def handle_info(message, state), do: Phoenix.Socket.__info__(message, state)
+      def handle_info(message, state), do: Combo.Socket.__info__(message, state)
 
       @doc false
-      def terminate(reason, state), do: Phoenix.Socket.__terminate__(reason, state)
+      def terminate(reason, state), do: Combo.Socket.__terminate__(reason, state)
     end
   end
 
@@ -407,7 +407,7 @@ defmodule Phoenix.Socket do
   defp expand_alias(other, _env), do: other
 
   @doc false
-  @deprecated "transport/3 in Phoenix.Socket is deprecated and has no effect"
+  @deprecated "transport/3 in Combo.Socket is deprecated and has no effect"
   defmacro transport(_name, _module, _config \\ []) do
     :ok
   end
@@ -452,7 +452,7 @@ defmodule Phoenix.Socket do
     opts = Keyword.merge(socket_options, opts)
     partitions = Keyword.get(opts, :partitions, System.schedulers_online())
     args = {endpoint, handler, partitions}
-    Supervisor.child_spec({Phoenix.Socket.PoolSupervisor, args}, id: handler)
+    Supervisor.child_spec({Combo.Socket.PoolSupervisor, args}, id: handler)
   end
 
   def __drainer_spec__(handler, opts, socket_options) do
@@ -471,7 +471,7 @@ defmodule Phoenix.Socket do
 
       opts = Keyword.merge(opts, drainer: drainer)
 
-      {Phoenix.Socket.PoolDrainer, {endpoint, handler, opts}}
+      {Combo.Socket.PoolDrainer, {endpoint, handler, opts}}
     else
       :ignore
     end
@@ -522,7 +522,7 @@ defmodule Phoenix.Socket do
 
   defp set_label(socket) do
     # TODO: replace with Process.put_label/2 when we require Elixir 1.17
-    Process.put(:"$process_label", {Phoenix.Socket, socket.handler, socket.id})
+    Process.put(:"$process_label", {Combo.Socket, socket.handler, socket.id})
   end
 
   def __init__({state, %{id: id, endpoint: endpoint} = socket}) do
@@ -612,7 +612,7 @@ defmodule Phoenix.Socket do
   end
 
   defp user_connect(handler, endpoint, transport, serializer, params, connect_info) do
-    # The information in the Phoenix.Socket goes to userland and channels.
+    # The information in the Combo.Socket goes to userland and channels.
     socket = %Socket{
       handler: handler,
       endpoint: endpoint,

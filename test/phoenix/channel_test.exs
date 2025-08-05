@@ -12,7 +12,7 @@ defmodule Combo.Channel.ChannelTest do
   test "broadcasts from self" do
     Phoenix.PubSub.subscribe(@pubsub, "sometopic")
 
-    socket = %Phoenix.Socket{
+    socket = %Combo.Socket{
       pubsub_server: @pubsub,
       topic: "sometopic",
       channel_pid: self(),
@@ -21,7 +21,7 @@ defmodule Combo.Channel.ChannelTest do
 
     broadcast_from(socket, "event1", %{key: :val})
 
-    refute_received %Phoenix.Socket.Broadcast{
+    refute_received %Combo.Socket.Broadcast{
       event: "event1",
       payload: %{key: :val},
       topic: "sometopic"
@@ -29,7 +29,7 @@ defmodule Combo.Channel.ChannelTest do
 
     broadcast_from!(socket, "event2", %{key: :val})
 
-    refute_received %Phoenix.Socket.Broadcast{
+    refute_received %Combo.Socket.Broadcast{
       event: "event2",
       payload: %{key: :val},
       topic: "sometopic"
@@ -37,7 +37,7 @@ defmodule Combo.Channel.ChannelTest do
 
     broadcast(socket, "event3", %{key: :val})
 
-    assert_receive %Phoenix.Socket.Broadcast{
+    assert_receive %Combo.Socket.Broadcast{
       event: "event3",
       payload: %{key: :val},
       topic: "sometopic"
@@ -45,7 +45,7 @@ defmodule Combo.Channel.ChannelTest do
 
     broadcast!(socket, "event4", %{key: :val})
 
-    assert_receive %Phoenix.Socket.Broadcast{
+    assert_receive %Combo.Socket.Broadcast{
       event: "event4",
       payload: %{key: :val},
       topic: "sometopic"
@@ -55,7 +55,7 @@ defmodule Combo.Channel.ChannelTest do
   test "broadcasts from other" do
     Phoenix.PubSub.subscribe(@pubsub, "sometopic")
 
-    socket = %Phoenix.Socket{
+    socket = %Combo.Socket{
       pubsub_server: @pubsub,
       topic: "sometopic",
       channel_pid: spawn_link(fn -> :ok end),
@@ -64,7 +64,7 @@ defmodule Combo.Channel.ChannelTest do
 
     broadcast_from(socket, "event1", %{key: :val})
 
-    assert_receive %Phoenix.Socket.Broadcast{
+    assert_receive %Combo.Socket.Broadcast{
       event: "event1",
       payload: %{key: :val},
       topic: "sometopic"
@@ -72,7 +72,7 @@ defmodule Combo.Channel.ChannelTest do
 
     broadcast_from!(socket, "event2", %{key: :val})
 
-    assert_receive %Phoenix.Socket.Broadcast{
+    assert_receive %Combo.Socket.Broadcast{
       event: "event2",
       payload: %{key: :val},
       topic: "sometopic"
@@ -80,7 +80,7 @@ defmodule Combo.Channel.ChannelTest do
 
     broadcast(socket, "event3", %{key: :val})
 
-    assert_receive %Phoenix.Socket.Broadcast{
+    assert_receive %Combo.Socket.Broadcast{
       event: "event3",
       payload: %{key: :val},
       topic: "sometopic"
@@ -88,7 +88,7 @@ defmodule Combo.Channel.ChannelTest do
 
     broadcast!(socket, "event4", %{key: :val})
 
-    assert_receive %Phoenix.Socket.Broadcast{
+    assert_receive %Combo.Socket.Broadcast{
       event: "event4",
       payload: %{key: :val},
       topic: "sometopic"
@@ -96,7 +96,7 @@ defmodule Combo.Channel.ChannelTest do
   end
 
   test "pushing to transport" do
-    socket = %Phoenix.Socket{
+    socket = %Combo.Socket{
       serializer: Combo.ChannelTest.NoopSerializer,
       topic: "sometopic",
       transport_pid: self(),
@@ -105,7 +105,7 @@ defmodule Combo.Channel.ChannelTest do
 
     push(socket, "event1", %{key: :val})
 
-    assert_receive %Phoenix.Socket.Message{
+    assert_receive %Combo.Socket.Message{
       event: "event1",
       payload: %{key: :val},
       topic: "sometopic"
@@ -113,7 +113,7 @@ defmodule Combo.Channel.ChannelTest do
   end
 
   test "replying to transport" do
-    socket = %Phoenix.Socket{
+    socket = %Combo.Socket{
       serializer: Combo.ChannelTest.NoopSerializer,
       ref: "123",
       topic: "sometopic",
@@ -124,7 +124,7 @@ defmodule Combo.Channel.ChannelTest do
     ref = socket_ref(socket)
     reply(ref, {:ok, %{key: :val}})
 
-    assert_receive %Phoenix.Socket.Reply{
+    assert_receive %Combo.Socket.Reply{
       payload: %{key: :val},
       ref: "123",
       status: :ok,
@@ -133,7 +133,7 @@ defmodule Combo.Channel.ChannelTest do
   end
 
   test "replying just status to transport" do
-    socket = %Phoenix.Socket{
+    socket = %Combo.Socket{
       serializer: Combo.ChannelTest.NoopSerializer,
       ref: "123",
       topic: "sometopic",
@@ -144,7 +144,7 @@ defmodule Combo.Channel.ChannelTest do
     ref = socket_ref(socket)
     reply(ref, :ok)
 
-    assert_receive %Phoenix.Socket.Reply{
+    assert_receive %Combo.Socket.Reply{
       payload: %{},
       ref: "123",
       status: :ok,
@@ -154,11 +154,11 @@ defmodule Combo.Channel.ChannelTest do
 
   test "socket_ref raises ArgumentError when socket is not joined or has no ref" do
     assert_raise ArgumentError, ~r"join", fn ->
-      socket_ref(%Phoenix.Socket{joined: false})
+      socket_ref(%Combo.Socket{joined: false})
     end
 
     assert_raise ArgumentError, ~r"ref", fn ->
-      socket_ref(%Phoenix.Socket{joined: true})
+      socket_ref(%Combo.Socket{joined: true})
     end
   end
 end

@@ -25,7 +25,7 @@ defmodule Phoenix.Integration.WebSocketTest do
   )
 
   defmodule UserSocket do
-    @behaviour Phoenix.Socket.Transport
+    @behaviour Combo.Socket.Transport
 
     def child_spec(opts) do
       :value = Keyword.fetch!(opts, :custom)
@@ -62,7 +62,7 @@ defmodule Phoenix.Integration.WebSocketTest do
   end
 
   defmodule PingSocket do
-    @behaviour Phoenix.Socket.Transport
+    @behaviour Combo.Socket.Transport
 
     def child_spec(_opts), do: :ignore
     def connect(_), do: {:ok, %{}}

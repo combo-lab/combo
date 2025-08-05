@@ -135,7 +135,7 @@ defmodule Combo.Transports.LongPoll.Server do
   defp publish_reply(state, reply) when is_map(reply) do
     IO.warn(
       "Returning a map from the LongPolling serializer is deprecated. " <>
-        "Please return JSON encoded data instead (see Phoenix.Socket.Serializer)"
+        "Please return JSON encoded data instead (see Combo.Socket.Serializer)"
     )
 
     publish_reply(state, Phoenix.json_library().encode_to_iodata!(reply))

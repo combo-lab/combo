@@ -26,7 +26,7 @@ defmodule Phoenix.Integration.LongPollSocketTest do
   )
 
   defmodule UserSocket do
-    @behaviour Phoenix.Socket.Transport
+    @behaviour Combo.Socket.Transport
 
     def child_spec(opts) do
       :value = Keyword.fetch!(opts, :custom)

@@ -1,11 +1,11 @@
-defmodule Phoenix.SocketTest do
+defmodule Combo.SocketTest do
   use ExUnit.Case, async: true
 
-  import Phoenix.Socket
-  alias Phoenix.Socket.{Message, InvalidMessageError}
+  import Combo.Socket
+  alias Combo.Socket.{Message, InvalidMessageError}
 
   defmodule UserSocket do
-    use Phoenix.Socket
+    use Combo.Socket
 
     channel "food*", FoodChannel
     channel "foo*", FooChannel
@@ -49,7 +49,7 @@ defmodule Phoenix.SocketTest do
 
   describe "assign/3" do
     test "assigns to socket" do
-      socket = %Phoenix.Socket{}
+      socket = %Combo.Socket{}
       assert socket.assigns[:foo] == nil
       socket = assign(socket, :foo, :bar)
       assert socket.assigns[:foo] == :bar
@@ -58,7 +58,7 @@ defmodule Phoenix.SocketTest do
 
   describe "assign/2" do
     test "assigns a map socket" do
-      socket = %Phoenix.Socket{}
+      socket = %Combo.Socket{}
       assert socket.assigns[:foo] == nil
       socket = assign(socket, %{foo: :bar, abc: :def})
       assert socket.assigns[:foo] == :bar
@@ -66,7 +66,7 @@ defmodule Phoenix.SocketTest do
     end
 
     test "merges if values exist" do
-      socket = %Phoenix.Socket{}
+      socket = %Combo.Socket{}
       socket = assign(socket, %{foo: :bar, abc: :def})
       socket = assign(socket, %{foo: :baz})
       assert socket.assigns[:foo] == :baz
@@ -74,7 +74,7 @@ defmodule Phoenix.SocketTest do
     end
 
     test "merges keyword lists" do
-      socket = %Phoenix.Socket{}
+      socket = %Combo.Socket{}
       socket = assign(socket, %{foo: :bar, abc: :def})
       socket = assign(socket, foo: :baz)
       assert socket.assigns[:foo] == :baz
@@ -88,7 +88,7 @@ defmodule Phoenix.SocketTest do
     end
 
     defmodule DrainerSpecSocket do
-      use Phoenix.Socket
+      use Combo.Socket
 
       def id(_), do: "123"
 
@@ -109,7 +109,7 @@ defmodule Phoenix.SocketTest do
       ]
 
       assert DrainerSpecSocket.drainer_spec(drainer: drainer_spec, endpoint: Endpoint) ==
-               {Phoenix.Socket.PoolDrainer,
+               {Combo.Socket.PoolDrainer,
                 {Endpoint, DrainerSpecSocket, [endpoint: Endpoint, drainer: drainer_spec]}}
     end
 
@@ -120,7 +120,7 @@ defmodule Phoenix.SocketTest do
                drainer: {DrainerSpecSocket, :dynamic_drainer_config, []},
                endpoint: Endpoint
              ) ==
-               {Phoenix.Socket.PoolDrainer,
+               {Combo.Socket.PoolDrainer,
                 {Endpoint, DrainerSpecSocket, [endpoint: Endpoint, drainer: drainer_spec]}}
     end
 

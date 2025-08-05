@@ -10,7 +10,7 @@ defmodule Phoenix.DebugTest do
     use GenServer
 
     def init(channel_pid) do
-      Process.put(:"$process_label", {Phoenix.Socket, __MODULE__, nil})
+      Process.put(:"$process_label", {Combo.Socket, __MODULE__, nil})
       {:ok, channel_pid}
     end
 
@@ -33,7 +33,7 @@ defmodule Phoenix.DebugTest do
     end
 
     def handle_call(:socket, _from, state) do
-      {:reply, %Phoenix.Socket{}, state}
+      {:reply, %Combo.Socket{}, state}
     end
   end
 
@@ -92,7 +92,7 @@ defmodule Phoenix.DebugTest do
 
   describe "socket/1" do
     test "returns the socket struct for a channel process", %{channel_pid: channel_pid} do
-      assert {:ok, %Phoenix.Socket{}} = Debug.socket(channel_pid)
+      assert {:ok, %Combo.Socket{}} = Debug.socket(channel_pid)
     end
 
     test "returns error for non-channel process" do

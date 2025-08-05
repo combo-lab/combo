@@ -23,10 +23,10 @@ defmodule Phoenix.Integration.WebsocketClient do
     ref: 1
   ]
 
-  alias Phoenix.Socket.Message
+  alias Combo.Socket.Message
 
   @doc """
-  Starts the WebSocket client for given ws URL. `Phoenix.Socket.Message`s
+  Starts the WebSocket client for given ws URL. `Combo.Socket.Message`s
   received from the server are forwarded to the sender pid.
   """
   def connect(sender, url, serializer, headers \\ []) do

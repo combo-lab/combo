@@ -7,7 +7,7 @@ defmodule Phoenix.Integration.WebSocketChannelsTest do
   import ExUnit.CaptureLog
 
   alias Phoenix.Integration.WebsocketClient
-  alias Phoenix.Socket.{V1, V2, Message}
+  alias Combo.Socket.{V1, V2, Message}
   alias __MODULE__.Endpoint
 
   @moduletag :capture_log
@@ -107,7 +107,7 @@ defmodule Phoenix.Integration.WebSocketChannelsTest do
   end
 
   defmodule UserSocketConnectInfo do
-    use Phoenix.Socket, log: false
+    use Combo.Socket, log: false
 
     channel "room:*", RoomChannel
 
@@ -137,7 +137,7 @@ defmodule Phoenix.Integration.WebSocketChannelsTest do
   end
 
   defmodule UserSocket do
-    use Phoenix.Socket
+    use Combo.Socket
 
     channel "room:*", RoomChannel
     channel "custom:*", CustomChannel

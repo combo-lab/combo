@@ -1,10 +1,10 @@
-defmodule Phoenix.Socket.TransportTest do
+defmodule Combo.Socket.TransportTest do
   use ExUnit.Case, async: true
   use RouterHelper
 
   import ExUnit.CaptureLog
 
-  alias Phoenix.Socket.Transport
+  alias Combo.Socket.Transport
 
   @secret_key_base String.duplicate("abcdefgh", 8)
 

@@ -1,8 +1,8 @@
 defmodule Phoenix.Test.ChannelTest do
   use ExUnit.Case, async: true
 
-  alias Phoenix.Socket
-  alias Phoenix.Socket.{Broadcast, Message}
+  alias Combo.Socket
+  alias Combo.Socket.{Broadcast, Message}
   alias __MODULE__.{UserSocket, Endpoint}
 
   Application.put_env(:phoenix, Endpoint,
@@ -155,7 +155,7 @@ defmodule Phoenix.Test.ChannelTest do
   end
 
   defmodule UserSocket do
-    use Phoenix.Socket
+    use Combo.Socket
 
     channel "foo:*", Channel, assigns: %{user_socket_assigns: true}
 

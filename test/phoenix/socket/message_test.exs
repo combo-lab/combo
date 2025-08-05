@@ -1,8 +1,8 @@
-defmodule Phoenix.Socket.MessageTest do
+defmodule Combo.Socket.MessageTest do
   use ExUnit.Case, async: true
-  doctest Phoenix.Socket.Message
+  doctest Combo.Socket.Message
 
-  alias Phoenix.Socket.Message
+  alias Combo.Socket.Message
 
   describe "inspect/2 custom implementation" do
     test "filters sensitive values in form submit events" do

@@ -37,7 +37,7 @@ defmodule Combo.Token do
       the secret key base is extracted from the endpoint
     * `Plug.Conn` - where the secret key base is extracted from the
       endpoint stored in the connection
-    * `Phoenix.Socket` or `Phoenix.LiveView.Socket` - where the secret
+    * `Combo.Socket` or `Phoenix.LiveView.Socket` - where the secret
       key base is extracted from the endpoint stored in the socket
     * a string, representing the secret key base itself. A key base
       with at least 20 randomly generated characters should be used
@@ -76,7 +76,7 @@ defmodule Combo.Token do
   a user on a Phoenix channel:
 
       defmodule MyApp.UserSocket do
-        use Phoenix.Socket
+        use Combo.Socket
 
         def connect(%{"token" => token}, socket, _connect_info) do
           case Combo.Token.verify(socket, "user auth", token, max_age: 86400) do

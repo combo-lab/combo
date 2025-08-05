@@ -1,4 +1,4 @@
-defmodule Phoenix.Socket.Serializer do
+defmodule Combo.Socket.Serializer do
   @moduledoc """
   A behaviour that serializes incoming and outgoing socket messages.
 
@@ -9,21 +9,21 @@ defmodule Phoenix.Socket.Serializer do
   """
 
   @doc """
-  Encodes a `Phoenix.Socket.Broadcast` struct to fastlane format.
+  Encodes a `Combo.Socket.Broadcast` struct to fastlane format.
   """
-  @callback fastlane!(Phoenix.Socket.Broadcast.t()) ::
+  @callback fastlane!(Combo.Socket.Broadcast.t()) ::
               {:socket_push, :text, iodata()}
               | {:socket_push, :binary, iodata()}
 
   @doc """
-  Encodes `Phoenix.Socket.Message` and `Phoenix.Socket.Reply` structs to push format.
+  Encodes `Combo.Socket.Message` and `Combo.Socket.Reply` structs to push format.
   """
-  @callback encode!(Phoenix.Socket.Message.t() | Phoenix.Socket.Reply.t()) ::
+  @callback encode!(Combo.Socket.Message.t() | Combo.Socket.Reply.t()) ::
               {:socket_push, :text, iodata()}
               | {:socket_push, :binary, iodata()}
 
   @doc """
-  Decodes iodata into `Phoenix.Socket.Message` struct.
+  Decodes iodata into `Combo.Socket.Message` struct.
   """
-  @callback decode!(iodata, options :: Keyword.t()) :: Phoenix.Socket.Message.t()
+  @callback decode!(iodata, options :: Keyword.t()) :: Combo.Socket.Message.t()
 end

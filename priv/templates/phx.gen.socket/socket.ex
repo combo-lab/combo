@@ -1,5 +1,5 @@
 defmodule <%= module %>Socket do
-  use Phoenix.Socket
+  use Combo.Socket
 
   # A Socket handler
   #

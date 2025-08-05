@@ -1,4 +1,4 @@
-defmodule Phoenix.Socket.Transport do
+defmodule Combo.Socket.Transport do
   @moduledoc """
   Outlines the Socket <-> Transport communication.
 
@@ -6,7 +6,7 @@ defmodule Phoenix.Socket.Transport do
   with a socket. This module defines the functions a transport will
   invoke on a given socket implementation.
 
-  `Phoenix.Socket` is just one possible implementation of a socket
+  `Combo.Socket` is just one possible implementation of a socket
   that multiplexes events over multiple channels. If you implement
   this behaviour, then existing transports can use your new socket
   implementation, without passing through channels.
@@ -20,7 +20,7 @@ defmodule Phoenix.Socket.Transport do
   Here is a simple echo socket implementation:
 
       defmodule EchoSocket do
-        @behaviour Phoenix.Socket.Transport
+        @behaviour Combo.Socket.Transport
 
         def child_spec(opts) do
           # We won't spawn any process, so let's ignore the child spec
@@ -109,7 +109,7 @@ defmodule Phoenix.Socket.Transport do
   Each socket connection is started by the transport
   and the process that controls the socket likely
   belongs to the transport. However, some sockets spawn
-  new processes, such as `Phoenix.Socket` which spawns
+  new processes, such as `Combo.Socket` which spawns
   channels, and this gives the ability to start a
   supervision tree associated to the socket.
 
@@ -151,7 +151,7 @@ defmodule Phoenix.Socket.Transport do
   may be invoked outside of the process that effectively
   runs the socket.
 
-  In the default `Phoenix.Socket` implementation, the
+  In the default `Combo.Socket` implementation, the
   metadata expects the following keys:
 
     * `:endpoint` - the application endpoint
@@ -354,7 +354,7 @@ defmodule Phoenix.Socket.Transport do
 
       true ->
         Logger.error("""
-        Could not check origin for Phoenix.Socket transport.
+        Could not check origin for Combo.Socket transport.
 
         Origin of the request: #{origin}
 
@@ -425,7 +425,7 @@ defmodule Phoenix.Socket.Transport do
     request_headers = get_req_header(conn, "sec-websocket-protocol")
 
     Logger.error("""
-    Could not check Websocket subprotocols for Phoenix.Socket transport.
+    Could not check Websocket subprotocols for Combo.Socket transport.
 
     Subprotocols of the request: #{inspect(request_headers)}
     Configured supported subprotocols: #{inspect(subprotocols)}

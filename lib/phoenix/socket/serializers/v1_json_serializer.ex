@@ -1,8 +1,8 @@
-defmodule Phoenix.Socket.V1.JSONSerializer do
+defmodule Combo.Socket.V1.JSONSerializer do
   @moduledoc false
-  @behaviour Phoenix.Socket.Serializer
+  @behaviour Combo.Socket.Serializer
 
-  alias Phoenix.Socket.{Broadcast, Message, Reply}
+  alias Combo.Socket.{Broadcast, Message, Reply}
 
   @impl true
   def fastlane!(%Broadcast{} = msg) do
@@ -32,7 +32,7 @@ defmodule Phoenix.Socket.V1.JSONSerializer do
 
     case payload do
       %{} ->
-        Phoenix.Socket.Message.from_map!(payload)
+        Combo.Socket.Message.from_map!(payload)
 
       other ->
         raise "V1 JSON Serializer expected a map, got #{inspect(other)}"

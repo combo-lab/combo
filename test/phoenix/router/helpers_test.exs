@@ -394,7 +394,7 @@ defmodule Phoenix.Router.HelpersTest do
   end
 
   defp socket_with_endpoint do
-    %Phoenix.Socket{endpoint: Endpoint}
+    %Combo.Socket{endpoint: Endpoint}
   end
 
   defp uri do

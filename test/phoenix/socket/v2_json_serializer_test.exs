@@ -1,6 +1,6 @@
-defmodule Phoenix.Socket.V2.JSONSerializerTest do
+defmodule Combo.Socket.V2.JSONSerializerTest do
   use ExUnit.Case, async: true
-  alias Phoenix.Socket.{Broadcast, Message, Reply, V2}
+  alias Combo.Socket.{Broadcast, Message, Reply, V2}
 
   @serializer V2.JSONSerializer
   @v2_fastlane_json "[null,null,\"t\",\"e\",{\"m\":1}]"
@@ -88,7 +88,7 @@ defmodule Phoenix.Socket.V2.JSONSerializerTest do
     end
   end
 
-  test "encode!/1 encodes `Phoenix.Socket.Message` as JSON" do
+  test "encode!/1 encodes `Combo.Socket.Message` as JSON" do
     msg = %Message{topic: "t", event: "e", payload: %{m: 1}}
     assert encode!(@serializer, msg) == @v2_msg_json
   end
@@ -98,7 +98,7 @@ defmodule Phoenix.Socket.V2.JSONSerializerTest do
     assert_raise ArgumentError, fn -> encode!(@serializer, msg) end
   end
 
-  test "encode!/1 encodes `Phoenix.Socket.Reply` as JSON" do
+  test "encode!/1 encodes `Combo.Socket.Reply` as JSON" do
     msg = %Reply{topic: "t", payload: %{m: 1}}
     encoded = encode!(@serializer, msg)
 
@@ -111,7 +111,7 @@ defmodule Phoenix.Socket.V2.JSONSerializerTest do
            ]
   end
 
-  test "decode!/2 decodes `Phoenix.Socket.Message` from JSON" do
+  test "decode!/2 decodes `Combo.Socket.Message` from JSON" do
     assert %Message{topic: "t", event: "e", payload: %{"m" => 1}} ==
              decode!(@serializer, @v2_msg_json, opcode: :text)
   end
@@ -145,7 +145,7 @@ defmodule Phoenix.Socket.V2.JSONSerializerTest do
         103
       >>
 
-      assert encode!(@serializer, %Phoenix.Socket.Message{
+      assert encode!(@serializer, %Combo.Socket.Message{
                join_ref: "12",
                ref: nil,
                topic: "topic",
@@ -156,7 +156,7 @@ defmodule Phoenix.Socket.V2.JSONSerializerTest do
 
     test "encode with oversized headers" do
       assert_raise ArgumentError, ~r/unable to convert topic to binary/, fn ->
-        encode!(@serializer, %Phoenix.Socket.Message{
+        encode!(@serializer, %Combo.Socket.Message{
           join_ref: "12",
           ref: nil,
           topic: String.duplicate("t", 256),
@@ -166,7 +166,7 @@ defmodule Phoenix.Socket.V2.JSONSerializerTest do
       end
 
       assert_raise ArgumentError, ~r/unable to convert event to binary/, fn ->
-        encode!(@serializer, %Phoenix.Socket.Message{
+        encode!(@serializer, %Combo.Socket.Message{
           join_ref: "12",
           ref: nil,
           topic: "topic",
@@ -176,7 +176,7 @@ defmodule Phoenix.Socket.V2.JSONSerializerTest do
       end
 
       assert_raise ArgumentError, ~r/unable to convert join_ref to binary/, fn ->
-        encode!(@serializer, %Phoenix.Socket.Message{
+        encode!(@serializer, %Combo.Socket.Message{
           join_ref: String.duplicate("j", 256),
           ref: nil,
           topic: "topic",
@@ -187,7 +187,7 @@ defmodule Phoenix.Socket.V2.JSONSerializerTest do
     end
 
     test "reply" do
-      assert encode!(@serializer, %Phoenix.Socket.Reply{
+      assert encode!(@serializer, %Combo.Socket.Reply{
                join_ref: "12",
                ref: "123",
                topic: "topic",
@@ -198,7 +198,7 @@ defmodule Phoenix.Socket.V2.JSONSerializerTest do
 
     test "reply with oversized headers" do
       assert_raise ArgumentError, ~r/unable to convert ref to binary/, fn ->
-        encode!(@serializer, %Phoenix.Socket.Reply{
+        encode!(@serializer, %Combo.Socket.Reply{
           join_ref: "12",
           ref: String.duplicate("r", 256),
           topic: "topic",
@@ -209,7 +209,7 @@ defmodule Phoenix.Socket.V2.JSONSerializerTest do
     end
 
     test "fastlane" do
-      assert fastlane!(@serializer, %Phoenix.Socket.Broadcast{
+      assert fastlane!(@serializer, %Combo.Socket.Broadcast{
                topic: "topic",
                event: "event",
                payload: {:binary, <<101, 102, 103>>}
@@ -218,7 +218,7 @@ defmodule Phoenix.Socket.V2.JSONSerializerTest do
 
     test "fastlane with oversized headers" do
       assert_raise ArgumentError, ~r/unable to convert topic to binary/, fn ->
-        fastlane!(@serializer, %Phoenix.Socket.Broadcast{
+        fastlane!(@serializer, %Combo.Socket.Broadcast{
           topic: String.duplicate("t", 256),
           event: "event",
           payload: {:binary, <<101, 102, 103>>}
@@ -226,7 +226,7 @@ defmodule Phoenix.Socket.V2.JSONSerializerTest do
       end
 
       assert_raise ArgumentError, ~r/unable to convert event to binary/, fn ->
-        fastlane!(@serializer, %Phoenix.Socket.Broadcast{
+        fastlane!(@serializer, %Combo.Socket.Broadcast{
           topic: "topic",
           event: String.duplicate("e", 256),
           payload: {:binary, <<101, 102, 103>>}
@@ -237,7 +237,7 @@ defmodule Phoenix.Socket.V2.JSONSerializerTest do
 
   describe "binary decode" do
     test "pushed message" do
-      assert decode!(@serializer, @client_push, opcode: :binary) == %Phoenix.Socket.Message{
+      assert decode!(@serializer, @client_push, opcode: :binary) == %Combo.Socket.Message{
                join_ref: "12",
                ref: "123",
                topic: "topic",

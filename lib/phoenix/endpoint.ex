@@ -743,7 +743,7 @@ defmodule Phoenix.Endpoint do
     paths =
       if websocket do
         websocket = put_auth_token(websocket, opts[:auth_token])
-        config = Phoenix.Socket.Transport.load_config(websocket, Combo.Transports.WebSocket)
+        config = Combo.Socket.Transport.load_config(websocket, Combo.Transports.WebSocket)
         plug_init = {endpoint, socket, config}
         {conn_ast, match_path} = socket_path(path, config)
         [{match_path, Combo.Transports.WebSocket, conn_ast, plug_init} | paths]
@@ -754,7 +754,7 @@ defmodule Phoenix.Endpoint do
     paths =
       if longpoll do
         longpoll = put_auth_token(longpoll, opts[:auth_token])
-        config = Phoenix.Socket.Transport.load_config(longpoll, Combo.Transports.LongPoll)
+        config = Combo.Socket.Transport.load_config(longpoll, Combo.Transports.LongPoll)
         plug_init = {endpoint, socket, config}
         {conn_ast, match_path} = socket_path(path, config)
         [{match_path, Combo.Transports.LongPoll, conn_ast, plug_init} | paths]
@@ -806,7 +806,7 @@ defmodule Phoenix.Endpoint do
   Defines a websocket/longpoll mount-point for a `socket`.
 
   It expects a `path`, a `socket` module, and a set of options.
-  The socket module is typically defined with `Phoenix.Socket`.
+  The socket module is typically defined with `Combo.Socket`.
 
   Both websocket and longpolling connections are supported out
   of the box.
@@ -840,7 +840,7 @@ defmodule Phoenix.Endpoint do
       * `:shutdown` - The maximum amount of time in milliseconds allowed
         to drain all batches. Defaults to 30000ms.
       * `:log` - the log level for drain actions. Defaults the `:log` option
-        passed to `use Phoenix.Socket` or `:info`. Set it to `false` to disable logging.
+        passed to `use Combo.Socket` or `:info`. Set it to `false` to disable logging.
 
       For example, if you have 150k connections, the default values will
       split them into 15 batches of 10k connections. Each batch takes
@@ -861,8 +861,8 @@ defmodule Phoenix.Endpoint do
 
       Custom transports might implement their own mechanism.
 
-  You can also pass the options below on `use Phoenix.Socket`.
-  The values specified here override the value in `use Phoenix.Socket`.
+  You can also pass the options below on `use Combo.Socket`.
+  The values specified here override the value in `use Combo.Socket`.
 
   ## Examples
 
@@ -889,7 +889,7 @@ defmodule Phoenix.Endpoint do
        to the transport name ("/websocket" or "/longpoll")
 
     * `:serializer` - a list of serializers for messages. See
-      `Phoenix.Socket` for more information
+      `Combo.Socket` for more information
 
     * `:transport_log` - if the transport layer itself should log and,
       if so, the level
@@ -1033,7 +1033,7 @@ defmodule Phoenix.Endpoint do
           subprotocols: ["sip", "mqtt"]
 
     * `:error_handler` - custom error handler for connection errors.
-      If `c:Phoenix.Socket.connect/3` returns an `{:error, reason}` tuple,
+      If `c:Combo.Socket.connect/3` returns an `{:error, reason}` tuple,
       the error handler will be called with the error reason. For WebSockets,
       the error handler must be a MFA tuple that receives a `Plug.Conn`, the
       error reason, and returns a `Plug.Conn` with a response. For example:

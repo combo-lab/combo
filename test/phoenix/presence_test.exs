@@ -1,6 +1,6 @@
 defmodule Phoenix.PresenceTest do
   use ExUnit.Case, async: true
-  alias Phoenix.Socket.Broadcast
+  alias Combo.Socket.Broadcast
 
   defmodule DefaultPresence do
     use Phoenix.Presence, otp_app: :phoenix
@@ -78,14 +78,14 @@ defmodule Phoenix.PresenceTest do
 
   test "list/1 lists presences from tracker", config do
     assert MyPresence.list(config.topic) == %{}
-    assert MyPresence.list(%Phoenix.Socket{topic: config.topic}) == %{}
+    assert MyPresence.list(%Combo.Socket{topic: config.topic}) == %{}
     assert {:ok, _} = MyPresence.track(self(), config.topic, "u1", %{name: "u1"})
 
     assert %{"u1" => %{extra: "extra", metas: [%{name: "u1", phx_ref: _}]}} =
              MyPresence.list(config.topic)
 
     assert %{"u1" => %{extra: "extra", metas: [%{name: "u1", phx_ref: _}]}} =
-             MyPresence.list(%Phoenix.Socket{topic: config.topic})
+             MyPresence.list(%Combo.Socket{topic: config.topic})
   end
 
   test "list/1 returns keys as strings", config do
@@ -201,7 +201,7 @@ defmodule Phoenix.PresenceTest do
 
   test "track and untrack with %Socket{}", %{topic: topic} = config do
     Phoenix.PubSub.subscribe(config.pubsub, topic)
-    socket = %Phoenix.Socket{topic: topic, channel_pid: self()}
+    socket = %Combo.Socket{topic: topic, channel_pid: self()}
     MyPresence.track(socket, "u1", %{})
     assert %{"u1" => %{metas: [%{}]}} = MyPresence.list(topic)
     assert MyPresence.untrack(socket, "u1") == :ok

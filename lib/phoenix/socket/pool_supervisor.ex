@@ -1,4 +1,4 @@
-defmodule Phoenix.Socket.PoolSupervisor do
+defmodule Combo.Socket.PoolSupervisor do
   @moduledoc false
   use Supervisor
 
@@ -63,7 +63,7 @@ defmodule Phoenix.Socket.PoolSupervisor do
   end
 end
 
-defmodule Phoenix.Socket.PoolDrainer do
+defmodule Combo.Socket.PoolDrainer do
   @moduledoc false
   use GenServer
   require Logger
@@ -127,7 +127,7 @@ defmodule Phoenix.Socket.PoolDrainer do
 
       spawn(fn ->
         for pid <- pids do
-          send(pid, %Phoenix.Socket.Broadcast{event: "phx_drain"})
+          send(pid, %Combo.Socket.Broadcast{event: "phx_drain"})
         end
       end)
 

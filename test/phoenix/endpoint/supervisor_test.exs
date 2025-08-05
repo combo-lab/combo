@@ -174,7 +174,7 @@ defmodule Phoenix.Endpoint.SupervisorTest do
 
   describe "origin & CSRF checks config" do
     defmodule TestSocket do
-      @behaviour Phoenix.Socket.Transport
+      @behaviour Combo.Socket.Transport
       def child_spec(_), do: :ignore
       def connect(_), do: {:ok, []}
       def init(state), do: {:ok, state}

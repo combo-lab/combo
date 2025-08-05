@@ -7,7 +7,7 @@ defmodule Combo.Transports.LongPoll do
   @connect_info_opts [:check_csrf]
 
   import Plug.Conn
-  alias Phoenix.Socket.{V1, V2, Transport}
+  alias Combo.Socket.{V1, V2, Transport}
 
   def default_config() do
     [

@@ -1,7 +1,7 @@
-defmodule Phoenix.Socket.V1.JSONSerializerTest do
+defmodule Combo.Socket.V1.JSONSerializerTest do
   use ExUnit.Case, async: true
 
-  alias Phoenix.Socket.{Broadcast, Message, Reply, V1}
+  alias Combo.Socket.{Broadcast, Message, Reply, V1}
 
   # v1 responses must not contain join_ref
   @serializer V1.JSONSerializer
@@ -20,7 +20,7 @@ defmodule Phoenix.Socket.V1.JSONSerializerTest do
     IO.iodata_to_binary(encoded)
   end
 
-  test "encode!/1 encodes `Phoenix.Socket.Message` as JSON" do
+  test "encode!/1 encodes `Combo.Socket.Message` as JSON" do
     msg = %Message{topic: "t", event: "e", payload: "m"}
     encoded = encode!(@serializer, msg)
 
@@ -32,7 +32,7 @@ defmodule Phoenix.Socket.V1.JSONSerializerTest do
            }
   end
 
-  test "encode!/1 encodes `Phoenix.Socket.Reply` as JSON" do
+  test "encode!/1 encodes `Combo.Socket.Reply` as JSON" do
     msg = %Reply{topic: "t", ref: "null"}
     encoded = encode!(@serializer, msg)
 
@@ -44,7 +44,7 @@ defmodule Phoenix.Socket.V1.JSONSerializerTest do
            }
   end
 
-  test "decode!/2 decodes `Phoenix.Socket.Message` from JSON" do
+  test "decode!/2 decodes `Combo.Socket.Message` from JSON" do
     assert %Message{topic: "t", event: "e", payload: "m"} ==
              decode!(@serializer, @v1_msg_json, opcode: :text)
   end

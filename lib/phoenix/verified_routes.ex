@@ -595,7 +595,7 @@ defmodule Combo.VerifiedRoutes do
 
   def static_url(other, path) do
     raise ArgumentError,
-          "expected a %Plug.Conn{}, a %Phoenix.Socket{}, a struct with an :endpoint key, " <>
+          "expected a %Plug.Conn{}, a %Combo.Socket{}, a struct with an :endpoint key, " <>
             "or a Phoenix.Endpoint when building static url for #{path}, got: #{inspect(other)}"
   end
 
@@ -636,7 +636,7 @@ defmodule Combo.VerifiedRoutes do
 
   defp guarded_unverified_url(other, path, _params) do
     raise ArgumentError,
-          "expected a %Plug.Conn{}, a %Phoenix.Socket{}, a %URI{}, a struct with an :endpoint key, " <>
+          "expected a %Plug.Conn{}, a %Combo.Socket{}, a %URI{}, a struct with an :endpoint key, " <>
             "or a Phoenix.Endpoint when building url at #{path}, got: #{inspect(other)}"
   end
 
@@ -721,7 +721,7 @@ defmodule Combo.VerifiedRoutes do
 
   def unverified_path(other, router, path, _params) do
     raise ArgumentError,
-          "expected a %Plug.Conn{}, a %Phoenix.Socket{}, a %URI{}, a struct with an :endpoint key, " <>
+          "expected a %Plug.Conn{}, a %Combo.Socket{}, a %URI{}, a struct with an :endpoint key, " <>
             "or a Phoenix.Endpoint when building path for #{inspect(router)} at #{path}, got: #{inspect(other)}"
   end
 

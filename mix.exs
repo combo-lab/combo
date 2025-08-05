@@ -209,7 +209,7 @@ defmodule Phoenix.MixProject do
     # Phoenix.Param
     # Phoenix.Presence
     # Phoenix.Router
-    # Phoenix.Socket
+    # Combo.Socket
     # Combo.Token
     # Combo.VerifiedRoutes
 
@@ -253,11 +253,11 @@ defmodule Phoenix.MixProject do
         Phoenix.Digester.Gzip
       ],
       Socket: [
-        Phoenix.Socket.Broadcast,
-        Phoenix.Socket.Message,
-        Phoenix.Socket.Reply,
-        Phoenix.Socket.Serializer,
-        Phoenix.Socket.Transport
+        Combo.Socket.Broadcast,
+        Combo.Socket.Message,
+        Combo.Socket.Reply,
+        Combo.Socket.Serializer,
+        Combo.Socket.Transport
       ]
     ]
   end

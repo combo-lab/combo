@@ -182,7 +182,7 @@ defmodule Combo.TokenTest do
   end
 
   defp socket() do
-    %Phoenix.Socket{endpoint: TokenEndpoint}
+    %Combo.Socket{endpoint: TokenEndpoint}
   end
 
   defp conn() do

@@ -55,7 +55,7 @@ Let's take a look at them.
 ### Overview
 
 To start communicating, a client connects to a node (a Phoenix server) using a transport (e.g., Websockets or long polling) and joins one or more channels using that single network connection.
-One channel server lightweight process is created per client, per topic. Each channel holds onto the `%Phoenix.Socket{}` and can maintain any state it needs within its `socket.assigns`.
+One channel server lightweight process is created per client, per topic. Each channel holds onto the `%Combo.Socket{}` and can maintain any state it needs within its `socket.assigns`.
 
 Once the connection is established, each incoming message from a client is routed, based on its topic, to the correct channel server.
 If the channel server asks to broadcast a message, that message is sent to the local PubSub, which sends it out to any clients connected to the same server and subscribed to that topic.
@@ -145,7 +145,7 @@ Topics are string identifiers - names that the various layers use in order to ma
 
 ### Messages
 
-The `Phoenix.Socket.Message` module defines a struct with the following keys which denotes a valid message. From the [Phoenix.Socket.Message docs](https://hexdocs.pm/phoenix/Phoenix.Socket.Message.html).
+The `Combo.Socket.Message` module defines a struct with the following keys which denotes a valid message. From the [Combo.Socket.Message docs](https://hexdocs.pm/phoenix/Combo.Socket.Message.html).
 
 - `topic` - The string topic or `"topic:subtopic"` pair namespace, such as `"messages"` or `"messages:123"`
 - `event` - The string event name, for example `"phx_join"`
@@ -220,7 +220,7 @@ Next, we will configure our socket to ensure messages get routed to the correct 
 
 ```elixir
 defmodule HelloWeb.UserSocket do
-  use Phoenix.Socket
+  use Combo.Socket
 
   ## Channels
   channel "room:*", HelloWeb.RoomChannel

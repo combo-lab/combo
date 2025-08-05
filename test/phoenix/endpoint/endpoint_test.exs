@@ -260,7 +260,7 @@ defmodule Phoenix.Endpoint.EndpointTest do
 
     Endpoint.broadcast_from(some, "sometopic", "event1", %{key: :val})
 
-    assert_receive %Phoenix.Socket.Broadcast{
+    assert_receive %Combo.Socket.Broadcast{
       event: "event1",
       payload: %{key: :val},
       topic: "sometopic"
@@ -268,7 +268,7 @@ defmodule Phoenix.Endpoint.EndpointTest do
 
     Endpoint.broadcast_from!(some, "sometopic", "event2", %{key: :val})
 
-    assert_receive %Phoenix.Socket.Broadcast{
+    assert_receive %Combo.Socket.Broadcast{
       event: "event2",
       payload: %{key: :val},
       topic: "sometopic"
@@ -276,7 +276,7 @@ defmodule Phoenix.Endpoint.EndpointTest do
 
     Endpoint.broadcast("sometopic", "event3", %{key: :val})
 
-    assert_receive %Phoenix.Socket.Broadcast{
+    assert_receive %Combo.Socket.Broadcast{
       event: "event3",
       payload: %{key: :val},
       topic: "sometopic"
@@ -284,7 +284,7 @@ defmodule Phoenix.Endpoint.EndpointTest do
 
     Endpoint.broadcast!("sometopic", "event4", %{key: :val})
 
-    assert_receive %Phoenix.Socket.Broadcast{
+    assert_receive %Combo.Socket.Broadcast{
       event: "event4",
       payload: %{key: :val},
       topic: "sometopic"
@@ -292,7 +292,7 @@ defmodule Phoenix.Endpoint.EndpointTest do
 
     Endpoint.local_broadcast_from(some, "sometopic", "event1", %{key: :val})
 
-    assert_receive %Phoenix.Socket.Broadcast{
+    assert_receive %Combo.Socket.Broadcast{
       event: "event1",
       payload: %{key: :val},
       topic: "sometopic"
@@ -300,7 +300,7 @@ defmodule Phoenix.Endpoint.EndpointTest do
 
     Endpoint.local_broadcast("sometopic", "event3", %{key: :val})
 
-    assert_receive %Phoenix.Socket.Broadcast{
+    assert_receive %Combo.Socket.Broadcast{
       event: "event3",
       payload: %{key: :val},
       topic: "sometopic"

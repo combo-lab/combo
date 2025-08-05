@@ -212,7 +212,7 @@ defmodule Phoenix.Presence do
       end
 
   """
-  @callback track(socket :: Phoenix.Socket.t(), key :: String.t(), meta :: map()) ::
+  @callback track(socket :: Combo.Socket.t(), key :: String.t(), meta :: map()) ::
               {:ok, ref :: binary()}
               | {:error, reason :: term()}
 
@@ -228,7 +228,7 @@ defmodule Phoenix.Presence do
   @doc """
   Stop tracking a channel's process.
   """
-  @callback untrack(socket :: Phoenix.Socket.t(), key :: String.t()) :: :ok
+  @callback untrack(socket :: Combo.Socket.t(), key :: String.t()) :: :ok
 
   @doc """
   Stop tracking a process.
@@ -242,7 +242,7 @@ defmodule Phoenix.Presence do
   the current map and returns a new one.
   """
   @callback update(
-              socket :: Phoenix.Socket.t(),
+              socket :: Combo.Socket.t(),
               key :: String.t(),
               meta :: map() | (map() -> map())
             ) ::
@@ -284,7 +284,7 @@ defmodule Phoenix.Presence do
   a `:phx_ref_prev` key will be present containing the previous
   `:phx_ref` value.
   """
-  @callback list(socket_or_topic :: Phoenix.Socket.t() | topic) :: presences
+  @callback list(socket_or_topic :: Combo.Socket.t() | topic) :: presences
 
   @doc """
   Returns the map of presence metadata for a socket/topic-key pair.
@@ -302,7 +302,7 @@ defmodule Phoenix.Presence do
   Like `c:list/1`, the presence metadata is passed to the `fetch`
   callback of your presence module to fetch any additional information.
   """
-  @callback get_by_key(Phoenix.Socket.t() | topic, key :: String.t()) :: [presence]
+  @callback get_by_key(Combo.Socket.t() | topic, key :: String.t()) :: [presence]
 
   @doc """
   Extend presence information with additional data.
@@ -375,7 +375,7 @@ defmodule Phoenix.Presence do
 
       # API
 
-      def track(%Phoenix.Socket{} = socket, key, meta) do
+      def track(%Combo.Socket{} = socket, key, meta) do
         track(socket.channel_pid, socket.topic, key, meta)
       end
 
@@ -383,7 +383,7 @@ defmodule Phoenix.Presence do
         Phoenix.Tracker.track(__MODULE__, pid, topic, key, meta)
       end
 
-      def untrack(%Phoenix.Socket{} = socket, key) do
+      def untrack(%Combo.Socket{} = socket, key) do
         untrack(socket.channel_pid, socket.topic, key)
       end
 
@@ -391,7 +391,7 @@ defmodule Phoenix.Presence do
         Phoenix.Tracker.untrack(__MODULE__, pid, topic, key)
       end
 
-      def update(%Phoenix.Socket{} = socket, key, meta) do
+      def update(%Combo.Socket{} = socket, key, meta) do
         update(socket.channel_pid, socket.topic, key, meta)
       end
 
@@ -399,10 +399,10 @@ defmodule Phoenix.Presence do
         Phoenix.Tracker.update(__MODULE__, pid, topic, key, meta)
       end
 
-      def list(%Phoenix.Socket{topic: topic}), do: list(topic)
+      def list(%Combo.Socket{topic: topic}), do: list(topic)
       def list(topic), do: Phoenix.Presence.list(__MODULE__, topic)
 
-      def get_by_key(%Phoenix.Socket{topic: topic}, key), do: get_by_key(topic, key)
+      def get_by_key(%Combo.Socket{topic: topic}, key), do: get_by_key(topic, key)
       def get_by_key(topic, key), do: Phoenix.Presence.get_by_key(__MODULE__, topic, key)
 
       def fetchers_pids(), do: Task.Supervisor.children(@task_supervisor)

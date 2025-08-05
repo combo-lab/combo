@@ -119,7 +119,7 @@ defmodule Combo.VerifiedRoutesTest do
     conn(:get, "/") |> Plug.Conn.put_private(:phoenix_endpoint, endpoint)
   end
 
-  defp socket_with_endpoint(endpoint \\ Endpoint), do: %Phoenix.Socket{endpoint: endpoint}
+  defp socket_with_endpoint(endpoint \\ Endpoint), do: %Combo.Socket{endpoint: endpoint}
 
   def conn_with_script_name(script_name \\ ~w(api)) do
     conn = Plug.Conn.put_private(conn(:get, "/"), :phoenix_endpoint, ScriptName)

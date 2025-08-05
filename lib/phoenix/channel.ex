@@ -12,7 +12,7 @@ defmodule Combo.Channel do
   Every time you join a channel, you need to choose which particular topic you
   want to listen to. The topic is just an identifier, but by convention it is
   often made of two parts: `"topic:subtopic"`. Using the `"topic:subtopic"`
-  approach pairs nicely with the `Phoenix.Socket.channel/3` allowing you to
+  approach pairs nicely with the `Combo.Socket.channel/3` allowing you to
   match on all topics starting with a given prefix by using a splat (the `*`
   character) as the last character in the topic pattern:
 
@@ -33,7 +33,7 @@ defmodule Combo.Channel do
       end
 
   The first argument is the topic, the second argument is a map payload given by
-  the client, and the third argument is an instance of `Phoenix.Socket`. The
+  the client, and the third argument is an instance of `Combo.Socket`. The
   `socket` is provided to all channel callbacks, so check its module and
   documentation to learn its fields and the different ways to interact with it.
 
@@ -150,7 +150,7 @@ defmodule Combo.Channel do
   For example, you could `push/3` a message to the client in `handle_info/3`
   after receiving a `PubSub` message relevant to them.
 
-      alias Phoenix.Socket.Broadcast
+      alias Combo.Socket.Broadcast
       def handle_info(%Broadcast{topic: _, event: event, payload: payload}, socket) do
         push(socket, event, payload)
         {:noreply, socket}
@@ -291,9 +291,9 @@ defmodule Combo.Channel do
   Note: the caller must be responsible for preventing duplicate subscriptions.
   After calling `subscribe/1` from your endpoint, the same flow applies to
   handling regular Elixir messages within your channel. Most often, you'll
-  simply relay the `%Phoenix.Socket.Broadcast{}` event and payload:
+  simply relay the `%Combo.Socket.Broadcast{}` event and payload:
 
-      alias Phoenix.Socket.Broadcast
+      alias Combo.Socket.Broadcast
       def handle_info(%Broadcast{topic: _, event: event, payload: payload}, socket) do
         push(socket, event, payload)
         {:noreply, socket}
@@ -333,7 +333,7 @@ defmodule Combo.Channel do
   Note that changing an event type's level doesn't affect what is logged,
   unless you set it to `false`, it affects the associated level.
   """
-  alias Phoenix.Socket
+  alias Combo.Socket
   alias Combo.Channel.Server
 
   @type payload :: map | term | {:binary, binary}
@@ -460,7 +460,7 @@ defmodule Combo.Channel do
       @phoenix_shutdown Keyword.get(opts, :shutdown, 5000)
 
       import unquote(__MODULE__)
-      import Phoenix.Socket, only: [assign: 3, assign: 2]
+      import Combo.Socket, only: [assign: 3, assign: 2]
 
       def child_spec(init_arg) do
         %{

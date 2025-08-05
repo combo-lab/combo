@@ -40,7 +40,7 @@ locals_without_parens = [
   socket: 2,
   socket: 3,
 
-  # Phoenix.Socket
+  # Combo.Socket
   channel: 2,
   channel: 3,
 
