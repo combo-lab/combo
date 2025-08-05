@@ -1,9 +1,9 @@
-defmodule Phoenix.Controller.ControllerTest do
+defmodule Combo.Controller.ControllerTest do
   use ExUnit.Case, async: true
   use RouterHelper
 
   import ExUnit.CaptureIO
-  import Phoenix.Controller
+  import Combo.Controller
   alias Plug.Conn
 
   setup do
@@ -874,24 +874,24 @@ defmodule Phoenix.Controller.ControllerTest do
   end
 
   describe "__using__" do
-    defp new_layout(module, opts), do: Phoenix.Controller.__plugs__(module, opts) |> elem(0)
-    defp new_view(module, opts), do: Phoenix.Controller.__plugs__(module, opts) |> elem(1)
+    defp new_layout(module, opts), do: Combo.Controller.__plugs__(module, opts) |> elem(0)
+    defp new_view(module, opts), do: Combo.Controller.__plugs__(module, opts) |> elem(1)
 
     test "deprecated when lacking formats" do
       assert capture_io(:stderr, fn ->
-               assert Phoenix.Controller.__plugs__(UserController, []) ==
+               assert Combo.Controller.__plugs__(UserController, []) ==
                         {{LayoutView, :app}, UserView}
              end) =~
                "use UserController must receive the :formats option with the formats you intend to render"
 
       assert capture_io(:stderr, fn ->
-               assert Phoenix.Controller.__plugs__(MyApp.UserController, []) ==
+               assert Combo.Controller.__plugs__(MyApp.UserController, []) ==
                         {{MyApp.LayoutView, :app}, MyApp.UserView}
              end) =~
                "use MyApp.UserController must receive the :formats option with the formats you intend to render"
 
       assert capture_io(:stderr, fn ->
-               assert Phoenix.Controller.__plugs__(MyApp.Admin.UserController, []) ==
+               assert Combo.Controller.__plugs__(MyApp.Admin.UserController, []) ==
                         {{MyApp.LayoutView, :app}, MyApp.Admin.UserView}
              end) =~
                "use MyApp.Admin.UserController must receive the :formats option with the formats you intend to render"

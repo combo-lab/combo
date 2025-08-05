@@ -543,14 +543,14 @@ defmodule Combo.Router.HelpersTest do
 
   test "phoenix_router_url with string takes precedence over endpoint" do
     url = "https://phoenixframework.org"
-    conn = Phoenix.Controller.put_router_url(conn_with_endpoint(), url)
+    conn = Combo.Controller.put_router_url(conn_with_endpoint(), url)
     assert Helpers.url(conn) == url
     assert Helpers.admin_message_url(conn, :show, 1) == url <> "/admin/new/messages/1"
   end
 
   test "phoenix_router_url with URI takes precedence over endpoint" do
     uri = %URI{scheme: "https", host: "phoenixframework.org", port: 123, path: "/path"}
-    conn = Phoenix.Controller.put_router_url(conn_with_endpoint(), uri)
+    conn = Combo.Controller.put_router_url(conn_with_endpoint(), uri)
 
     assert Helpers.url(conn) == "https://phoenixframework.org:123/path"
 
@@ -560,31 +560,31 @@ defmodule Combo.Router.HelpersTest do
 
   test "phoenix_static_url with string takes precedence over endpoint" do
     url = "https://phoenixframework.org"
-    conn = Phoenix.Controller.put_static_url(conn_with_endpoint(), url)
+    conn = Combo.Controller.put_static_url(conn_with_endpoint(), url)
     assert Helpers.static_url(conn, "/images/foo.png") == url <> "/images/foo.png"
 
-    conn = Phoenix.Controller.put_static_url(conn_with_script_name(), url)
+    conn = Combo.Controller.put_static_url(conn_with_script_name(), url)
     assert Helpers.static_url(conn, "/images/foo.png") == url <> "/images/foo.png"
   end
 
   test "phoenix_static_url set to string with path results in static url with that path" do
     url = "https://phoenixframework.org/path"
-    conn = Phoenix.Controller.put_static_url(conn_with_endpoint(), url)
+    conn = Combo.Controller.put_static_url(conn_with_endpoint(), url)
     assert Helpers.static_url(conn, "/images/foo.png") == url <> "/images/foo.png"
 
-    conn = Phoenix.Controller.put_static_url(conn_with_script_name(), url)
+    conn = Combo.Controller.put_static_url(conn_with_script_name(), url)
     assert Helpers.static_url(conn, "/images/foo.png") == url <> "/images/foo.png"
   end
 
   test "phoenix_static_url with URI takes precedence over endpoint" do
     uri = %URI{scheme: "https", host: "phoenixframework.org", port: 123}
 
-    conn = Phoenix.Controller.put_static_url(conn_with_endpoint(), uri)
+    conn = Combo.Controller.put_static_url(conn_with_endpoint(), uri)
 
     assert Helpers.static_url(conn, "/images/foo.png") ==
              "https://phoenixframework.org:123/images/foo.png"
 
-    conn = Phoenix.Controller.put_static_url(conn_with_script_name(), uri)
+    conn = Combo.Controller.put_static_url(conn_with_script_name(), uri)
 
     assert Helpers.static_url(conn, "/images/foo.png") ==
              "https://phoenixframework.org:123/images/foo.png"
@@ -593,12 +593,12 @@ defmodule Combo.Router.HelpersTest do
   test "phoenix_static_url set to URI with path results in static url with that path" do
     uri = %URI{scheme: "https", host: "phoenixframework.org", port: 123, path: "/path"}
 
-    conn = Phoenix.Controller.put_static_url(conn_with_endpoint(), uri)
+    conn = Combo.Controller.put_static_url(conn_with_endpoint(), uri)
 
     assert Helpers.static_url(conn, "/images/foo.png") ==
              "https://phoenixframework.org:123/path/images/foo.png"
 
-    conn = Phoenix.Controller.put_static_url(conn_with_script_name(), uri)
+    conn = Combo.Controller.put_static_url(conn_with_script_name(), uri)
 
     assert Helpers.static_url(conn, "/images/foo.png") ==
              "https://phoenixframework.org:123/path/images/foo.png"

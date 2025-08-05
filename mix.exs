@@ -202,7 +202,7 @@ defmodule Phoenix.MixProject do
     #
     # Phoenix
     # Combo.Channel
-    # Phoenix.Controller
+    # Combo.Controller
     # Combo.Endpoint
     # Combo.Naming
     # Phoenix.Logger

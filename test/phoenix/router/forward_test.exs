@@ -1,5 +1,5 @@
 defmodule Combo.Router.HealthController do
-  use Phoenix.Controller, formats: []
+  use Combo.Controller, formats: []
   def health(conn, _params), do: text(conn, "health")
 end
 
@@ -8,7 +8,7 @@ defmodule Combo.Router.ForwardTest do
   use RouterHelper
 
   defmodule Controller do
-    use Phoenix.Controller, formats: []
+    use Combo.Controller, formats: []
     plug :assign_fwd_script
 
     def index(conn, _params), do: text(conn, "admin index")

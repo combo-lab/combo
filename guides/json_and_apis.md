@@ -183,7 +183,7 @@ Let's say we have a `show` action which uses [`with`](`with/1`) to fetch a blog 
 
 ```elixir
 defmodule HelloWeb.MyController do
-  use Phoenix.Controller
+  use Combo.Controller
 
   def show(conn, %{"id" => id}, current_user) do
     with {:ok, post} <- fetch_post(id),
@@ -212,7 +212,7 @@ Instead we can define a module plug which knows how to handle these error cases 
 
 ```elixir
 defmodule HelloWeb.MyFallbackController do
-  use Phoenix.Controller
+  use Combo.Controller
 
   def call(conn, {:error, :not_found}) do
     conn
@@ -234,7 +234,7 @@ Then we can reference our new controller as the `action_fallback` and simply rem
 
 ```elixir
 defmodule HelloWeb.MyController do
-  use Phoenix.Controller
+  use Combo.Controller
 
   action_fallback HelloWeb.MyFallbackController
 

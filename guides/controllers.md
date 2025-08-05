@@ -136,7 +136,7 @@ If we need to pass values into the template when using `render`, that's easy. We
   end
 ```
 
-Note: Using `Phoenix.Controller` imports `Plug.Conn`, so shortening the call to [`assign/3`] works just fine.
+Note: Using `Combo.Controller` imports `Plug.Conn`, so shortening the call to [`assign/3`] works just fine.
 
 Passing more than one value to our template is as simple as connecting [`assign/3`] functions together:
 
@@ -180,7 +180,7 @@ What it doesn't have is a view for rendering JSON. Phoenix Controller hands off 
 ```elixir
   def controller do
     quote do
-      use Phoenix.Controller,
+      use Combo.Controller,
         formats: [:html, :json]
       ...
     end
@@ -348,7 +348,7 @@ end
 
 Sometimes we need to communicate with users during the course of an action. Maybe there was an error updating a schema, or maybe we just want to welcome them back to the application. For this, we have flash messages.
 
-The `Phoenix.Controller` module provides the [`put_flash/3`] to set flash messages as a key-value pair and placing them into a `@flash` assign in the connection. Let's set two flash messages in our `HelloWeb.PageController` to try this out.
+The `Combo.Controller` module provides the [`put_flash/3`] to set flash messages as a key-value pair and placing them into a `@flash` assign in the connection. Let's set two flash messages in our `HelloWeb.PageController` to try this out.
 
 To do this we modify the `home` action as follows:
 
@@ -385,7 +385,7 @@ The flash functionality is handy when mixed with redirects. Perhaps you want to 
 
 Now if you reload the [welcome page], you will be redirected and the flash message will be shown once more.
 
-Besides [`put_flash/3`], the `Phoenix.Controller` module has another useful function worth knowing about. [`clear_flash/1`] takes only `conn` and removes any flash messages which might be stored in the session.
+Besides [`put_flash/3`], the `Combo.Controller` module has another useful function worth knowing about. [`clear_flash/1`] takes only `conn` and removes any flash messages which might be stored in the session.
 
 Phoenix does not enforce which keys are stored in the flash. As long as we are internally consistent, all will be well. `:info` and `:error`, however, are common and are handled by default in our templates.
 
@@ -396,15 +396,15 @@ Phoenix has two views called `ErrorHTML` and `ErrorJSON` which live in `lib/hell
 [`render/4`]: `Combo.Template.render/4`
 [`/hello/Frank`]: http://localhost:4000/hello/Frank
 [`assign/3`]: `Plug.Conn.assign/3`
-[`clear_flash/1`]: `Phoenix.Controller.clear_flash/1`
+[`clear_flash/1`]: `Combo.Controller.clear_flash/1`
 [`Combo.Flash.get/2`]: `Combo.Flash.get/2`
-[`html/2`]: `Phoenix.Controller.html/2`
-[`json/2`]: `Phoenix.Controller.json/2`
-[`put_flash/3`]: `Phoenix.Controller.put_flash/3`
+[`html/2`]: `Combo.Controller.html/2`
+[`json/2`]: `Combo.Controller.json/2`
+[`put_flash/3`]: `Combo.Controller.put_flash/3`
 [`put_resp_content_type/2`]: `Plug.Conn.put_resp_content_type/2`
-[`put_root_layout/2`]: `Phoenix.Controller.put_root_layout/2`
-[`redirect/2`]: `Phoenix.Controller.redirect/2`
-[`render/3`]: `Phoenix.Controller.render/3`
+[`put_root_layout/2`]: `Combo.Controller.put_root_layout/2`
+[`redirect/2`]: `Combo.Controller.redirect/2`
+[`render/3`]: `Combo.Controller.render/3`
 [`send_resp/3`]: `Plug.Conn.send_resp/3`
-[`text/2`]: `Phoenix.Controller.text/2`
+[`text/2`]: `Combo.Controller.text/2`
 [welcome page]: http://localhost:4000/

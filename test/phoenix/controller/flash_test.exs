@@ -1,8 +1,8 @@
-defmodule Phoenix.Controller.FlashTest do
+defmodule Combo.Controller.FlashTest do
   use ExUnit.Case, async: true
   use RouterHelper
 
-  import Phoenix.Controller
+  import Combo.Controller
 
   alias Combo.Flash
 

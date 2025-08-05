@@ -87,8 +87,8 @@ defmodule Combo.Endpoint.RenderErrorsTest do
       # Those are always ignored and must be explicitly opted-in.
       conn =
         conn
-        |> Phoenix.Controller.put_layout({Unknown, "layout"})
-        |> Phoenix.Controller.put_root_layout({Unknown, "root"})
+        |> Combo.Controller.put_layout({Unknown, "layout"})
+        |> Combo.Controller.put_root_layout({Unknown, "root"})
 
       reason = ArgumentError.exception("oops")
       raise Plug.Conn.WrapperError, conn: conn, kind: :error, stack: stack, reason: reason

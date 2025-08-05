@@ -1,4 +1,4 @@
-defmodule Phoenix.Controller do
+defmodule Combo.Controller do
   import Plug.Conn
   alias Plug.Conn.AlreadySentError
 
@@ -9,7 +9,7 @@ defmodule Phoenix.Controller do
 
   # View/Layout deprecation plan
   # 1. DONE! Deprecate :namespace option in favor of :layouts on use
-  # 2. Deprecate the :layouts option in use Phoenix.Controller
+  # 2. Deprecate the :layouts option in use Combo.Controller
   # 3. Deprecate setting a non-format view/layout on put_*
   # 4. Deprecate rendering a view/layout from :_
 
@@ -53,12 +53,12 @@ defmodule Phoenix.Controller do
     * `Plug.Conn` - a collection of low-level functions to work with
       the connection
 
-    * `Phoenix.Controller` - functions provided by Phoenix
+    * `Combo.Controller` - functions provided by Phoenix
       to support rendering, and other Phoenix specific behaviour
 
   If you want to have functions that manipulate the connection
   without fully implementing the controller, you can import both
-  modules directly instead of `use Phoenix.Controller`.
+  modules directly instead of `use Combo.Controller`.
 
   ## Rendering
 
@@ -74,7 +74,7 @@ defmodule Phoenix.Controller do
   This is done by specifying the option `:formats` when defining
   the controller:
 
-      use Phoenix.Controller, formats: [:html, :json]
+      use Combo.Controller, formats: [:html, :json]
 
    Now, when invoking `render/3`, a controller named `MyAppWeb.UserController`
    will invoke `MyAppWeb.UserHTML` and `MyAppWeb.UserJSON` respectively
@@ -91,7 +91,7 @@ defmodule Phoenix.Controller do
   directly with a connection. For example, instead of inferring the
   the view names from the controller, as done in:
 
-      use Phoenix.Controller, formats: [:html, :json]
+      use Combo.Controller, formats: [:html, :json]
 
   You can write the above explicitly in your actions as:
 
@@ -136,7 +136,7 @@ defmodule Phoenix.Controller do
   compatibility. This behaviour can be explicitly retained by passing a
   suffix to the `:formats` option:
 
-      use Phoenix.Controller, formats: [html: "View", json: "View"]
+      use Combo.Controller, formats: [html: "View", json: "View"]
 
   ## Plug pipeline
 
@@ -242,12 +242,12 @@ defmodule Phoenix.Controller do
       end
 
     quote bind_quoted: [opts: opts] do
-      import Phoenix.Controller
+      import Combo.Controller
       import Plug.Conn
 
-      use Phoenix.Controller.Pipeline
+      use Combo.Controller.Pipeline
 
-      with {layout, view} <- Phoenix.Controller.__plugs__(__MODULE__, opts) do
+      with {layout, view} <- Combo.Controller.__plugs__(__MODULE__, opts) do
         plug :put_new_layout, layout
         plug :put_new_view, view
       end
@@ -271,7 +271,7 @@ defmodule Phoenix.Controller do
   ## Examples
 
       defmodule MyController do
-        use Phoenix.Controller
+        use Combo.Controller
 
         action_fallback MyFallbackController
 
@@ -296,7 +296,7 @@ defmodule Phoenix.Controller do
   write the following fallback controller to handle the above values:
 
       defmodule MyFallbackController do
-        use Phoenix.Controller
+        use Combo.Controller
 
         def call(conn, {:error, :not_found}) do
           conn
@@ -314,7 +314,7 @@ defmodule Phoenix.Controller do
       end
   """
   defmacro action_fallback(plug) do
-    Phoenix.Controller.Pipeline.__action_fallback__(plug, __CALLER__)
+    Combo.Controller.Pipeline.__action_fallback__(plug, __CALLER__)
   end
 
   @doc """
@@ -908,7 +908,7 @@ defmodule Phoenix.Controller do
 
       defmodule MyAppWeb.UserController do
         # Will use MyAppWeb.UserHTML and MyAppWeb.UserJSON
-        use Phoenix.Controller, formats: [:html, :json]
+        use Combo.Controller, formats: [:html, :json]
       end
 
   With the formats set, you can render in two ways, either passing a string
@@ -932,7 +932,7 @@ defmodule Phoenix.Controller do
   at runtime:
 
       defmodule MyAppWeb.UserController do
-        use Phoenix.Controller
+        use Combo.Controller
 
         def show(conn, _params) do
           conn
@@ -962,7 +962,7 @@ defmodule Phoenix.Controller do
   def render(conn, view, template)
       when is_atom(view) and (is_binary(template) or is_atom(template)) do
     IO.warn(
-      "Phoenix.Controller.render/3 with a view is deprecated, see the documentation for render/3 for an alternative"
+      "Combo.Controller.render/3 with a view is deprecated, see the documentation for render/3 for an alternative"
     )
 
     render(conn, view, template, [])
@@ -1058,7 +1058,7 @@ defmodule Phoenix.Controller do
         used everywhere. Also remember to configure your controller
         to use layouts with formats:
 
-            use Phoenix.Controller, layouts: [#{format}: #{inspect(bad_value)}]
+            use Combo.Controller, layouts: [#{format}: #{inspect(bad_value)}]
         """)
 
         if format in layout_formats(conn), do: good_value, else: false
@@ -1880,7 +1880,7 @@ defmodule Phoenix.Controller do
 
       def current_secure_url(conn, params \\ %{}) do
         current_uri = MyAppWeb.Endpoint.struct_url()
-        current_path = Phoenix.Controller.current_path(conn, params)
+        current_path = Combo.Controller.current_path(conn, params)
         Combo.VerifiedRoutes.unverified_url(%URI{current_uri | scheme: "https"}, current_path)
       end
 
@@ -1928,7 +1928,7 @@ defmodule Phoenix.Controller do
         case Keyword.fetch(opts, :layouts) do
           {:ok, formats} when is_list(formats) ->
             # TODO: Deprecate passing :layouts altogether in Phoenix v1.9,
-            # use Phoenix.Controller should only set views
+            # use Combo.Controller should only set views
             Enum.map(formats, fn
               {format, mod} when is_atom(mod) ->
                 {format, {mod, :app}}

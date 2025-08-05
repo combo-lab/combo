@@ -224,4 +224,4 @@ This mechanism is also very flexible. For example, if you want to create an admi
 </Layouts.admin>
 ```
 
-> Previous Phoenix versions used a nested layout mechanism, by passing the `:layouts` to `Phoenix.Controller` and `:layout` to `Phoenix.LiveView`, but this mechanism is discouraged in new Phoenix applications.
+> Previous Phoenix versions used a nested layout mechanism, by passing the `:layouts` to `Combo.Controller` and `:layout` to `Phoenix.LiveView`, but this mechanism is discouraged in new Phoenix applications.

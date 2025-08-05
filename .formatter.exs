@@ -31,7 +31,7 @@ locals_without_parens = [
   resources: 4,
   trace: 4,
 
-  # Phoenix.Controller
+  # Combo.Controller
   action_fallback: 1,
 
   # Combo.Endpoint

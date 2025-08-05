@@ -1,11 +1,11 @@
-defmodule Phoenix.Controller.PipelineTest do
+defmodule Combo.Controller.PipelineTest do
   use ExUnit.Case, async: true
   use RouterHelper
 
-  import Phoenix.Controller
+  import Combo.Controller
 
   defmodule MyController do
-    use Phoenix.Controller, formats: []
+    use Combo.Controller, formats: []
 
     @secret_actions [:secret]
 
@@ -50,13 +50,13 @@ defmodule Phoenix.Controller.PipelineTest do
   end
 
   defmodule NoViewsController do
-    use Phoenix.Controller, formats: []
+    use Combo.Controller, formats: []
 
     def show(conn, _), do: conn
   end
 
   defmodule FallbackFunctionController do
-    use Phoenix.Controller, formats: []
+    use Combo.Controller, formats: []
 
     action_fallback :function_plug
 
@@ -76,9 +76,9 @@ defmodule Phoenix.Controller.PipelineTest do
   end
 
   defmodule ActionController do
-    use Phoenix.Controller, formats: []
+    use Combo.Controller, formats: []
 
-    action_fallback Phoenix.Controller.PipelineTest
+    action_fallback Combo.Controller.PipelineTest
 
     plug :put_assign
 
@@ -213,9 +213,9 @@ defmodule Phoenix.Controller.PipelineTest do
     end
 
     test "raises when calling from import instead of use", config do
-      assert_raise RuntimeError, ~r/can only be called when using Phoenix.Controller/, fn ->
+      assert_raise RuntimeError, ~r/can only be called when using Combo.Controller/, fn ->
         defmodule config.test do
-          import Phoenix.Controller
+          import Combo.Controller
           action_fallback Boom
         end
       end
@@ -224,7 +224,7 @@ defmodule Phoenix.Controller.PipelineTest do
     test "raises when calling more than once", config do
       assert_raise RuntimeError, ~r/can only be called a single time/, fn ->
         defmodule config.test do
-          use Phoenix.Controller, formats: []
+          use Combo.Controller, formats: []
           action_fallback Ok
           action_fallback Boom
         end

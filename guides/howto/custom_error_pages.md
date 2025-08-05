@@ -23,7 +23,7 @@ defmodule HelloWeb.ErrorHTML do
   # the template name. For example, "404.html" becomes
   # "Not Found".
   def render(template, _assigns) do
-    Phoenix.Controller.status_message_from_template(template)
+    Combo.Controller.status_message_from_template(template)
   end
 end
 
@@ -39,7 +39,7 @@ defmodule HelloWeb.ErrorJSON do
   # the template name. For example, "404.json" becomes
   # "Not Found".
   def render(template, _assigns) do
-    %{errors: %{detail: Phoenix.Controller.status_message_from_template(template)}}
+    %{errors: %{detail: Combo.Controller.status_message_from_template(template)}}
   end
 end
 ```
@@ -64,7 +64,7 @@ The first question is, where does that error string come from? The answer is rig
 
 ```elixir
 def render(template, _assigns) do
-  Phoenix.Controller.status_message_from_template(template)
+  Combo.Controller.status_message_from_template(template)
 end
 ```
 

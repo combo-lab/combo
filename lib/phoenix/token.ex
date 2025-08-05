@@ -252,7 +252,7 @@ defmodule Combo.Token do
   ## Helpers
 
   defp get_key_base(%Plug.Conn{} = conn),
-    do: conn |> Phoenix.Controller.endpoint_module() |> get_endpoint_key_base()
+    do: conn |> Combo.Controller.endpoint_module() |> get_endpoint_key_base()
 
   defp get_key_base(%_{endpoint: endpoint}),
     do: get_endpoint_key_base(endpoint)

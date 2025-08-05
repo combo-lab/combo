@@ -1,5 +1,5 @@
 defmodule Combo.Router.PipelineTest.SampleController do
-  use Phoenix.Controller, formats: []
+  use Combo.Controller, formats: []
   def index(conn, _params), do: text(conn, "index")
   def crash(_conn, _params), do: raise("crash!")
   def noop_plug(conn, _opts), do: conn

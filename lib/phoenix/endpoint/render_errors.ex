@@ -18,7 +18,7 @@ defmodule Combo.Endpoint.RenderErrors do
   require Logger
 
   alias Combo.Router.NoRouteError
-  alias Phoenix.Controller
+  alias Combo.Controller
 
   @already_sent {:plug_conn, :sent}
 
@@ -164,7 +164,7 @@ defmodule Combo.Endpoint.RenderErrors do
           _ -> Controller.accepts(conn, Enum.map(formats, &elem(&1, 0)))
         end
 
-      format = Phoenix.Controller.get_format(conn)
+      format = Combo.Controller.get_format(conn)
 
       case List.keyfind(formats, format, 0) do
         {_, view} ->

@@ -2,7 +2,7 @@ defmodule <%= inspect auth_module %> do
   use <%= inspect context.web_module %>, :verified_routes
 
   import Plug.Conn
-  import Phoenix.Controller
+  import Combo.Controller
 
   alias <%= inspect context.module %>
   alias <%= inspect scope_config.scope.module %>

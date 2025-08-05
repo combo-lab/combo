@@ -2,7 +2,7 @@ defmodule Combo.NotAcceptableError do
   @moduledoc """
   Raised when one of the `accept*` headers is not accepted by the server.
 
-  This exception is commonly raised by `Phoenix.Controller.accepts/2`
+  This exception is commonly raised by `Combo.Controller.accepts/2`
   which negotiates the media types the server is able to serve with
   the contents the client is able to render.
 
@@ -20,7 +20,7 @@ defmodule Combo.MissingParamError do
   Raised when a key is expected to be present in the request parameters,
   but is not.
 
-  This exception is raised by `Phoenix.Controller.scrub_params/2` which:
+  This exception is raised by `Combo.Controller.scrub_params/2` which:
 
     * Checks to see if the required_key is present (can be empty)
     * Changes all empty parameters to nils ("" -> nil)

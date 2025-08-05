@@ -267,9 +267,9 @@ defmodule Combo.Router do
         end
       end
 
-  `Combo.Router` imports functions from both `Plug.Conn` and `Phoenix.Controller`
+  `Combo.Router` imports functions from both `Plug.Conn` and `Combo.Controller`
   to help define plugs. In the example above, `fetch_session/2`
-  comes from `Plug.Conn` while `accepts/2` comes from `Phoenix.Controller`.
+  comes from `Plug.Conn` while `accepts/2` comes from `Combo.Controller`.
 
   Note that router pipelines are only invoked after a route is found.
   No plug is invoked in case no matches were found.
@@ -304,7 +304,7 @@ defmodule Combo.Router do
 
       # TODO v2: No longer automatically import dependencies
       import Plug.Conn
-      import Phoenix.Controller
+      import Combo.Controller
 
       # Set up initial scope
       @phoenix_pipeline nil

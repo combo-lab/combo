@@ -1,4 +1,4 @@
-defmodule Phoenix.Controller.Pipeline do
+defmodule Combo.Controller.Pipeline do
   @moduledoc false
 
   @doc false
@@ -7,10 +7,10 @@ defmodule Phoenix.Controller.Pipeline do
       @behaviour Plug
 
       require Combo.Endpoint
-      import Phoenix.Controller.Pipeline
+      import Combo.Controller.Pipeline
 
       Module.register_attribute(__MODULE__, :plugs, accumulate: true)
-      @before_compile Phoenix.Controller.Pipeline
+      @before_compile Combo.Controller.Pipeline
       @phoenix_fallback :unregistered
 
       @doc false
@@ -39,7 +39,7 @@ defmodule Phoenix.Controller.Pipeline do
   def __action_fallback__(plug, caller) do
     plug = Macro.expand(plug, %{caller | function: {:init, 1}})
     quote bind_quoted: [plug: plug] do
-      @phoenix_fallback Phoenix.Controller.Pipeline.validate_fallback(
+      @phoenix_fallback Combo.Controller.Pipeline.validate_fallback(
                           plug,
                           __MODULE__,
                           Module.get_attribute(__MODULE__, :phoenix_fallback)
@@ -52,8 +52,8 @@ defmodule Phoenix.Controller.Pipeline do
     cond do
       fallback == nil ->
         raise """
-        action_fallback can only be called when using Phoenix.Controller.
-        Add `use Phoenix.Controller` to #{inspect(module)}
+        action_fallback can only be called when using Combo.Controller.
+        Add `use Combo.Controller` to #{inspect(module)}
         """
 
       fallback != :unregistered ->
@@ -96,7 +96,7 @@ defmodule Phoenix.Controller.Pipeline do
           unquote(fallback_ast)
         catch
           :error, reason ->
-            Phoenix.Controller.Pipeline.__catch__(
+            Combo.Controller.Pipeline.__catch__(
               var!(conn_before),
               reason,
               __MODULE__,

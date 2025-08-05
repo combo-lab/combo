@@ -22,7 +22,7 @@ mix phx.gen.auth Accounts User users
 
 An authentication system can be created in two different ways:
 - Using Phoenix.LiveView (default)
-- Using Phoenix.Controller only
+- Using Combo.Controller only
 Do you want to create a LiveView based authentication system? [Yn] n
 
 ...

@@ -3,7 +3,7 @@ defmodule Combo.Router.ResourceTest do
   use RouterHelper
 
   defmodule Api.GenericController do
-    use Phoenix.Controller, formats: []
+    use Combo.Controller, formats: []
     def show(conn, _params), do: text(conn, "show")
     def new(conn, _params), do: text(conn, "new")
     def edit(conn, _params), do: text(conn, "edit")

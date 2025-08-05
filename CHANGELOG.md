@@ -20,8 +20,8 @@ The headers `x-download-options` and `x-frame-options` are no longer set as they
 
 This release introduces deprecation warnings for several features that have been soft-deprecated in the past.
 
-- `use Phoenix.Controller` must now specify the `:formats` option, which may be set to an empty list if the formats are not known upfront
-- The `:namespace` and `:put_default_views` options on `use Phoenix.Controller` are deprecated and emit a warning on use
+- `use Combo.Controller` must now specify the `:formats` option, which may be set to an empty list if the formats are not known upfront
+- The `:namespace` and `:put_default_views` options on `use Combo.Controller` are deprecated and emit a warning on use
 - Specifying layouts without modules, such as `put_layout(conn, :print)` or `put_layout(conn, html: :print)` is deprecated
 - The `:trailing_slash` option in `Combo.Router` has been deprecated in favor of using `Phoenix.VerifiedRoutes`. The overall usage of helpers will be deprecated in the future
 
