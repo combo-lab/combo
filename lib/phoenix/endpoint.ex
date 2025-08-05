@@ -618,7 +618,7 @@ defmodule Combo.Endpoint do
       and the second item being the `static_integrity`.
       """
       def static_lookup(path) do
-        Phoenix.Config.cache(
+        Combo.Config.cache(
           __MODULE__,
           {:__phoenix_static__, path},
           &Combo.Endpoint.Supervisor.static_lookup(&1, path)

@@ -570,7 +570,7 @@ defmodule Combo.Socket.Transport do
   end
 
   defp check_origin_config(handler, endpoint, opts) do
-    Phoenix.Config.cache(endpoint, {:check_origin, handler}, fn _ ->
+    Combo.Config.cache(endpoint, {:check_origin, handler}, fn _ ->
       check_origin =
         case Keyword.get(opts, :check_origin, endpoint.config(:check_origin)) do
           origins when is_list(origins) ->

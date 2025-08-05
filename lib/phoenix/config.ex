@@ -1,4 +1,4 @@
-defmodule Phoenix.Config do
+defmodule Combo.Config do
   # Handles Phoenix configuration.
   #
   # This module is private to Phoenix and should not be accessed

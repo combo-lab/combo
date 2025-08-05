@@ -26,8 +26,8 @@ defmodule Combo.Endpoint.Supervisor do
 
   @doc false
   def init({otp_app, mod, opts}) do
-    default_conf = Phoenix.Config.merge(defaults(otp_app, mod), opts)
-    env_conf = Phoenix.Config.from_env(otp_app, mod, default_conf)
+    default_conf = Combo.Config.merge(defaults(otp_app, mod), opts)
+    env_conf = Combo.Config.from_env(otp_app, mod, default_conf)
 
     secret_conf =
       cond do
@@ -172,7 +172,7 @@ defmodule Combo.Endpoint.Supervisor do
 
   defp config_children(mod, conf, default_conf) do
     args = {mod, conf, default_conf, name: Module.concat(mod, "Config")}
-    [{Phoenix.Config, args}]
+    [{Combo.Config, args}]
   end
 
   defp warmup_children(mod) do
@@ -267,7 +267,7 @@ defmodule Combo.Endpoint.Supervisor do
   Callback that changes the configuration from the app callback.
   """
   def config_change(endpoint, changed, removed) do
-    res = Phoenix.Config.config_change(endpoint, changed, removed)
+    res = Combo.Config.config_change(endpoint, changed, removed)
     warmup(endpoint)
     res
   end
@@ -281,7 +281,7 @@ defmodule Combo.Endpoint.Supervisor do
   just the static path is returned.
 
   The result is wrapped in a `{:cache | :nocache, value}` tuple so
-  the `Phoenix.Config` layer knows how to cache it.
+  the `Combo.Config` layer knows how to cache it.
   """
   @invalid_local_url_chars ["\\"]
 
@@ -416,11 +416,11 @@ defmodule Combo.Endpoint.Supervisor do
   end
 
   defp warmup_static(endpoint, %{"latest" => latest, "digests" => digests}) do
-    Phoenix.Config.put(endpoint, :cache_static_manifest_latest, latest)
+    Combo.Config.put(endpoint, :cache_static_manifest_latest, latest)
     with_vsn? = !endpoint.config(:cache_manifest_skip_vsn)
 
     Enum.each(latest, fn {key, _} ->
-      Phoenix.Config.cache(endpoint, {:__phoenix_static__, "/" <> key}, fn _ ->
+      Combo.Config.cache(endpoint, {:__phoenix_static__, "/" <> key}, fn _ ->
         {:cache, static_cache(digests, Map.get(latest, key), with_vsn?)}
       end)
     end)

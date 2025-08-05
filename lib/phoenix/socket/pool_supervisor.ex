@@ -47,7 +47,7 @@ defmodule Combo.Socket.PoolSupervisor do
   def init({endpoint, name, partitions}) do
     ref = :ets.new(name, [:public, read_concurrency: true])
     :ets.insert(ref, {:partitions, partitions})
-    Phoenix.Config.permanent(endpoint, {:socket, name}, ref)
+    Combo.Config.permanent(endpoint, {:socket, name}, ref)
 
     children =
       for i <- 0..(partitions - 1) do

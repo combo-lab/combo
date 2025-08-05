@@ -1,6 +1,6 @@
-defmodule Phoenix.ConfigTest do
+defmodule Combo.ConfigTest do
   use ExUnit.Case, async: true
-  import Phoenix.Config
+  import Combo.Config
 
   @defaults [static: [at: "/"]]
   @config [parsers: false, custom: true, otp_app: :phoenix_config]
