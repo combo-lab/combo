@@ -5,12 +5,12 @@ for module <- [RouteFormatter.PageController, RouteFormatter.ImageController] do
   end
 end
 
-defmodule Phoenix.Router.ConsoleFormatterTest do
+defmodule Combo.Router.ConsoleFormatterTest do
   use ExUnit.Case, async: true
-  alias Phoenix.Router.ConsoleFormatter
+  alias Combo.Router.ConsoleFormatter
 
   defmodule RouterTestSingleRoutes do
-    use Phoenix.Router
+    use Combo.Router
 
     get "/", RouteFormatter.PageController, :index, as: :page
     post "/images", RouteFormatter.ImageController, :upload, as: :upload_image
@@ -34,7 +34,7 @@ defmodule Phoenix.Router.ConsoleFormatterTest do
   end
 
   defmodule RouterTestResources do
-    use Phoenix.Router
+    use Combo.Router
     resources "/images", RouteFormatter.ImageController
   end
 
@@ -52,7 +52,7 @@ defmodule Phoenix.Router.ConsoleFormatterTest do
   end
 
   defmodule RouterTestResource do
-    use Phoenix.Router
+    use Combo.Router
     resources "/image", RouteFormatter.ImageController, singleton: true
     forward "/admin", RouteFormatter.PageController, [], as: :admin
     forward "/f1", RouteFormatter.ImageController
@@ -94,7 +94,7 @@ defmodule Phoenix.Router.ConsoleFormatterTest do
   end
 
   defmodule HelpersFalseRouter do
-    use Phoenix.Router, helpers: false
+    use Combo.Router, helpers: false
     resources "/image", RouteFormatter.ImageController
   end
 

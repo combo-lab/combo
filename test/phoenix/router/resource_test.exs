@@ -1,4 +1,4 @@
-defmodule Phoenix.Router.ResourceTest do
+defmodule Combo.Router.ResourceTest do
   use ExUnit.Case, async: true
   use RouterHelper
 
@@ -13,7 +13,7 @@ defmodule Phoenix.Router.ResourceTest do
   end
 
   defmodule Router do
-    use Phoenix.Router
+    use Combo.Router
 
     resources "/account", Api.GenericController, alias: Api, singleton: true do
       resources "/comments", GenericController
@@ -88,7 +88,7 @@ defmodule Phoenix.Router.ResourceTest do
   end
 
   test "limit resource by passing :except option" do
-    assert_raise Phoenix.Router.NoRouteError, fn ->
+    assert_raise Combo.Router.NoRouteError, fn ->
       call(Router, :delete, "/account/session")
     end
 
@@ -97,7 +97,7 @@ defmodule Phoenix.Router.ResourceTest do
   end
 
   test "limit resource by passing :only option" do
-    assert_raise Phoenix.Router.NoRouteError, fn ->
+    assert_raise Combo.Router.NoRouteError, fn ->
       call(Router, :patch, "/session/new")
     end
 

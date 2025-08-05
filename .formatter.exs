@@ -2,7 +2,7 @@ locals_without_parens = [
   # Combo.Channel
   intercept: 1,
 
-  # Phoenix.Router
+  # Combo.Router
   connect: 3,
   connect: 4,
   delete: 3,

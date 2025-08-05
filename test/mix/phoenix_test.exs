@@ -12,7 +12,7 @@ defmodule Mix.PhoenixTest do
   end
 
   test "modules/0 returns all modules in project" do
-    assert Phoenix.Router in Mix.Phoenix.modules()
+    assert Combo.Router in Mix.Phoenix.modules()
   end
 
   test "attrs/1 defaults each type" do

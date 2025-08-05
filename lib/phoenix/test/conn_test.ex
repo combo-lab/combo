@@ -592,9 +592,9 @@ defmodule Combo.ConnTest do
     %URI{path: path, host: host} = conn |> redirected_to(status) |> URI.parse()
     path = remove_script_name(conn, router, path)
 
-    case Phoenix.Router.route_info(router, "GET", path, host || conn.host) do
+    case Combo.Router.route_info(router, "GET", path, host || conn.host) do
       :error ->
-        raise Phoenix.Router.NoRouteError, conn: conn, router: router
+        raise Combo.Router.NoRouteError, conn: conn, router: router
       %{path_params: path_params} ->
         Enum.into(path_params, %{}, fn {key, val} -> {String.to_atom(key), val} end)
     end
@@ -626,12 +626,12 @@ defmodule Combo.ConnTest do
   def path_params(%Plug.Conn{} = conn, to) when is_binary(to) do
     router = Phoenix.Controller.router_module(conn)
 
-    case Phoenix.Router.route_info(router, "GET", to, conn.host) do
+    case Combo.Router.route_info(router, "GET", to, conn.host) do
     %{path_params: path_params} ->
       Enum.into(path_params, %{}, fn {key, val} -> {String.to_atom(key), val} end)
 
     :error ->
-      raise Phoenix.Router.NoRouteError, conn: conn, router: router
+      raise Combo.Router.NoRouteError, conn: conn, router: router
     end
   end
 

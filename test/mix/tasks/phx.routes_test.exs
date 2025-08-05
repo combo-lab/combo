@@ -10,22 +10,22 @@ defmodule PageController do
 end
 
 defmodule PhoenixTestWeb.Router do
-  use Phoenix.Router
+  use Combo.Router
   get "/", PageController, :index, as: :page
 end
 
 defmodule PhoenixTestOld.Router do
-  use Phoenix.Router
+  use Combo.Router
   get "/old", PageController, :index, as: :page
 end
 
 defmodule PhoenixTestLiveWeb.Router do
-  use Phoenix.Router
+  use Combo.Router
   get "/", PageController, :index, metadata: %{mfa: {PageController.Live, :init, 1}}
 end
 
 defmodule PhoenixTestWeb.ForwardedRouter do
-  use Phoenix.Router
+  use Combo.Router
 
   forward "/", PhoenixTestWeb.PlugRouterWithVerifiedRoutes
 end

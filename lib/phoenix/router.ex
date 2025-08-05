@@ -1,4 +1,4 @@
-defmodule Phoenix.Router do
+defmodule Combo.Router do
   defmodule NoRouteError do
     @moduledoc """
     Exception raised when no route is found.
@@ -33,7 +33,7 @@ defmodule Phoenix.Router do
   macros are named after HTTP verbs. For example:
 
       defmodule MyAppWeb.Router do
-        use Phoenix.Router
+        use Combo.Router
 
         get "/pages/:page", PageController, :show
       end
@@ -106,7 +106,7 @@ defmodule Phoenix.Router do
   > #### Why the macros? {: .info}
   >
   > Phoenix does its best to keep the usage of macros low. You may have noticed,
-  > however, that the `Phoenix.Router` relies heavily on macros. Why is that?
+  > however, that the `Combo.Router` relies heavily on macros. Why is that?
   >
   > We use `get`, `post`, `put`, and `delete` to define your routes. We use macros
   > for two purposes:
@@ -140,7 +140,7 @@ defmodule Phoenix.Router do
 
   Phoenix generates a module `Helpers` inside your router by default, which contains
   named helpers to help developers generate and keep their routes up to date.
-  Helpers can be disabled by passing `helpers: false` to `use Phoenix.Router`.
+  Helpers can be disabled by passing `helpers: false` to `use Combo.Router`.
 
   Helpers are automatically generated based on the controller name.
   For example, the route:
@@ -214,7 +214,7 @@ defmodule Phoenix.Router do
   to generate "RESTful" routes to a given resource:
 
       defmodule MyAppWeb.Router do
-        use Phoenix.Router, helpers: false
+        use Combo.Router, helpers: false
 
         resources "/pages", PageController, only: [:show]
         resources "/users", UserController, except: [:delete]
@@ -253,7 +253,7 @@ defmodule Phoenix.Router do
   For example:
 
       defmodule MyAppWeb.Router do
-        use Phoenix.Router
+        use Combo.Router
 
         pipeline :browser do
           plug :fetch_session
@@ -267,7 +267,7 @@ defmodule Phoenix.Router do
         end
       end
 
-  `Phoenix.Router` imports functions from both `Plug.Conn` and `Phoenix.Controller`
+  `Combo.Router` imports functions from both `Plug.Conn` and `Phoenix.Controller`
   to help define plugs. In the example above, `fetch_session/2`
   comes from `Plug.Conn` while `accepts/2` comes from `Phoenix.Controller`.
 
@@ -280,7 +280,7 @@ defmodule Phoenix.Router do
   within an actual Phoenix application.
   """
 
-  alias Phoenix.Router.{Resource, Scope, Route, Helpers}
+  alias Combo.Router.{Resource, Scope, Route, Helpers}
 
   @http_methods [:get, :post, :put, :patch, :delete, :options, :connect, :trace, :head]
 
@@ -300,7 +300,7 @@ defmodule Phoenix.Router do
       # TODO: Require :helpers to be explicit given
       @phoenix_helpers Keyword.get(unquote(opts), :helpers, true)
 
-      import Phoenix.Router
+      import Combo.Router
 
       # TODO v2: No longer automatically import dependencies
       import Plug.Conn
@@ -308,7 +308,7 @@ defmodule Phoenix.Router do
 
       # Set up initial scope
       @phoenix_pipeline nil
-      Phoenix.Router.Scope.init(__MODULE__)
+      Combo.Router.Scope.init(__MODULE__)
       @before_compile unquote(__MODULE__)
     end
   end
@@ -320,7 +320,7 @@ defmodule Phoenix.Router do
   # over again.
   defp defs() do
     quote unquote: false do
-      var!(add_resources, Phoenix.Router) = fn resource ->
+      var!(add_resources, Combo.Router) = fn resource ->
         path = resource.path
         ctrl = resource.controller
         opts = resource.route
@@ -459,7 +459,7 @@ defmodule Phoenix.Router do
 
         case __match_route__(decoded, method, host) do
           {metadata, prepare, pipeline, plug_opts} ->
-            Phoenix.Router.__call__(conn, metadata, prepare, pipeline, plug_opts)
+            Combo.Router.__call__(conn, metadata, prepare, pipeline, plug_opts)
 
           :error ->
             raise NoRouteError, conn: conn, router: __MODULE__
@@ -475,11 +475,11 @@ defmodule Phoenix.Router do
       @behaviour Combo.VerifiedRoutes
 
       def formatted_routes(_) do
-        Phoenix.Router.__formatted_routes__(__MODULE__)
+        Combo.Router.__formatted_routes__(__MODULE__)
       end
 
       def verified_route?(_, split_path) do
-        Phoenix.Router.__verified_route__?(__MODULE__, split_path)
+        Combo.Router.__verified_route__?(__MODULE__, split_path)
       end
     end
   end
@@ -1016,7 +1016,7 @@ defmodule Phoenix.Router do
 
     quote do
       resource = Resource.build(unquote(path), unquote(controller), unquote(options))
-      var!(add_resources, Phoenix.Router).(resource)
+      var!(add_resources, Combo.Router).(resource)
       unquote(scope)
     end
   end
@@ -1186,7 +1186,7 @@ defmodule Phoenix.Router do
   A common use case for `forward` is for sharing a router between
   applications or even breaking a big router into smaller ones.
   However, in other for route generation to route accordingly, you
-  can only forward to a given `Phoenix.Router` once.
+  can only forward to a given `Combo.Router` once.
 
   The router pipelines will be invoked prior to forwarding the
   connection.
@@ -1233,7 +1233,7 @@ defmodule Phoenix.Router do
 
   ## Examples
 
-      iex> Phoenix.Router.route_info(AppWeb.Router, "GET", "/posts/123", "myhost")
+      iex> Combo.Router.route_info(AppWeb.Router, "GET", "/posts/123", "myhost")
       %{
         log: :debug,
         path_params: %{"id" => "123"},
@@ -1243,7 +1243,7 @@ defmodule Phoenix.Router do
         route: "/posts/:id",
       }
 
-      iex> Phoenix.Router.route_info(MyRouter, "GET", "/not-exists", "myhost")
+      iex> Combo.Router.route_info(MyRouter, "GET", "/not-exists", "myhost")
       :error
   """
   @doc type: :reflection

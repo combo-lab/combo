@@ -20,13 +20,13 @@ end
 alias Phoenix.Test.ConnTest.CatchAll
 
 defmodule Phoenix.Test.ConnTest.RedirRouter do
-  use Phoenix.Router
+  use Combo.Router
   get "/", CatchAll, :foo
   get "/posts/:id", CatchAll, :some_action
 end
 
 defmodule Phoenix.Test.ConnTest.Router do
-  use Phoenix.Router
+  use Combo.Router
 
   pipeline :browser do
     plug :put_bypass, :browser
@@ -457,14 +457,14 @@ defmodule Phoenix.Test.ConnTest do
       assert redirected_params(conn) == %{id: "123"}
     end
 
-    test "raises Phoenix.Router.NoRouteError for unmatched location" do
+    test "raises Combo.Router.NoRouteError for unmatched location" do
       conn =
         build_conn(:get, "/")
         |> RedirRouter.call(RedirRouter.init([]))
         |> put_resp_header("location", "/unmatched")
         |> send_resp(302, "foo")
 
-      assert_raise Phoenix.Router.NoRouteError, fn ->
+      assert_raise Combo.Router.NoRouteError, fn ->
         redirected_params(conn)
       end
     end
@@ -500,10 +500,10 @@ defmodule Phoenix.Test.ConnTest do
       assert path_params(conn, "/posts/123") == %{id: "123"}
     end
 
-    test "raises Phoenix.Router.NoRouteError for unmatched location" do
+    test "raises Combo.Router.NoRouteError for unmatched location" do
       conn = RedirRouter.call(build_conn(:get, "/"), RedirRouter.init([]))
 
-      assert_raise Phoenix.Router.NoRouteError, fn ->
+      assert_raise Combo.Router.NoRouteError, fn ->
         path_params(conn, "/unmatched")
       end
     end

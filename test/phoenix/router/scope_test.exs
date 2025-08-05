@@ -1,4 +1,4 @@
-defmodule Phoenix.Router.ScopedRoutingTest do
+defmodule Combo.Router.ScopedRoutingTest do
   use ExUnit.Case, async: true
   use RouterHelper
 
@@ -33,7 +33,7 @@ defmodule Phoenix.Router.ScopedRoutingTest do
   end
 
   defmodule Router do
-    use Phoenix.Router
+    use Combo.Router
 
     scope "/admin", host: "baz." do
       get "/users/:id", Api.V1.UserController, :baz_host
@@ -199,11 +199,11 @@ defmodule Phoenix.Router.ScopedRoutingTest do
     conn = call(Router, :get, "http://baz.pang.com/host/users/1")
     assert conn.status == 200
 
-    assert_raise Phoenix.Router.NoRouteError, fn ->
+    assert_raise Combo.Router.NoRouteError, fn ->
       call(Router, :get, "http://foobar.com.br/host/users/1")
     end
 
-    assert_raise Phoenix.Router.NoRouteError, fn ->
+    assert_raise Combo.Router.NoRouteError, fn ->
       call(Router, :get, "http://ba.pang.com/host/users/1")
     end
   end
@@ -213,7 +213,7 @@ defmodule Phoenix.Router.ScopedRoutingTest do
                  "expected router scope :host to be compile-time string or list of strings, got: nil",
                  fn ->
                    defmodule BadRouter do
-                     use Phoenix.Router
+                     use Combo.Router
 
                      scope "/admin", host: ["foo.", nil] do
                        get "/users/:id", Api.V1.UserController, :baz_host
@@ -253,14 +253,14 @@ defmodule Phoenix.Router.ScopedRoutingTest do
   test "string paths are enforced" do
     assert_raise ArgumentError, ~r{router paths must be strings, got: :bar}, fn ->
       defmodule SomeRouter do
-        use Phoenix.Router, otp_app: :phoenix
+        use Combo.Router, otp_app: :phoenix
         get :bar, Router, []
       end
     end
 
     assert_raise ArgumentError, ~r{router paths must be strings, got: :bar}, fn ->
       defmodule SomeRouter do
-        use Phoenix.Router, otp_app: :phoenix
+        use Combo.Router, otp_app: :phoenix
         get "/foo", Router, []
 
         scope "/another" do
@@ -285,7 +285,7 @@ defmodule Phoenix.Router.ScopedRoutingTest do
   test "raises for reserved prefixes" do
     assert_raise ArgumentError, ~r/`static` is a reserved route prefix/, fn ->
       defmodule ErrorRouter do
-        use Phoenix.Router
+        use Combo.Router
 
         scope "/" do
           get "/", StaticController, :index
@@ -295,7 +295,7 @@ defmodule Phoenix.Router.ScopedRoutingTest do
 
     assert_raise ArgumentError, ~r/`static` is a reserved route prefix/, fn ->
       defmodule ErrorRouter do
-        use Phoenix.Router
+        use Combo.Router
 
         scope "/" do
           get "/", Api.V1.UserController, :show, as: :static

@@ -1,17 +1,17 @@
-defmodule Phoenix.Router.PipelineTest.SampleController do
+defmodule Combo.Router.PipelineTest.SampleController do
   use Phoenix.Controller, formats: []
   def index(conn, _params), do: text(conn, "index")
   def crash(_conn, _params), do: raise("crash!")
   def noop_plug(conn, _opts), do: conn
 end
 
-alias Phoenix.Router.PipelineTest.SampleController
+alias Combo.Router.PipelineTest.SampleController
 
-defmodule Phoenix.Router.PipelineTest.Router do
-  use Phoenix.Router
+defmodule Combo.Router.PipelineTest.Router do
+  use Combo.Router
 
   # This should work even if the import comes
-  # after the Phoenix.Router definition
+  # after the Combo.Router definition
   import SampleController, only: [noop_plug: 2]
 
   pipeline :browser do
@@ -76,9 +76,9 @@ defmodule Phoenix.Router.PipelineTest.Router do
   end
 end
 
-alias Phoenix.Router.PipelineTest.Router
+alias Combo.Router.PipelineTest.Router
 
-defmodule Phoenix.Router.PipelineTest do
+defmodule Combo.Router.PipelineTest do
   use ExUnit.Case, async: true
   use RouterHelper
 
@@ -128,7 +128,7 @@ defmodule Phoenix.Router.PipelineTest do
   test "duplicate pipe_through's raises" do
     assert_raise ArgumentError, ~r{duplicate pipe_through for :browser}, fn ->
       defmodule DupPipeThroughRouter do
-        use Phoenix.Router, otp_app: :phoenix
+        use Combo.Router, otp_app: :phoenix
 
         pipeline :browser do
         end
@@ -142,7 +142,7 @@ defmodule Phoenix.Router.PipelineTest do
 
     assert_raise ArgumentError, ~r{duplicate pipe_through for :browser}, fn ->
       defmodule DupScopedPipeThroughRouter do
-        use Phoenix.Router, otp_app: :phoenix
+        use Combo.Router, otp_app: :phoenix
 
         pipeline :browser do
         end
@@ -161,7 +161,7 @@ defmodule Phoenix.Router.PipelineTest do
   test "pipeline raises on conflict" do
     assert_raise ArgumentError, ~r{there is an import from Kernel with the same name}, fn ->
       defmodule ConflictingPipeline do
-        use Phoenix.Router, otp_app: :phoenix
+        use Combo.Router, otp_app: :phoenix
 
         pipeline :raise do
           plug Plug.Head

@@ -300,10 +300,10 @@ wanted to see the number of requests per route, or per route
 _and_ method?
 
 Let's take a look at another event emitted during the HTTP
-request lifecycle, this time from `Phoenix.Router`:
+request lifecycle, this time from `Combo.Router`:
 
 * `[:phoenix, :router_dispatch, :stop]` - dispatched by
-  Phoenix.Router after successfully dispatching to a matched
+  Combo.Router after successfully dispatching to a matched
   route
 
   * Measurement: `%{duration: native_time}`

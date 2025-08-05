@@ -95,7 +95,7 @@ defmodule Phoenix.Endpoint.RenderErrorsTest do
     end
 
     match _ do
-      raise Phoenix.Router.NoRouteError, conn: conn, router: __MODULE__
+      raise Combo.Router.NoRouteError, conn: conn, router: __MODULE__
     end
   end
 

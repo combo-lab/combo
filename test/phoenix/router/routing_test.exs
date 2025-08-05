@@ -1,4 +1,4 @@
-defmodule Phoenix.Router.RoutingTest do
+defmodule Combo.Router.RoutingTest do
   use ExUnit.Case, async: true
   use RouterHelper
 
@@ -38,7 +38,7 @@ defmodule Phoenix.Router.RoutingTest do
   end
 
   defmodule Router do
-    use Phoenix.Router
+    use Combo.Router
 
     get "/", UserController, :index, as: :users
     get "/users/top", UserController, :top, as: :top
@@ -256,7 +256,7 @@ defmodule Phoenix.Router.RoutingTest do
 
     test "logs controller and action with (path) parameters" do
       assert capture_log(fn -> call(Router, :get, "/users/1", foo: "bar") end) =~ """
-             [debug] Processing with Phoenix.Router.RoutingTest.UserController.show/2
+             [debug] Processing with Combo.Router.RoutingTest.UserController.show/2
                Parameters: %{"foo" => "bar", "id" => "1"}
                Pipelines: []
              """
@@ -264,7 +264,7 @@ defmodule Phoenix.Router.RoutingTest do
 
     test "logs controller and action with filtered parameters" do
       assert capture_log(fn -> call(Router, :get, "/users/1", password: "bar") end) =~ """
-             [debug] Processing with Phoenix.Router.RoutingTest.UserController.show/2
+             [debug] Processing with Combo.Router.RoutingTest.UserController.show/2
                Parameters: %{"id" => "1", "password" => "[FILTERED]"}
                Pipelines: []
              """
@@ -272,7 +272,7 @@ defmodule Phoenix.Router.RoutingTest do
 
     test "logs plug with pipeline and custom level" do
       assert capture_log(fn -> call(Router, :get, "/plug") end) =~ """
-             [info] Processing with Phoenix.Router.RoutingTest.SomePlug
+             [info] Processing with Combo.Router.RoutingTest.SomePlug
                Parameters: %{}
                Pipelines: [:noop]
              """
@@ -280,26 +280,26 @@ defmodule Phoenix.Router.RoutingTest do
 
     test "does not log when log is set to false" do
       refute capture_log(fn -> call(Router, :get, "/no_log", foo: "bar") end) =~
-               "Processing with Phoenix.Router.RoutingTest.SomePlug"
+               "Processing with Combo.Router.RoutingTest.SomePlug"
     end
 
     test "overrides plug name that processes the route when set in metadata" do
       assert capture_log(fn -> call(Router, :get, "/override-plug-name") end) =~
-               "Processing with Phoenix.Router.RoutingTest.LogLevel.log_level/1"
+               "Processing with Combo.Router.RoutingTest.LogLevel.log_level/1"
     end
 
     test "logs custom level when log is set to a 1-arity function" do
       assert capture_log(fn -> call(Router, :get, "/fun_log", level: "info") end) =~
-               "[info] Processing with Phoenix.Router.RoutingTest.SomePlug"
+               "[info] Processing with Combo.Router.RoutingTest.SomePlug"
 
       assert capture_log(fn -> call(Router, :get, "/fun_log", level: "error") end) =~
-               "[error] Processing with Phoenix.Router.RoutingTest.SomePlug"
+               "[error] Processing with Combo.Router.RoutingTest.SomePlug"
 
       assert capture_log(fn -> call(Router, :get, "/fun_log", level: "yelling") end) =~
-               "[debug] Processing with Phoenix.Router.RoutingTest.SomePlug"
+               "[debug] Processing with Combo.Router.RoutingTest.SomePlug"
 
       assert capture_log(fn -> call(Router, :get, "/fun_log") end) =~
-               "[debug] Processing with Phoenix.Router.RoutingTest.SomePlug"
+               "[debug] Processing with Combo.Router.RoutingTest.SomePlug"
     end
   end
 
@@ -406,7 +406,7 @@ defmodule Phoenix.Router.RoutingTest do
                log: :debug,
                path_params: %{"id" => "123"},
                pipe_through: [],
-               plug: Phoenix.Router.RoutingTest.UserController,
+               plug: Combo.Router.RoutingTest.UserController,
                plug_opts: :show,
                route: "/users/:id"
              } = meta
@@ -426,7 +426,7 @@ defmodule Phoenix.Router.RoutingTest do
                log: :debug,
                path_params: %{"id" => "123"},
                pipe_through: [],
-               plug: Phoenix.Router.RoutingTest.UserController,
+               plug: Combo.Router.RoutingTest.UserController,
                plug_opts: :show,
                route: "/users/:id"
              } = meta
@@ -448,7 +448,7 @@ defmodule Phoenix.Router.RoutingTest do
                log: :info,
                path_params: %{"id" => "123"},
                pipe_through: [:noop],
-               plug: Phoenix.Router.RoutingTest.UserController,
+               plug: Combo.Router.RoutingTest.UserController,
                plug_opts: :raise,
                reason: %Plug.Conn.WrapperError{
                  conn: %Plug.Conn{state: :unset},
@@ -478,7 +478,7 @@ defmodule Phoenix.Router.RoutingTest do
                log: :debug,
                path_params: %{},
                pipe_through: [],
-               plug: Phoenix.Router.RoutingTest.UserController,
+               plug: Combo.Router.RoutingTest.UserController,
                plug_opts: :exit,
                reason: :boom,
                route: "/exit",
@@ -491,54 +491,54 @@ defmodule Phoenix.Router.RoutingTest do
 
   describe "route_info" do
     test " returns route string, path params, and more" do
-      assert Phoenix.Router.route_info(Router, "GET", "foo/bar/baz", nil) == %{
+      assert Combo.Router.route_info(Router, "GET", "foo/bar/baz", nil) == %{
                log: :debug,
                path_params: %{"path" => ["foo", "bar", "baz"]},
                pipe_through: [],
-               plug: Phoenix.Router.RoutingTest.UserController,
+               plug: Combo.Router.RoutingTest.UserController,
                plug_opts: :not_found,
                route: "/*path"
              }
 
-      assert Phoenix.Router.route_info(Router, "GET", "users/1", nil) == %{
+      assert Combo.Router.route_info(Router, "GET", "users/1", nil) == %{
                log: :debug,
                path_params: %{"id" => "1"},
                pipe_through: [],
-               plug: Phoenix.Router.RoutingTest.UserController,
+               plug: Combo.Router.RoutingTest.UserController,
                plug_opts: :show,
                route: "/users/:id",
                access: :user
              }
 
-      assert Phoenix.Router.route_info(Router, "GET", "/", "host") == %{
+      assert Combo.Router.route_info(Router, "GET", "/", "host") == %{
                log: :debug,
                path_params: %{},
                pipe_through: [],
-               plug: Phoenix.Router.RoutingTest.UserController,
+               plug: Combo.Router.RoutingTest.UserController,
                plug_opts: :index,
                route: "/"
              }
 
-      assert Phoenix.Router.route_info(Router, "POST", "/not-exists", "host") == :error
+      assert Combo.Router.route_info(Router, "POST", "/not-exists", "host") == :error
     end
 
     test "returns route string, path params and more for split path" do
-      assert Phoenix.Router.route_info(Router, "GET", ~w(foo bar baz), nil) == %{
+      assert Combo.Router.route_info(Router, "GET", ~w(foo bar baz), nil) == %{
                log: :debug,
                path_params: %{"path" => ["foo", "bar", "baz"]},
                pipe_through: [],
-               plug: Phoenix.Router.RoutingTest.UserController,
+               plug: Combo.Router.RoutingTest.UserController,
                plug_opts: :not_found,
                route: "/*path"
              }
     end
 
     test "returns accumulated pipe_through metadata" do
-      assert Phoenix.Router.route_info(Router, "GET", "/info", nil) == %{
+      assert Combo.Router.route_info(Router, "GET", "/info", nil) == %{
                log: :info,
                path_params: %{},
                pipe_through: [:noop, :halt],
-               plug: Phoenix.Router.RoutingTest.UserController,
+               plug: Combo.Router.RoutingTest.UserController,
                plug_opts: :raise,
                route: "/info"
              }

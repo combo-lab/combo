@@ -56,7 +56,7 @@ get "/", PageController, :home
 
 > #### Why the macros? {: .info}
 >
-> Phoenix does its best to keep the usage of macros low. You may have noticed, however, that the `Phoenix.Router` relies heavily on macros. Why is that?
+> Phoenix does its best to keep the usage of macros low. You may have noticed, however, that the `Combo.Router` relies heavily on macros. Why is that?
 >
 > We use `get`, `post`, `put`, and `delete` to define your routes. We use macros for two purposes:
 >
@@ -82,7 +82,7 @@ The route above tells us that any HTTP GET request for the root of the applicati
 
 ## Resources
 
-The router supports other macros besides those for HTTP verbs like [`get`](`Phoenix.Router.get/3`), [`post`](`Phoenix.Router.post/3`), and [`put`](`Phoenix.Router.put/3`). The most important among them is [`resources`](`Phoenix.Router.resources/4`). Let's add a resource to our `lib/hello_web/router.ex` file like this:
+The router supports other macros besides those for HTTP verbs like [`get`](`Combo.Router.get/3`), [`post`](`Combo.Router.post/3`), and [`put`](`Combo.Router.put/3`). The most important among them is [`resources`](`Combo.Router.resources/4`). Let's add a resource to our `lib/hello_web/router.ex` file like this:
 
 ```elixir
 scope "/", HelloWeb do
@@ -155,7 +155,7 @@ PATCH  /comments/:id       HelloWeb.CommentController :update
 PUT    /comments/:id       HelloWeb.CommentController :update
 ```
 
-The `Phoenix.Router.resources/4` macro describes additional options for customizing resource routes.
+The `Combo.Router.resources/4` macro describes additional options for customizing resource routes.
 
 ## Verified Routes
 
@@ -418,7 +418,7 @@ Interestingly, we can use multiple scopes with the same path as long as we are c
 
 ```elixir
 defmodule HelloWeb.Router do
-  use Phoenix.Router
+  use Combo.Router
   ...
   scope "/", HelloWeb do
     pipe_through :browser
@@ -502,13 +502,13 @@ When the server accepts a request, the request will always first pass through th
 
 Let's say that the request matches our first route: a GET to `/`. The router will first pipe that request through the `:browser` pipeline - which will fetch the session data, fetch the flash, and execute forgery protection - before it dispatches the request to `PageController`'s `home` action.
 
-Conversely, suppose the request matches any of the routes defined by the [`resources/2`](`Phoenix.Router.resources/2`) macro. In that case, the router will pipe it through the `:api` pipeline — which currently only performs content negotiation — before it dispatches further to the correct action of the `HelloWeb.ReviewController`.
+Conversely, suppose the request matches any of the routes defined by the [`resources/2`](`Combo.Router.resources/2`) macro. In that case, the router will pipe it through the `:api` pipeline — which currently only performs content negotiation — before it dispatches further to the correct action of the `HelloWeb.ReviewController`.
 
 If no route matches, no pipeline is invoked and a 404 error is raised.
 
 ### Creating new pipelines
 
-Phoenix allows us to create our own custom pipelines anywhere in the router. To do so, we call the [`pipeline/2`](`Phoenix.Router.pipeline/2`) macro with these arguments: an atom for the name of our new pipeline and a block with all the plugs we want in it.
+Phoenix allows us to create our own custom pipelines anywhere in the router. To do so, we call the [`pipeline/2`](`Combo.Router.pipeline/2`) macro with these arguments: an atom for the name of our new pipeline and a block with all the plugs we want in it.
 
 ```elixir
 defmodule HelloWeb.Router do
@@ -591,7 +591,7 @@ You can create as few or as many scopes as you want. Because pipelines are reusa
 
 ## Forward
 
-The `Phoenix.Router.forward/4` macro can be used to send all requests that start with a particular path to a particular plug. Let's say we have a part of our system that is responsible (it could even be a separate application or library) for running jobs in the background, it could have its own web interface for checking the status of the jobs. We can forward to this admin interface using:
+The `Combo.Router.forward/4` macro can be used to send all requests that start with a particular path to a particular plug. Let's say we have a part of our system that is responsible (it could even be a separate application or library) for running jobs in the background, it could have its own web interface for checking the status of the jobs. We can forward to this admin interface using:
 
 ```elixir
 defmodule HelloWeb.Router do
@@ -609,7 +609,7 @@ end
 
 This means that all routes starting with `/jobs` will be sent to the `BackgroundJob.Plug` module. Inside the plug, you can match on subroutes, such as `/pending` and `/active` that shows the status of certain jobs.
 
-We can even mix the [`forward/4`](`Phoenix.Router.forward/4`) macro with pipelines. If we wanted to ensure that the user was authenticated and was an administrator in order to see the jobs page, we could use the following in our router.
+We can even mix the [`forward/4`](`Combo.Router.forward/4`) macro with pipelines. If we wanted to ensure that the user was authenticated and was an administrator in order to see the jobs page, we could use the following in our router.
 
 ```elixir
 defmodule HelloWeb.Router do

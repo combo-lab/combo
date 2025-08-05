@@ -47,7 +47,7 @@ defmodule Phoenix.Integration.EndpointTest do
     end
 
     match _ do
-      raise Phoenix.Router.NoRouteError, conn: conn, router: __MODULE__
+      raise Combo.Router.NoRouteError, conn: conn, router: __MODULE__
     end
 
     def __routes__ do

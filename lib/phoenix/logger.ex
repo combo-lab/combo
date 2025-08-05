@@ -29,20 +29,20 @@ defmodule Phoenix.Logger do
       * Disable logging: In your endpoint `plug Plug.Telemetry, ..., log: Logger.level | false`
       * Configure log level dynamically: `plug Plug.Telemetry, ..., log: {Mod, Fun, Args}`
 
-    * `[:phoenix, :router_dispatch, :start]` - dispatched by `Phoenix.Router`
+    * `[:phoenix, :router_dispatch, :start]` - dispatched by `Combo.Router`
       before dispatching to a matched route
       * Measurement: `%{system_time: System.system_time}`
       * Metadata: `%{conn: Plug.Conn.t, route: binary, plug: module, plug_opts: term, path_params: map, pipe_through: [atom], log: Logger.level | false}`
       * Disable logging: Pass `log: false` to the router macro, for example: `get("/page", PageController, :index, log: false)`
       * Configure log level dynamically: `get("/page", PageController, :index, log: {Mod, Fun, Args})`
 
-    * `[:phoenix, :router_dispatch, :exception]` - dispatched by `Phoenix.Router`
+    * `[:phoenix, :router_dispatch, :exception]` - dispatched by `Combo.Router`
       after exceptions on dispatching a route
       * Measurement: `%{duration: native_time}`
       * Metadata: `%{conn: Plug.Conn.t, kind: :throw | :error | :exit, reason: term(), stacktrace: Exception.stacktrace()}`
       * Disable logging: This event is not logged
 
-    * `[:phoenix, :router_dispatch, :stop]` - dispatched by `Phoenix.Router`
+    * `[:phoenix, :router_dispatch, :stop]` - dispatched by `Combo.Router`
       after successfully dispatching a matched route
       * Measurement: `%{duration: native_time}`
       * Metadata: `%{conn: Plug.Conn.t, route: binary, plug: module, plug_opts: term, path_params: map, pipe_through: [atom], log: Logger.level | false}`

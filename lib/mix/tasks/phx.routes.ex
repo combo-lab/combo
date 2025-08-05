@@ -1,6 +1,6 @@
 defmodule Mix.Tasks.Phx.Routes do
   use Mix.Task
-  alias Phoenix.Router.ConsoleFormatter
+  alias Combo.Router.ConsoleFormatter
 
   @shortdoc "Prints all routes"
 
@@ -93,7 +93,7 @@ defmodule Mix.Tasks.Phx.Routes do
     %{path: path} = URI.parse(url)
 
     method = opts |> Keyword.get(:method, "get") |> String.upcase()
-    meta = Phoenix.Router.route_info(router_mod, method, path, "")
+    meta = Combo.Router.route_info(router_mod, method, path, "")
     %{plug: plug, plug_opts: plug_opts} = meta
 
     {module, func_name} =

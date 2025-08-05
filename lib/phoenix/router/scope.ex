@@ -1,5 +1,5 @@
-defmodule Phoenix.Router.Scope do
-  alias Phoenix.Router.Scope
+defmodule Combo.Router.Scope do
+  alias Combo.Router.Scope
   @moduledoc false
 
   @stack :phoenix_router_scopes
@@ -61,7 +61,7 @@ defmodule Phoenix.Router.Scope do
         metadata
       end
 
-    Phoenix.Router.Route.build(
+    Combo.Router.Route.build(
       line,
       kind,
       verb,

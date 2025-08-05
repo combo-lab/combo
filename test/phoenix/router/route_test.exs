@@ -1,7 +1,7 @@
-defmodule Phoenix.Router.RouteTest do
+defmodule Combo.Router.RouteTest do
   use ExUnit.Case, async: true
 
-  import Phoenix.Router.Route
+  import Combo.Router.Route
 
   def init(opts), do: opts
 
@@ -65,8 +65,8 @@ defmodule Phoenix.Router.RouteTest do
       |> exprs()
 
     assert exprs.verb_match == "GET"
-    assert exprs.path == ["foo", {:arg0, [], Phoenix.Router.Route}]
-    assert exprs.binding == [{"bar", {:arg0, [], Phoenix.Router.Route}}]
+    assert exprs.path == ["foo", {:arg0, [], Combo.Router.Route}]
+    assert exprs.binding == [{"bar", {:arg0, [], Combo.Router.Route}}]
     assert Macro.to_string(exprs.hosts) == "[_]"
 
     exprs =

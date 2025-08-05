@@ -1,4 +1,4 @@
-defmodule Phoenix.Router.ConsoleFormatter do
+defmodule Combo.Router.ConsoleFormatter do
   @moduledoc false
 
   @doc """

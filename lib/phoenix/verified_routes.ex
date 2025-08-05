@@ -12,7 +12,7 @@ defmodule Combo.VerifiedRoutes do
 
       redirect(to: url(~p"/posts/#{post}"))
 
-  Will be verified against your standard `Phoenix.Router` definitions:
+  Will be verified against your standard `Combo.Router` definitions:
 
       get "/posts/:post_id", PostController, :show
       post "/sessions/new", SessionController, :create
@@ -278,7 +278,7 @@ defmodule Combo.VerifiedRoutes do
   Returns the necessary information about routes for display in `mix phx.routes`.
 
   The `plug_opts` is typically only passed when the router is mounted within
-  a `Phoenix.Router`. Otherwise it defaults to `[]`.
+  a `Combo.Router`. Otherwise it defaults to `[]`.
   """
   @callback formatted_routes(plug_opts()) :: [formatted_route()]
 
@@ -286,7 +286,7 @@ defmodule Combo.VerifiedRoutes do
   Returns `true` if the path is verified, and false if not.
 
   The `plug_opts` is typically only passed when the router is mounted within
-  a `Phoenix.Router`. Otherwise it defaults to `[]`.
+  a `Combo.Router`. Otherwise it defaults to `[]`.
   """
   @callback verified_route?(plug_opts(), [String.t()]) :: boolean()
 

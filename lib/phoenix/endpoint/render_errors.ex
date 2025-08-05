@@ -17,7 +17,7 @@ defmodule Phoenix.Endpoint.RenderErrors do
   require Phoenix.Endpoint
   require Logger
 
-  alias Phoenix.Router.NoRouteError
+  alias Combo.Router.NoRouteError
   alias Phoenix.Controller
 
   @already_sent {:plug_conn, :sent}
@@ -102,7 +102,7 @@ defmodule Phoenix.Endpoint.RenderErrors do
   def __debugger_banner__(_conn, _status, _kind, %NoRouteError{router: router}, _stack) do
     """
     <h3>Available routes</h3>
-    <pre>#{Phoenix.Router.ConsoleFormatter.format(router)}</pre>
+    <pre>#{Combo.Router.ConsoleFormatter.format(router)}</pre>
     """
   end
 

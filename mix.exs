@@ -208,7 +208,7 @@ defmodule Phoenix.MixProject do
     # Phoenix.Logger
     # Phoenix.Param
     # Phoenix.Presence
-    # Phoenix.Router
+    # Combo.Router
     # Combo.Socket
     # Combo.Token
     # Combo.VerifiedRoutes

@@ -1,9 +1,9 @@
-defmodule Phoenix.Router.HealthController do
+defmodule Combo.Router.HealthController do
   use Phoenix.Controller, formats: []
   def health(conn, _params), do: text(conn, "health")
 end
 
-defmodule Phoenix.Router.ForwardTest do
+defmodule Combo.Router.ForwardTest do
   use ExUnit.Case, async: true
   use RouterHelper
 
@@ -19,18 +19,18 @@ defmodule Phoenix.Router.ForwardTest do
   end
 
   defmodule ApiRouter do
-    use Phoenix.Router
+    use Combo.Router
 
     get "/", Controller, :api_root
     get "/users", Controller, :api_users
 
-    scope "/health", Phoenix.Router do
+    scope "/health", Combo.Router do
       forward "/", HealthController, :health
     end
   end
 
   defmodule AdminDashboard do
-    use Phoenix.Router
+    use Combo.Router
 
     get "/", Controller, :index, as: :page
     get "/stats", Controller, :stats, as: :page
@@ -48,7 +48,7 @@ defmodule Phoenix.Router.ForwardTest do
   end
 
   defmodule Router do
-    use Phoenix.Router
+    use Combo.Router
 
     scope "/" do
       get "/stats", Controller, :stats
@@ -83,7 +83,7 @@ defmodule Phoenix.Router.ForwardTest do
     router =
       quote do
         defmodule BadRouter do
-          use Phoenix.Router
+          use Combo.Router
           forward "/api/:version", ApiRouter
         end
       end
@@ -135,7 +135,7 @@ defmodule Phoenix.Router.ForwardTest do
 
     assert_raise(ArgumentError, error_message, fn ->
       defmodule BrokenRouter do
-        use Phoenix.Router
+        use Combo.Router
 
         scope "/" do
           forward "/health", to: HealthController

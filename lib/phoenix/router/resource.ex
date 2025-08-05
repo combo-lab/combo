@@ -1,16 +1,16 @@
-defmodule Phoenix.Router.Resource do
+defmodule Combo.Router.Resource do
   # This module defines the Resource struct that is used
   # throughout Phoenix's router. This struct is private
   # as it contains internal routing information.
   @moduledoc false
 
-  alias Phoenix.Router.Resource
+  alias Combo.Router.Resource
 
   @default_param_key "id"
   @actions [:index, :edit, :new, :show, :create, :update, :delete]
 
   @doc """
-  The `Phoenix.Router.Resource` struct. It stores:
+  The `Combo.Router.Resource` struct. It stores:
 
     * `:path` - the path as string (not normalized)
     * `:param` - the param to be used in routes (not normalized)
@@ -28,7 +28,7 @@ defmodule Phoenix.Router.Resource do
   Builds a resource struct.
   """
   def build(path, controller, options) when is_atom(controller) and is_list(options) do
-    path    = Phoenix.Router.Scope.validate_path(path)
+    path    = Combo.Router.Scope.validate_path(path)
     alias   = Keyword.get(options, :alias)
     param   = Keyword.get(options, :param, @default_param_key)
     name    = Keyword.get(options, :name, Phoenix.Naming.resource_name(controller, "Controller"))

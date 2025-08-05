@@ -1,8 +1,8 @@
-defmodule Phoenix.Router.Helpers do
+defmodule Combo.Router.Helpers do
   # Module that generates the routing helpers.
   @moduledoc false
 
-  alias Phoenix.Router.Route
+  alias Combo.Router.Route
   alias Plug.Conn
 
   @doc """
@@ -139,7 +139,7 @@ defmodule Phoenix.Router.Helpers do
           end
 
           defp raise_route_error(unquote(helper), suffix, arity, action, params) do
-            Phoenix.Router.Helpers.raise_route_error(
+            Combo.Router.Helpers.raise_route_error(
               __MODULE__,
               "#{unquote(helper)}_#{suffix}",
               arity,

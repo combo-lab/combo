@@ -4,11 +4,11 @@ This release requires Erlang/OTP 25+.
 
 ## Streamlined generators
 
-  * Extend tailwindcss support in new apps with [daisyUI](https://daisyui.com/) for light/dark/system mode support for entire app, including core components
-  * Simplify layout handling for new apps. Now there is only a single `root.html.heex` which wraps the render pipeline. Other dynamic layouts, like `app.html.heex` are called as needed within templates as regular function components
-  * Simplify core components and live generators to more closely match basic `phx.gen.html` crud. This serves as a better base for seasoned devs to start with, and lessens the amount of code newcomers need to get up to speed with on the basics
-  * Introduce magic links (passwordless auth) and "sudo mode" to `mix phx.gen.auth` while simplifying the generated structure
-  * Introduce scopes to Phoenix generators, designed to make secure data access the *default*, not something you remember (or forget) to do later
+- Extend tailwindcss support in new apps with [daisyUI](https://daisyui.com/) for light/dark/system mode support for entire app, including core components
+- Simplify layout handling for new apps. Now there is only a single `root.html.heex` which wraps the render pipeline. Other dynamic layouts, like `app.html.heex` are called as needed within templates as regular function components
+- Simplify core components and live generators to more closely match basic `phx.gen.html` crud. This serves as a better base for seasoned devs to start with, and lessens the amount of code newcomers need to get up to speed with on the basics
+- Introduce magic links (passwordless auth) and "sudo mode" to `mix phx.gen.auth` while simplifying the generated structure
+- Introduce scopes to Phoenix generators, designed to make secure data access the _default_, not something you remember (or forget) to do later
 
 ## `put_secure_browser_headers`
 
@@ -20,36 +20,40 @@ The headers `x-download-options` and `x-frame-options` are no longer set as they
 
 This release introduces deprecation warnings for several features that have been soft-deprecated in the past.
 
-  * `use Phoenix.Controller` must now specify the `:formats` option, which may be set to an empty list if the formats are not known upfront
-  * The `:namespace` and `:put_default_views` options on `use Phoenix.Controller` are deprecated and emit a warning on use
-  * Specifying layouts without modules, such as `put_layout(conn, :print)` or `put_layout(conn, html: :print)` is deprecated
-  * The `:trailing_slash` option in `Phoenix.Router` has been deprecated in favor of using `Phoenix.VerifiedRoutes`. The overall usage of helpers will be deprecated in the future
+- `use Phoenix.Controller` must now specify the `:formats` option, which may be set to an empty list if the formats are not known upfront
+- The `:namespace` and `:put_default_views` options on `use Phoenix.Controller` are deprecated and emit a warning on use
+- Specifying layouts without modules, such as `put_layout(conn, :print)` or `put_layout(conn, html: :print)` is deprecated
+- The `:trailing_slash` option in `Combo.Router` has been deprecated in favor of using `Phoenix.VerifiedRoutes`. The overall usage of helpers will be deprecated in the future
 
 ## 1.8.0-rc.3 (2025-05-07)
-  - [phx.gen.auth] allow configuring the scope's assign key in phx.gen.auth
-  - [phx.new] Do not override theme in root layout if explicitly set
+
+- [phx.gen.auth] allow configuring the scope's assign key in phx.gen.auth
+- [phx.new] Do not override theme in root layout if explicitly set
 
 ### Enhancements
 
 ## 1.8.0-rc.2 (2025-04-29)
 
 ### Bug Fixes
-  - [phx.gen.live] only subscribe to pubsub if connected
-  - [phx.gen.auth] remove unused current_password field
-  - [phx.gen.auth] use context_app for scopes to fix generated scopes in umbrella apps
+
+- [phx.gen.live] only subscribe to pubsub if connected
+- [phx.gen.auth] remove unused current_password field
+- [phx.gen.auth] use context_app for scopes to fix generated scopes in umbrella apps
 
 ## 1.8.0-rc.1 (2025-04-16)
 
 ### Enhancements
-  - [phx.new] Support PORT in dev
-  - [phx.gen.auth] - Replace `utc_now/0 + truncate/1` with `utc_now/1`
-  - [phx.gen.auth] - Make dev mailbox link more obvious
+
+- [phx.new] Support PORT in dev
+- [phx.gen.auth] - Replace `utc_now/0 + truncate/1` with `utc_now/1`
+- [phx.gen.auth] - Make dev mailbox link more obvious
 
 ### Bug Fixes
-  - [phx.new] Fix Tailwind custom variants for loading classes (#6194)
-  - [phx.new] Fix heroicons path for umbrella apps
-  - Fix crash when an open :show page gets a PubSub broadcast for items (#6197)
-  - Fix missing index for scoped resources (#6186)
+
+- [phx.new] Fix Tailwind custom variants for loading classes (#6194)
+- [phx.new] Fix heroicons path for umbrella apps
+- Fix crash when an open :show page gets a PubSub broadcast for items (#6197)
+- Fix missing index for scoped resources (#6186)
 
 ## 1.8.0-rc.0 (2025-04-01) 🚀
 

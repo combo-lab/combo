@@ -1,13 +1,13 @@
-defmodule Phoenix.Router.Route do
+defmodule Combo.Router.Route do
   # This module defines the Route struct that is used
   # throughout Phoenix's router. This struct is private
   # as it contains internal routing information.
   @moduledoc false
 
-  alias Phoenix.Router.Route
+  alias Combo.Router.Route
 
   @doc """
-  The `Phoenix.Router.Route` struct. It stores:
+  The `Combo.Router.Route` struct. It stores:
 
     * `:verb` - the HTTP verb as an atom
     * `:line` - the line the route was defined
@@ -58,7 +58,7 @@ defmodule Phoenix.Router.Route do
 
   @doc """
   Receives the verb, path, plug, options and helper
-  and returns a `Phoenix.Router.Route` struct.
+  and returns a `Combo.Router.Route` struct.
   """
   @spec build(
           non_neg_integer,
@@ -205,7 +205,7 @@ defmodule Phoenix.Router.Route do
        }) do
     quote do
       {
-        Phoenix.Router.Route,
+        Combo.Router.Route,
         {unquote(metadata.forward), unquote(plug), unquote(Macro.escape(plug_opts))}
       }
     end
@@ -216,7 +216,7 @@ defmodule Phoenix.Router.Route do
     path_params = Macro.var(:path_params, :conn)
 
     merge_params =
-      quote(do: Phoenix.Router.Route.merge_params(unquote(params), unquote(path_params)))
+      quote(do: Combo.Router.Route.merge_params(unquote(params), unquote(path_params)))
 
     {
       [{:params, params}],

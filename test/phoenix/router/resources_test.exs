@@ -1,4 +1,4 @@
-defmodule Phoenix.Router.ResourcesTest do
+defmodule Combo.Router.ResourcesTest do
   use ExUnit.Case, async: true
   use RouterHelper
 
@@ -32,7 +32,7 @@ defmodule Phoenix.Router.ResourcesTest do
   end
 
   defmodule Router do
-    use Phoenix.Router
+    use Combo.Router
 
     resources "/users", UserController, alias: Api do
       resources "/comments", CommentController do
@@ -169,7 +169,7 @@ defmodule Phoenix.Router.ResourcesTest do
   end
 
   test "nested options limit resource by passing :except option" do
-    assert_raise Phoenix.Router.NoRouteError, fn ->
+    assert_raise Combo.Router.NoRouteError, fn ->
       call(Router, :delete, "/users/1/files/2")
     end
 
@@ -178,15 +178,15 @@ defmodule Phoenix.Router.ResourcesTest do
   end
 
   test "nested options limit resource by passing :only option" do
-    assert_raise Phoenix.Router.NoRouteError, fn ->
+    assert_raise Combo.Router.NoRouteError, fn ->
       call(Router, :patch, "/admin/1/files/2")
     end
 
-    assert_raise Phoenix.Router.NoRouteError, fn ->
+    assert_raise Combo.Router.NoRouteError, fn ->
       call(Router, :post, "/admin/1/files")
     end
 
-    assert_raise Phoenix.Router.NoRouteError, fn ->
+    assert_raise Combo.Router.NoRouteError, fn ->
       call(Router, :delete, "/admin/1/files/1")
     end
 
@@ -203,19 +203,19 @@ defmodule Phoenix.Router.ResourcesTest do
     assert conn.status == 200
     assert conn.resp_body == "show users"
 
-    assert_raise Phoenix.Router.NoRouteError, fn ->
+    assert_raise Combo.Router.NoRouteError, fn ->
       call(Router, :get, "/admin/")
     end
 
-    assert_raise Phoenix.Router.NoRouteError, fn ->
+    assert_raise Combo.Router.NoRouteError, fn ->
       call(Router, :patch, "/admin/1")
     end
 
-    assert_raise Phoenix.Router.NoRouteError, fn ->
+    assert_raise Combo.Router.NoRouteError, fn ->
       call(Router, :post, "/admin")
     end
 
-    assert_raise Phoenix.Router.NoRouteError, fn ->
+    assert_raise Combo.Router.NoRouteError, fn ->
       call(Router, :delete, "/admin/1")
     end
 
@@ -235,7 +235,7 @@ defmodule Phoenix.Router.ResourcesTest do
     assert conn.status == 200
     assert conn.resp_body == "create comments"
 
-    assert_raise Phoenix.Router.NoRouteError, fn ->
+    assert_raise Combo.Router.NoRouteError, fn ->
       call(Router, :delete, "/scoped_files/1")
     end
   end
@@ -275,7 +275,7 @@ defmodule Phoenix.Router.ResourcesTest do
                  ~r/supported singleton actions: \[:edit, :new, :show, :create, :update, :delete\]/,
                  fn ->
                    defmodule SingletonRouter.Router do
-                     use Phoenix.Router
+                     use Combo.Router
                      resources "/", UserController, singleton: true, only: [:index]
                    end
                  end
@@ -286,7 +286,7 @@ defmodule Phoenix.Router.ResourcesTest do
                  ~r/supported actions: \[:index, :edit, :new, :show, :create, :update, :delete\]/,
                  fn ->
                    defmodule SingletonRouter.Router do
-                     use Phoenix.Router
+                     use Combo.Router
                      resources "/", UserController, only: [:bad_index]
                    end
                  end
@@ -297,7 +297,7 @@ defmodule Phoenix.Router.ResourcesTest do
                  ~r/supported actions: \[:index, :edit, :new, :show, :create, :update, :delete\]/,
                  fn ->
                    defmodule SingletonRouter.Router do
-                     use Phoenix.Router
+                     use Combo.Router
                      resources "/", UserController, except: [:bad_index]
                    end
                  end

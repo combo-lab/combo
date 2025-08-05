@@ -16,12 +16,12 @@ for module <- modules do
   end
 end
 
-defmodule Phoenix.Router.HelpersTest do
+defmodule Combo.Router.HelpersTest do
   use ExUnit.Case, async: true
   use RouterHelper
 
   defmodule Router do
-    use Phoenix.Router
+    use Combo.Router
 
     get "/posts/top", PostController, :top, as: :top
     get "/posts/bottom/:order/:count", PostController, :bottom, as: :bottom
@@ -266,7 +266,7 @@ defmodule Phoenix.Router.HelpersTest do
     end
 
     assert_raise ArgumentError,
-                 ~r/no function clause for Phoenix.Router.HelpersTest.Router.Helpers.user_comment_path\/3 and action :show/,
+                 ~r/no function clause for Combo.Router.HelpersTest.Router.Helpers.user_comment_path\/3 and action :show/,
                  fn ->
                    Helpers.user_comment_path(Endpoint, :show, 123)
                  end
@@ -606,7 +606,7 @@ defmodule Phoenix.Router.HelpersTest do
 
   describe "helpers: false" do
     defmodule NoHelpersRouter do
-      use Phoenix.Router, helpers: false
+      use Combo.Router, helpers: false
 
       get "/", PostController, :home
     end
