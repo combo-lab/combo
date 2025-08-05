@@ -24,26 +24,6 @@ defmodule Phoenix.Template.CEExEngine.Compiler.Attr do
          else: (_ -> {:quoted, quoted_escape_attrs([{name, quoted}], meta)})
   end
 
-  # for values of list type, like ["static1", "static2", dynamic1, "static3"]
-  defp precompile_static(name, [head | tail] = quoted, meta)
-       when is_list(quoted) and is_binary(head) do
-    {bins, tail} = Enum.split_while(tail, &is_binary/1)
-    static = [head | bins]
-    dynamic = tail
-
-    escaped_static = escape_value(static)
-
-    new_quoted =
-      if tail == [] do
-        [IO.iodata_to_binary(escaped_static)]
-      else
-        quoted_dynamic = quoted_escape_value(dynamic, meta)
-        [IO.iodata_to_binary([escaped_static, ?\s]), quoted_dynamic]
-      end
-
-    {:ok, {:attr, name, new_quoted}}
-  end
-
   # for values using string concatenation, like "btn" <> "-red"
   defp precompile_static(name, {:<>, _, [_, _]} = quoted, meta) do
     {:ok, {:attr, name, inline_binaries(quoted, meta)}}
@@ -96,16 +76,6 @@ defmodule Phoenix.Template.CEExEngine.Compiler.Attr do
   defp quoted_escape_attrs(attrs, meta) do
     quote line: meta[:line] do
       {:safe, unquote(__MODULE__).escape_attrs(unquote(attrs))}
-    end
-  end
-
-  @doc false
-  @spec escape_value(term()) :: iodata()
-  def escape_value(value), do: SafeHTML.escape_attr_value(value)
-
-  defp quoted_escape_value(value, meta) do
-    quote line: meta[:line] do
-      {:safe, unquote(__MODULE__).escape_value(unquote(value))}
     end
   end
 
