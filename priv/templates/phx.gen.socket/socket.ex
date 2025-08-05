@@ -35,7 +35,7 @@ defmodule <%= module %>Socket do
   # websocket
   # configuration](https://hexdocs.pm/phoenix/Phoenix.Endpoint.html#socket/3-websocket-configuration).
   #
-  # See `Phoenix.Token` documentation for examples in
+  # See `Combo.Token` documentation for examples in
   # performing token verification on connect.
   @impl true
   def connect(_params, socket, _connect_info) do

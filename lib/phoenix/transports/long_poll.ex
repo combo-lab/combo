@@ -250,7 +250,7 @@ defmodule Phoenix.Transports.LongPoll do
     do: send(pid, msg)
 
   defp sign_token(endpoint, data, opts) do
-    Phoenix.Token.sign(
+    Combo.Token.sign(
       endpoint,
       Atom.to_string(endpoint.config(:pubsub_server)),
       data,
@@ -259,7 +259,7 @@ defmodule Phoenix.Transports.LongPoll do
   end
 
   defp verify_token(endpoint, signed, opts) do
-    Phoenix.Token.verify(
+    Combo.Token.verify(
       endpoint,
       Atom.to_string(endpoint.config(:pubsub_server)),
       signed,

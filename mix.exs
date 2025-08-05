@@ -210,7 +210,7 @@ defmodule Phoenix.MixProject do
     # Phoenix.Presence
     # Phoenix.Router
     # Phoenix.Socket
-    # Phoenix.Token
+    # Combo.Token
     # Phoenix.VerifiedRoutes
 
     [

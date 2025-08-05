@@ -1,4 +1,4 @@
-defmodule Phoenix.Token do
+defmodule Combo.Token do
   @moduledoc """
   Conveniences to sign/encrypt data inside tokens
   for use in Channels, API authentication, and more.
@@ -21,8 +21,8 @@ defmodule Phoenix.Token do
   the id from a database. For example:
 
       iex> user_id = 1
-      iex> token = Phoenix.Token.sign(MyAppWeb.Endpoint, "user auth", user_id)
-      iex> Phoenix.Token.verify(MyAppWeb.Endpoint, "user auth", token, max_age: 86400)
+      iex> token = Combo.Token.sign(MyAppWeb.Endpoint, "user auth", user_id)
+      iex> Combo.Token.verify(MyAppWeb.Endpoint, "user auth", token, max_age: 86400)
       {:ok, 1}
 
   In that example we have a user's id, we generate a token and
@@ -60,7 +60,7 @@ defmodule Phoenix.Token do
   One is via the meta tag:
 
   ```heex
-  <meta name="channel_token" content={Phoenix.Token.sign(@conn, "user auth", @current_user.id)}>
+  <meta name="channel_token" content={Combo.Token.sign(@conn, "user auth", @current_user.id)}>
   ```
 
   Or an endpoint that returns it:
@@ -68,7 +68,7 @@ defmodule Phoenix.Token do
       def create(conn, params) do
         user = User.create(params)
         render(conn, "user.json",
-               %{token: Phoenix.Token.sign(conn, "user auth", user.id), user: user})
+               %{token: Combo.Token.sign(conn, "user auth", user.id), user: user})
       end
 
   Once the token is sent, the client may now send it back to the server
@@ -79,7 +79,7 @@ defmodule Phoenix.Token do
         use Phoenix.Socket
 
         def connect(%{"token" => token}, socket, _connect_info) do
-          case Phoenix.Token.verify(socket, "user auth", token, max_age: 86400) do
+          case Combo.Token.verify(socket, "user auth", token, max_age: 86400) do
             {:ok, user_id} ->
               socket = assign(socket, :user, Repo.get!(User, user_id))
               {:ok, socket}
@@ -94,7 +94,7 @@ defmodule Phoenix.Token do
   In this example, the phoenix.js client will send the token in the
   `connect` command which is then validated by the server.
 
-  `Phoenix.Token` can also be used for validating APIs, handling
+  `Combo.Token` can also be used for validating APIs, handling
   password resets, e-mail confirmation and more.
   """
 
@@ -171,13 +171,13 @@ defmodule Phoenix.Token do
 
   In this scenario we will create a token, sign it, then provide it to a client
   application. The client will then use this token to authenticate requests for
-  resources from the server. See `Phoenix.Token` summary for more info about
+  resources from the server. See `Combo.Token` summary for more info about
   creating tokens.
 
       iex> user_id    = 99
       iex> secret     = "kjoy3o1zeidquwy1398juxzldjlksahdk3"
       iex> namespace  = "user auth"
-      iex> token      = Phoenix.Token.sign(secret, namespace, user_id)
+      iex> token      = Combo.Token.sign(secret, namespace, user_id)
 
   The mechanism for passing the token to the client is typically through a
   cookie, a JSON response body, or HTTP header. For now, assume the client has
@@ -186,7 +186,7 @@ defmodule Phoenix.Token do
   When the server receives a request, it can use `verify/4` to determine if it
   should provide the requested resources to the client:
 
-      iex> Phoenix.Token.verify(secret, namespace, token, max_age: 86400)
+      iex> Combo.Token.verify(secret, namespace, token, max_age: 86400)
       {:ok, 99}
 
   In this example, we know the client sent a valid token because `verify/4`
@@ -196,13 +196,13 @@ defmodule Phoenix.Token do
   However, if the client had sent an expired token, an invalid token, or `nil`,
   `verify/4` would have returned an error instead:
 
-      iex> Phoenix.Token.verify(secret, namespace, expired, max_age: 86400)
+      iex> Combo.Token.verify(secret, namespace, expired, max_age: 86400)
       {:error, :expired}
 
-      iex> Phoenix.Token.verify(secret, namespace, invalid, max_age: 86400)
+      iex> Combo.Token.verify(secret, namespace, invalid, max_age: 86400)
       {:error, :invalid}
 
-      iex> Phoenix.Token.verify(secret, namespace, nil, max_age: 86400)
+      iex> Combo.Token.verify(secret, namespace, nil, max_age: 86400)
       {:error, :missing}
 
   ## Options

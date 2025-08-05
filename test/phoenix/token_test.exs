@@ -1,6 +1,6 @@
-defmodule Phoenix.TokenTest do
+defmodule Combo.TokenTest do
   use ExUnit.Case, async: true
-  alias Phoenix.Token
+  alias Combo.Token
 
   setup do
     Logger.disable(self())

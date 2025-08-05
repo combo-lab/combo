@@ -217,7 +217,7 @@ defmodule Phoenix.Socket do
   websocket
   configuration](https://hexdocs.pm/phoenix/Phoenix.Endpoint.html#socket/3-websocket-configuration).
 
-  See `Phoenix.Token` documentation for examples in
+  See `Combo.Token` documentation for examples in
   performing token verification on connect.
   """
   @callback connect(params :: map, Socket.t(), connect_info :: map) ::

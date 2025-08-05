@@ -384,7 +384,7 @@ That's all there is to our basic chat app. Fire up multiple browser tabs and you
 
 ## Using Token Authentication
 
-When we connect, we'll often need to authenticate the client. Fortunately, this is a 5-step process with [Phoenix.Token](https://hexdocs.pm/phoenix/Phoenix.Token.html).
+When we connect, we'll often need to authenticate the client. Fortunately, this is a 5-step process with [Combo.Token](https://hexdocs.pm/phoenix/Combo.Token.html).
 
 ### Step 1 - Enable the `auth_token` functionality in the socket
 
@@ -416,7 +416,7 @@ end
 
 defp put_user_token(conn, _) do
   if current_user = conn.assigns[:current_user] do
-    token = Phoenix.Token.sign(conn, "user socket", current_user.id)
+    token = Combo.Token.sign(conn, "user socket", current_user.id)
     assign(conn, :user_token, token)
   else
     conn
@@ -442,7 +442,7 @@ We also need to pass the `:auth_token` to the socket constructor and verify the 
 ```elixir
 def connect(_params_, socket, connect_info) do
   # max_age: 1209600 is equivalent to two weeks in seconds
-  case Phoenix.Token.verify(socket, "user socket", connect_info[:auth_token], max_age: 1209600) do
+  case Combo.Token.verify(socket, "user socket", connect_info[:auth_token], max_age: 1209600) do
     {:ok, user_id} ->
       {:ok, assign(socket, :current_user, user_id)}
     {:error, reason} ->
@@ -457,7 +457,7 @@ In our JavaScript, we can use the token set previously when constructing the Soc
 let socket = new Socket("/socket", {authToken: window.userToken})
 ```
 
-We used `Phoenix.Token.verify/4` to verify the user token provided by the client. `Phoenix.Token.verify/4` returns either `{:ok, user_id}` or `{:error, reason}`. We can pattern match on that return in a `case` statement. With a verified token, we set the user's id as the value to `:current_user` in the socket. Otherwise, we return `:error`.
+We used `Combo.Token.verify/4` to verify the user token provided by the client. `Combo.Token.verify/4` returns either `{:ok, user_id}` or `{:error, reason}`. We can pattern match on that return in a `case` statement. With a verified token, we set the user's id as the value to `:current_user` in the socket. Otherwise, we return `:error`.
 
 ### Step 5 - Connect to the socket in JavaScript
 

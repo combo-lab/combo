@@ -302,11 +302,11 @@ defmodule Phoenix.Integration.LongPollChannelsTest do
     session = join(path, topic, vsn, join_ref, :local, payload, params, headers)
 
     {:ok, {:v1, _id, pid, topic}} =
-      Phoenix.Token.verify(Endpoint, Atom.to_string(__MODULE__), session["token"])
+      Combo.Token.verify(Endpoint, Atom.to_string(__MODULE__), session["token"])
 
     %{
       "token" =>
-        Phoenix.Token.sign(Endpoint, Atom.to_string(__MODULE__), {:v1, "unknown", pid, topic})
+        Combo.Token.sign(Endpoint, Atom.to_string(__MODULE__), {:v1, "unknown", pid, topic})
     }
   end
 

@@ -1058,7 +1058,7 @@ defmodule Phoenix.Endpoint do
       pubsub layer to respond in milliseconds (ms). Defaults to `2000`.
 
     * `:crypto` - options for verifying and signing the token, accepted
-      by `Phoenix.Token`. By default tokens are valid for 2 weeks
+      by `Combo.Token`. By default tokens are valid for 2 weeks
 
   """
   defmacro socket(path, module, opts \\ []) do
