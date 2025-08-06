@@ -662,7 +662,7 @@ defmodule Combo.Router do
 
   defp build_pipes(name, pipe_through) do
     plugs = pipe_through |> Enum.reverse() |> Enum.map(&{&1, [], true})
-    opts = [init_mode: Phoenix.plug_init_mode(), log_on_halt: :debug]
+    opts = [init_mode: Combo.plug_init_mode(), log_on_halt: :debug]
     {conn, body} = Plug.Builder.compile(__ENV__, plugs, opts)
 
     quote do
@@ -722,7 +722,7 @@ defmodule Combo.Router do
       """
       ## Compatibility with `Plug.Head`
 
-      By default, Combo applications include `Plug.Head` in their endpoint,
+      By default, Combo apps include `Plug.Head` in their endpoint,
       which converts HEAD requests into regular GET requests. Therefore, if
       you intend to use `head/4` in your router, you need to move `Plug.Head`
       to inside your router in a way it does not conflict with the paths given
@@ -793,7 +793,7 @@ defmodule Combo.Router do
         Scope.pipeline(__MODULE__, plug)
 
         {conn, body} =
-          Plug.Builder.compile(__ENV__, @phoenix_pipeline, init_mode: Phoenix.plug_init_mode())
+          Plug.Builder.compile(__ENV__, @phoenix_pipeline, init_mode: Combo.plug_init_mode())
 
         def unquote(plug)(unquote(conn), _) do
           try do
@@ -838,7 +838,7 @@ defmodule Combo.Router do
   end
 
   defp expand_plug_and_opts(plug, opts, caller) do
-    runtime? = Phoenix.plug_init_mode() == :runtime
+    runtime? = Combo.plug_init_mode() == :runtime
 
     plug =
       if runtime? do
@@ -903,7 +903,7 @@ defmodule Combo.Router do
   """
   defmacro pipe_through(pipes) do
     pipes =
-      if Phoenix.plug_init_mode() == :runtime and Macro.quoted_literal?(pipes) do
+      if Combo.plug_init_mode() == :runtime and Macro.quoted_literal?(pipes) do
         Macro.prewalk(pipes, &expand_alias(&1, __CALLER__))
       else
         pipes

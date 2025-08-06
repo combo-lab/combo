@@ -142,7 +142,7 @@ The conversion from the data being sent by the form to an actual `Plug.Upload` i
 plug Plug.Parsers,
   parsers: [:urlencoded, :multipart, :json],
   pass: ["*/*"],
-  json_decoder: Phoenix.json_library()
+  json_decoder: Combo.json_library()
 ```
 
 Besides the options above, `Plug.Parsers` accepts other options to control data upload:

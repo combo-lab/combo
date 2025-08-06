@@ -290,6 +290,6 @@ defmodule Combo.Transports.LongPoll do
   defp send_json(conn, data) do
     conn
     |> put_resp_header("content-type", "application/json; charset=utf-8")
-    |> send_resp(200, Phoenix.json_library().encode_to_iodata!(data))
+    |> send_resp(200, Combo.json_library().encode_to_iodata!(data))
   end
 end

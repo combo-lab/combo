@@ -26,7 +26,7 @@ defmodule Combo.Socket.V2.JSONSerializer do
   end
 
   def fastlane!(%Broadcast{payload: %{}} = msg) do
-    data = Phoenix.json_library().encode_to_iodata!([nil, nil, msg.topic, msg.event, msg.payload])
+    data = Combo.json_library().encode_to_iodata!([nil, nil, msg.topic, msg.event, msg.payload])
     {:socket_push, :text, data}
   end
 
@@ -69,7 +69,7 @@ defmodule Combo.Socket.V2.JSONSerializer do
       %{status: reply.status, response: reply.payload}
     ]
 
-    {:socket_push, :text, Phoenix.json_library().encode_to_iodata!(data)}
+    {:socket_push, :text, Combo.json_library().encode_to_iodata!(data)}
   end
 
   def encode!(%Message{payload: {:binary, data}} = msg) do
@@ -94,7 +94,7 @@ defmodule Combo.Socket.V2.JSONSerializer do
 
   def encode!(%Message{payload: %{}} = msg) do
     data = [msg.join_ref, msg.ref, msg.topic, msg.event, msg.payload]
-    {:socket_push, :text, Phoenix.json_library().encode_to_iodata!(data)}
+    {:socket_push, :text, Combo.json_library().encode_to_iodata!(data)}
   end
 
   def encode!(%Message{payload: invalid}) do
@@ -110,7 +110,7 @@ defmodule Combo.Socket.V2.JSONSerializer do
   end
 
   defp decode_text(raw_message) do
-    [join_ref, ref, topic, event, payload | _] = Phoenix.json_library().decode!(raw_message)
+    [join_ref, ref, topic, event, payload | _] = Combo.json_library().decode!(raw_message)
 
     %Message{
       topic: topic,

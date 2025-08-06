@@ -357,7 +357,7 @@ defmodule Combo.Template do
   defp default_encoders do
     [
       html: Combo.Template.HTMLEncoder,
-      json: Phoenix.json_library(),
+      json: Combo.json_library(),
       js: Combo.Template.HTMLEncoder
     ]
   end

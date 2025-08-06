@@ -242,7 +242,7 @@ defmodule Mix.Tasks.Phx.Gen.Release do
       "https://hub.docker.com/v2/namespaces/hexpm/repositories/elixir/tags?name=#{elixir_vsn}-erlang-#{otp_vsn}-debian-#{@debian}-"
 
     fetch_body!(url)
-    |> Phoenix.json_library().decode!()
+    |> Combo.json_library().decode!()
     |> Map.fetch!("results")
     |> Enum.find_value(:error, fn %{"name" => name} ->
       if String.ends_with?(name, "-slim") do

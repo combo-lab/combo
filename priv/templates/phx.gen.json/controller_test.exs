@@ -33,7 +33,7 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
       conn = get(conn, ~p"<%= schema.api_route_prefix %><%= scope_param_route_prefix %><%= schema.route_prefix %>/#{<%= primary_key %>}")
 
       assert %{
-               "<%= primary_key %>" => ^<%= primary_key %><%= for {key, val} <- schema.params.create |> Phoenix.json_library().encode!() |> Phoenix.json_library().decode!() do %>,
+               "<%= primary_key %>" => ^<%= primary_key %><%= for {key, val} <- schema.params.create |> Combo.json_library().encode!() |> Combo.json_library().decode!() do %>,
                "<%= key %>" => <%= inspect(val) %><% end %>
              } = json_response(conn, 200)["data"]
     end
@@ -54,7 +54,7 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
       conn = get(conn, ~p"<%= schema.api_route_prefix %><%= scope_param_route_prefix %><%= schema.route_prefix %>/#{<%= primary_key %>}")
 
       assert %{
-               "<%= primary_key %>" => ^<%= primary_key %><%= for {key, val} <- schema.params.update |> Phoenix.json_library().encode!() |> Phoenix.json_library().decode!() do %>,
+               "<%= primary_key %>" => ^<%= primary_key %><%= for {key, val} <- schema.params.update |> Combo.json_library().encode!() |> Combo.json_library().decode!() do %>,
                "<%= key %>" => <%= inspect(val) %><% end %>
              } = json_response(conn, 200)["data"]
     end

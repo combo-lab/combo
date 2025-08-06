@@ -363,7 +363,7 @@ defmodule Combo.Controller do
   """
   @spec json(Plug.Conn.t(), term) :: Plug.Conn.t()
   def json(conn, data) do
-    response = Phoenix.json_library().encode_to_iodata!(data)
+    response = Combo.json_library().encode_to_iodata!(data)
     send_resp(conn, conn.status || 200, "application/json", response)
   end
 

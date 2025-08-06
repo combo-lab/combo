@@ -1,4 +1,4 @@
-defmodule Phoenix do
+defmodule Combo do
   @moduledoc """
   This is the documentation for the Phoenix project.
 
@@ -14,7 +14,7 @@ defmodule Phoenix do
     _ = Combo.Template.engines()
     _ = Combo.Template.format_encoders()
 
-    # Configure proper system flags from Phoenix only
+    # Configure proper system flags
     if stacktrace_depth = Application.get_env(:phoenix, :stacktrace_depth) do
       :erlang.system_flag(:backtrace_depth, stacktrace_depth)
     end
@@ -28,20 +28,20 @@ defmodule Phoenix do
     end
 
     children = [
-      # Code reloading must be serial across all Phoenix apps
+      # Code reloading must be serial across all Combo apps
       Combo.CodeReloader.Server,
       {DynamicSupervisor, name: Combo.Transports.LongPoll.Supervisor, strategy: :one_for_one}
     ]
 
-    Supervisor.start_link(children, strategy: :one_for_one, name: Phoenix.Supervisor)
+    Supervisor.start_link(children, strategy: :one_for_one, name: Combo.Supervisor)
   end
 
   @doc """
-  Returns the configured JSON encoding library for Phoenix.
+  Returns the configured JSON encoding library.
 
-  To customize the JSON library, including the following
-  in your `config/config.exs`:
-
+  To customize the JSON library, including the following in your
+  `config/config.exs`:
+  
       config :phoenix, :json_library, AlternativeJsonLibrary
 
   """
@@ -50,12 +50,10 @@ defmodule Phoenix do
   end
 
   @doc """
-  Returns the `:plug_init_mode` that controls when plugs are
-  initialized.
+  Returns the `:plug_init_mode` that controls when plugs are initialized.
 
-  We recommend to set it to `:runtime` in development for
-  compilation time improvements. It must be `:compile` in
-  production (the default).
+  It's recommended to set it to `:runtime` in development for compilation time
+  improvements. It must be `:compile` in production (the default).
 
   This option is passed as the `:init_mode` to `Plug.Builder.compile/3`.
   """
@@ -69,7 +67,7 @@ defmodule Phoenix do
     if configured_lib && not Code.ensure_loaded?(configured_lib) do
       IO.warn("""
       found #{inspect(configured_lib)} in your application configuration
-      for Phoenix JSON encoding, but module #{inspect(configured_lib)} is not available.
+      for Combo JSON encoding, but module #{inspect(configured_lib)} is not available.
       Ensure #{inspect(configured_lib)} is listed as a dependency in mix.exs.
       """)
     end

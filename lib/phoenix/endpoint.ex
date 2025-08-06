@@ -467,7 +467,7 @@ defmodule Combo.Endpoint do
 
   defp plug() do
     quote location: :keep do
-      use Plug.Builder, init_mode: Phoenix.plug_init_mode()
+      use Plug.Builder, init_mode: Combo.plug_init_mode()
       import Combo.Endpoint
 
       Module.register_attribute(__MODULE__, :phoenix_sockets, accumulate: true)

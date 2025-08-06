@@ -79,7 +79,7 @@ defmodule Combo.Controller.Pipeline do
     {conn, body} =
       Plug.Builder.compile(env, plugs,
         log_on_halt: :debug,
-        init_mode: Phoenix.plug_init_mode()
+        init_mode: Combo.plug_init_mode()
       )
 
     fallback_ast =
@@ -176,7 +176,7 @@ defmodule Combo.Controller.Pipeline do
   defmacro plug(plug, opts), do: plug(plug, opts, true, __CALLER__)
 
   defp plug(plug, opts, guards, caller) do
-    runtime? = Phoenix.plug_init_mode() == :runtime
+    runtime? = Combo.plug_init_mode() == :runtime
 
     plug =
       if runtime? do

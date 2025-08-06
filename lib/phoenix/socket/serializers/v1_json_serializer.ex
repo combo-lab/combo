@@ -28,7 +28,7 @@ defmodule Combo.Socket.V1.JSONSerializer do
 
   @impl true
   def decode!(message, _opts) do
-    payload = Phoenix.json_library().decode!(message)
+    payload = Combo.json_library().decode!(message)
 
     case payload do
       %{} ->
@@ -42,6 +42,6 @@ defmodule Combo.Socket.V1.JSONSerializer do
   defp encode_v1_fields_only(%Message{} = msg) do
     msg
     |> Map.take([:topic, :event, :payload, :ref])
-    |> Phoenix.json_library().encode_to_iodata!()
+    |> Combo.json_library().encode_to_iodata!()
   end
 end
