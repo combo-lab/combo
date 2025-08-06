@@ -230,11 +230,11 @@ defmodule Phoenix.MixProject do
         Combo.Template.CEExEngine.Assigns,
         Combo.Template.CEExEngine.DeclarativeAssigns,
         Combo.Template.CEExEngine.Slot,
-        Combo.Template.CEExEngine.Formatter,
         Combo.Template.HTMLEncoder
       ],
       HTML: [
         Combo.HTML,
+        Combo.HTML.Formatter,
         Combo.HTML.Form,
         Combo.HTML.FormData,
         Combo.HTML.FormField

@@ -1,9 +1,7 @@
-defmodule Combo.Template.CEExEngine.FormatterTest do
+defmodule Combo.HTML.FormatterTest do
   use ExUnit.Case, async: true
 
-  use ExUnit.Case, async: true
-
-  alias Combo.Template.CEExEngine.Formatter
+  alias Combo.HTML.Formatter
   alias Combo.Template.CEExEngine.Tokenizer.ParseError
 
   defp assert_formatter_output(input, expected, dot_formatter_opts \\ []) do

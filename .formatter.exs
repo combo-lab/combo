@@ -72,10 +72,11 @@ locals_without_parens = [
   attr: 3,
   slot: 1,
   slot: 2,
-  slot: 3,
+  slot: 3
 ]
 
 [
   locals_without_parens: locals_without_parens,
-  export: [locals_without_parens: locals_without_parens]
+  export: [locals_without_parens: locals_without_parens],
+  plugins: [Combo.HTML.Formatter]
 ]
