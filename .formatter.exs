@@ -1,6 +1,9 @@
 locals_without_parens = [
-  # Combo.Channel
-  intercept: 1,
+  # Combo.Endpoint
+  plug: 1,
+  plug: 2,
+  socket: 2,
+  socket: 3,
 
   # Combo.Router
   connect: 3,
@@ -34,15 +37,26 @@ locals_without_parens = [
   # Combo.Controller
   action_fallback: 1,
 
-  # Combo.Endpoint
-  plug: 1,
-  plug: 2,
-  socket: 2,
-  socket: 3,
+  # Combo.Template
+  embed_templates: 1,
+  embed_templates: 2,
+
+  # Combo.HTML
+  attr: 2,
+  attr: 3,
+  slot: 1,
+  slot: 2,
+  slot: 3,
 
   # Combo.Socket
   channel: 2,
   channel: 3,
+
+  # Combo.Channel
+  intercept: 1,
+
+  # Combo.ConnTest
+  assert_error_sent: 2,
 
   # Combo.ChannelTest
   assert_broadcast: 2,
@@ -58,21 +72,7 @@ locals_without_parens = [
   refute_push: 3,
   refute_reply: 2,
   refute_reply: 3,
-  refute_reply: 4,
-
-  # Combo.ConnTest
-  assert_error_sent: 2,
-
-  # Combo.Template
-  embed_templates: 1,
-  embed_templates: 2,
-
-  # Combo.Template.CEExEngine.DeclarativeAssigns
-  attr: 2,
-  attr: 3,
-  slot: 1,
-  slot: 2,
-  slot: 3
+  refute_reply: 4
 ]
 
 [
