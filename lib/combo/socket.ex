@@ -406,12 +406,6 @@ defmodule Combo.Socket do
 
   defp expand_alias(other, _env), do: other
 
-  @doc false
-  @deprecated "transport/3 in Combo.Socket is deprecated and has no effect"
-  defmacro transport(_name, _module, _config \\ []) do
-    :ok
-  end
-
   defmacro __before_compile__(env) do
     channels =
       env.module
