@@ -25,7 +25,6 @@ defmodule Combo.Router.RouteTest do
         %{foo: "bar"},
         %{bar: "baz"},
         %{log: :debug},
-        true,
         true
       )
 
@@ -41,7 +40,6 @@ defmodule Combo.Router.RouteTest do
     assert route.private == %{foo: "bar"}
     assert route.assigns == %{bar: "baz"}
     assert route.metadata == %{log: :debug}
-    assert route.trailing_slash? == true
   end
 
   test "builds expressions based on the route" do
@@ -59,7 +57,6 @@ defmodule Combo.Router.RouteTest do
         %{},
         %{},
         %{},
-        false,
         true
       )
       |> exprs()
@@ -83,7 +80,6 @@ defmodule Combo.Router.RouteTest do
         %{foo: "bar"},
         %{bar: "baz"},
         %{},
-        false,
         true
       )
       |> exprs()
@@ -104,7 +100,6 @@ defmodule Combo.Router.RouteTest do
         %{foo: "bar"},
         %{bar: "baz"},
         %{},
-        false,
         true
       )
       |> exprs()
@@ -125,7 +120,6 @@ defmodule Combo.Router.RouteTest do
         %{foo: "bar"},
         %{bar: "baz"},
         %{},
-        false,
         true
       )
       |> exprs()
@@ -148,7 +142,6 @@ defmodule Combo.Router.RouteTest do
         %{foo: "bar"},
         %{bar: "baz"},
         %{},
-        false,
         true
       )
 
@@ -172,7 +165,6 @@ defmodule Combo.Router.RouteTest do
         %{foo: "bar"},
         %{bar: "baz"},
         %{forward: ~w(foo)},
-        false,
         true
       )
 
