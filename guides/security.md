@@ -345,6 +345,7 @@ User input determines the `content-type` of the file. There is no validation o
 
 ```html
 <html><script>alert(1)</script></html>
+```
 
 This will result in JavaScript being executed in the browser of the victim who views the image. Restricting the `put_resp_content_type` argument to only image files would fix this vulnerability. 
 
@@ -412,6 +413,7 @@ The way most web frameworks, including Phoenix, mitigate this vulnerability is b
 <!-- A typical CSRF token seen in a Phoenix form -->
 <input name="_csrf_token" type="hidden" hidden="" 
   value="WUZXJh07BhAIJ24jP1d-KQEpLwYmMDwQ0-2eYNLH_x8oHoO_qv_HJDqZ">
+```
 
 This changes the previous HTTP request to:
 
