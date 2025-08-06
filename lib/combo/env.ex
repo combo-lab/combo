@@ -25,7 +25,7 @@ defmodule Combo.Env do
     put(namespace, new_opts)
   end
 
-  @app :phoenix
+  @app :combo
   defp get_all(key), do: Application.get_env(@app, key, [])
   defp get(key, default), do: Application.get_env(@app, key, default)
   defp put(key, value), do: Application.put_env(@app, key, value)

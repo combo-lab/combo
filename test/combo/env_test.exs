@@ -3,7 +3,7 @@ defmodule Combo.EnvTest do
 
   alias Combo.Env
 
-  @app :phoenix
+  @app :combo
 
   test "get_all_env/1" do
     ns = :ga1

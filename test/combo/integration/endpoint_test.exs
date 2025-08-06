@@ -201,6 +201,6 @@ defmodule Phoenix.Integration.EndpointTest do
   end
 
   defp serve_endpoints(bool) do
-    Application.put_env(:phoenix, :serve_endpoints, bool)
+    Application.put_env(:combo, :serve_endpoints, bool)
   end
 end

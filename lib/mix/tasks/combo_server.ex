@@ -33,7 +33,7 @@ defmodule Mix.Tasks.Combo.Server do
 
   @impl true
   def run(args) do
-    Application.put_env(:phoenix, :serve_endpoints, true, persistent: true)
+    Application.put_env(:combo, :serve_endpoints, true, persistent: true)
     Mix.Tasks.Run.run(run_args() ++ open_args(args))
   end
 
@@ -43,7 +43,7 @@ defmodule Mix.Tasks.Combo.Server do
 
   defp open_args(args) do
     if "--open" in args do
-      Application.put_env(:phoenix, :browser_open, true)
+      Application.put_env(:combo, :browser_open, true)
       args -- ["--open"]
     else
       args

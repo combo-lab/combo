@@ -19,33 +19,33 @@ defmodule Combo.Endpoint.EndpointTest do
     pubsub_server: :endpoint_pub
   ]
 
-  Application.put_env(:phoenix, __MODULE__.Endpoint, @config)
+  Application.put_env(:combo, __MODULE__.Endpoint, @config)
 
   defmodule Endpoint do
-    use Combo.Endpoint, otp_app: :phoenix
+    use Combo.Endpoint, otp_app: :combo
 
     # Assert endpoint variables
-    assert @otp_app == :phoenix
+    assert @otp_app == :combo
     assert code_reloading? == false
     assert debug_errors? == false
   end
 
   defmodule NoConfigEndpoint do
-    use Combo.Endpoint, otp_app: :phoenix
+    use Combo.Endpoint, otp_app: :combo
   end
 
   defmodule SystemTupleEndpoint do
-    use Combo.Endpoint, otp_app: :phoenix
+    use Combo.Endpoint, otp_app: :combo
   end
 
   defmodule TelemetryEventEndpoint do
-    use Combo.Endpoint, otp_app: :phoenix
+    use Combo.Endpoint, otp_app: :combo
   end
 
   setup_all do
     ExUnit.CaptureLog.capture_log(fn -> start_supervised!(Endpoint) end)
     start_supervised!({Phoenix.PubSub, name: :endpoint_pub})
-    on_exit(fn -> Application.delete_env(:phoenix, :serve_endpoints) end)
+    on_exit(fn -> Application.delete_env(:combo, :serve_endpoints) end)
     :ok
   end
 
@@ -96,22 +96,22 @@ defmodule Combo.Endpoint.EndpointTest do
     # Set up the test telemetry event
     :telemetry.attach(
       [:test, :endpoint, :init, :handler],
-      [:phoenix, :endpoint, :init],
+      [:combo, :endpoint, :init],
       &__MODULE__.validate_init_event/4,
       nil
     )
 
-    Application.put_env(:phoenix, __MODULE__.TelemetryEventEndpoint, server: false)
+    Application.put_env(:combo, __MODULE__.TelemetryEventEndpoint, server: false)
     start_supervised!(TelemetryEventEndpoint)
   after
     :telemetry.detach([:test, :endpoint, :init, :handler])
   end
 
   def validate_init_event(event, measurements, metadata, _config) do
-    assert event == [:phoenix, :endpoint, :init]
+    assert event == [:combo, :endpoint, :init]
     assert Process.whereis(TelemetryEventEndpoint) == metadata.pid
     assert metadata.module == TelemetryEventEndpoint
-    assert metadata.otp_app == :phoenix
+    assert metadata.otp_app == :combo
     assert metadata.config == [server: false]
     assert Map.has_key?(measurements, :system_time)
   end
@@ -182,10 +182,10 @@ defmodule Combo.Endpoint.EndpointTest do
 
   @tag :capture_log
   test "uses url configuration for static path" do
-    Application.put_env(:phoenix, __MODULE__.UrlEndpoint, url: [path: "/api"])
+    Application.put_env(:combo, __MODULE__.UrlEndpoint, url: [path: "/api"])
 
     defmodule UrlEndpoint do
-      use Combo.Endpoint, otp_app: :phoenix
+      use Combo.Endpoint, otp_app: :combo
     end
 
     UrlEndpoint.start_link()
@@ -198,10 +198,10 @@ defmodule Combo.Endpoint.EndpointTest do
 
   @tag :capture_log
   test "uses static_url configuration for static path" do
-    Application.put_env(:phoenix, __MODULE__.StaticEndpoint, static_url: [path: "/static"])
+    Application.put_env(:combo, __MODULE__.StaticEndpoint, static_url: [path: "/static"])
 
     defmodule StaticEndpoint do
-      use Combo.Endpoint, otp_app: :phoenix
+      use Combo.Endpoint, otp_app: :combo
     end
 
     StaticEndpoint.start_link()
@@ -214,13 +214,13 @@ defmodule Combo.Endpoint.EndpointTest do
 
   @tag :capture_log
   test "can find the running address and port for an endpoint" do
-    Application.put_env(:phoenix, __MODULE__.AddressEndpoint,
+    Application.put_env(:combo, __MODULE__.AddressEndpoint,
       http: [ip: {127, 0, 0, 1}, port: 0],
       server: true
     )
 
     defmodule AddressEndpoint do
-      use Combo.Endpoint, otp_app: :phoenix
+      use Combo.Endpoint, otp_app: :combo
     end
 
     AddressEndpoint.start_link()
@@ -288,7 +288,7 @@ defmodule Combo.Endpoint.EndpointTest do
     config =
       put_in(
         @config[:cache_static_manifest],
-        {:phoenix, "../../../../test/fixtures/digest/compile/cache_manifest.json"}
+        {:combo, "../../../../test/fixtures/digest/compile/cache_manifest.json"}
       )
 
     assert Endpoint.config_change([{Endpoint, config}], []) == :ok
@@ -297,29 +297,29 @@ defmodule Combo.Endpoint.EndpointTest do
 
   test "server?/2 returns true for explicitly true server", config do
     endpoint = Module.concat(__MODULE__, config.test)
-    Application.put_env(:phoenix, endpoint, server: true)
-    assert Combo.Endpoint.server?(:phoenix, endpoint)
+    Application.put_env(:combo, endpoint, server: true)
+    assert Combo.Endpoint.server?(:combo, endpoint)
   end
 
   test "server?/2 returns false for explicitly false server", config do
-    Application.put_env(:phoenix, :serve_endpoints, true)
+    Application.put_env(:combo, :serve_endpoints, true)
     endpoint = Module.concat(__MODULE__, config.test)
-    Application.put_env(:phoenix, endpoint, server: false)
-    refute Combo.Endpoint.server?(:phoenix, endpoint)
+    Application.put_env(:combo, endpoint, server: false)
+    refute Combo.Endpoint.server?(:combo, endpoint)
   end
 
   test "server?/2 returns true for global serve_endpoints as true", config do
-    Application.put_env(:phoenix, :serve_endpoints, true)
+    Application.put_env(:combo, :serve_endpoints, true)
     endpoint = Module.concat(__MODULE__, config.test)
-    Application.put_env(:phoenix, endpoint, [])
-    assert Combo.Endpoint.server?(:phoenix, endpoint)
+    Application.put_env(:combo, endpoint, [])
+    assert Combo.Endpoint.server?(:combo, endpoint)
   end
 
   test "server?/2 returns false for no global serve_endpoints config", config do
-    Application.delete_env(:phoenix, :serve_endpoints)
+    Application.delete_env(:combo, :serve_endpoints)
     endpoint = Module.concat(__MODULE__, config.test)
-    Application.put_env(:phoenix, endpoint, [])
-    refute Combo.Endpoint.server?(:phoenix, endpoint)
+    Application.put_env(:combo, endpoint, [])
+    refute Combo.Endpoint.server?(:combo, endpoint)
   end
 
   test "static_path/1 validates paths are local/safe" do
@@ -351,7 +351,7 @@ defmodule Combo.Endpoint.EndpointTest do
   test "validates websocket and longpoll socket options" do
     assert_raise ArgumentError, ~r/unknown keys \[:invalid\]/, fn ->
       defmodule MyInvalidSocketEndpoint1 do
-        use Combo.Endpoint, otp_app: :phoenix
+        use Combo.Endpoint, otp_app: :combo
 
         socket "/ws", UserSocket, websocket: [path: "/ws", check_origin: false, invalid: true]
       end
@@ -359,7 +359,7 @@ defmodule Combo.Endpoint.EndpointTest do
 
     assert_raise ArgumentError, ~r/unknown keys \[:drainer\]/, fn ->
       defmodule MyInvalidSocketEndpoint2 do
-        use Combo.Endpoint, otp_app: :phoenix
+        use Combo.Endpoint, otp_app: :combo
 
         socket "/ws", UserSocket, longpoll: [path: "/ws", check_origin: false, drainer: []]
       end

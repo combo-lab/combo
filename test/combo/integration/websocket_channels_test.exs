@@ -13,7 +13,7 @@ defmodule Phoenix.Integration.WebSocketChannelsTest do
   @moduletag :capture_log
   @port 5807
 
-  Application.put_env(:phoenix, Endpoint,
+  Application.put_env(:combo, Endpoint,
     https: false,
     http: [port: @port],
     debug_errors: false,
@@ -163,7 +163,7 @@ defmodule Phoenix.Integration.WebSocketChannelsTest do
   end
 
   defmodule Endpoint do
-    use Combo.Endpoint, otp_app: :phoenix
+    use Combo.Endpoint, otp_app: :combo
 
     @session_config store: :cookie,
                     key: "_hello_key",
@@ -211,8 +211,8 @@ defmodule Phoenix.Integration.WebSocketChannelsTest do
   end
 
   setup %{adapter: adapter} do
-    config = Application.get_env(:phoenix, Endpoint)
-    Application.put_env(:phoenix, Endpoint, Keyword.merge(config, adapter: adapter))
+    config = Application.get_env(:combo, Endpoint)
+    Application.put_env(:combo, Endpoint, Keyword.merge(config, adapter: adapter))
     capture_log(fn -> start_supervised!(Endpoint) end)
     start_supervised!({Phoenix.PubSub, name: __MODULE__})
     :ok

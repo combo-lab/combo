@@ -20,7 +20,7 @@ defmodule Combo.Router.ConsoleFormatterTest do
   def __sockets__, do: []
 
   defmodule FormatterEndpoint do
-    use Combo.Endpoint, otp_app: :phoenix
+    use Combo.Endpoint, otp_app: :combo
 
     socket "/socket", TestSocket, websocket: true
   end

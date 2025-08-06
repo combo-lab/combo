@@ -3,11 +3,11 @@ defmodule Combo.PresenceTest do
   alias Combo.Socket.Broadcast
 
   defmodule DefaultPresence do
-    use Combo.Presence, otp_app: :phoenix
+    use Combo.Presence, otp_app: :combo
   end
 
   defmodule MyPresence do
-    use Combo.Presence, otp_app: :phoenix
+    use Combo.Presence, otp_app: :combo
 
     def fetch(_topic, entries) do
       for {key, %{metas: metas}} <- entries, into: %{} do
@@ -17,7 +17,7 @@ defmodule Combo.PresenceTest do
   end
 
   defmodule MetasPresence do
-    use Combo.Presence, otp_app: :phoenix
+    use Combo.Presence, otp_app: :combo
 
     def init(state), do: {:ok, state}
 
@@ -28,7 +28,7 @@ defmodule Combo.PresenceTest do
   end
 
   defmodule MetasMissingInitPresence do
-    use Combo.Presence, otp_app: :phoenix
+    use Combo.Presence, otp_app: :combo
 
     def init_presence do
       Combo.Presence.init({
@@ -43,8 +43,8 @@ defmodule Combo.PresenceTest do
     end
   end
 
-  Application.put_env(:phoenix, MyPresence, pubsub_server: PresPub)
-  Application.put_env(:phoenix, MetasPresence, pubsub_server: PresPub)
+  Application.put_env(:combo, MyPresence, pubsub_server: PresPub)
+  Application.put_env(:combo, MetasPresence, pubsub_server: PresPub)
 
   setup_all do
     start_supervised!({Phoenix.PubSub, name: PresPub, pool_size: 1})
@@ -65,7 +65,7 @@ defmodule Combo.PresenceTest do
                 [
                   Combo.PresenceTest.DefaultPresence,
                   Combo.PresenceTest.DefaultPresence.TaskSupervisor,
-                  [otp_app: :phoenix]
+                  [otp_app: :combo]
                 ]},
              type: :supervisor
            }

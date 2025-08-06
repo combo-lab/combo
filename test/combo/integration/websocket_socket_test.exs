@@ -15,7 +15,7 @@ defmodule Phoenix.Integration.WebSocketTest do
   @path "ws://127.0.0.1:#{@port}/ws/websocket"
 
   Application.put_env(
-    :phoenix,
+    :combo,
     Endpoint,
     https: false,
     http: [port: @port],
@@ -87,7 +87,7 @@ defmodule Phoenix.Integration.WebSocketTest do
   end
 
   defmodule Endpoint do
-    use Combo.Endpoint, otp_app: :phoenix
+    use Combo.Endpoint, otp_app: :combo
 
     socket "/ws", UserSocket,
       websocket: [check_origin: ["//example.com"], subprotocols: ["sip"], timeout: 200],
@@ -105,8 +105,8 @@ defmodule Phoenix.Integration.WebSocketTest do
   end
 
   setup %{adapter: adapter} do
-    config = Application.get_env(:phoenix, Endpoint)
-    Application.put_env(:phoenix, Endpoint, Keyword.merge(config, adapter: adapter))
+    config = Application.get_env(:combo, Endpoint)
+    Application.put_env(:combo, Endpoint, Keyword.merge(config, adapter: adapter))
     capture_log(fn -> start_supervised!(Endpoint) end)
     :ok
   end

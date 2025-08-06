@@ -7,7 +7,7 @@ defmodule Combo.MixProject do
 
   def project do
     [
-      app: :phoenix,
+      app: :combo,
       version: @version,
       elixir: @elixir_requirement,
       deps: deps(),

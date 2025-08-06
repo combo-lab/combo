@@ -14,7 +14,7 @@ defmodule Phoenix.Integration.LongPollSocketTest do
   @pool_size 1
 
   Application.put_env(
-    :phoenix,
+    :combo,
     Endpoint,
     https: false,
     http: [port: @port],
@@ -63,7 +63,7 @@ defmodule Phoenix.Integration.LongPollSocketTest do
   end
 
   defmodule Endpoint do
-    use Combo.Endpoint, otp_app: :phoenix
+    use Combo.Endpoint, otp_app: :combo
 
     socket "/ws", UserSocket,
       longpoll: [window_ms: 200, pubsub_timeout_ms: 200, check_origin: ["//example.com"]],
@@ -75,8 +75,8 @@ defmodule Phoenix.Integration.LongPollSocketTest do
   end
 
   setup %{adapter: adapter} do
-    config = Application.get_env(:phoenix, Endpoint)
-    Application.put_env(:phoenix, Endpoint, Keyword.merge(config, adapter: adapter))
+    config = Application.get_env(:combo, Endpoint)
+    Application.put_env(:combo, Endpoint, Keyword.merge(config, adapter: adapter))
     capture_log(fn -> start_supervised!(Endpoint) end)
     start_supervised!({Phoenix.PubSub, name: __MODULE__, pool_size: @pool_size})
     :ok

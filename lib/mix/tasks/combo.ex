@@ -30,8 +30,8 @@ defmodule Mix.Tasks.Combo do
   end
 
   defp general() do
-    Application.ensure_all_started(:phoenix)
-    Mix.shell().info "Combo v#{Application.spec(:phoenix, :vsn)}"
+    Application.ensure_all_started(:combo)
+    Mix.shell().info "Combo v#{Application.spec(:combo, :vsn)}"
     Mix.shell().info "Peace of mind from prototype to production"
     Mix.shell().info "\n"
     Mix.shell().info "## Options\n"

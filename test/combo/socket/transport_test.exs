@@ -8,14 +8,14 @@ defmodule Combo.Socket.TransportTest do
 
   @secret_key_base String.duplicate("abcdefgh", 8)
 
-  Application.put_env :phoenix, __MODULE__.Endpoint,
+  Application.put_env :combo, __MODULE__.Endpoint,
     force_ssl: [],
     url: [host: "host.com"],
     check_origin: ["//endpoint.com"],
     secret_key_base: @secret_key_base
 
   defmodule Endpoint do
-    use Combo.Endpoint, otp_app: :phoenix
+    use Combo.Endpoint, otp_app: :combo
 
     @session_config [
       store: :cookie,

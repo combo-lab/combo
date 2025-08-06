@@ -3,7 +3,7 @@ defmodule Combo.Endpoint.SupervisorTest do
   alias Combo.Endpoint.Supervisor
 
   defmodule HTTPSEndpoint do
-    def config(:otp_app), do: :phoenix
+    def config(:otp_app), do: :combo
     def config(:https), do: [port: 443]
     def config(:http), do: false
     def config(:url), do: [host: "example.com"]
@@ -11,7 +11,7 @@ defmodule Combo.Endpoint.SupervisorTest do
   end
 
   defmodule HTTPEndpoint do
-    def config(:otp_app), do: :phoenix
+    def config(:otp_app), do: :combo
     def config(:https), do: false
     def config(:http), do: [port: 80]
     def config(:url), do: [host: "example.com"]
@@ -19,7 +19,7 @@ defmodule Combo.Endpoint.SupervisorTest do
   end
 
   defmodule HTTPEnvVarEndpoint do
-    def config(:otp_app), do: :phoenix
+    def config(:otp_app), do: :combo
     def config(:https), do: false
     def config(:http), do: [port: System.get_env("COMBO_PORT")]
     def config(:url), do: [host: System.get_env("COMBO_HOST")]
@@ -46,7 +46,7 @@ defmodule Combo.Endpoint.SupervisorTest do
   end
 
   setup_all do
-    Application.put_env(:phoenix, SupervisorApp.Endpoint, custom: true)
+    Application.put_env(:combo, SupervisorApp.Endpoint, custom: true)
     System.put_env("COMBO_PORT", "8080")
     System.put_env("COMBO_HOST", "example.org")
 
@@ -86,37 +86,37 @@ defmodule Combo.Endpoint.SupervisorTest do
   test "logs info if :http or :https configuration is set but not :server when running in release" do
     # simulate running inside release
     System.put_env("RELEASE_NAME", "phoenix-test")
-    Application.put_env(:phoenix, ServerEndpoint, server: false, http: [], https: [])
+    Application.put_env(:combo, ServerEndpoint, server: false, http: [], https: [])
 
     assert capture_log(fn ->
-             {:ok, {_, _children}} = Supervisor.init({:phoenix, ServerEndpoint, []})
+             {:ok, {_, _children}} = Supervisor.init({:combo, ServerEndpoint, []})
            end) =~ "Configuration :server"
 
-    Application.put_env(:phoenix, ServerEndpoint, server: false, http: [])
+    Application.put_env(:combo, ServerEndpoint, server: false, http: [])
 
     assert capture_log(fn ->
-             {:ok, {_, _children}} = Supervisor.init({:phoenix, ServerEndpoint, []})
+             {:ok, {_, _children}} = Supervisor.init({:combo, ServerEndpoint, []})
            end) =~ "Configuration :server"
 
-    Application.put_env(:phoenix, ServerEndpoint, server: false, https: [])
+    Application.put_env(:combo, ServerEndpoint, server: false, https: [])
 
     assert capture_log(fn ->
-             {:ok, {_, _children}} = Supervisor.init({:phoenix, ServerEndpoint, []})
+             {:ok, {_, _children}} = Supervisor.init({:combo, ServerEndpoint, []})
            end) =~ "Configuration :server"
 
-    Application.put_env(:phoenix, ServerEndpoint, server: false)
+    Application.put_env(:combo, ServerEndpoint, server: false)
 
     refute capture_log(fn ->
-             {:ok, {_, _children}} = Supervisor.init({:phoenix, ServerEndpoint, []})
+             {:ok, {_, _children}} = Supervisor.init({:combo, ServerEndpoint, []})
            end) =~ "Configuration :server"
 
-    Application.put_env(:phoenix, ServerEndpoint, server: true)
+    Application.put_env(:combo, ServerEndpoint, server: true)
 
     refute capture_log(fn ->
-             {:ok, {_, _children}} = Supervisor.init({:phoenix, ServerEndpoint, []})
+             {:ok, {_, _children}} = Supervisor.init({:combo, ServerEndpoint, []})
            end) =~ "Configuration :server"
 
-    Application.delete_env(:phoenix, ServerEndpoint)
+    Application.delete_env(:combo, ServerEndpoint)
   end
 
   describe "watchers" do
@@ -127,8 +127,8 @@ defmodule Combo.Endpoint.SupervisorTest do
     @watchers [esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]}]
 
     test "init/1 starts watcher children when `:server` config is true" do
-      Application.put_env(:phoenix, WatchersEndpoint, server: true, watchers: @watchers)
-      {:ok, {_, children}} = Supervisor.init({:phoenix, WatchersEndpoint, []})
+      Application.put_env(:combo, WatchersEndpoint, server: true, watchers: @watchers)
+      {:ok, {_, children}} = Supervisor.init({:combo, WatchersEndpoint, []})
 
       assert Enum.any?(children, fn
                %{start: {Combo.Endpoint.Watcher, :start_link, _config}} -> true
@@ -137,8 +137,8 @@ defmodule Combo.Endpoint.SupervisorTest do
     end
 
     test "init/1 doesn't start watchers when `:server` config is true and `:watchers` is false" do
-      Application.put_env(:phoenix, WatchersEndpoint, server: true, watchers: false)
-      {:ok, {_, children}} = Supervisor.init({:phoenix, WatchersEndpoint, []})
+      Application.put_env(:combo, WatchersEndpoint, server: true, watchers: false)
+      {:ok, {_, children}} = Supervisor.init({:combo, WatchersEndpoint, []})
 
       refute Enum.any?(children, fn
                %{start: {Combo.Endpoint.Watcher, :start_link, _config}} -> true
@@ -147,8 +147,8 @@ defmodule Combo.Endpoint.SupervisorTest do
     end
 
     test "init/1 doesn't start watchers when `:server` config is false" do
-      Application.put_env(:phoenix, WatchersEndpoint, server: false, watchers: @watchers)
-      {:ok, {_, children}} = Supervisor.init({:phoenix, WatchersEndpoint, []})
+      Application.put_env(:combo, WatchersEndpoint, server: false, watchers: @watchers)
+      {:ok, {_, children}} = Supervisor.init({:combo, WatchersEndpoint, []})
 
       refute Enum.any?(children, fn
                %{start: {Combo.Endpoint.Watcher, :start_link, _config}} -> true
@@ -157,13 +157,13 @@ defmodule Combo.Endpoint.SupervisorTest do
     end
 
     test "init/1 starts watcher children when `:server` config is false and `:force_watchers` is true" do
-      Application.put_env(:phoenix, WatchersEndpoint,
+      Application.put_env(:combo, WatchersEndpoint,
         server: false,
         force_watchers: true,
         watchers: @watchers
       )
 
-      {:ok, {_, children}} = Supervisor.init({:phoenix, WatchersEndpoint, []})
+      {:ok, {_, children}} = Supervisor.init({:combo, WatchersEndpoint, []})
 
       assert Enum.any?(children, fn
                %{start: {Combo.Endpoint.Watcher, :start_link, _config}} -> true
@@ -184,30 +184,30 @@ defmodule Combo.Endpoint.SupervisorTest do
     end
 
     defmodule SocketEndpoint do
-      use Combo.Endpoint, otp_app: :phoenix
+      use Combo.Endpoint, otp_app: :combo
 
       socket "/ws", TestSocket, websocket: [check_csrf: false, check_origin: false]
     end
 
-    Application.put_env(:phoenix, SocketEndpoint, [])
+    Application.put_env(:combo, SocketEndpoint, [])
 
     test "fails when CSRF and origin checks both disabled in transport" do
       assert_raise ArgumentError, ~r/one of :check_origin and :check_csrf must be set/, fn ->
-        Supervisor.init({:phoenix, SocketEndpoint, []})
+        Supervisor.init({:combo, SocketEndpoint, []})
       end
     end
 
     defmodule SocketEndpointOriginCheckDisabled do
-      use Combo.Endpoint, otp_app: :phoenix
+      use Combo.Endpoint, otp_app: :combo
 
       socket "/ws", TestSocket, websocket: [check_csrf: false]
     end
 
-    Application.put_env(:phoenix, SocketEndpointOriginCheckDisabled, check_origin: false)
+    Application.put_env(:combo, SocketEndpointOriginCheckDisabled, check_origin: false)
 
     test "fails when origin is disabled in endpoint config and CSRF disabled in transport" do
       assert_raise ArgumentError, ~r/one of :check_origin and :check_csrf must be set/, fn ->
-        Supervisor.init({:phoenix, SocketEndpointOriginCheckDisabled, []})
+        Supervisor.init({:combo, SocketEndpointOriginCheckDisabled, []})
       end
     end
   end

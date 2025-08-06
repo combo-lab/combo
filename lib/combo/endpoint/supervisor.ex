@@ -212,7 +212,7 @@ defmodule Combo.Endpoint.Supervisor do
 
   defp server?(conf) when is_list(conf) do
     Keyword.get_lazy(conf, :server, fn ->
-      Application.get_env(:phoenix, :serve_endpoints, false)
+      Application.get_env(:combo, :serve_endpoints, false)
     end)
   end
 
@@ -431,7 +431,7 @@ defmodule Combo.Endpoint.Supervisor do
   end
 
   defp browser_open(endpoint, conf) do
-    if Application.get_env(:phoenix, :browser_open, false) && server?(conf) do
+    if Application.get_env(:combo, :browser_open, false) && server?(conf) do
       url = endpoint.url()
 
       {cmd, args} =

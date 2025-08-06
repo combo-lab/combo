@@ -163,7 +163,7 @@ defmodule Combo.Digester do
   end
 
   defp compressed_extensions do
-    compressors = Application.fetch_env!(:phoenix, :static_compressors)
+    compressors = Application.fetch_env!(:combo, :static_compressors)
     Enum.flat_map(compressors, & &1.file_extensions())
   end
 
@@ -192,7 +192,7 @@ defmodule Combo.Digester do
     path = Path.join(output_path, file.relative_path)
     File.mkdir_p!(path)
 
-    compressors = Application.fetch_env!(:phoenix, :static_compressors)
+    compressors = Application.fetch_env!(:combo, :static_compressors)
 
     Enum.each(compressors, fn compressor ->
       [file_extension | _] = compressor.file_extensions()

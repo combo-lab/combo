@@ -353,7 +353,7 @@ defmodule Combo.Controller do
   @doc """
   Sends JSON response.
 
-  It uses the configured `:json_library` under the `:phoenix`
+  It uses the configured `:json_library` under the `:combo`
   application for `:json` to pick up the encoder module.
 
   ## Examples

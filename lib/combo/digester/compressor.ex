@@ -19,7 +19,7 @@ defmodule Combo.Digester.Compressor do
         @behaviour Combo.Digester.Compressor
 
         def compress_file(file_path, content) do
-          valid_extension = Path.extname(file_path) in Application.fetch_env!(:phoenix, :gzippable_exts)
+          valid_extension = Path.extname(file_path) in Application.fetch_env!(:combo, :gzippable_exts)
           {:ok, compressed_content} = :brotli.encode(content)
 
           if valid_extension && byte_size(compressed_content) < byte_size(content) do
@@ -35,7 +35,7 @@ defmodule Combo.Digester.Compressor do
       end
 
       # config/config.exs
-      config :phoenix,
+      config :combo,
         static_compressors: [Combo.Digester.Gzip, MyApp.BrotliCompressor],
         # ...
   """

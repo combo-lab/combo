@@ -57,10 +57,10 @@ defmodule Phoenix.Test.ConnTest do
 
   @moduletag :capture_log
 
-  Application.put_env(:phoenix, Phoenix.Test.ConnTest.Endpoint, [])
+  Application.put_env(:combo, Phoenix.Test.ConnTest.Endpoint, [])
 
   defmodule Endpoint do
-    use Combo.Endpoint, otp_app: :phoenix
+    use Combo.Endpoint, otp_app: :combo
     def init(opts), do: opts
     def call(conn, :set), do: resp(conn, 200, "ok")
     def call(conn, opts) do

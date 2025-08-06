@@ -4,11 +4,11 @@ config :logger, :console,
   colors: [enabled: false],
   format: "\n$time $metadata[$level] $message\n"
 
-config :phoenix,
+config :combo,
   json_library: Jason,
   stacktrace_depth: 20
 
-config :phoenix, :template, trim_on_ceex_engine: false
+config :combo, :template, trim_on_ceex_engine: false
 
 if Mix.env() == :dev do
   esbuild = fn args ->

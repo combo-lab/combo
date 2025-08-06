@@ -15,15 +15,15 @@ defmodule Combo do
     _ = Combo.Template.format_encoders()
 
     # Configure proper system flags
-    if stacktrace_depth = Application.get_env(:phoenix, :stacktrace_depth) do
+    if stacktrace_depth = Application.get_env(:combo, :stacktrace_depth) do
       :erlang.system_flag(:backtrace_depth, stacktrace_depth)
     end
 
-    if filter = Application.get_env(:phoenix, :filter_parameters) do
-      Application.put_env(:phoenix, :filter_parameters, Combo.Logger.compile_filter(filter))
+    if filter = Application.get_env(:combo, :filter_parameters) do
+      Application.put_env(:combo, :filter_parameters, Combo.Logger.compile_filter(filter))
     end
 
-    if Application.fetch_env!(:phoenix, :logger) do
+    if Application.fetch_env!(:combo, :logger) do
       Combo.Logger.install()
     end
 
@@ -42,11 +42,11 @@ defmodule Combo do
   To customize the JSON library, including the following in your
   `config/config.exs`:
   
-      config :phoenix, :json_library, AlternativeJsonLibrary
+      config :combo, :json_library, AlternativeJsonLibrary
 
   """
   def json_library do
-    Application.get_env(:phoenix, :json_library, Jason)
+    Application.get_env(:combo, :json_library, Jason)
   end
 
   @doc """
@@ -58,11 +58,11 @@ defmodule Combo do
   This option is passed as the `:init_mode` to `Plug.Builder.compile/3`.
   """
   def plug_init_mode do
-    Application.get_env(:phoenix, :plug_init_mode, :compile)
+    Application.get_env(:combo, :plug_init_mode, :compile)
   end
 
   defp warn_on_missing_json_library do
-    configured_lib = Application.get_env(:phoenix, :json_library)
+    configured_lib = Application.get_env(:combo, :json_library)
 
     if configured_lib && not Code.ensure_loaded?(configured_lib) do
       IO.warn("""

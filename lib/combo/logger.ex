@@ -175,7 +175,7 @@ defmodule Combo.Logger do
   end
 
   @doc false
-  def filter_values(values, filter \\ Application.get_env(:phoenix, :filter_parameters, [])) do
+  def filter_values(values, filter \\ Application.get_env(:combo, :filter_parameters, [])) do
     case compile_filter(filter) do
       {:compiled, key_match, value_match} -> discard_values(values, key_match, value_match)
       {:keep, match} -> keep_values(values, match)

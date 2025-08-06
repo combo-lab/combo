@@ -2,7 +2,7 @@ defmodule Combo.Endpoint.RenderErrorsTest do
   use ExUnit.Case, async: true
   use RouterHelper
 
-  Application.put_env(:phoenix, __MODULE__.Endpoint, [])
+  Application.put_env(:combo, __MODULE__.Endpoint, [])
 
   import ExUnit.CaptureLog
   view = __MODULE__
@@ -100,7 +100,7 @@ defmodule Combo.Endpoint.RenderErrorsTest do
   end
 
   defmodule Endpoint do
-    use Combo.Endpoint, otp_app: :phoenix
+    use Combo.Endpoint, otp_app: :combo
   end
 
   setup do

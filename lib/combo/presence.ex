@@ -501,7 +501,7 @@ defmodule Combo.Presence do
   end
 
   @doc false
-  def handle_info({task_ref, {:phoenix, ref, computed_diffs}}, state) do
+  def handle_info({task_ref, {:combo, ref, computed_diffs}}, state) do
     %{current_task: current_task} = state
     {^ref, %Task{ref: ^task_ref} = task} = current_task
     Task.shutdown(task)
@@ -612,7 +612,7 @@ defmodule Combo.Presence do
           end)
 
         receive do
-          {^ref, :continue} -> {:phoenix, ref, computed_diffs}
+          {^ref, :continue} -> {:combo, ref, computed_diffs}
         end
       end)
 

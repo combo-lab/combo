@@ -64,7 +64,7 @@ defmodule Mix.Tasks.Combo.Digest do
 
     Mix.Task.reenable("combo.digest")
 
-    {:ok, _} = Application.ensure_all_started(:phoenix)
+    {:ok, _} = Application.ensure_all_started(:combo)
 
     {opts, args, _} = OptionParser.parse(all_args, switches: @switches, aliases: [o: :output])
     input_path = List.first(args) || @default_input_path

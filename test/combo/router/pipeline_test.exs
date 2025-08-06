@@ -128,7 +128,7 @@ defmodule Combo.Router.PipelineTest do
   test "duplicate pipe_through's raises" do
     assert_raise ArgumentError, ~r{duplicate pipe_through for :browser}, fn ->
       defmodule DupPipeThroughRouter do
-        use Combo.Router, otp_app: :phoenix
+        use Combo.Router, otp_app: :combo
 
         pipeline :browser do
         end
@@ -142,7 +142,7 @@ defmodule Combo.Router.PipelineTest do
 
     assert_raise ArgumentError, ~r{duplicate pipe_through for :browser}, fn ->
       defmodule DupScopedPipeThroughRouter do
-        use Combo.Router, otp_app: :phoenix
+        use Combo.Router, otp_app: :combo
 
         pipeline :browser do
         end
@@ -161,7 +161,7 @@ defmodule Combo.Router.PipelineTest do
   test "pipeline raises on conflict" do
     assert_raise ArgumentError, ~r{there is an import from Kernel with the same name}, fn ->
       defmodule ConflictingPipeline do
-        use Combo.Router, otp_app: :phoenix
+        use Combo.Router, otp_app: :combo
 
         pipeline :raise do
           plug Plug.Head

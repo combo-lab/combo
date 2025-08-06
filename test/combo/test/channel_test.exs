@@ -5,13 +5,13 @@ defmodule Phoenix.Test.ChannelTest do
   alias Combo.Socket.{Broadcast, Message}
   alias __MODULE__.{UserSocket, Endpoint}
 
-  Application.put_env(:phoenix, Endpoint,
+  Application.put_env(:combo, Endpoint,
     pubsub_server: Phoenix.Test.ChannelTest.PubSub,
     server: false
   )
 
   defmodule Endpoint do
-    use Combo.Endpoint, otp_app: :phoenix
+    use Combo.Endpoint, otp_app: :combo
 
     socket "/socket", UserSocket
   end
