@@ -130,61 +130,8 @@ defmodule Combo.Router do
   ## Generating routes
 
   For generating routes inside your application,  see the `Combo.VerifiedRoutes`
-  documentation for `~p` based route generation which is the preferred way to
-  generate route paths and URLs with compile-time verification.
-
-  Phoenix also supports generating function helpers, which was the default
-  mechanism in Phoenix v1.6 and earlier. We will explore it next.
-
-  ### Helpers (deprecated)
-
-  Phoenix generates a module `Helpers` inside your router by default, which contains
-  named helpers to help developers generate and keep their routes up to date.
-  Helpers can be disabled by passing `helpers: false` to `use Combo.Router`.
-
-  Helpers are automatically generated based on the controller name.
-  For example, the route:
-
-      get "/pages/:page", PageController, :show
-
-  will generate the following named helper:
-
-      MyAppWeb.Router.Helpers.page_path(conn_or_endpoint, :show, "hello")
-      "/pages/hello"
-
-      MyAppWeb.Router.Helpers.page_path(conn_or_endpoint, :show, "hello", some: "query")
-      "/pages/hello?some=query"
-
-      MyAppWeb.Router.Helpers.page_url(conn_or_endpoint, :show, "hello")
-      "http://example.com/pages/hello"
-
-      MyAppWeb.Router.Helpers.page_url(conn_or_endpoint, :show, "hello", some: "query")
-      "http://example.com/pages/hello?some=query"
-
-  If the route contains glob-like patterns, parameters for those have to be given as
-  list:
-
-      MyAppWeb.Router.Helpers.page_path(conn_or_endpoint, :show, ["hello", "world"])
-      "/pages/hello/world"
-
-  The URL generated in the named URL helpers is based on the configuration for
-  `:url`, `:http` and `:https`. However, if for some reason you need to manually
-  control the URL generation, the url helpers also allow you to pass in a `URI`
-  struct:
-
-      uri = %URI{scheme: "https", host: "other.example.com"}
-      MyAppWeb.Router.Helpers.page_url(uri, :show, "hello")
-      "https://other.example.com/pages/hello"
-
-  The named helper can also be customized with the `:as` option. Given
-  the route:
-
-      get "/pages/:page", PageController, :show, as: :special_page
-
-  the named helper will be:
-
-      MyAppWeb.Router.Helpers.special_page_path(conn, :show, "hello")
-      "/pages/hello"
+  documentation for `~p` based route generation which generates route paths and
+  URLs with compile-time verification.
 
   ## Scopes and Resources
 
@@ -214,7 +161,7 @@ defmodule Combo.Router do
   to generate "RESTful" routes to a given resource:
 
       defmodule MyAppWeb.Router do
-        use Combo.Router, helpers: false
+        use Combo.Router
 
         resources "/pages", PageController, only: [:show]
         resources "/users", UserController, except: [:delete]
@@ -280,7 +227,7 @@ defmodule Combo.Router do
   within an actual Phoenix application.
   """
 
-  alias Combo.Router.{Resource, Scope, Route, Helpers}
+  alias Combo.Router.{Resource, Scope, Route}
 
   @http_methods [:get, :post, :put, :patch, :delete, :options, :connect, :trace, :head]
 
@@ -294,11 +241,9 @@ defmodule Combo.Router do
     end
   end
 
-  defp prelude(opts) do
+  defp prelude(_opts) do
     quote do
       Module.register_attribute(__MODULE__, :phoenix_routes, accumulate: true)
-      # TODO: Require :helpers to be explicit given
-      @phoenix_helpers Keyword.get(unquote(opts), :helpers, true)
 
       import Combo.Router
 
@@ -489,11 +434,6 @@ defmodule Combo.Router do
     routes = env.module |> Module.get_attribute(:phoenix_routes) |> Enum.reverse()
     routes_with_exprs = Enum.map(routes, &{&1, Route.exprs(&1)})
 
-    helpers =
-      if Module.get_attribute(env.module, :phoenix_helpers) do
-        Helpers.define(env, routes_with_exprs)
-      end
-
     {matches, {pipelines, _}} =
       Enum.map_reduce(routes_with_exprs, {[], %{}}, &build_match/2)
 
@@ -548,9 +488,6 @@ defmodule Combo.Router do
 
       @doc false
       def __checks__, do: unquote({:__block__, [], checks})
-
-      @doc false
-      def __helpers__, do: unquote(helpers)
 
       defp prepare(conn) do
         merge_private(conn, [{:phoenix_router, __MODULE__}, {__MODULE__, conn.script_name}])

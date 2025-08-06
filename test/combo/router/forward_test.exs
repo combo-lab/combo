@@ -99,23 +99,6 @@ defmodule Combo.Router.ForwardTest do
     assert conn.private[AdminDashboard] == ["admin"]
   end
 
-  test "helpers cascade script name across forwards based on main router" do
-    import AdminDashboard.Helpers
-    assert page_path(%Plug.Conn{}, :stats) == "/stats"
-
-    conn = call(Router, :get, "/stats")
-    assert page_path(conn, :stats) == "/admin/stats"
-
-    conn = call(Router, :get, "/stats", _params = nil, ["phx"])
-    assert page_path(conn, :stats) == "/phx/admin/stats"
-
-    conn = call(Router, :get, "/admin/stats")
-    assert page_path(conn, :stats) == "/admin/stats"
-
-    conn = call(Router, :get, "/admin/stats", _params = nil, ["phx"])
-    assert page_path(conn, :stats) == "/phx/admin/stats"
-  end
-
   test "forward can handle plugs with non-literal init returns" do
     assert call(Router, :get, "/init").assigns.opts == %{non: :literal}
   end
