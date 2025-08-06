@@ -10,7 +10,7 @@ Here's an example configuration from `config/runtime.exs`.
 import Config
 
 config :hello, HelloWeb.Endpoint,
-  http: [port: {:system, "PORT"}],
+  http: [port: System.get_env("PORT")],
   url: [host: "example.com"],
   cache_static_manifest: "priv/static/cache_manifest.json",
   https: [
@@ -61,8 +61,7 @@ config :my_app, MyAppWeb.Endpoint,
   force_ssl: [rewrite_on: [:x_forwarded_proto]]
 ```
 
-
-If an unsafe (HTTP) request is sent, the above will redirect to the HTTPS version using the `:host` specified in the `:url` configuration.  To dynamically redirect to the `host` of the current request, set `:host` in the `:force_ssl` configuration to `nil`.
+If an unsafe (HTTP) request is sent, the above will redirect to the HTTPS version using the `:host` specified in the `:url` configuration. To dynamically redirect to the `host` of the current request, set `:host` in the `:force_ssl` configuration to `nil`.
 
 ```elixir
 config :my_app, MyAppWeb.Endpoint,
@@ -78,7 +77,7 @@ config :my_app, MyAppWeb.Endpoint,
   force_ssl: [rewrite_on: [:x_forwarded_proto], exclude: ["localhost", "127.0.0.1"]]
 ```
 
-It is important to note that `force_ssl:` is a *compile* time config, so it normally is set in `prod.exs`, it will not work when set from `runtime.exs`.
+It is important to note that `force_ssl:` is a _compile_ time config, so it normally is set in `prod.exs`, it will not work when set from `runtime.exs`.
 
 For more information on the implications of offloading TLS to an external element, in particular relating to secure cookies, refer to the [Plug HTTPS Guide](https://hexdocs.pm/plug/https.html#offloading-tls). Keep in mind that the options passed to `Plug.SSL` in that document should be set using the `force_ssl:` endpoint option in a Phoenix application.
 
@@ -93,11 +92,13 @@ While HSTS is recommended in production, it can lead to unexpected behavior when
 If you inadvertently enable HSTS for localhost, you may need to reset your browser's cache before it will accept HTTP traffic from localhost again.
 
 For Chrome:
+
 1. Open the Developer Tools Panel.
 2. Click and hold the reload icon next to the address bar to reveal a dropdown menu.
 3. Select "Empty Cache and Hard Reload".
 
 For Safari:
+
 1. Clear your browser cache.
 2. Remove the entry from `~/Library/Cookies/HSTS.plist` or delete the file entirely.
 3. Restart Safari.

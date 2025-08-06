@@ -21,8 +21,8 @@ defmodule Combo.Endpoint.SupervisorTest do
   defmodule HTTPEnvVarEndpoint do
     def config(:otp_app), do: :phoenix
     def config(:https), do: false
-    def config(:http), do: [port: {:system, "PHOENIX_PORT"}]
-    def config(:url), do: [host: {:system, "PHOENIX_HOST"}]
+    def config(:http), do: [port: System.get_env("PHOENIX_PORT")]
+    def config(:url), do: [host: System.get_env("PHOENIX_HOST")]
     def config(_), do: nil
   end
 

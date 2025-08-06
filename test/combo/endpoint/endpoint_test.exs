@@ -8,7 +8,7 @@ defmodule Combo.Endpoint.EndpointTest do
   use RouterHelper
 
   @config [
-    url: [host: {:system, "ENDPOINT_TEST_HOST"}, path: "/api"],
+    url: [host: System.get_env("ENDPOINT_TEST_HOST"), path: "/api"],
     static_url: [host: "static.example.com"],
     server: false,
     http: [port: 80],
@@ -65,7 +65,7 @@ defmodule Combo.Endpoint.EndpointTest do
 
   test "has reloadable configuration" do
     endpoint_id = Endpoint.config(:endpoint_id)
-    assert Endpoint.config(:url) == [host: {:system, "ENDPOINT_TEST_HOST"}, path: "/api"]
+    assert Endpoint.config(:url) == [host: "example.com", path: "/api"]
     assert Endpoint.config(:static_url) == [host: "static.example.com"]
     assert Endpoint.url() == "https://example.com"
     assert Endpoint.path("/") == "/api/"
@@ -81,7 +81,7 @@ defmodule Combo.Endpoint.EndpointTest do
     assert Endpoint.config(:endpoint_id) == endpoint_id
 
     assert Enum.sort(Endpoint.config(:url)) ==
-             [host: {:system, "ENDPOINT_TEST_HOST"}, path: "/api", port: 1234]
+             [host: "example.com", path: "/api", port: 1234]
 
     assert Enum.sort(Endpoint.config(:static_url)) ==
              [host: "static.example.com", port: 456]
@@ -90,29 +90,6 @@ defmodule Combo.Endpoint.EndpointTest do
     assert Endpoint.path("/") == "/api/"
     assert Endpoint.static_url() == "https://static.example.com:456"
     assert Endpoint.struct_url() == %URI{scheme: "https", host: "example.com", port: 1234}
-  end
-
-  test "{:system, env_var} tuples are deprecated" do
-    Application.put_env(:phoenix, __MODULE__.SystemTupleEndpoint,
-      url: [
-        host: {:system, "ENDPOINT_TEST_HOST"},
-        port: {:system, "ENDPOINT_TEST_PORT"}
-      ],
-      static_url: [
-        host: {:system, "ENDPOINT_TEST_ASSET_HOST"},
-        port: {:system, "ENDPOINT_TEST_ASSET_PORT"}
-      ]
-    )
-
-    log =
-      ExUnit.CaptureLog.capture_log(fn ->
-        start_supervised!(SystemTupleEndpoint)
-      end)
-
-    assert log =~ ~S|host: System.get_env("ENDPOINT_TEST_HOST")|
-    assert log =~ ~S|port: System.get_env("ENDPOINT_TEST_PORT")|
-    assert log =~ ~S|host: System.get_env("ENDPOINT_TEST_ASSET_HOST")|
-    assert log =~ ~S|port: System.get_env("ENDPOINT_TEST_ASSET_PORT")|
   end
 
   test "start_link/2 should emit an Endpoint init event" do
