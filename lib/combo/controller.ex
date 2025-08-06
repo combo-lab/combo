@@ -959,24 +959,6 @@ defmodule Combo.Controller do
     conn |> put_format(format) |> render_and_send(format, base, assigns)
   end
 
-  def render(conn, view, template)
-      when is_atom(view) and (is_binary(template) or is_atom(template)) do
-    IO.warn(
-      "Combo.Controller.render/3 with a view is deprecated, see the documentation for render/3 for an alternative"
-    )
-
-    render(conn, view, template, [])
-  end
-
-  @doc false
-  @deprecated "render/4 is deprecated. Use put_view + render/3"
-  def render(conn, view, template, assigns)
-      when is_atom(view) and (is_binary(template) or is_atom(template)) do
-    conn
-    |> put_view(view)
-    |> render(template, assigns)
-  end
-
   defp render_and_send(conn, format, template, assigns) do
     view = view_module(conn, format)
     conn = prepare_assigns(conn, assigns, template, format)
