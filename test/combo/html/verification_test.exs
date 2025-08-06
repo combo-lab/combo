@@ -165,7 +165,7 @@ defmodule Combo.HTML.VerificationTest do
            may not be provided directly
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line}: (file)"
 
     line = get_line(__MODULE__.TypeAttrs, :render_string_line)
 
@@ -184,7 +184,7 @@ defmodule Combo.HTML.VerificationTest do
              must be a :string, got: #{inspect(value)}
              """
 
-      assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + offset}: (file)"
+      assert warnings =~ "test/combo/html/verification_test.exs:#{line + offset}: (file)"
     end
 
     line = get_line(__MODULE__.TypeAttrs, :render_atom_line)
@@ -202,7 +202,7 @@ defmodule Combo.HTML.VerificationTest do
              must be an :atom, got: #{inspect(value)}
              """
 
-      assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + offset}: (file)"
+      assert warnings =~ "test/combo/html/verification_test.exs:#{line + offset}: (file)"
     end
 
     line = get_line(__MODULE__.TypeAttrs, :render_boolean_line)
@@ -222,7 +222,7 @@ defmodule Combo.HTML.VerificationTest do
              must be a :boolean, got: #{inspect(value)}
              """
 
-      assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + offset}: (file)"
+      assert warnings =~ "test/combo/html/verification_test.exs:#{line + offset}: (file)"
     end
 
     line = get_line(__MODULE__.TypeAttrs, :render_integer_line)
@@ -242,7 +242,7 @@ defmodule Combo.HTML.VerificationTest do
              must be an :integer, got: #{inspect(value)}
              """
 
-      assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + offset}: (file)"
+      assert warnings =~ "test/combo/html/verification_test.exs:#{line + offset}: (file)"
     end
 
     line = get_line(__MODULE__.TypeAttrs, :render_float_line)
@@ -262,7 +262,7 @@ defmodule Combo.HTML.VerificationTest do
              must be a :float, got: #{inspect(value)}
              """
 
-      assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + offset}: (file)"
+      assert warnings =~ "test/combo/html/verification_test.exs:#{line + offset}: (file)"
     end
 
     line = get_line(__MODULE__.TypeAttrs, :render_map_line)
@@ -282,7 +282,7 @@ defmodule Combo.HTML.VerificationTest do
              must be a :map, got: #{inspect(value)}
              """
 
-      assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + offset}: (file)"
+      assert warnings =~ "test/combo/html/verification_test.exs:#{line + offset}: (file)"
     end
 
     line = get_line(__MODULE__.TypeAttrs, :render_list_line)
@@ -302,7 +302,7 @@ defmodule Combo.HTML.VerificationTest do
              must be a :list, got: #{inspect(value)}
              """
 
-      assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + offset}: (file)"
+      assert warnings =~ "test/combo/html/verification_test.exs:#{line + offset}: (file)"
     end
   end
 
@@ -336,7 +336,7 @@ defmodule Combo.HTML.VerificationTest do
            must be a URI struct, got: 123
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 2}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 2}: (file)"
   end
 
   test "validates function types" do
@@ -403,34 +403,34 @@ defmodule Combo.HTML.VerificationTest do
            must be a function, got: :foo
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 5}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 5}: (file)"
 
     assert warnings =~ """
            attribute "arity_1" in component Combo.HTML.VerificationTest.FunAttrs.func/1 \
            must be a function of arity 1, got: a function of arity 2
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 11}: (file)"
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 12}: (file)"
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 13}: (file)"
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 14}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 11}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 12}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 13}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 14}: (file)"
 
     assert warnings =~ """
            attribute "arity_2" in component Combo.HTML.VerificationTest.FunAttrs.func/1 \
            must be a function of arity 2, got: a function of arity 1
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 20}: (file)"
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 21}: (file)"
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 22}: (file)"
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 23}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 20}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 21}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 22}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 23}: (file)"
 
     assert warnings =~ """
            attribute "arity_1" in slot "myslot" for component Combo.HTML.VerificationTest.FunAttrs.func/1 \
            must be a function of arity 1, got: a function of arity 2
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 26}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 26}: (file)"
   end
 
   test "validate required attributes" do
@@ -462,14 +462,14 @@ defmodule Combo.HTML.VerificationTest do
            Combo.HTML.VerificationTest.RequiredAttrs.func/1
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line}: (file)"
 
     assert warnings =~ """
            missing required attribute "name" for component \
            Combo.HTML.VerificationTest.RequiredAttrs.func/1
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line}: (file)"
   end
 
   test "validate undefined attributes" do
@@ -498,14 +498,14 @@ defmodule Combo.HTML.VerificationTest do
            Combo.HTML.VerificationTest.UndefinedAttrs.func/1
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line}: (file)"
 
     assert warnings =~ """
            undefined attribute "width" for component \
            Combo.HTML.VerificationTest.UndefinedAttrs.func/1
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line}: (file)"
   end
 
   test "validates values" do
@@ -556,7 +556,7 @@ defmodule Combo.HTML.VerificationTest do
            must be one of ["foo", "bar", "baz"], got: "boom"
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 2}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 2}: (file)"
 
     assert warnings =~ """
            attribute "attr" in component \
@@ -564,7 +564,7 @@ defmodule Combo.HTML.VerificationTest do
            must be one of ["foo", "bar", "baz"], got: a function of arity 1
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 3}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 3}: (file)"
 
     assert warnings =~ """
            attribute "attr" in component \
@@ -572,7 +572,7 @@ defmodule Combo.HTML.VerificationTest do
            must be a :string, got: a function of arity 1
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 4}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 4}: (file)"
 
     assert warnings =~ """
            attribute "attr" in component \
@@ -580,7 +580,7 @@ defmodule Combo.HTML.VerificationTest do
            must be one of [:foo, :bar, :baz], got: :boom
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 5}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 5}: (file)"
 
     assert warnings =~ """
            attribute "attr" in component \
@@ -588,7 +588,7 @@ defmodule Combo.HTML.VerificationTest do
            must be one of 1..10, got: 11
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 6}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 6}: (file)"
   end
 
   test "validate required slots" do
@@ -648,14 +648,14 @@ defmodule Combo.HTML.VerificationTest do
            Combo.HTML.VerificationTest.RequiredSlots.func/1
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 3}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 3}: (file)"
 
     assert warnings =~ """
            missing required slot "named" for component \
            Combo.HTML.VerificationTest.RequiredSlots.func_named_slot/1
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 9}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 9}: (file)"
   end
 
   test "validate slot attr types" do
@@ -807,7 +807,7 @@ defmodule Combo.HTML.VerificationTest do
              must be a :string, got: #{inspect(value)}
              """
 
-      assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + offset}: (file)"
+      assert warnings =~ "test/combo/html/verification_test.exs:#{line + offset}: (file)"
     end
 
     line = get_line(__MODULE__.SlotAttrs, :render_atom_line)
@@ -825,7 +825,7 @@ defmodule Combo.HTML.VerificationTest do
              must be an :atom, got: #{inspect(value)}
              """
 
-      assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + offset}: (file)"
+      assert warnings =~ "test/combo/html/verification_test.exs:#{line + offset}: (file)"
     end
 
     line = get_line(__MODULE__.SlotAttrs, :render_boolean_line)
@@ -845,7 +845,7 @@ defmodule Combo.HTML.VerificationTest do
              must be a :boolean, got: #{inspect(value)}
              """
 
-      assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + offset}: (file)"
+      assert warnings =~ "test/combo/html/verification_test.exs:#{line + offset}: (file)"
     end
 
     line = get_line(__MODULE__.SlotAttrs, :render_integer_line)
@@ -865,7 +865,7 @@ defmodule Combo.HTML.VerificationTest do
              must be an :integer, got: #{inspect(value)}
              """
 
-      assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + offset}: (file)"
+      assert warnings =~ "test/combo/html/verification_test.exs:#{line + offset}: (file)"
     end
 
     line = get_line(__MODULE__.SlotAttrs, :render_float_line)
@@ -885,7 +885,7 @@ defmodule Combo.HTML.VerificationTest do
              must be a :float, got: #{inspect(value)}
              """
 
-      assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + offset}: (file)"
+      assert warnings =~ "test/combo/html/verification_test.exs:#{line + offset}: (file)"
     end
 
     line = get_line(__MODULE__.SlotAttrs, :render_list_line)
@@ -905,7 +905,7 @@ defmodule Combo.HTML.VerificationTest do
              must be a :list, got: #{inspect(value)}
              """
 
-      assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + offset}: (file)"
+      assert warnings =~ "test/combo/html/verification_test.exs:#{line + offset}: (file)"
     end
   end
 
@@ -1008,7 +1008,7 @@ defmodule Combo.HTML.VerificationTest do
            must be one of ["foo", "bar", "baz"], got: "boom"
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 3}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 3}: (file)"
 
     assert warnings =~ """
            attribute "atom" in slot "named" for component \
@@ -1016,7 +1016,7 @@ defmodule Combo.HTML.VerificationTest do
            must be one of [:foo, :bar, :baz], got: :boom
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 3}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 3}: (file)"
 
     assert warnings =~ """
            attribute "integer" in slot "named" for component \
@@ -1024,7 +1024,7 @@ defmodule Combo.HTML.VerificationTest do
            must be one of 1..10, got: 11
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 3}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 3}: (file)"
   end
 
   test "validates required slot attrs" do
@@ -1074,7 +1074,7 @@ defmodule Combo.HTML.VerificationTest do
            Combo.HTML.VerificationTest.RequiredSlotAttrs.func/1
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 1}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 1}: (file)"
 
     assert warnings =~ """
            missing required attribute "attr" \
@@ -1083,7 +1083,7 @@ defmodule Combo.HTML.VerificationTest do
            Combo.HTML.VerificationTest.RequiredSlotAttrs.func/1
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 3}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 3}: (file)"
   end
 
   test "validates undefined slots" do
@@ -1133,14 +1133,14 @@ defmodule Combo.HTML.VerificationTest do
            Combo.HTML.VerificationTest.UndefinedSlots.fun_no_slots/1
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 3}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 3}: (file)"
 
     assert warnings =~ """
            undefined slot "undefined" for component \
            Combo.HTML.VerificationTest.UndefinedSlots.func/1
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 8}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 8}: (file)"
 
     assert warnings =~ """
            undefined attribute "undefined" \
@@ -1149,7 +1149,7 @@ defmodule Combo.HTML.VerificationTest do
            Combo.HTML.VerificationTest.UndefinedSlots.func_undefined_slot_attrs/1
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 12}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 12}: (file)"
 
     assert warnings =~ """
            undefined attribute "undefined" \
@@ -1158,7 +1158,7 @@ defmodule Combo.HTML.VerificationTest do
            Combo.HTML.VerificationTest.UndefinedSlots.func_undefined_slot_attrs/1
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 13}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 13}: (file)"
   end
 
   test "validates attrs and slots for external function components" do
@@ -1197,14 +1197,14 @@ defmodule Combo.HTML.VerificationTest do
            Combo.HTML.VerificationTest.External.render/1
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line}: (file)"
 
     assert warnings =~ """
            missing required attribute "attr" in slot "named" for component \
            Combo.HTML.VerificationTest.External.render/1
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 1}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 1}: (file)"
   end
 
   test "validates calls for locally defined components" do
@@ -1248,7 +1248,7 @@ defmodule Combo.HTML.VerificationTest do
            Combo.HTML.VerificationTest.LocalComponents.public/1
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 2}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 2}: (file)"
 
     assert warnings =~ """
            missing required attribute "attr" \
@@ -1256,7 +1256,7 @@ defmodule Combo.HTML.VerificationTest do
            Combo.HTML.VerificationTest.LocalComponents.private/1
            """
 
-    assert warnings =~ "test/phoenix/html/verification_test.exs:#{line + 3}: (file)"
+    assert warnings =~ "test/combo/html/verification_test.exs:#{line + 3}: (file)"
   end
 
   test "global includes" do

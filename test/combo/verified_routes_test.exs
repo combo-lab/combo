@@ -568,7 +568,7 @@ defmodule Combo.VerifiedRoutesTest do
                "warning: no route path for Combo.VerifiedRoutesTest.Router matches \"/router_forward/warn\""
 
       assert warnings =~
-               ~r"test/phoenix/verified_routes_test.exs:#{line}:(\d+:)? Combo.VerifiedRoutesTest.Forwards.test/0"
+               ~r"test/combo/verified_routes_test.exs:#{line}:(\d+:)? Combo.VerifiedRoutesTest.Forwards.test/0"
     after
       :code.purge(__MODULE__.Forwards)
       :code.delete(__MODULE__.Forwards)
