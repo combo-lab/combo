@@ -1850,32 +1850,32 @@ defmodule Combo.Template.CEExEngine.FormatterTest do
     """)
   end
 
-  test "respects heex_line_length" do
+  test "respects ceex_line_length" do
     assert_formatter_doesnt_change(
       """
       <p>
         <strong>Please let me be in the same line</strong> Value <strong>Please let me be in the same line</strong>.
       </p>
       """,
-      heex_line_length: 1000
+      ceex_line_length: 1000
     )
   end
 
-  test "does not format when phx-no-format attr is present" do
+  test "does not format when ceex-no-format attr is present" do
     assert_formatter_doesnt_change(
       """
-      <.textarea phx-no-format>My content</.textarea>
+      <.textarea ceex-no-format>My content</.textarea>
       """,
       line_length: 5
     )
 
     assert_formatter_output(
       """
-      <script phx-no-format><%= raw(js_code()) %></script>
+      <script ceex-no-format><%= raw(js_code()) %></script>
       """,
       """
       <script
-        phx-no-format
+        ceex-no-format
       ><%= raw(js_code()) %></script>
       """,
       line_length: 5
@@ -1883,11 +1883,11 @@ defmodule Combo.Template.CEExEngine.FormatterTest do
 
     assert_formatter_output(
       """
-      <span phx-no-format class="underline">Check</span> Messages
+      <span ceex-no-format class="underline">Check</span> Messages
       """,
       """
       <span
-        phx-no-format
+        ceex-no-format
         class="underline"
       >Check</span> Messages
       """,
@@ -1895,16 +1895,16 @@ defmodule Combo.Template.CEExEngine.FormatterTest do
     )
   end
 
-  test "respect interpolation when phx-no-format is present" do
+  test "respect interpolation when ceex-no-format is present" do
     assert_formatter_doesnt_change("""
-    <title data-prefix={@prefix} data-default={@default} data-suffix={@suffix} phx-no-format>{@prefix}{render_present(render_slot(@inner_block), @default)}{@suffix}</title>
+    <title data-prefix={@prefix} data-default={@default} data-suffix={@suffix} ceex-no-format>{@prefix}{render_present(render_slot(@inner_block), @default)}{@suffix}</title>
     """)
   end
 
-  test "respect nesting of children when phx-no-format is present" do
+  test "respect nesting of children when ceex-no-format is present" do
     assert_formatter_doesnt_change(
       """
-      <ul class="root" phx-no-format><!-- comment
+      <ul class="root" ceex-no-format><!-- comment
       --><%= for user <- @users do %>
           <li class="list">
             <div class="child1">
@@ -1919,7 +1919,7 @@ defmodule Combo.Template.CEExEngine.FormatterTest do
 
     assert_formatter_doesnt_change(
       """
-      <ul class="root" phx-no-format>
+      <ul class="root" ceex-no-format>
       <li class="list">
           <div
           class="child1">
@@ -2015,7 +2015,7 @@ defmodule Combo.Template.CEExEngine.FormatterTest do
         Hi
       </div>
       """,
-      heex_line_length: 10
+      ceex_line_length: 10
     )
 
     assert_formatter_doesnt_change(
@@ -2024,7 +2024,7 @@ defmodule Combo.Template.CEExEngine.FormatterTest do
         Hi
       </div>
       """,
-      heex_line_length: 10
+      ceex_line_length: 10
     )
   end
 
@@ -2042,7 +2042,7 @@ defmodule Combo.Template.CEExEngine.FormatterTest do
         baz
       </p>
       """,
-      heex_line_length: 15
+      ceex_line_length: 15
     )
   end
 
@@ -2221,7 +2221,7 @@ defmodule Combo.Template.CEExEngine.FormatterTest do
       """
       <.link class="font-semibold" navigate={~p"/open/file?autosave=true"}>Browse them here</.link>.
       """,
-      heex_line_length: 72
+      ceex_line_length: 72
     )
   end
 
@@ -2325,7 +2325,7 @@ defmodule Combo.Template.CEExEngine.FormatterTest do
 
   # integration tests
   defp assert_mix_format_output(input_ex, expected, dot_formatter_opts \\ []) do
-    filename = "index.html.heex"
+    filename = "index.html.ceex"
     ex_path = Path.join(System.tmp_dir(), filename)
     dot_formatter_path = ex_path <> ".formatter.exs"
     dot_formatter_opts = Keyword.put(dot_formatter_opts, :plugins, [Formatter])
@@ -2455,7 +2455,7 @@ defmodule Combo.Template.CEExEngine.FormatterTest do
     assert_mix_format_output(input, expected, line_length: 20)
   end
 
-  test "heex_line_length overrides line_length" do
+  test "ceex_line_length overrides line_length" do
     input = """
       <section><h1><b class="there are several classes">{@user.name}</b></h1></section>
     """
@@ -2466,6 +2466,6 @@ defmodule Combo.Template.CEExEngine.FormatterTest do
     </section>
     """
 
-    assert_mix_format_output(input, expected, line_length: 20, heex_line_length: 80)
+    assert_mix_format_output(input, expected, line_length: 20, ceex_line_length: 80)
   end
 end

@@ -1,37 +1,37 @@
 defmodule Combo.Template.CEExEngine.Formatter do
   @moduledoc """
-  Format HEEx templates from `.heex` files or `~CE` sigils.
+  Formats templates files or inline templates of CEEx.
 
   This is a `mix format` [plugin](https://hexdocs.pm/mix/main/Mix.Tasks.Format.html#module-plugins).
 
   ## Setup
 
-  Add it as a plugin to your `.formatter.exs` file and make sure to put
-  the `heex` extension in the `inputs` option.
+  Add it as a plugin to the `.formatter.exs` file and make sure to put the
+  `ceex` extension in the `:inputs` option.
 
   ```elixir
   [
-    plugins: [Phoenix.Formatter],
-    inputs: ["*.{heex,ex,exs}", "priv/*/seeds.exs", "{config,lib,test}/**/*.{heex,ex,exs}"],
+    plugins: [Combo.HTML.Formatter],
+    inputs: ["{mix,.formatter}.exs", "{config,lib,test}/**/*.{ceex,ex,exs}"]
     # ...
   ]
   ```
 
   > ### For umbrella projects {: .info}
   >
-  > In umbrella projects you must also change two files at the umbrella root,
-  > add `:phoenix_live_view` to your `deps` in the `mix.exs` file
-  > and add `plugins: [Phoenix.Formatter]` in the `.formatter.exs` file.
+  > In umbrella projects, you must also add two changes at the umbrella root:
+  >
+  >   1. add `:combo` to your `deps` in the `mix.exs` file
+  >   2. add `plugins: [Combo.HTML.Formatter]` in the `.formatter.exs` file.
+  >
   > This is because the formatter does not attempt to load the dependencies of
   > all children applications.
 
   ### Editor support
 
   Most editors that support `mix format` integration should automatically format
-  `.heex` and `~CE` templates. Other editors may require custom integration or
-  even provide additional functionality. Here are some reference posts:
-
-    * [Formatting HEEx templates in VS Code](https://pragmaticstudio.com/tutorials/formatting-heex-templates-in-vscode)
+  `.ceex` and `~CE` templates. Other editors may require custom integration or
+  even provide additional functionality.
 
   ## Options
 
@@ -39,12 +39,11 @@ defmodule Combo.Template.CEExEngine.Formatter do
       of 98 characters, which can be overwritten with the `:line_length` option
       in your `.formatter.exs` file.
 
-    * `:heex_line_length` - change the line length only for the HEEx formatter.
+    * `:ceex_line_length` - change the line length only for the CEEx formatter.
 
       ```elixir
       [
-        # ...omitted
-        heex_line_length: 300
+        ceex_line_length: 300
       ]
       ```
 
@@ -55,7 +54,7 @@ defmodule Combo.Template.CEExEngine.Formatter do
 
       ```elixir
       [
-        plugins: [Phoenix.Formatter],
+        plugins: [Combo.HTML.Formatter],
         attribute_formatters: %{class: ClassFormatter},
       ]
       ```
@@ -85,24 +84,24 @@ defmodule Combo.Template.CEExEngine.Formatter do
 
   Given HTML like this:
 
-  ```heex
+  ```ceex
     <section><h1>   <b>{@user.name}</b></h1></section>
   ```
 
   It will be formatted as:
 
-  ```heex
+  ```ceex
   <section>
     <h1><b>{@user.name}</b></h1>
   </section>
   ```
 
-  A block element will go to the next line, while inline elements will be kept in the current line
-  as long as they fit within the configured line length.
+  A block element will go to the next line, while inline elements will be kept
+  in the current line as long as they fit within the configured line length.
 
   It will also keep inline elements in their own lines if you intentionally write them this way:
 
-  ```heex
+  ```ceex
   <section>
     <h1>
       <b>{@user.name}</b>
@@ -113,30 +112,29 @@ defmodule Combo.Template.CEExEngine.Formatter do
   This formatter will place all attributes on their own lines when they do not all fit in the
   current line. Therefore this:
 
-  ```heex
-  <section id="user-section-id" class="sm:focus:block flex w-full p-3" phx-click="send-event">
+  ```ceex
+  <section id="user-section-id" class="sm:focus:block flex w-full p-3">
     <p>Hi</p>
   </section>
   ```
 
   Will be formatted to:
 
-  ```heex
+  ```ceex
   <section
     id="user-section-id"
     class="sm:focus:block flex w-full p-3"
-    phx-click="send-event"
   >
     <p>Hi</p>
   </section>
   ```
 
-  This formatter **does not** format Elixir expressions with `do...end`.
-  The content within it will be formatted accordingly though. Therefore, the given
+  This formatter **does not** format Elixir expressions with `do...end`. The
+  content within it will be formatted accordingly though. Therefore, the given
   input:
 
   ```eex
-  <%= live_redirect(
+  <%= redirect(
          to: "/my/path",
     class: "my class"
   ) do %>
@@ -147,7 +145,7 @@ defmodule Combo.Template.CEExEngine.Formatter do
   Will be formatted to
 
   ```eex
-  <%= live_redirect(
+  <%= redirect(
          to: "/my/path",
     class: "my class"
   ) do %>
@@ -162,7 +160,7 @@ defmodule Combo.Template.CEExEngine.Formatter do
   The formatter will keep intentional new lines. However, the formatter will
   always keep a maximum of one line break in case you have multiple ones:
 
-  ```heex
+  ```ceex
   <p>
     text
 
@@ -173,7 +171,7 @@ defmodule Combo.Template.CEExEngine.Formatter do
 
   Will be formatted to:
 
-  ```heex
+  ```ceex
   <p>
     text
 
@@ -250,18 +248,18 @@ defmodule Combo.Template.CEExEngine.Formatter do
   ## Skip formatting
 
   In case you don't want part of your HTML to be automatically formatted.
-  You can use the special `phx-no-format` attribute so that the formatter will
+  You can use the special `ceex-no-format` attribute so that the formatter will
   skip the element block. Note that this attribute will not be rendered.
 
   Therefore:
 
-  ```heex
-  <.textarea phx-no-format>My content</.textarea>
+  ```ceex
+  <.textarea ceex-no-format>My content</.textarea>
   ```
 
   Will be kept as is your code editor, but rendered as:
 
-  ```heex
+  ```ceex
   <textarea>My content</textarea>
   ```
   """
@@ -293,7 +291,7 @@ defmodule Combo.Template.CEExEngine.Formatter do
 
   @impl Mix.Tasks.Format
   def features(_opts) do
-    [sigils: [:CH], extensions: [".heex"]]
+    [sigils: [:CE], extensions: [".ceex"]]
   end
 
   @impl Mix.Tasks.Format
@@ -301,7 +299,7 @@ defmodule Combo.Template.CEExEngine.Formatter do
     if opts[:sigil] === :H and opts[:modifiers] === ~c"noformat" do
       source
     else
-      line_length = opts[:heex_line_length] || opts[:line_length] || @default_line_length
+      line_length = opts[:ceex_line_length] || opts[:line_length] || @default_line_length
       newlines = :binary.matches(source, ["\r\n", "\n"])
       inline_matcher = opts[:inline_matcher] || ["link", "button"]
 
@@ -347,8 +345,6 @@ defmodule Combo.Template.CEExEngine.Formatter do
     end
   end
 
-  # Tokenize contents using EEx.tokenize and Phoenix.Live.Tokenizer respectively.
-  #
   # The following content:
   #
   # "<section>\n  <p><%= user.name ></p>\n  <%= if true do %> <p>this</p><% else %><p>that</p><% end %>\n</section>\n"
@@ -721,7 +717,7 @@ defmodule Combo.Template.CEExEngine.Formatter do
     Enum.any?(attrs, fn
       {"contenteditable", {:string, "false", _meta}, _} -> false
       {"contenteditable", _v, _} -> true
-      {"phx-no-format", _v, _} -> true
+      {"ceex-no-format", _v, _} -> true
       _ -> false
     end)
   end
