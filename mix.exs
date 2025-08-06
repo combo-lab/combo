@@ -30,7 +30,6 @@ defmodule Combo.MixProject do
       docs: docs(),
       aliases: aliases(),
       source_url: @scm_url,
-      homepage_url: "https://www.phoenixframework.org",
       description: "Peace of mind from prototype to production",
       test_ignore_filters: [
         &String.starts_with?(&1, "test/fixtures/"),
@@ -210,10 +209,6 @@ defmodule Combo.MixProject do
     # Combo.VerifiedRoutes
 
     [
-      "Safe HTML": [
-        Combo.SafeHTML,
-        Combo.SafeHTML.Safe
-      ],
       Template: [
         Combo.Template,
         Combo.Template.Engine,
@@ -234,6 +229,10 @@ defmodule Combo.MixProject do
         Combo.HTML.Form,
         Combo.HTML.FormData,
         Combo.HTML.FormField
+      ],
+      "Safe HTML": [
+        Combo.SafeHTML,
+        Combo.SafeHTML.Safe
       ],
       Testing: [
         Combo.ChannelTest,
