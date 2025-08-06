@@ -1059,12 +1059,6 @@ defmodule Combo.Endpoint do
     end
   end
 
-  @doc false
-  @deprecated "Combo.Endpoint.instrument/4 is deprecated and has no effect. Use :telemetry instead"
-  defmacro instrument(_endpoint_or_conn_or_socket, _event, _runtime, _fun) do
-    :ok
-  end
-
   @doc """
   Checks if Endpoint's web server has been configured to start.
 
