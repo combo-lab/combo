@@ -1,26 +1,18 @@
 # Combo
 
-> Peace of mind from prototype to production.
+Combines the best parts of modern web development.
 
-[![Build Status](https://github.com/phoenixframework/phoenix/workflows/CI/badge.svg)](https://github.com/phoenixframework/phoenix/actions/workflows/ci.yml) [![Hex.pm](https://img.shields.io/hexpm/v/phoenix.svg)](https://hex.pm/packages/phoenix) [![Documentation](https://img.shields.io/badge/documentation-gray)](https://hexdocs.pm/phoenix)
+[![Build Status](https://github.com/combo-team/combo/workflows/CI/badge.svg)](https://github.com/combo-team/combo/actions/workflows/ci.yml) [![Hex.pm](https://img.shields.io/hexpm/v/combo.svg)](https://hex.pm/packages/combo)
 
 ## Getting started
 
-See the official site at <https://www.phoenixframework.org/>.
-
-Install the latest version of Phoenix by following the instructions at <https://hexdocs.pm/phoenix/installation.html#phoenix>.
-
-## Documentation
-
-API documentation is available at <https://hexdocs.pm/phoenix>.
-
-Phoenix.js documentation is available at <https://hexdocs.pm/phoenix/js>.
+Read the [documentation](https://hexdocs.pm/combo).
 
 ## Contributing
 
-We appreciate any contribution to Phoenix. Check our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [CONTRIBUTING.md](CONTRIBUTING.md) guides for more information. We usually keep a list of features and bugs in the [issue tracker][4].
+We appreciate any contribution to Combo. Check our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [CONTRIBUTING.md](CONTRIBUTING.md) guides for more information. We usually keep a list of features and bugs in the [issue tracker][4].
 
-### Generating a Phoenix project from unreleased versions
+### Generating a Combo project from unreleased versions
 
 You can create a new project using the latest Phoenix source installer (the `phx.new` Mix task) with the following steps:
 
@@ -51,22 +43,14 @@ npm install --prefix assets
 MIX_ENV=docs mix docs
 ```
 
-To build Phoenix:
+To build Combo:
 
 ```bash
 mix deps.get
 mix compile
 ```
 
-To build the Phoenix installer:
-
-```bash
-mix deps.get
-mix compile
-mix archive.build
-```
-
-To build Phoenix.js:
+To build Combo.js:
 
 ```bash
 cd assets

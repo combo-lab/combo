@@ -1,6 +1,6 @@
 defmodule Combo do
   @moduledoc """
-  This is the documentation for the Phoenix project.
+  Combines the best parts of modern web development.
   """
 
   use Application
@@ -36,8 +36,9 @@ defmodule Combo do
   end
 
   @doc """
-  Returns the configured JSON module.
-
+  Returns the value of `:json_module` option, which specifies the module
+  for JSON encoding.
+  
   To customize the JSON module, including the following in your
   `config/config.exs`:
   
@@ -49,7 +50,8 @@ defmodule Combo do
   end
 
   @doc """
-  Returns the `:plug_init_mode` that controls when plugs are initialized.
+  Returns the value of `:plug_init_mode` option that controls when plugs are
+  initialized.
 
   It's recommended to set it to `:runtime` in development for compilation time
   improvements. It must be `:compile` in production (the default).

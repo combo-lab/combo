@@ -30,7 +30,7 @@ defmodule Combo.MixProject do
       docs: docs(),
       aliases: aliases(),
       source_url: @scm_url,
-      description: "Peace of mind from prototype to production",
+      description: "Combines the best parts of modern web development.",
       test_ignore_filters: [
         &String.starts_with?(&1, "test/fixtures/"),
         &String.starts_with?(&1, "test/support/")
