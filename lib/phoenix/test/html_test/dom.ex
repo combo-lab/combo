@@ -33,7 +33,9 @@ defmodule Combo.HTMLTest.DOM do
 
   @spec to_lazy(LazyHTML.Tree.t()) :: LazyHTML.t()
   def to_lazy(tree) do
-    LazyHTML.from_tree(tree)
+    tree
+    |> List.wrap()
+    |> LazyHTML.from_tree()
   end
 
   @spec to_tree(LazyHTML.t()) :: String.t()
