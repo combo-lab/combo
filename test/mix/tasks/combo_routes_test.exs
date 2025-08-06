@@ -54,7 +54,7 @@ defmodule Mix.Tasks.Combo.RoutesTest do
   test "format routes for router" do
     run(["ComboTestWeb.Router", "--no-compile"])
     assert_received {:mix_shell, :info, [routes]}
-    assert routes =~ "page_path  GET  /  PageController :index"
+    assert routes =~ "GET  /  PageController :index"
   end
 
   test "format routes for forwarded router that implements verified routes" do
@@ -74,6 +74,6 @@ defmodule Mix.Tasks.Combo.RoutesTest do
   test "overrides module name for route with :mfa metadata" do
     run(["ComboTestLiveWeb.Router", "--no-compile"])
     assert_received {:mix_shell, :info, [routes]}
-    assert routes =~ "page_path  GET  /  PageController.Live :index"
+    assert routes =~ "GET  /  PageController.Live :index"
   end
 end
