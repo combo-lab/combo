@@ -139,7 +139,7 @@ defmodule Phoenix.Integration.EndpointTest do
 
       {:ok, resp} = HTTPClient.request(:get, "http://127.0.0.1:#{@prod}/unknown?_format=json", %{})
       assert resp.status == 404
-      assert resp.body |> Combo.json_library().decode!() == %{"error" => "Got 404 from error with GET"}
+      assert resp.body |> Combo.json_module().decode!() == %{"error" => "Got 404 from error with GET"}
 
       assert capture_log(fn ->
         {:ok, resp} = HTTPClient.request(:get, "http://127.0.0.1:#{@prod}/oops", %{})

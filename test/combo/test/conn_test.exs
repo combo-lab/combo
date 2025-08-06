@@ -120,7 +120,7 @@ defmodule Phoenix.Test.ConnTest do
       build_conn()
       |> put_req_header("content-type", "application/json")
       |> post(:hello, "[1, 2, 3]")
-      |> Plug.Parsers.call(Plug.Parsers.init(parsers: [:json], json_decoder: Combo.json_library()))
+      |> Plug.Parsers.call(Plug.Parsers.init(parsers: [:json], json_decoder: Combo.json_module()))
 
     assert conn.method == "POST"
     assert conn.path_info == []

@@ -1,14 +1,13 @@
 defmodule Combo do
   @moduledoc """
   This is the documentation for the Phoenix project.
-
-  To get started, see our [overview guides](overview.html).
   """
+
   use Application
 
   @doc false
   def start(_type, _args) do
-    warn_on_missing_json_library()
+    warn_on_missing_json_module()
 
     # Warm up caches
     _ = Combo.Template.engines()
@@ -37,16 +36,16 @@ defmodule Combo do
   end
 
   @doc """
-  Returns the configured JSON encoding library.
+  Returns the configured JSON module.
 
-  To customize the JSON library, including the following in your
+  To customize the JSON module, including the following in your
   `config/config.exs`:
   
-      config :combo, :json_library, AlternativeJsonLibrary
+      config :combo, :json_module, AlternativeJsonModule
 
   """
-  def json_library do
-    Application.get_env(:combo, :json_library, Jason)
+  def json_module do
+    Application.get_env(:combo, :json_module, Jason)
   end
 
   @doc """
@@ -61,8 +60,8 @@ defmodule Combo do
     Application.get_env(:combo, :plug_init_mode, :compile)
   end
 
-  defp warn_on_missing_json_library do
-    configured_lib = Application.get_env(:combo, :json_library)
+  defp warn_on_missing_json_module do
+    configured_lib = Application.get_env(:combo, :json_module)
 
     if configured_lib && not Code.ensure_loaded?(configured_lib) do
       IO.warn("""

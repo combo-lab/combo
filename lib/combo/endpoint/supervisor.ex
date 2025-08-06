@@ -412,7 +412,7 @@ defmodule Combo.Endpoint.Supervisor do
       outer = Application.app_dir(app, inner)
 
       if File.exists?(outer) do
-        outer |> File.read!() |> Combo.json_library().decode!()
+        outer |> File.read!() |> Combo.json_module().decode!()
       else
         raise ArgumentError,
               "could not find static manifest at #{inspect(outer)}. " <>

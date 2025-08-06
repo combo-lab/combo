@@ -353,7 +353,7 @@ defmodule Combo.Controller do
   @doc """
   Sends JSON response.
 
-  It uses the configured `:json_library` under the `:combo`
+  It uses the configured `:json_module` under the `:combo`
   application for `:json` to pick up the encoder module.
 
   ## Examples
@@ -363,7 +363,7 @@ defmodule Combo.Controller do
   """
   @spec json(Plug.Conn.t(), term) :: Plug.Conn.t()
   def json(conn, data) do
-    response = Combo.json_library().encode_to_iodata!(data)
+    response = Combo.json_module().encode_to_iodata!(data)
     send_resp(conn, conn.status || 200, "application/json", response)
   end
 
