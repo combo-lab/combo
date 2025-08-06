@@ -1709,40 +1709,6 @@ defmodule Combo.Controller do
   end
 
   @doc """
-  Returns a map of previously set flash messages or an empty map.
-
-  ## Examples
-
-      iex> get_flash(conn)
-      %{}
-
-      iex> conn = put_flash(conn, :info, "Welcome Back!")
-      iex> get_flash(conn)
-      %{"info" => "Welcome Back!"}
-
-  """
-  @deprecated "get_flash/1 is deprecated. Use the @flash assign provided by the :fetch_flash plug"
-  def get_flash(conn) do
-    Map.get(conn.assigns, :flash) ||
-      raise ArgumentError, message: "flash not fetched, call fetch_flash/2"
-  end
-
-  @doc """
-  Returns a message from flash by `key` (or `nil` if no message is available for `key`).
-
-  ## Examples
-
-      iex> conn = put_flash(conn, :info, "Welcome Back!")
-      iex> get_flash(conn, :info)
-      "Welcome Back!"
-
-  """
-  @deprecated "get_flash/2 is deprecated. Use Combo.Flash.get(@flash, key) instead"
-  def get_flash(conn, key) do
-    get_flash(conn)[flash_key(key)]
-  end
-
-  @doc """
   Generates a status message from the template name.
 
   ## Examples

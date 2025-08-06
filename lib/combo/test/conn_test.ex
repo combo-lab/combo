@@ -271,22 +271,6 @@ defmodule Combo.ConnTest do
   defdelegate fetch_flash(conn), to: Combo.Controller
 
   @doc """
-  Gets the whole flash storage.
-  """
-  @spec get_flash(Conn.t) :: map
-  @deprecated "get_flash/1 is deprecated. Use conn.assigns.flash instead"
-  def get_flash(conn), do: conn.assigns.flash
-
-  @doc """
-  Gets the given key from the flash storage.
-  """
-  @spec get_flash(Conn.t, term) :: term
-  @deprecated "get_flash/2 is deprecated. Use Combo.Flash.get/2 instead"
-  def get_flash(conn, key) do
-    Combo.Flash.get(conn.assigns.flash, key)
-  end
-
-  @doc """
   Puts the given value under key in the flash storage.
   """
   @spec put_flash(Conn.t, term, term) :: Conn.t
