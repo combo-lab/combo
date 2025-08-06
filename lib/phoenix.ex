@@ -20,11 +20,11 @@ defmodule Phoenix do
     end
 
     if filter = Application.get_env(:phoenix, :filter_parameters) do
-      Application.put_env(:phoenix, :filter_parameters, Phoenix.Logger.compile_filter(filter))
+      Application.put_env(:phoenix, :filter_parameters, Combo.Logger.compile_filter(filter))
     end
 
     if Application.fetch_env!(:phoenix, :logger) do
-      Phoenix.Logger.install()
+      Combo.Logger.install()
     end
 
     children = [

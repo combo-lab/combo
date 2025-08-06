@@ -1,4 +1,4 @@
-defmodule Phoenix.Logger do
+defmodule Combo.Logger do
   @moduledoc """
   Instrumenter to handle logging of various instrumentation events.
 

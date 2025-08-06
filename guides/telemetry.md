@@ -149,7 +149,7 @@ took to get the response:
 
 ### Phoenix Telemetry Events
 
-A full list of all Phoenix telemetry events can be found in `Phoenix.Logger`
+A full list of all Phoenix telemetry events can be found in `Combo.Logger`
 
 ## Metrics
 
@@ -193,7 +193,7 @@ guide.
 
 > The full list of `:telemetry` events emitted from Phoenix,
 along with their measurements and metadata, is available in
-the "Instrumentation" section of the `Phoenix.Logger` module
+the "Instrumentation" section of the `Combo.Logger` module
 documentation.
 
 ### An Ecto Example
@@ -522,7 +522,7 @@ their own (in alphabetical order, please):
 * [Broadway](https://hexdocs.pm/broadway) - [Events](https://hexdocs.pm/broadway/Broadway.html#module-telemetry)
 * [Ecto](https://hexdocs.pm/ecto) - [Events](https://hexdocs.pm/ecto/Ecto.Repo.html#module-telemetry-events)
 * [Oban](https://hexdocs.pm/oban) - [Events](https://hexdocs.pm/oban/Oban.Telemetry.html)
-* [Phoenix](https://hexdocs.pm/phoenix) - [Events](https://hexdocs.pm/phoenix/Phoenix.Logger.html#module-instrumentation)
+* [Phoenix](https://hexdocs.pm/phoenix) - [Events](https://hexdocs.pm/phoenix/Combo.Logger.html#module-instrumentation)
 * [Plug](https://hexdocs.pm/plug) - [Events](https://hexdocs.pm/plug/Plug.Telemetry.html)
 * [Tesla](https://hexdocs.pm/tesla) - [Events](https://hexdocs.pm/tesla/Tesla.Middleware.Telemetry.html)
 
