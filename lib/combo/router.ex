@@ -347,13 +347,13 @@ defmodule Combo.Router do
     start = System.monotonic_time()
     measurements = %{system_time: System.system_time()}
     metadata = %{metadata | conn: conn}
-    :telemetry.execute([:phoenix, :router_dispatch, :start], measurements, metadata)
+    :telemetry.execute([:combo, :router_dispatch, :start], measurements, metadata)
 
     case pipeline.(conn) do
       %Plug.Conn{halted: true} = halted_conn ->
         measurements = %{duration: System.monotonic_time() - start}
         metadata = %{metadata | conn: halted_conn}
-        :telemetry.execute([:phoenix, :router_dispatch, :stop], measurements, metadata)
+        :telemetry.execute([:combo, :router_dispatch, :stop], measurements, metadata)
         halted_conn
 
       %Plug.Conn{} = piped_conn ->
@@ -363,21 +363,21 @@ defmodule Combo.Router do
           conn ->
             measurements = %{duration: System.monotonic_time() - start}
             metadata = %{metadata | conn: conn}
-            :telemetry.execute([:phoenix, :router_dispatch, :stop], measurements, metadata)
+            :telemetry.execute([:combo, :router_dispatch, :stop], measurements, metadata)
             conn
         rescue
           e in Plug.Conn.WrapperError ->
             measurements = %{duration: System.monotonic_time() - start}
             new_metadata = %{conn: conn, kind: :error, reason: e, stacktrace: __STACKTRACE__}
             metadata = Map.merge(metadata, new_metadata)
-            :telemetry.execute([:phoenix, :router_dispatch, :exception], measurements, metadata)
+            :telemetry.execute([:combo, :router_dispatch, :exception], measurements, metadata)
             Plug.Conn.WrapperError.reraise(e)
         catch
           kind, reason ->
             measurements = %{duration: System.monotonic_time() - start}
             new_metadata = %{conn: conn, kind: kind, reason: reason, stacktrace: __STACKTRACE__}
             metadata = Map.merge(metadata, new_metadata)
-            :telemetry.execute([:phoenix, :router_dispatch, :exception], measurements, metadata)
+            :telemetry.execute([:combo, :router_dispatch, :exception], measurements, metadata)
             Plug.Conn.WrapperError.reraise(piped_conn, kind, reason, __STACKTRACE__)
         end
     end

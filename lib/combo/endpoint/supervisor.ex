@@ -18,7 +18,7 @@ defmodule Combo.Endpoint.Supervisor do
 
       measurements = %{system_time: System.system_time()}
       metadata = %{pid: pid, config: conf, module: mod, otp_app: otp_app}
-      :telemetry.execute([:phoenix, :endpoint, :init], measurements, metadata)
+      :telemetry.execute([:combo, :endpoint, :init], measurements, metadata)
 
       ok
     end

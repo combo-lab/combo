@@ -115,7 +115,7 @@ defmodule Combo.Socket.PoolDrainer do
       count = if index == rounds, do: length(pids), else: size
 
       :telemetry.execute(
-        [:phoenix, :socket_drain],
+        [:combo, :socket_drain],
         %{count: count, total: total, index: index, rounds: rounds},
         %{
           endpoint: endpoint,

@@ -304,9 +304,9 @@ defmodule Combo.Router.RoutingTest do
   end
 
   describe "telemetry" do
-    @router_start_event [:phoenix, :router_dispatch, :start]
-    @router_stop_event [:phoenix, :router_dispatch, :stop]
-    @router_exception_event [:phoenix, :router_dispatch, :exception]
+    @router_start_event [:combo, :router_dispatch, :start]
+    @router_stop_event [:combo, :router_dispatch, :stop]
+    @router_exception_event [:combo, :router_dispatch, :exception]
     @router_events [
       @router_start_event,
       @router_stop_event,

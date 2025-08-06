@@ -987,7 +987,7 @@ defmodule Combo.Controller do
   defp template_render(view, template, format, assigns) do
     metadata = %{view: view, template: template, format: format}
 
-    :telemetry.span([:phoenix, :controller, :render], metadata, fn ->
+    :telemetry.span([:combo, :controller, :render], metadata, fn ->
       {Combo.Template.render(view, template, format, assigns), metadata}
     end)
   end
@@ -995,7 +995,7 @@ defmodule Combo.Controller do
   defp template_render_to_iodata(view, template, format, assigns) do
     metadata = %{view: view, template: template, format: format}
 
-    :telemetry.span([:phoenix, :controller, :render], metadata, fn ->
+    :telemetry.span([:combo, :controller, :render], metadata, fn ->
       {Combo.Template.render_to_iodata(view, template, format, assigns), metadata}
     end)
   end

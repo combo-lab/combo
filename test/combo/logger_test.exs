@@ -97,7 +97,7 @@ defmodule Combo.LoggerTest do
     test "invokes log level callback from Plug.Telemetry" do
       opts =
         Plug.Telemetry.init(
-          event_prefix: [:phoenix, :endpoint],
+          event_prefix: [:combo, :endpoint],
           log: {__MODULE__, :log_level, []}
         )
 
@@ -120,7 +120,7 @@ defmodule Combo.LoggerTest do
 
     test "invokes log level from Plug.Telemetry" do
       assert ExUnit.CaptureLog.capture_log(fn ->
-               opts = Plug.Telemetry.init(event_prefix: [:phoenix, :endpoint], log: :error)
+               opts = Plug.Telemetry.init(event_prefix: [:combo, :endpoint], log: :error)
                Plug.Telemetry.call(conn(:get, "/"), opts)
              end) =~ "[error] GET /"
     end

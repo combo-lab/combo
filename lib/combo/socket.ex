@@ -502,7 +502,7 @@ defmodule Combo.Socket do
         }
 
         duration = System.monotonic_time() - start
-        :telemetry.execute([:phoenix, :socket_connected], %{duration: duration}, metadata)
+        :telemetry.execute([:combo, :socket_connected], %{duration: duration}, metadata)
         result
 
       :error ->

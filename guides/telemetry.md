@@ -131,7 +131,7 @@ A Telemetry event is made up of the following:
 
 Here is an example of an event from your endpoint:
 
-* `[:phoenix, :endpoint, :stop]` - dispatched by
+* `[:combo, :endpoint, :stop]` - dispatched by
   `Plug.Telemetry`, one of the default plugs in your endpoint, whenever the response is
   sent
 
@@ -144,7 +144,7 @@ will emit a "stop" event, with a measurement of how long it
 took to get the response:
 
 ```elixir
-:telemetry.execute([:phoenix, :endpoint, :stop], %{duration: duration}, %{conn: conn})
+:telemetry.execute([:combo, :endpoint, :stop], %{duration: duration}, %{conn: conn})
 ```
 
 ### Phoenix Telemetry Events
@@ -302,7 +302,7 @@ _and_ method?
 Let's take a look at another event emitted during the HTTP
 request lifecycle, this time from `Combo.Router`:
 
-* `[:phoenix, :router_dispatch, :stop]` - dispatched by
+* `[:combo, :router_dispatch, :stop]` - dispatched by
   Combo.Router after successfully dispatching to a matched
   route
 

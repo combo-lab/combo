@@ -86,7 +86,7 @@ defmodule Combo.Endpoint.RenderErrors do
       render(conn, status, kind, reason, stack, opts)
     after
       duration = System.monotonic_time() - start
-      :telemetry.execute([:phoenix, :error_rendered], %{duration: duration}, metadata)
+      :telemetry.execute([:combo, :error_rendered], %{duration: duration}, metadata)
     end
   end
 
