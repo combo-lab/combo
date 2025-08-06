@@ -1,8 +1,8 @@
-Code.require_file "../../../installer/test/mix_helper.exs", __DIR__
+Code.require_file "./mix_helper.exs", __DIR__
 
-defmodule Mix.Tasks.Phx.Gen.SecretTest do
+defmodule Mix.Tasks.Combo.Gen.SecretTest do
   use ExUnit.Case
-  import Mix.Tasks.Phx.Gen.Secret
+  import Mix.Tasks.Combo.Gen.Secret
 
   test "generates a secret" do
     run []
@@ -17,14 +17,14 @@ defmodule Mix.Tasks.Phx.Gen.SecretTest do
   end
 
   test "raises on invalid args" do
-    message = "mix phx.gen.secret expects a length as integer or no argument at all"
+    message = "mix combo.gen.secret expects a length as integer or no argument at all"
     assert_raise Mix.Error, message, fn -> run ["bad"] end
     assert_raise Mix.Error, message, fn -> run ["32bad"] end
     assert_raise Mix.Error, message, fn -> run ["32", "bad"] end
   end
 
   test "raises when length is too short" do
-    message = "The secret should be at least 32 characters long"
+    message = "mix combo.gen.secret expects a length to be at least 32 characters long"
     assert_raise Mix.Error, message, fn -> run ["0"] end
     assert_raise Mix.Error, message, fn -> run ["31"] end
   end

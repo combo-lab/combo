@@ -1,10 +1,10 @@
-defmodule Mix.Tasks.Phx.Digest.Clean do
+defmodule Mix.Tasks.Combo.Digest.Clean do
   use Mix.Task
   @default_output_path "priv/static"
   @default_age 3600
   @default_keep 2
 
-  @shortdoc "Removes old versions of static assets."
+  @shortdoc "Removes old versions of static assets"
   @recursive true
 
   @moduledoc """
@@ -14,10 +14,10 @@ defmodule Mix.Tasks.Phx.Digest.Clean do
   2 previous versions as well as any digest created
   in the last hour.
 
-      $ mix phx.digest.clean
-      $ mix phx.digest.clean -o /www/public
-      $ mix phx.digest.clean --age 600 --keep 3
-      $ mix phx.digest.clean --all
+      $ mix combo.digest.clean
+      $ mix combo.digest.clean -o /www/public
+      $ mix combo.digest.clean --age 600 --keep 3
+      $ mix combo.digest.clean --all
 
   ## Options
 
@@ -35,18 +35,19 @@ defmodule Mix.Tasks.Phx.Digest.Clean do
       will be removed. Note this overrides the age and keep switches.
 
     * `--no-compile` - do not run mix compile
+
   """
 
   @switches [output: :string, age: :integer, keep: :integer, all: :boolean]
 
-  @doc false
+  @impl Mix.Task
   def run(all_args) do
     # Ensure all compressors are compiled.
     if "--no-compile" not in all_args do
       Mix.Task.run("compile", all_args)
     end
 
-    Mix.Task.reenable("phx.digest.clean")
+    Mix.Task.reenable("combo.digest.clean")
 
     {:ok, _} = Application.ensure_all_started(:phoenix)
 

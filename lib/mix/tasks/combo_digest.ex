@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Phx.Digest do
+defmodule Mix.Tasks.Combo.Digest do
   use Mix.Task
   @default_input_path "priv/static"
 
@@ -8,8 +8,8 @@ defmodule Mix.Tasks.Phx.Digest do
   @moduledoc """
   Digests and compresses static files.
 
-      $ mix phx.digest
-      $ mix phx.digest priv/static -o /www/public
+      $ mix combo.digest
+      $ mix combo.digest priv/static -o /www/public
 
   The first argument is the path where the static files are located. The
   `-o` option indicates the path that will be used to save the digested and
@@ -33,8 +33,8 @@ defmodule Mix.Tasks.Phx.Digest do
     * app-eb0a5b9302e8d32828d8a73f137cc8f0.js.gz
     * cache_manifest.json
 
-  You can use `mix phx.digest.clean` to prune stale versions of the assets.
-  If you want to remove all produced files, run `mix phx.digest.clean --all`.
+  You can use `mix combo.digest.clean` to prune stale versions of the assets.
+  If you want to remove all produced files, run `mix combo.digest.clean --all`.
 
   ## vsn
 
@@ -49,6 +49,7 @@ defmodule Mix.Tasks.Phx.Digest do
     * `--no-vsn` - do not add version query string to assets
 
     * `--no-compile` - do not run mix compile
+
   """
 
   @default_opts [vsn: true]
@@ -61,7 +62,7 @@ defmodule Mix.Tasks.Phx.Digest do
       Mix.Task.run("compile", all_args)
     end
 
-    Mix.Task.reenable("phx.digest")
+    Mix.Task.reenable("combo.digest")
 
     {:ok, _} = Application.ensure_all_started(:phoenix)
 

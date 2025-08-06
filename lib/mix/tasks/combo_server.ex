@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Phx.Server do
+defmodule Mix.Tasks.Combo.Server do
   use Mix.Task
 
   @shortdoc "Starts applications and their servers"
@@ -16,18 +16,19 @@ defmodule Mix.Tasks.Phx.Server do
   Furthermore, this task accepts the same command-line options as
   `mix run`.
 
-  For example, to run `phx.server` without recompiling:
+  For example, to run `combo.server` without recompiling:
 
-      $ mix phx.server --no-compile
+      $ mix combo.server --no-compile
 
   The `--no-halt` flag is automatically added.
 
   Note that the `--no-deps-check` flag cannot be used this way,
-  because Mix needs to check dependencies to find `phx.server`.
+  because Mix needs to check dependencies to find `combo.server`.
 
-  To run `phx.server` without checking dependencies, you can run:
+  To run `combo.server` without checking dependencies, you can run:
 
-      $ mix do deps.loadpaths --no-deps-check, phx.server
+      $ mix do deps.loadpaths --no-deps-check, combo.server
+
   """
 
   @impl true
