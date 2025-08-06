@@ -62,8 +62,8 @@ defmodule Combo.Template.CEExEngine.Formatter do
 
     * `:inline_matcher` - a list of regular expressions to determine if a component
       should be treated as inline.
-      Defaults to `[~r/link/, ~r/button/]`, which treats any component with `link
-      or `button` in its name as inline.
+      Defaults to `["link", "button"]`, which treats any component with `link` or
+      `button` in its name as inline.
       Can be disabled by setting it to an empty list.
 
   ## Formatting
@@ -303,7 +303,7 @@ defmodule Combo.Template.CEExEngine.Formatter do
     else
       line_length = opts[:heex_line_length] || opts[:line_length] || @default_line_length
       newlines = :binary.matches(source, ["\r\n", "\n"])
-      inline_matcher = opts[:inline_matcher] || [~r/link/, ~r/button/]
+      inline_matcher = opts[:inline_matcher] || ["link", "button"]
 
       opts =
         Keyword.update(opts, :attribute_formatters, %{}, fn formatters ->
@@ -567,7 +567,7 @@ defmodule Combo.Template.CEExEngine.Formatter do
         preceeded_by_non_white_space?(upper_buffer) ->
           {:preserve, Enum.reverse(reversed_buffer)}
 
-       inline?(tag_name, opts.inline_elements, opts.inline_matcher) ->
+        inline?(tag_name, opts.inline_elements, opts.inline_matcher) ->
           {:inline,
            reversed_buffer
            |> may_set_preserve_on_text(:last)
@@ -641,9 +641,8 @@ defmodule Combo.Template.CEExEngine.Formatter do
 
   defp inline?(tag_name, inline_elements, inline_matcher) do
     tag_name in inline_elements or
-      Enum.any?(inline_matcher, &Regex.match?(&1, tag_name))
+      Enum.any?(inline_matcher, &(tag_name =~ &1))
   end
-
 
   defp count_newlines_before_text(binary),
     do: count_newlines_until_text(binary, 0, 0, 1)
@@ -745,7 +744,10 @@ defmodule Combo.Template.CEExEngine.Formatter do
   end
 
   defp content_from_source(
-         {source, newlines}, {line_start, column_start}, {line_end, column_end}) do
+         {source, newlines},
+         {line_start, column_start},
+         {line_end, column_end}
+       ) do
     lines = Enum.slice([{0, 0} | newlines], (line_start - 1)..(line_end - 1))
     [first_line | _] = lines
     [last_line | _] = Enum.reverse(lines)
