@@ -116,13 +116,13 @@ defmodule Combo.VerifiedRoutesTest do
   end
 
   defp conn_with_endpoint(endpoint \\ Endpoint) do
-    conn(:get, "/") |> Plug.Conn.put_private(:phoenix_endpoint, endpoint)
+    conn(:get, "/") |> Plug.Conn.put_private(:combo_endpoint, endpoint)
   end
 
   defp socket_with_endpoint(endpoint \\ Endpoint), do: %Combo.Socket{endpoint: endpoint}
 
   def conn_with_script_name(script_name \\ ~w(api)) do
-    conn = Plug.Conn.put_private(conn(:get, "/"), :phoenix_endpoint, ScriptName)
+    conn = Plug.Conn.put_private(conn(:get, "/"), :combo_endpoint, ScriptName)
 
     put_in(conn.script_name, script_name)
   end
@@ -482,7 +482,7 @@ defmodule Combo.VerifiedRoutesTest do
                "https://static.example.com/api/images/foo.png"
     end
 
-    test "phoenix_router_url with string takes precedence over endpoint" do
+    test "combo_router_url with string takes precedence over endpoint" do
       url = "https://phoenixframework.org"
       conn = Combo.Controller.put_router_url(conn_with_endpoint(), url)
 
@@ -491,7 +491,7 @@ defmodule Combo.VerifiedRoutesTest do
       assert url(conn, ~p"/admin/new/messages/#{123}") == url <> "/admin/new/messages/123"
     end
 
-    test "phoenix_router_url with URI takes precedence over endpoint" do
+    test "combo_router_url with URI takes precedence over endpoint" do
       uri = %URI{scheme: "https", host: "phoenixframework.org", port: 123, path: "/path"}
       conn = Combo.Controller.put_router_url(conn_with_endpoint(), uri)
 
@@ -501,7 +501,7 @@ defmodule Combo.VerifiedRoutesTest do
                "https://phoenixframework.org:123/path/admin/new/messages/1"
     end
 
-    test "phoenix_static_url with string takes precedence over endpoint" do
+    test "combo_static_url with string takes precedence over endpoint" do
       url = "https://phoenixframework.org"
 
       conn = Combo.Controller.put_static_url(conn_with_endpoint(), url)
@@ -511,7 +511,7 @@ defmodule Combo.VerifiedRoutesTest do
       assert url(conn, ~p"/images/foo.png") == url <> "/images/foo.png"
     end
 
-    test "phoenix_static_url set to string with path results in static url with that path" do
+    test "combo_static_url set to string with path results in static url with that path" do
       url = "https://phoenixframework.org/path"
       conn = Combo.Controller.put_static_url(conn_with_endpoint(), url)
       assert url(conn, ~p"/images/foo.png") == url <> "/images/foo.png"
@@ -520,7 +520,7 @@ defmodule Combo.VerifiedRoutesTest do
       assert url(conn, ~p"/images/foo.png") == url <> "/images/foo.png"
     end
 
-    test "phoenix_static_url with URI takes precedence over endpoint" do
+    test "combo_static_url with URI takes precedence over endpoint" do
       uri = %URI{scheme: "https", host: "phoenixframework.org", port: 123}
 
       conn = Combo.Controller.put_static_url(conn_with_endpoint(), uri)
@@ -530,7 +530,7 @@ defmodule Combo.VerifiedRoutesTest do
       assert url(conn, ~p"/images/foo.png") == "https://phoenixframework.org:123/images/foo.png"
     end
 
-    test "phoenix_static_url set to URI with path results in static url with that path" do
+    test "combo_static_url set to URI with path results in static url with that path" do
       uri = %URI{scheme: "https", host: "phoenixframework.org", port: 123, path: "/path"}
 
       conn = Combo.Controller.put_static_url(conn_with_endpoint(), uri)

@@ -2,9 +2,6 @@ defmodule Combo.HTML.Form do
   @moduledoc ~S"""
   Define a `Combo.HTML.Form` struct and functions to interact with it.
 
-  For building actual forms in your Phoenix application, see
-  [the `Phoenix.Component.form/1` component](https://hexdocs.pm/phoenix_live_view/Phoenix.Component.html#form/1).
-
   ## Access behaviour
 
   The `Combo.HTML.Form` struct implements the `Access` behaviour.

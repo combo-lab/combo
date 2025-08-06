@@ -1046,10 +1046,10 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
     def_components_calls_ast =
       if components_calls != [] do
         quote do
-          @after_verify {__MODULE__, :__phoenix_component_verify__}
+          @after_verify {__MODULE__, :__combo_component_verify__}
 
           @doc false
-          def __phoenix_component_verify__(module) do
+          def __combo_component_verify__(module) do
             unquote(__MODULE__).__verify__(module, unquote(Macro.escape(components_calls)))
           end
         end

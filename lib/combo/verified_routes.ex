@@ -240,7 +240,7 @@ defmodule Combo.VerifiedRoutes do
 
   @doc false
   def __using__(mod, opts) do
-    Module.register_attribute(mod, :phoenix_verified_routes, accumulate: true)
+    Module.register_attribute(mod, :combo_verified_routes, accumulate: true)
     Module.put_attribute(mod, :before_compile, __MODULE__)
     Module.put_attribute(mod, :router, Keyword.fetch!(opts, :router))
     Module.put_attribute(mod, :endpoint, Keyword.get(opts, :endpoint))
@@ -261,7 +261,7 @@ defmodule Combo.VerifiedRoutes do
                 "expected path_prefixes to be a list of zero-arity functions, got: #{inspect(other)}"
       end
 
-    Module.put_attribute(mod, :phoenix_verified_config, %{
+    Module.put_attribute(mod, :combo_verified_config, %{
       statics: statics,
       path_prefixes: path_prefixes
     })
@@ -292,11 +292,11 @@ defmodule Combo.VerifiedRoutes do
 
   defmacro __before_compile__(_env) do
     quote do
-      @after_verify {__MODULE__, :__phoenix_verify_routes__}
+      @after_verify {__MODULE__, :__combo_verify_routes__}
 
       @doc false
-      def __phoenix_verify_routes__(_module) do
-        unquote(__MODULE__).__verify__(@phoenix_verified_routes)
+      def __combo_verify_routes__(_module) do
+        unquote(__MODULE__).__verify__(@combo_verified_routes)
       end
     end
   end
@@ -367,7 +367,7 @@ defmodule Combo.VerifiedRoutes do
     if static? do
       static_ast
     else
-      Module.put_attribute(env.module, :phoenix_verified_routes, route)
+      Module.put_attribute(env.module, :combo_verified_routes, route)
       path_ast
     end
   end
@@ -381,7 +381,7 @@ defmodule Combo.VerifiedRoutes do
         unquote(__MODULE__).static_url(unquote_splicing([endpoint_ctx, route_ast]))
       end
     else
-      Module.put_attribute(env.module, :phoenix_verified_routes, route)
+      Module.put_attribute(env.module, :combo_verified_routes, route)
 
       quote do
         unquote(__MODULE__).unverified_url(unquote_splicing([endpoint_ctx, path_ast]))
@@ -580,8 +580,8 @@ defmodule Combo.VerifiedRoutes do
 
   def static_url(%Plug.Conn{private: private}, path) do
     case private do
-      %{phoenix_static_url: static_url} -> concat_url(static_url, path)
-      %{phoenix_endpoint: endpoint} -> static_url(endpoint, path)
+      %{combo_static_url: static_url} -> concat_url(static_url, path)
+      %{combo_endpoint: endpoint} -> static_url(endpoint, path)
     end
   end
 
@@ -617,8 +617,8 @@ defmodule Combo.VerifiedRoutes do
 
   defp guarded_unverified_url(%Plug.Conn{private: private}, path, params) do
     case private do
-      %{phoenix_router_url: url} when is_binary(url) -> concat_url(url, path, params)
-      %{phoenix_endpoint: endpoint} -> concat_url(endpoint.url(), path, params)
+      %{combo_router_url: url} when is_binary(url) -> concat_url(url, path, params)
+      %{combo_endpoint: endpoint} -> concat_url(endpoint.url(), path, params)
     end
   end
 
@@ -669,8 +669,8 @@ defmodule Combo.VerifiedRoutes do
 
   def static_path(%Plug.Conn{private: private}, path) do
     case private do
-      %{phoenix_static_url: _} -> path
-      %{phoenix_endpoint: endpoint} -> endpoint.static_path(path)
+      %{combo_static_url: _} -> path
+      %{combo_endpoint: endpoint} -> endpoint.static_path(path)
     end
   end
 
@@ -863,7 +863,7 @@ defmodule Combo.VerifiedRoutes do
   """
   def static_integrity(conn_or_socket_or_endpoint, path)
 
-  def static_integrity(%Plug.Conn{private: %{phoenix_endpoint: endpoint}}, path) do
+  def static_integrity(%Plug.Conn{private: %{combo_endpoint: endpoint}}, path) do
     static_integrity(endpoint, path)
   end
 
@@ -892,7 +892,7 @@ defmodule Combo.VerifiedRoutes do
   defp to_param(data), do: Combo.Param.to_param(data)
 
   defp build_route(route_ast, sigil_p, env, endpoint_ctx, router) do
-    config = Module.get_attribute(env.module, :phoenix_verified_config, [])
+    config = Module.get_attribute(env.module, :combo_verified_config, [])
 
     router =
       case Macro.expand(router, env) do
@@ -1012,7 +1012,7 @@ defmodule Combo.VerifiedRoutes do
   end
 
   defp build_conn_forward_path(%Plug.Conn{} = conn, router, path) do
-    with %{phoenix_router: phx_router} <- conn.private,
+    with %{combo_router: phx_router} <- conn.private,
          %{^phx_router => script_name} when is_list(script_name) <- conn.private,
          local_script when is_list(local_script) <- phx_router.__forward__(router) do
       path_with_script(path, script_name ++ local_script)

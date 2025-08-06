@@ -321,25 +321,25 @@ defmodule Combo.Controller do
   Returns the action name as an atom, raises if unavailable.
   """
   @spec action_name(Plug.Conn.t()) :: atom
-  def action_name(conn), do: conn.private.phoenix_action
+  def action_name(conn), do: conn.private.combo_action
 
   @doc """
   Returns the controller module as an atom, raises if unavailable.
   """
   @spec controller_module(Plug.Conn.t()) :: atom
-  def controller_module(conn), do: conn.private.phoenix_controller
+  def controller_module(conn), do: conn.private.combo_controller
 
   @doc """
   Returns the router module as an atom, raises if unavailable.
   """
   @spec router_module(Plug.Conn.t()) :: atom
-  def router_module(conn), do: conn.private.phoenix_router
+  def router_module(conn), do: conn.private.combo_router
 
   @doc """
   Returns the endpoint module as an atom, raises if unavailable.
   """
   @spec endpoint_module(Plug.Conn.t()) :: atom
-  def endpoint_module(conn), do: conn.private.phoenix_endpoint
+  def endpoint_module(conn), do: conn.private.combo_endpoint
 
   @doc """
   Returns the template name rendered in the view as a string
@@ -347,7 +347,7 @@ defmodule Combo.Controller do
   """
   @spec view_template(Plug.Conn.t()) :: binary | nil
   def view_template(conn) do
-    conn.private[:phoenix_template]
+    conn.private[:combo_template]
   end
 
   @doc """
@@ -536,7 +536,7 @@ defmodule Combo.Controller do
   """
   @spec put_view(Plug.Conn.t(), [{format :: atom, view}] | view) :: Plug.Conn.t()
   def put_view(%Plug.Conn{state: state} = conn, formats) when state in @unsent do
-    put_private_view(conn, :phoenix_view, :replace, formats)
+    put_private_view(conn, :combo_view, :replace, formats)
   end
 
   def put_view(%Plug.Conn{} = conn, module) do
@@ -582,7 +582,7 @@ defmodule Combo.Controller do
   # TODO: Remove | view from the spec once we deprecate put_new_view on controllers on v1.9
   @spec put_new_view(Plug.Conn.t(), [{format :: atom, view}] | view) :: Plug.Conn.t()
   def put_new_view(%Plug.Conn{state: state} = conn, formats) when state in @unsent do
-    put_private_view(conn, :phoenix_view, :new, formats)
+    put_private_view(conn, :combo_view, :new, formats)
   end
 
   def put_new_view(%Plug.Conn{} = conn, module) do
@@ -606,7 +606,7 @@ defmodule Combo.Controller do
     format = format || get_safe_format(conn)
 
     # TODO: Remove the first branch once code paths are deprecated and then removed
-    case conn.private[:phoenix_view] do
+    case conn.private[:combo_view] do
       %{_: value} when value != nil ->
         value
 
@@ -651,7 +651,7 @@ defmodule Combo.Controller do
   @spec put_layout(Plug.Conn.t(), [{format :: atom, layout}] | false) :: Plug.Conn.t()
   def put_layout(%Plug.Conn{state: state} = conn, layout) do
     if state in @unsent do
-      put_private_layout(conn, :phoenix_layout, :replace, layout)
+      put_private_layout(conn, :combo_layout, :replace, layout)
     else
       raise AlreadySentError, """
       the response was already sent.
@@ -755,7 +755,7 @@ defmodule Combo.Controller do
       """)
     end
 
-    put_private_layout(conn, :phoenix_layout, :new, layout)
+    put_private_layout(conn, :combo_layout, :new, layout)
   end
 
   @doc """
@@ -793,7 +793,7 @@ defmodule Combo.Controller do
           Plug.Conn.t()
   def put_root_layout(%Plug.Conn{state: state} = conn, layout) do
     if state in @unsent do
-      put_private_layout(conn, :phoenix_root_layout, :replace, layout)
+      put_private_layout(conn, :combo_root_layout, :replace, layout)
     else
       raise AlreadySentError, """
       the response was already sent.
@@ -811,7 +811,7 @@ defmodule Combo.Controller do
   @spec put_layout_formats(Plug.Conn.t(), [String.t()]) :: Plug.Conn.t()
   def put_layout_formats(%Plug.Conn{state: state} = conn, formats)
       when state in @unsent and is_list(formats) do
-    put_private(conn, :phoenix_layout_formats, formats)
+    put_private(conn, :combo_layout_formats, formats)
   end
 
   def put_layout_formats(%Plug.Conn{} = conn, _formats) do
@@ -828,7 +828,7 @@ defmodule Combo.Controller do
   @deprecated "layout_formats/1 is deprecated, pass a keyword list to put_layout/put_root_layout instead"
   @spec layout_formats(Plug.Conn.t()) :: [String.t()]
   def layout_formats(conn) do
-    Map.get(conn.private, :phoenix_layout_formats, ~w(html))
+    Map.get(conn.private, :combo_layout_formats, ~w(html))
   end
 
   @doc """
@@ -838,7 +838,7 @@ defmodule Combo.Controller do
   """
   @spec layout(Plug.Conn.t(), binary | nil) :: {atom, String.t() | atom} | false
   def layout(conn, format \\ nil) do
-    get_private_layout(conn, :phoenix_layout, format)
+    get_private_layout(conn, :combo_layout, format)
   end
 
   @doc """
@@ -848,7 +848,7 @@ defmodule Combo.Controller do
   """
   @spec root_layout(Plug.Conn.t(), binary | nil) :: {atom, String.t() | atom} | false
   def root_layout(conn, format \\ nil) do
-    get_private_layout(conn, :phoenix_root_layout, format)
+    get_private_layout(conn, :combo_root_layout, format)
   end
 
   defp get_private_layout(conn, priv_key, format) do
@@ -1011,7 +1011,7 @@ defmodule Combo.Controller do
       end
 
     conn
-    |> put_private(:phoenix_template, template <> "." <> format)
+    |> put_private(:combo_template, template <> "." <> format)
     |> Map.update!(:assigns, fn prev ->
       prev
       |> Map.merge(assigns)
@@ -1023,7 +1023,7 @@ defmodule Combo.Controller do
 
   defp assigns_layout(conn, _assigns, format) do
     # TODO: Remove _ handling once layouts(false) is set to remove all formats
-    case conn.private[:phoenix_layout] do
+    case conn.private[:combo_layout] do
       %{^format => bad_value, _: good_value} when good_value != false ->
         IO.warn("""
         conflicting layouts found. A layout has been set with format, such as:
@@ -1113,11 +1113,11 @@ defmodule Combo.Controller do
   `Routes.some_route_path` helpers, as those are always relative.
   """
   def put_router_url(conn, %URI{} = uri) do
-    put_private(conn, :phoenix_router_url, URI.to_string(uri))
+    put_private(conn, :combo_router_url, URI.to_string(uri))
   end
 
   def put_router_url(conn, url) when is_binary(url) do
-    put_private(conn, :phoenix_router_url, url)
+    put_private(conn, :combo_router_url, url)
   end
 
   @doc """
@@ -1128,11 +1128,11 @@ defmodule Combo.Controller do
   endpoint configuration (much like `put_router_url/2` but for static URLs).
   """
   def put_static_url(conn, %URI{} = uri) do
-    put_private(conn, :phoenix_static_url, URI.to_string(uri))
+    put_private(conn, :combo_static_url, URI.to_string(uri))
   end
 
   def put_static_url(conn, url) when is_binary(url) do
-    put_private(conn, :phoenix_static_url, url)
+    put_private(conn, :combo_static_url, url)
   end
 
   @doc """
@@ -1145,7 +1145,7 @@ defmodule Combo.Controller do
 
   See `get_format/1` for retrieval.
   """
-  def put_format(conn, format), do: put_private(conn, :phoenix_format, to_string(format))
+  def put_format(conn, format), do: put_private(conn, :combo_format, to_string(format))
 
   @doc """
   Returns the request format, such as "json", "html".
@@ -1156,11 +1156,11 @@ defmodule Combo.Controller do
   is typically set from the negotiation done in `accepts/2`.
   """
   def get_format(conn) do
-    conn.private[:phoenix_format] || conn.params["_format"]
+    conn.private[:combo_format] || conn.params["_format"]
   end
 
   defp get_safe_format(conn) do
-    conn.private[:phoenix_format] ||
+    conn.private[:combo_format] ||
       case conn.params do
         %{"_format" => format} -> format
         %{} -> nil
@@ -1628,7 +1628,7 @@ defmodule Combo.Controller do
     if Map.get(conn.assigns, :flash) do
       conn
     else
-      session_flash = get_session(conn, "phoenix_flash")
+      session_flash = get_session(conn, "combo_flash")
       conn = persist_flash(conn, session_flash || %{})
 
       register_before_send(conn, fn conn ->
@@ -1640,10 +1640,10 @@ defmodule Combo.Controller do
             conn
 
           flash_size > 0 and conn.status in 300..308 ->
-            put_session(conn, "phoenix_flash", flash)
+            put_session(conn, "combo_flash", flash)
 
           true ->
-            delete_session(conn, "phoenix_flash")
+            delete_session(conn, "combo_flash")
         end
       end)
     end

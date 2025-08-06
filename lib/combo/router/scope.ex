@@ -2,9 +2,9 @@ defmodule Combo.Router.Scope do
   alias Combo.Router.Scope
   @moduledoc false
 
-  @stack :phoenix_router_scopes
-  @pipes :phoenix_pipeline_scopes
-  @top :phoenix_top_scopes
+  @stack :combo_router_scopes
+  @pipes :combo_pipeline_scopes
+  @top :combo_top_scopes
 
   defstruct path: [],
             alias: [],

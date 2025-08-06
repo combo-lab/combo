@@ -3,7 +3,7 @@ defmodule Combo.ConfigTest do
   import Combo.Config
 
   @defaults [static: [at: "/"]]
-  @config [parsers: false, custom: true, otp_app: :phoenix_config]
+  @config [parsers: false, custom: true, otp_app: :combo_config]
   @all @config ++ @defaults
 
   test "reads configuration from env", meta do

@@ -295,8 +295,8 @@ defmodule Combo.Socket do
       import Combo.Socket
       @behaviour Combo.Socket
       @before_compile Combo.Socket
-      Module.register_attribute(__MODULE__, :phoenix_channels, accumulate: true)
-      @phoenix_socket_options unquote(opts)
+      Module.register_attribute(__MODULE__, :combo_channels, accumulate: true)
+      @combo_socket_options unquote(opts)
 
       ## Callbacks
 
@@ -304,16 +304,16 @@ defmodule Combo.Socket do
 
       @doc false
       def child_spec(opts) do
-        Combo.Socket.__child_spec__(__MODULE__, opts, @phoenix_socket_options)
+        Combo.Socket.__child_spec__(__MODULE__, opts, @combo_socket_options)
       end
 
       @doc false
       def drainer_spec(opts) do
-        Combo.Socket.__drainer_spec__(__MODULE__, opts, @phoenix_socket_options)
+        Combo.Socket.__drainer_spec__(__MODULE__, opts, @combo_socket_options)
       end
 
       @doc false
-      def connect(map), do: Combo.Socket.__connect__(__MODULE__, map, @phoenix_socket_options)
+      def connect(map), do: Combo.Socket.__connect__(__MODULE__, map, @combo_socket_options)
 
       @doc false
       def init(state), do: Combo.Socket.__init__(state)
@@ -397,7 +397,7 @@ defmodule Combo.Socket do
       end
 
     quote do
-      @phoenix_channels {unquote(topic_pattern), unquote(module), unquote(opts)}
+      @combo_channels {unquote(topic_pattern), unquote(module), unquote(opts)}
     end
   end
 
@@ -409,7 +409,7 @@ defmodule Combo.Socket do
   defmacro __before_compile__(env) do
     channels =
       env.module
-      |> Module.get_attribute(:phoenix_channels, [])
+      |> Module.get_attribute(:combo_channels, [])
       |> Enum.reverse()
 
     channel_defs =

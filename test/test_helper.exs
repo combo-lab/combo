@@ -11,7 +11,7 @@ defmodule Phoenix.ErrorView do
   end
 
   def render(template, %{conn: conn}) do
-    unless conn.private.phoenix_endpoint do
+    unless conn.private.combo_endpoint do
       raise "no endpoint in error view"
     end
     "#{template} from Phoenix.ErrorView"

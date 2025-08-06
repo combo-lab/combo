@@ -21,8 +21,8 @@ defmodule Combo.Endpoint.SupervisorTest do
   defmodule HTTPEnvVarEndpoint do
     def config(:otp_app), do: :phoenix
     def config(:https), do: false
-    def config(:http), do: [port: System.get_env("PHOENIX_PORT")]
-    def config(:url), do: [host: System.get_env("PHOENIX_HOST")]
+    def config(:http), do: [port: System.get_env("COMBO_PORT")]
+    def config(:url), do: [host: System.get_env("COMBO_HOST")]
     def config(_), do: nil
   end
 
@@ -47,8 +47,8 @@ defmodule Combo.Endpoint.SupervisorTest do
 
   setup_all do
     Application.put_env(:phoenix, SupervisorApp.Endpoint, custom: true)
-    System.put_env("PHOENIX_PORT", "8080")
-    System.put_env("PHOENIX_HOST", "example.org")
+    System.put_env("COMBO_PORT", "8080")
+    System.put_env("COMBO_HOST", "example.org")
 
     [HTTPSEndpoint, HTTPEndpoint, HTTPEnvVarEndpoint, URLEndpoint, StaticURLEndpoint]
     |> Enum.each(&Supervisor.warmup/1)

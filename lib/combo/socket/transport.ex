@@ -499,7 +499,7 @@ defmodule Combo.Socket.Transport do
           {:session, connect_session(conn, endpoint, session, opts)}
 
         :auth_token ->
-          {:auth_token, conn.private[:phoenix_transport_auth_token]}
+          {:auth_token, conn.private[:combo_transport_auth_token]}
 
         {key, val} ->
           {key, val}

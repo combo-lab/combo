@@ -30,9 +30,9 @@ defmodule Combo.Controller.FlashTest do
     conn =
       conn(:get, "/")
       |> with_session()
-      |> put_session("phoenix_flash", expected_flash)
+      |> put_session("combo_flash", expected_flash)
       |> fetch_flash()
-      |> put_session("phoenix_flash", %{"foo" => "baz"})
+      |> put_session("combo_flash", %{"foo" => "baz"})
       |> fetch_flash()
 
     assert conn.assigns.flash == expected_flash

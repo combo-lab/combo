@@ -1,6 +1,6 @@
 # Release Instructions
 
-  1. Check related deps for required version bumps and compatibility (`phoenix_ecto`, `phoenix_html`)
+  1. Check related deps for required version bumps and compatibility.
   2. Bump version in related files below
   3. Bump external dependency version in related external files below
   4. Run tests:

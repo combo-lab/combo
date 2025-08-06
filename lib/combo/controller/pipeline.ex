@@ -11,7 +11,7 @@ defmodule Combo.Controller.Pipeline do
 
       Module.register_attribute(__MODULE__, :plugs, accumulate: true)
       @before_compile Combo.Controller.Pipeline
-      @phoenix_fallback :unregistered
+      @combo_fallback :unregistered
 
       @doc false
       def init(opts), do: opts
@@ -20,14 +20,14 @@ defmodule Combo.Controller.Pipeline do
       def call(conn, action) when is_atom(action) do
         conn
         |> merge_private(
-          phoenix_controller: __MODULE__,
-          phoenix_action: action
+          combo_controller: __MODULE__,
+          combo_action: action
         )
-        |> phoenix_controller_pipeline(action)
+        |> combo_controller_pipeline(action)
       end
 
       @doc false
-      def action(%Plug.Conn{private: %{phoenix_action: action}} = conn, _options) do
+      def action(%Plug.Conn{private: %{combo_action: action}} = conn, _options) do
         apply(__MODULE__, action, [conn, conn.params])
       end
 
@@ -39,10 +39,10 @@ defmodule Combo.Controller.Pipeline do
   def __action_fallback__(plug, caller) do
     plug = Macro.expand(plug, %{caller | function: {:init, 1}})
     quote bind_quoted: [plug: plug] do
-      @phoenix_fallback Combo.Controller.Pipeline.validate_fallback(
+      @combo_fallback Combo.Controller.Pipeline.validate_fallback(
                           plug,
                           __MODULE__,
-                          Module.get_attribute(__MODULE__, :phoenix_fallback)
+                          Module.get_attribute(__MODULE__, :combo_fallback)
                         )
     end
   end
@@ -84,7 +84,7 @@ defmodule Combo.Controller.Pipeline do
 
     fallback_ast =
       env.module
-      |> Module.get_attribute(:phoenix_fallback)
+      |> Module.get_attribute(:combo_fallback)
       |> build_fallback()
 
     quote do
@@ -100,13 +100,13 @@ defmodule Combo.Controller.Pipeline do
               var!(conn_before),
               reason,
               __MODULE__,
-              var!(conn_before).private.phoenix_action,
+              var!(conn_before).private.combo_action,
               __STACKTRACE__
             )
         end
       end
 
-      defp phoenix_controller_pipeline(unquote(conn), var!(action)) do
+      defp combo_controller_pipeline(unquote(conn), var!(action)) do
         var!(conn) = unquote(conn)
         var!(controller) = __MODULE__
         _ = var!(conn)

@@ -41,7 +41,7 @@ defmodule Combo.CodeReloaderTest do
 
     conn =
       conn(:get, "/")
-      |> Plug.Conn.put_private(:phoenix_endpoint, Endpoint)
+      |> Plug.Conn.put_private(:combo_endpoint, Endpoint)
       |> Combo.CodeReloader.call(opts)
 
     assert conn.state == :unset
@@ -54,7 +54,7 @@ defmodule Combo.CodeReloaderTest do
 
     conn =
       conn(:get, "/")
-      |> Plug.Conn.put_private(:phoenix_endpoint, Endpoint)
+      |> Plug.Conn.put_private(:combo_endpoint, Endpoint)
       |> Combo.CodeReloader.call(opts)
 
     assert conn.state == :sent

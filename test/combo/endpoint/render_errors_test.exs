@@ -189,7 +189,7 @@ defmodule Combo.Endpoint.RenderErrorsTest do
   end
 
   defp put_endpoint(conn) do
-    Plug.Conn.put_private(conn, :phoenix_endpoint, Endpoint)
+    Plug.Conn.put_private(conn, :combo_endpoint, Endpoint)
   end
 
   defp assert_render(status, conn, opts, func) do
@@ -266,7 +266,7 @@ defmodule Combo.Endpoint.RenderErrorsTest do
   end
 
   test "exception page uses stored _format" do
-    conn = conn(:get, "/") |> put_private(:phoenix_format, "text")
+    conn = conn(:get, "/") |> put_private(:combo_format, "text")
     body = assert_render(500, conn, [accepts: ["html", "text"]], fn -> throw(:hello) end)
     assert body == "500 in TEXT"
   end

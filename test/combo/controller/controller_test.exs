@@ -17,27 +17,27 @@ defmodule Combo.Controller.ControllerTest do
   end
 
   test "action_name/1" do
-    conn = put_private(%Conn{}, :phoenix_action, :show)
+    conn = put_private(%Conn{}, :combo_action, :show)
     assert action_name(conn) == :show
   end
 
   test "controller_module/1" do
-    conn = put_private(%Conn{}, :phoenix_controller, Hello)
+    conn = put_private(%Conn{}, :combo_controller, Hello)
     assert controller_module(conn) == Hello
   end
 
   test "router_module/1" do
-    conn = put_private(%Conn{}, :phoenix_router, Hello)
+    conn = put_private(%Conn{}, :combo_router, Hello)
     assert router_module(conn) == Hello
   end
 
   test "endpoint_module/1" do
-    conn = put_private(%Conn{}, :phoenix_endpoint, Hello)
+    conn = put_private(%Conn{}, :combo_endpoint, Hello)
     assert endpoint_module(conn) == Hello
   end
 
   test "view_template/1" do
-    conn = put_private(%Conn{}, :phoenix_template, "hello.html")
+    conn = put_private(%Conn{}, :combo_template, "hello.html")
     assert view_template(conn) == "hello.html"
     assert view_template(%Conn{}) == nil
   end
@@ -939,8 +939,8 @@ defmodule Combo.Controller.ControllerTest do
     def build_conn_for_path(path) do
       conn(:get, path)
       |> fetch_query_params()
-      |> put_private(:phoenix_endpoint, __MODULE__)
-      |> put_private(:phoenix_router, __MODULE__)
+      |> put_private(:combo_endpoint, __MODULE__)
+      |> put_private(:combo_router, __MODULE__)
     end
 
     test "current_path/1 uses the conn's query params" do

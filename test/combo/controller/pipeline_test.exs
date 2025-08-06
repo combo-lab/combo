@@ -83,7 +83,7 @@ defmodule Combo.Controller.PipelineTest do
     plug :put_assign
 
     def action(conn, _) do
-      apply(__MODULE__, conn.private.phoenix_action, [conn, conn.body_params, conn.query_params])
+      apply(__MODULE__, conn.private.combo_action, [conn, conn.body_params, conn.query_params])
     end
 
     def show(conn, _, _), do: text(conn, "show")

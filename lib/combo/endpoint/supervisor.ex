@@ -238,7 +238,7 @@ defmodule Combo.Endpoint.Supervisor do
       reloadable_apps: nil,
       # TODO: Gettext had a compiler in earlier versions,
       # but not since v0.20, so we can remove it here eventually.
-      reloadable_compilers: [:phoenix_live_view, :gettext, :elixir, :app],
+      reloadable_compilers: [:gettext, :elixir, :app],
       secret_key_base: nil,
       static_url: nil,
       url: [host: "localhost", path: "/"],
@@ -379,7 +379,7 @@ defmodule Combo.Endpoint.Supervisor do
     with_vsn? = !endpoint.config(:cache_manifest_skip_vsn)
 
     Enum.each(latest, fn {key, _} ->
-      Combo.Config.cache(endpoint, {:__phoenix_static__, "/" <> key}, fn _ ->
+      Combo.Config.cache(endpoint, {:__combo_static__, "/" <> key}, fn _ ->
         {:cache, static_cache(digests, Map.get(latest, key), with_vsn?)}
       end)
     end)

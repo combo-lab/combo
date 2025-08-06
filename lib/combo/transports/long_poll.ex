@@ -273,7 +273,7 @@ defmodule Combo.Transports.LongPoll do
         conn
 
       [token | _] ->
-        Plug.Conn.put_private(conn, :phoenix_transport_auth_token, token)
+        Plug.Conn.put_private(conn, :combo_transport_auth_token, token)
     end
   end
 

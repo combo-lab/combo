@@ -26,7 +26,7 @@ defmodule Combo.Endpoint.RenderErrors do
   defmacro __using__(opts) do
     quote do
       @before_compile Combo.Endpoint.RenderErrors
-      @phoenix_render_errors unquote(opts)
+      @combo_render_errors unquote(opts)
     end
   end
 
@@ -41,11 +41,11 @@ defmodule Combo.Endpoint.RenderErrors do
         rescue
           e in Plug.Conn.WrapperError ->
             %{conn: conn, kind: kind, reason: reason, stack: stack} = e
-            unquote(__MODULE__).__catch__(conn, kind, reason, stack, @phoenix_render_errors)
+            unquote(__MODULE__).__catch__(conn, kind, reason, stack, @combo_render_errors)
         catch
           kind, reason ->
             stack = __STACKTRACE__
-            unquote(__MODULE__).__catch__(conn, kind, reason, stack, @phoenix_render_errors)
+            unquote(__MODULE__).__catch__(conn, kind, reason, stack, @combo_render_errors)
         end
       end
     end
@@ -160,7 +160,7 @@ defmodule Combo.Endpoint.RenderErrors do
     try do
       conn =
         case conn.private do
-          %{phoenix_format: format} when is_binary(format) -> conn
+          %{combo_format: format} when is_binary(format) -> conn
           _ -> Controller.accepts(conn, Enum.map(formats, &elem(&1, 0)))
         end
 

@@ -82,7 +82,7 @@ defmodule Phoenix.Test.ConnTest do
     assert conn.method == "GET"
     assert conn.path_info == []
     assert conn.private.plug_skip_csrf_protection
-    assert conn.private.phoenix_recycled
+    assert conn.private.combo_recycled
   end
 
   test "build_conn/2 returns a new connection" do
@@ -90,7 +90,7 @@ defmodule Phoenix.Test.ConnTest do
     assert conn.method == "POST"
     assert conn.path_info == ["hello"]
     assert conn.private.plug_skip_csrf_protection
-    assert conn.private.phoenix_recycled
+    assert conn.private.combo_recycled
   end
 
   test "dispatch/5 with path" do
@@ -99,7 +99,7 @@ defmodule Phoenix.Test.ConnTest do
     assert conn.path_info == ["hello"]
     assert conn.params == %{"foo" => "bar"}
     assert conn.private.endpoint == []
-    refute conn.private.phoenix_recycled
+    refute conn.private.combo_recycled
   end
 
   test "dispatch/5 with action" do
@@ -108,7 +108,7 @@ defmodule Phoenix.Test.ConnTest do
     assert conn.path_info == []
     assert conn.params == %{"foo" => "bar"}
     assert conn.private.endpoint == :hello
-    refute conn.private.phoenix_recycled
+    refute conn.private.combo_recycled
   end
 
   test "dispatch/5 with binary body" do
@@ -153,7 +153,7 @@ defmodule Phoenix.Test.ConnTest do
     assert conn.state == :sent
     assert conn.status == 200
     assert conn.resp_body == "ok"
-    refute conn.private.phoenix_recycled
+    refute conn.private.combo_recycled
   end
 
   describe "recycle/1" do
@@ -244,7 +244,7 @@ defmodule Phoenix.Test.ConnTest do
     assert get_req_header(conn, "hello") == ["world"]
 
     conn =
-      put_in(conn.private.phoenix_recycled, false)
+      put_in(conn.private.combo_recycled, false)
       |> ensure_recycled()
     assert get_req_header(conn, "hello") == []
   end

@@ -151,7 +151,7 @@ defmodule Combo.ConnTest do
   def build_conn(method, path, params_or_body \\ nil) do
     Plug.Adapters.Test.Conn.conn(%Conn{}, method, path, params_or_body)
     |> Conn.put_private(:plug_skip_csrf_protection, true)
-    |> Conn.put_private(:phoenix_recycled, true)
+    |> Conn.put_private(:combo_recycled, true)
   end
 
   @http_methods [:get, :post, :put, :patch, :delete, :options, :connect, :trace, :head]
@@ -223,7 +223,7 @@ defmodule Combo.ConnTest do
     conn
     |> ensure_recycled()
     |> dispatch_endpoint(endpoint, method, path_or_action, params_or_body)
-    |> Conn.put_private(:phoenix_recycled, false)
+    |> Conn.put_private(:combo_recycled, false)
     |> from_set_to_sent()
   end
   def dispatch(conn, _endpoint, method, _path_or_action, _params_or_body) do
@@ -478,7 +478,7 @@ defmodule Combo.ConnTest do
   """
   @spec ensure_recycled(Conn.t) :: Conn.t
   def ensure_recycled(conn) do
-    if conn.private[:phoenix_recycled] do
+    if conn.private[:combo_recycled] do
       conn
     else
       recycle(conn)
@@ -534,7 +534,7 @@ defmodule Combo.ConnTest do
   """
   @spec bypass_through(Conn.t) :: Conn.t
   def bypass_through(conn) do
-    Plug.Conn.put_private(conn, :phoenix_bypass, :all)
+    Plug.Conn.put_private(conn, :combo_bypass, :all)
   end
 
   @doc """
@@ -544,7 +544,7 @@ defmodule Combo.ConnTest do
   """
   @spec bypass_through(Conn.t, module) :: Conn.t
   def bypass_through(conn, router) do
-    Plug.Conn.put_private(conn, :phoenix_bypass, {router, :current})
+    Plug.Conn.put_private(conn, :combo_bypass, {router, :current})
   end
 
   @doc """
@@ -554,7 +554,7 @@ defmodule Combo.ConnTest do
   """
   @spec bypass_through(Conn.t, module, atom | list) :: Conn.t
   def bypass_through(conn, router, pipelines) do
-    Plug.Conn.put_private(conn, :phoenix_bypass, {router, List.wrap(pipelines)})
+    Plug.Conn.put_private(conn, :combo_bypass, {router, List.wrap(pipelines)})
   end
 
   @doc """

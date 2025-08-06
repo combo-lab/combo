@@ -1,7 +1,7 @@
 defmodule Combo.DigesterTest do
   use ExUnit.Case, async: true
 
-  @output_path Path.join("tmp", "phoenix_digest")
+  @output_path Path.join("tmp", "combo_digest")
   @fake_now 32_132_173
   @hash_regex ~S"[a-fA-F\d]{32}"
 
@@ -176,7 +176,7 @@ defmodule Combo.DigesterTest do
     end
 
     test "keeps old version in cache manifest when digesting twice" do
-      input_path = Path.join("tmp", "phoenix_digest_twice")
+      input_path = Path.join("tmp", "combo_digest_twice")
       input_file = Path.join(input_path, "file.js")
 
       try do
@@ -201,7 +201,7 @@ defmodule Combo.DigesterTest do
     end
 
     test "doesn't duplicate files when digesting and compressing twice" do
-      input_path = Path.join("tmp", "phoenix_digest_twice")
+      input_path = Path.join("tmp", "combo_digest_twice")
       input_file = Path.join(input_path, "file.js")
 
       try do

@@ -243,7 +243,7 @@ defmodule Combo.Router do
 
   defp prelude(_opts) do
     quote do
-      Module.register_attribute(__MODULE__, :phoenix_routes, accumulate: true)
+      Module.register_attribute(__MODULE__, :combo_routes, accumulate: true)
 
       import Combo.Router
 
@@ -252,7 +252,7 @@ defmodule Combo.Router do
       import Combo.Controller
 
       # Set up initial scope
-      @phoenix_pipeline nil
+      @combo_pipeline nil
       Combo.Router.Scope.init(__MODULE__)
       @before_compile unquote(__MODULE__)
     end
@@ -324,7 +324,7 @@ defmodule Combo.Router do
 
   @doc false
   def __call__(
-        %{private: %{phoenix_router: router, phoenix_bypass: {router, pipes}}} = conn,
+        %{private: %{combo_router: router, combo_bypass: {router, pipes}}} = conn,
         metadata,
         prepare,
         pipeline,
@@ -338,7 +338,7 @@ defmodule Combo.Router do
     end
   end
 
-  def __call__(%{private: %{phoenix_bypass: :all}} = conn, metadata, prepare, _, _) do
+  def __call__(%{private: %{combo_bypass: :all}} = conn, metadata, prepare, _, _) do
     prepare.(conn, metadata)
   end
 
@@ -431,7 +431,7 @@ defmodule Combo.Router do
 
   @doc false
   defmacro __before_compile__(env) do
-    routes = env.module |> Module.get_attribute(:phoenix_routes) |> Enum.reverse()
+    routes = env.module |> Module.get_attribute(:combo_routes) |> Enum.reverse()
     routes_with_exprs = Enum.map(routes, &{&1, Route.exprs(&1)})
 
     {matches, {pipelines, _}} =
@@ -490,7 +490,7 @@ defmodule Combo.Router do
       def __checks__, do: unquote({:__block__, [], checks})
 
       defp prepare(conn) do
-        merge_private(conn, [{:phoenix_router, __MODULE__}, {__MODULE__, conn.script_name}])
+        merge_private(conn, [{:combo_router, __MODULE__}, {__MODULE__, conn.script_name}])
       end
 
       unquote(pipelines)
@@ -674,7 +674,7 @@ defmodule Combo.Router do
 
   defp add_route(kind, verb, path, plug, plug_opts, options) do
     quote do
-      @phoenix_routes Scope.route(
+      @combo_routes Scope.route(
                         __ENV__.line,
                         __ENV__.module,
                         unquote(kind),
@@ -721,7 +721,7 @@ defmodule Combo.Router do
     block =
       quote do
         plug = unquote(plug)
-        @phoenix_pipeline []
+        @combo_pipeline []
         unquote(block)
       end
 
@@ -730,7 +730,7 @@ defmodule Combo.Router do
         Scope.pipeline(__MODULE__, plug)
 
         {conn, body} =
-          Plug.Builder.compile(__ENV__, @phoenix_pipeline, init_mode: Combo.plug_init_mode())
+          Plug.Builder.compile(__ENV__, @combo_pipeline, init_mode: Combo.plug_init_mode())
 
         def unquote(plug)(unquote(conn), _) do
           try do
@@ -744,7 +744,7 @@ defmodule Combo.Router do
           end
         end
 
-        @phoenix_pipeline nil
+        @combo_pipeline nil
       end
 
     quote do
@@ -766,8 +766,8 @@ defmodule Combo.Router do
     {plug, opts} = expand_plug_and_opts(plug, opts, __CALLER__)
 
     quote do
-      if pipeline = @phoenix_pipeline do
-        @phoenix_pipeline [{unquote(plug), unquote(opts), true} | pipeline]
+      if pipeline = @combo_pipeline do
+        @combo_pipeline [{unquote(plug), unquote(opts), true} | pipeline]
       else
         raise "cannot define plug at the router level, plug must be defined inside a pipeline"
       end
@@ -847,7 +847,7 @@ defmodule Combo.Router do
       end
 
     quote do
-      if pipeline = @phoenix_pipeline do
+      if pipeline = @combo_pipeline do
         raise "cannot pipe_through inside a pipeline"
       else
         Scope.pipe_through(__MODULE__, unquote(pipes))

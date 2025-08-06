@@ -112,7 +112,7 @@ defmodule Combo.Transports.WebSocket do
             token = Base.decode64!(encoded_token, padding: false)
 
             conn
-            |> put_private(:phoenix_transport_auth_token, token)
+            |> put_private(:combo_transport_auth_token, token)
             |> set_actual_subprotocols(actual_subprotocols)
 
           _ ->

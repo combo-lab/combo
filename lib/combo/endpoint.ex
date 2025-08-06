@@ -470,7 +470,7 @@ defmodule Combo.Endpoint do
       use Plug.Builder, init_mode: Combo.plug_init_mode()
       import Combo.Endpoint
 
-      Module.register_attribute(__MODULE__, :phoenix_sockets, accumulate: true)
+      Module.register_attribute(__MODULE__, :combo_sockets, accumulate: true)
 
       if force_ssl = Combo.Endpoint.__force_ssl__(__MODULE__, var!(force_ssl)) do
         plug Plug.SSL, force_ssl
@@ -610,7 +610,7 @@ defmodule Combo.Endpoint do
       def static_lookup(path) do
         Combo.Config.cache(
           __MODULE__,
-          {:__phoenix_static__, path},
+          {:__combo_static__, path},
           &Combo.Endpoint.Supervisor.static_lookup(&1, path)
         )
       end
@@ -631,7 +631,7 @@ defmodule Combo.Endpoint do
 
   @doc false
   defmacro __before_compile__(%{module: module}) do
-    sockets = Module.get_attribute(module, :phoenix_sockets)
+    sockets = Module.get_attribute(module, :combo_sockets)
 
     dispatches =
       for {path, socket, socket_opts} <- sockets,
@@ -649,7 +649,7 @@ defmodule Combo.Endpoint do
       # Inline render errors so we set the endpoint before calling it.
       def call(conn, opts) do
         conn = %{conn | script_name: script_name(), secret_key_base: config(:secret_key_base)}
-        conn = Plug.Conn.put_private(conn, :phoenix_endpoint, __MODULE__)
+        conn = Plug.Conn.put_private(conn, :combo_endpoint, __MODULE__)
 
         try do
           super(conn, opts)
@@ -1055,7 +1055,7 @@ defmodule Combo.Endpoint do
     module = Macro.expand(module, %{__CALLER__ | function: {:socket_dispatch, 2}})
 
     quote do
-      @phoenix_sockets {unquote(path), unquote(module), unquote(opts)}
+      @combo_sockets {unquote(path), unquote(module), unquote(opts)}
     end
   end
 

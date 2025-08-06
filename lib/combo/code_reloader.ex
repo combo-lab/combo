@@ -110,7 +110,7 @@ defmodule Combo.CodeReloader do
   API used by Plug to invoke the code reloader on every request.
   """
   def call(conn, opts) do
-    case opts[:reloader].(conn.private.phoenix_endpoint, opts) do
+    case opts[:reloader].(conn.private.combo_endpoint, opts) do
       :ok ->
         conn
 

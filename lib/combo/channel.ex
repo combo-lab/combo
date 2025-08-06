@@ -453,11 +453,11 @@ defmodule Combo.Channel do
       @behaviour unquote(__MODULE__)
       @on_definition unquote(__MODULE__)
       @before_compile unquote(__MODULE__)
-      @phoenix_intercepts []
-      @phoenix_log_join Keyword.get(opts, :log_join, :info)
-      @phoenix_log_handle_in Keyword.get(opts, :log_handle_in, :debug)
-      @phoenix_hibernate_after Keyword.get(opts, :hibernate_after, 15_000)
-      @phoenix_shutdown Keyword.get(opts, :shutdown, 5000)
+      @combo_intercepts []
+      @combo_log_join Keyword.get(opts, :log_join, :info)
+      @combo_log_handle_in Keyword.get(opts, :log_handle_in, :debug)
+      @combo_hibernate_after Keyword.get(opts, :hibernate_after, 15_000)
+      @combo_shutdown Keyword.get(opts, :shutdown, 5000)
 
       import unquote(__MODULE__)
       import Combo.Socket, only: [assign: 3, assign: 2]
@@ -466,26 +466,26 @@ defmodule Combo.Channel do
         %{
           id: __MODULE__,
           start: {__MODULE__, :start_link, [init_arg]},
-          shutdown: @phoenix_shutdown,
+          shutdown: @combo_shutdown,
           restart: :temporary
         }
       end
 
       def start_link(triplet) do
         GenServer.start_link(Combo.Channel.Server, triplet,
-          hibernate_after: @phoenix_hibernate_after
+          hibernate_after: @combo_hibernate_after
         )
       end
 
       def __socket__(:private) do
-        %{log_join: @phoenix_log_join, log_handle_in: @phoenix_log_handle_in}
+        %{log_join: @combo_log_join, log_handle_in: @combo_log_handle_in}
       end
     end
   end
 
   defmacro __before_compile__(_) do
     quote do
-      def __intercepts__, do: @phoenix_intercepts
+      def __intercepts__, do: @combo_intercepts
     end
   end
 
@@ -521,14 +521,14 @@ defmodule Combo.Channel do
   """
   defmacro intercept(events) do
     quote do
-      @phoenix_intercepts unquote(events)
+      @combo_intercepts unquote(events)
     end
   end
 
   @doc false
   def __on_definition__(env, :def, :handle_out, [event, _payload, _socket], _, _)
       when is_binary(event) do
-    unless event in Module.get_attribute(env.module, :phoenix_intercepts) do
+    unless event in Module.get_attribute(env.module, :combo_intercepts) do
       IO.write(
         "#{Path.relative_to(env.file, File.cwd!())}:#{env.line}: [warning] " <>
           "An intercept for event \"#{event}\" has not yet been defined in #{env.module}.handle_out/3. " <>

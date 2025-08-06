@@ -186,6 +186,6 @@ defmodule Combo.TokenTest do
   end
 
   defp conn() do
-    %Plug.Conn{} |> Plug.Conn.put_private(:phoenix_endpoint, TokenEndpoint)
+    %Plug.Conn{} |> Plug.Conn.put_private(:combo_endpoint, TokenEndpoint)
   end
 end
