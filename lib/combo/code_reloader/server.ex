@@ -185,7 +185,7 @@ defmodule Combo.CodeReloader.Server do
 
   if Version.match?(System.version(), ">= 1.18.0-dev") do
     defp warn_missing_mix_listener do
-      if Mix.Project.get() != Phoenix.MixProject do
+      if Mix.Project.get() != Combo.MixProject do
         IO.warn("""
         a Mix listener expected by Combo.CodeReloader is missing.
 

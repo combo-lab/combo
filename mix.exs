@@ -1,13 +1,9 @@
-defmodule Phoenix.MixProject do
+defmodule Combo.MixProject do
   use Mix.Project
 
-  @version "1.8.0-rc.3"
-  @scm_url "https://github.com/phoenixframework/phoenix"
-
-  # If the elixir requirement is updated, we need to make the installer
-  # use at least the minimum requirement used here. Although often the
-  # installer is ahead of Phoenix itself.
+  @version "0.1.0"
   @elixir_requirement "~> 1.15"
+  @scm_url "https://github.com/combo-team/combo"
 
   def project do
     [
@@ -30,7 +26,7 @@ defmodule Phoenix.MixProject do
         ]
       ],
       elixirc_paths: elixirc_paths(Mix.env()),
-      name: "Phoenix",
+      name: "Combo",
       docs: docs(),
       aliases: aliases(),
       source_url: @scm_url,
@@ -200,7 +196,7 @@ defmodule Phoenix.MixProject do
   defp groups_for_modules do
     # Ungrouped Modules:
     #
-    # Phoenix
+    # Combo
     # Combo.Channel
     # Combo.Controller
     # Combo.Endpoint
