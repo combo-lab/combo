@@ -6,7 +6,7 @@
  */
 export default class Presence {
   constructor(channel, opts = {}) {
-    let events = opts.events || { state: "presence_state", diff: "presence_diff" }
+    let events = opts.events || { state: 'presence_state', diff: 'presence_diff' }
     this.state = {}
     this.pendingDiffs = []
     this.channel = channel
@@ -35,7 +35,8 @@ export default class Presence {
 
       if (this.inPendingSyncState()) {
         this.pendingDiffs.push(diff)
-      } else {
+      }
+      else {
         this.state = Presence.syncDiff(this.state, diff, onJoin, onLeave)
         onSync()
       }
@@ -85,10 +86,10 @@ export default class Presence {
     this.map(newState, (key, newPresence) => {
       let currentPresence = state[key]
       if (currentPresence) {
-        let newRefs = newPresence.metas.map((m) => m.phx_ref)
-        let curRefs = currentPresence.metas.map((m) => m.phx_ref)
-        let joinedMetas = newPresence.metas.filter((m) => curRefs.indexOf(m.phx_ref) < 0)
-        let leftMetas = currentPresence.metas.filter((m) => newRefs.indexOf(m.phx_ref) < 0)
+        let newRefs = newPresence.metas.map(m => m.phx_ref)
+        let curRefs = currentPresence.metas.map(m => m.phx_ref)
+        let joinedMetas = newPresence.metas.filter(m => curRefs.indexOf(m.phx_ref) < 0)
+        let leftMetas = currentPresence.metas.filter(m => newRefs.indexOf(m.phx_ref) < 0)
         if (joinedMetas.length > 0) {
           joins[key] = newPresence
           joins[key].metas = joinedMetas
@@ -97,7 +98,8 @@ export default class Presence {
           leaves[key] = this.clone(currentPresence)
           leaves[key].metas = leftMetas
         }
-      } else {
+      }
+      else {
         joins[key] = newPresence
       }
     })
@@ -126,8 +128,8 @@ export default class Presence {
       let currentPresence = state[key]
       state[key] = this.clone(newPresence)
       if (currentPresence) {
-        let joinedRefs = state[key].metas.map((m) => m.phx_ref)
-        let curMetas = currentPresence.metas.filter((m) => joinedRefs.indexOf(m.phx_ref) < 0)
+        let joinedRefs = state[key].metas.map(m => m.phx_ref)
+        let curMetas = currentPresence.metas.filter(m => joinedRefs.indexOf(m.phx_ref) < 0)
         state[key].metas.unshift(...curMetas)
       }
       onJoin(key, currentPresence, newPresence)
@@ -137,7 +139,7 @@ export default class Presence {
       if (!currentPresence) {
         return
       }
-      let refsToRemove = leftPresence.metas.map((m) => m.phx_ref)
+      let refsToRemove = leftPresence.metas.map(m => m.phx_ref)
       currentPresence.metas = currentPresence.metas.filter((p) => {
         return refsToRemove.indexOf(p.phx_ref) < 0
       })
@@ -172,7 +174,7 @@ export default class Presence {
   // private
 
   static map(obj, func) {
-    return Object.getOwnPropertyNames(obj).map((key) => func(key, obj[key]))
+    return Object.getOwnPropertyNames(obj).map(key => func(key, obj[key]))
   }
 
   static clone(obj) {

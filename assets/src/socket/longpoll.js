@@ -1,9 +1,9 @@
-import { SOCKET_STATES, TRANSPORTS, AUTH_TOKEN_PREFIX } from "./constants"
+import { SOCKET_STATES, TRANSPORTS, AUTH_TOKEN_PREFIX } from './constants'
 
-import Ajax from "./ajax"
+import Ajax from './ajax'
 
 let arrayBufferToBase64 = (buffer) => {
-  let binary = ""
+  let binary = ''
   let bytes = new Uint8Array(buffer)
   let len = bytes.byteLength
   for (let i = 0; i < len; i++) {
@@ -39,9 +39,9 @@ export default class LongPoll {
 
   normalizeEndpoint(endPoint) {
     return endPoint
-      .replace("ws://", "http://")
-      .replace("wss://", "https://")
-      .replace(new RegExp("(.*)\/" + TRANSPORTS.websocket), "$1/" + TRANSPORTS.longpoll)
+      .replace('ws://', 'http://')
+      .replace('wss://', 'https://')
+      .replace(new RegExp('(.*)/' + TRANSPORTS.websocket), '$1/' + TRANSPORTS.longpoll)
   }
 
   endpointURL() {
@@ -54,8 +54,8 @@ export default class LongPoll {
   }
 
   ontimeout() {
-    this.onerror("timeout")
-    this.closeAndRetry(1005, "timeout", false)
+    this.onerror('timeout')
+    this.closeAndRetry(1005, 'timeout', false)
   }
 
   isActive() {
@@ -63,12 +63,12 @@ export default class LongPoll {
   }
 
   poll() {
-    const headers = { Accept: "application/json" }
+    const headers = { Accept: 'application/json' }
     if (this.authToken) {
-      headers["X-Phoenix-AuthToken"] = this.authToken
+      headers['X-Phoenix-AuthToken'] = this.authToken
     }
     this.ajax(
-      "GET",
+      'GET',
       headers,
       null,
       () => this.ontimeout(),
@@ -76,7 +76,8 @@ export default class LongPoll {
         if (resp) {
           var { status, token, messages } = resp
           this.token = token
-        } else {
+        }
+        else {
           status = 0
         }
 
@@ -115,12 +116,12 @@ export default class LongPoll {
             break
           case 403:
             this.onerror(403)
-            this.close(1008, "forbidden", false)
+            this.close(1008, 'forbidden', false)
             break
           case 0:
           case 500:
             this.onerror(500)
-            this.closeAndRetry(1011, "internal server error", 500)
+            this.closeAndRetry(1011, 'internal server error', 500)
             break
           default:
             throw new Error(`unhandled poll status ${status}`)
@@ -134,14 +135,16 @@ export default class LongPoll {
   // pushes against an empty buffer
 
   send(body) {
-    if (typeof body !== "string") {
+    if (typeof body !== 'string') {
       body = arrayBufferToBase64(body)
     }
     if (this.currentBatch) {
       this.currentBatch.push(body)
-    } else if (this.awaitingBatchAck) {
+    }
+    else if (this.awaitingBatchAck) {
       this.batchBuffer.push(body)
-    } else {
+    }
+    else {
       this.currentBatch = [body]
       this.currentBatchTimer = setTimeout(() => {
         this.batchSend(this.currentBatch)
@@ -153,16 +156,17 @@ export default class LongPoll {
   batchSend(messages) {
     this.awaitingBatchAck = true
     this.ajax(
-      "POST",
-      { "Content-Type": "application/x-ndjson" },
-      messages.join("\n"),
-      () => this.onerror("timeout"),
+      'POST',
+      { 'Content-Type': 'application/x-ndjson' },
+      messages.join('\n'),
+      () => this.onerror('timeout'),
       (resp) => {
         this.awaitingBatchAck = false
         if (!resp || resp.status !== 200) {
           this.onerror(resp && resp.status)
-          this.closeAndRetry(1011, "internal server error", false)
-        } else if (this.batchBuffer.length > 0) {
+          this.closeAndRetry(1011, 'internal server error', false)
+        }
+        else if (this.batchBuffer.length > 0) {
           this.batchSend(this.batchBuffer)
           this.batchBuffer = []
         }
@@ -182,9 +186,10 @@ export default class LongPoll {
     this.batchBuffer = []
     clearTimeout(this.currentBatchTimer)
     this.currentBatchTimer = null
-    if (typeof CloseEvent !== "undefined") {
-      this.onclose(new CloseEvent("close", opts))
-    } else {
+    if (typeof CloseEvent !== 'undefined') {
+      this.onclose(new CloseEvent('close', opts))
+    }
+    else {
       this.onclose(opts)
     }
   }

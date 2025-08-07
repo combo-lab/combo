@@ -13,8 +13,8 @@
     }
   },
   "files": [
-    "LICENSE.md",
     "package.json",
-    "priv/static/*"
+    "priv/static/*",
+    "LICENSE.md"
   ]
 }

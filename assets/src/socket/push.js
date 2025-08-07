@@ -9,11 +9,11 @@ export default class Push {
   constructor(channel, event, payload, timeout) {
     this.channel = channel
     this.event = event
-    this.payload =
-      payload ||
-      function () {
-        return {}
-      }
+    this.payload
+      = payload
+        || function () {
+          return {}
+        }
     this.receivedResp = null
     this.timeout = timeout
     this.timeoutTimer = null
@@ -35,7 +35,7 @@ export default class Push {
    *
    */
   send() {
-    if (this.hasReceived("timeout")) {
+    if (this.hasReceived('timeout')) {
       return
     }
     this.startTimeout()
@@ -78,7 +78,7 @@ export default class Push {
    * @private
    */
   matchReceive({ status, response, _ref }) {
-    this.recHooks.filter((h) => h.status === status).forEach((h) => h.callback(response))
+    this.recHooks.filter(h => h.status === status).forEach(h => h.callback(response))
   }
 
   /**
@@ -117,7 +117,7 @@ export default class Push {
     })
 
     this.timeoutTimer = setTimeout(() => {
-      this.trigger("timeout", {})
+      this.trigger('timeout', {})
     }, this.timeout)
   }
 
