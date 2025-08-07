@@ -81,7 +81,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     quoted = Assigns.traverse(quoted)
 
     quoted =
-      if body_annotation = caller && Annotation.annotate_body(caller) do
+      if body_annotation = caller && Annotation.get_body_annotation(caller) do
         annotate_body(quoted, body_annotation)
       else
         quoted
@@ -1197,7 +1197,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     %{file: file} = state
     %{line: line} = t_meta
 
-    if anno = Annotation.annotate_caller(file, line) do
+    if anno = Annotation.get_caller_annotation(file, line) do
       state |> iob_acc_text(anno)
     else
       state
