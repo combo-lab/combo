@@ -1,8 +1,8 @@
 import {jest} from "@jest/globals"
-import {LongPoll} from "../js/phoenix"
-import {Socket} from "../js/phoenix"
-import {AUTH_TOKEN_PREFIX} from "../js/phoenix/constants"
-import Ajax from "../js/phoenix/ajax"
+import {LongPoll} from "../src/phoenix"
+import {Socket} from "../src/phoenix"
+import {AUTH_TOKEN_PREFIX} from "../src/phoenix/constants"
+import Ajax from "../src/phoenix/ajax"
 
 describe("LongPoll", () => {
   let originalXHR

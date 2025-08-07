@@ -192,8 +192,6 @@
  * @module phoenix
  */
 
-import html from "./html"
-
 import Channel from "./channel"
 import LongPoll from "./longpoll"
 import Presence from "./presence"
@@ -201,8 +199,6 @@ import Serializer from "./serializer"
 import Socket from "./socket"
 
 export {
-  html,
-
   Channel,
   LongPoll,
   Presence,

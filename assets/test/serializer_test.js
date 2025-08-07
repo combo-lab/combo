@@ -3,7 +3,7 @@
  */
 
 import {TextEncoder, TextDecoder} from "util"
-import {Serializer} from "../js/phoenix"
+import {Serializer} from "../src/phoenix"
 
 let exampleMsg = {join_ref: "0", ref: "1", topic: "t", event: "e", payload: {foo: 1}}
 

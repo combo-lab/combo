@@ -1,4 +1,4 @@
-import {Presence} from "../js/phoenix"
+import {Presence} from "../src/phoenix"
 
 const clone = (obj) => {
   let cloned = JSON.parse(JSON.stringify(obj))

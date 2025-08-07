@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  * @jest-environment-options {"url": "http://example.com/"}
  */
-import { Socket } from "../js/phoenix"
+import { Socket } from "../src/phoenix"
 
 // sadly, jsdom can only be configured globally for a file
 

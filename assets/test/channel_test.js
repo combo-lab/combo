@@ -1,5 +1,5 @@
 import {jest} from "@jest/globals"
-import {Channel, Socket} from "../js/phoenix"
+import {Channel, Socket} from "../src/phoenix"
 
 let channel, socket
 
