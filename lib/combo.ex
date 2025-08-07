@@ -1,6 +1,6 @@
 defmodule Combo do
   @moduledoc """
-  Combines the best parts of modern web development.
+  Combines the good parts of modern web development.
   """
 
   use Application
