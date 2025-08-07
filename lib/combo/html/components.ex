@@ -242,11 +242,11 @@ defmodule Combo.HTML.Components do
 
   ## Creating a form from changesets
 
-  When using changesets, the underlying data, form parameters, and errors are
-  retrieved from it. The `:as` option is automatically computed too.
+  When using changesets, the underlying data, form parameters, and errors
+  are retrieved from it. The `:as` option is automatically computed too.
   For example, if you have a user schema:
 
-      defmodule MyApp.Users.User do
+      defmodule Demo.Users.User do
         use Ecto.Schema
 
         schema "..." do
@@ -256,12 +256,22 @@ defmodule Combo.HTML.Components do
 
   And then you create a changeset that you pass to `to_form`:
 
-      %MyApp.Users.User{}
+      %Demo.Users.User{}
       |> Ecto.Changeset.change()
       |> to_form()
 
   In this case, once the form is submitted, the parameters will be available
   under `%{"user" => user_params}`.
+
+  ## Using the created form
+
+  The form can be passed to the `<.form>` component:
+
+  ```ceex
+  <.form :let={f} for={@form} id="todo-form">
+    <.input field={f[:name]} type="text" />
+  </.form>
+  ```
 
   ## Options
 

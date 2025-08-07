@@ -1,6 +1,6 @@
 defmodule Combo.Endpoint.Cowboy2Adapter do
   @moduledoc """
-  The Cowboy2 adapter for Phoenix.
+  The Cowboy2 adapter for `Combo.Endpoint`.
 
   ## Endpoint configuration
 
