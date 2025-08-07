@@ -290,7 +290,7 @@ defmodule Combo.Template.CEExEngine.CompilerTest do
         global: [
           {"key1", "value1"},
           {"key2", "<value2>"},
-          {"key3", {:safe, "<value3>"}},
+          {"key3", {:safe, "<value3>"}}
         ]
       }
 
@@ -596,37 +596,37 @@ defmodule Combo.Template.CEExEngine.CompilerTest do
     end
   end
 
-  # describe "debug annotations" do
-  #   alias Combo.Template.CEExEngine.Compiler.DebugAnnotation
-  #   import Combo.Template.CEExEngine.Compiler.DebugAnnotation
+  describe "debug annotations" do
+    alias Combo.HTML.DebugAnnotations
+    import Combo.HTML.DebugAnnotations
 
-  #   test "without root tag" do
-  #     assigns = %{}
+    test "without root tag" do
+      assigns = %{}
 
-  #     assert render_compiled("<DebugAnnotation.remote value='1'/>") ==
-  #              "<!-- <Combo.Template.CEExEngine.Compiler.DebugAnnotation.remote> test/support/phoenix/template/html_engine/compiler/debug_annotation.exs:7 () -->REMOTE COMPONENT: Value: 1<!-- </Combo.Template.CEExEngine.Compiler.DebugAnnotation.remote> -->"
+      assert render_compiled("<DebugAnnotations.remote value='1'/>") ==
+               "<!-- <Combo.HTML.DebugAnnotations.remote> test/support/debug_annotations.exs:7 () -->REMOTE COMPONENT: Value: 1<!-- </Combo.HTML.DebugAnnotations.remote> -->"
 
-  #     assert render_compiled("<.local value='1'/>") ==
-  #              "<!-- <Combo.Template.CEExEngine.Compiler.DebugAnnotation.local> test/support/phoenix/template/html_engine/compiler/debug_annotation.exs:15 () -->LOCAL COMPONENT: Value: 1<!-- </Combo.Template.CEExEngine.Compiler.DebugAnnotation.local> -->"
-  #   end
+      assert render_compiled("<.local value='1'/>") ==
+               "<!-- <Combo.HTML.DebugAnnotations.local> test/support/debug_annotations.exs:15 () -->LOCAL COMPONENT: Value: 1<!-- </Combo.HTML.DebugAnnotations.local> -->"
+    end
 
-  #   test "with root tag" do
-  #     assigns = %{}
+      test "with root tag" do
+        assigns = %{}
 
-  #     assert render_compiled("<DebugAnnotation.remote_with_root value='1'/>") ==
-  #              "<!-- <Combo.Template.CEExEngine.Compiler.DebugAnnotation.remote_with_root> test/support/phoenix/template/html_engine/compiler/debug_annotation.exs:11 () --><div>REMOTE COMPONENT: Value: 1</div><!-- </Combo.Template.CEExEngine.Compiler.DebugAnnotation.remote_with_root> -->"
+        assert render_compiled("<DebugAnnotations.remote_with_root value='1'/>") ==
+                 "<!-- <Combo.HTML.DebugAnnotations.remote_with_root> test/support/debug_annotations.exs:11 () --><div>REMOTE COMPONENT: Value: 1</div><!-- </Combo.HTML.DebugAnnotations.remote_with_root> -->"
 
-  #     assert render_compiled("<.local_with_root value='1'/>") ==
-  #              "<!-- <Combo.Template.CEExEngine.Compiler.DebugAnnotation.local_with_root> test/support/phoenix/template/html_engine/compiler/debug_annotation.exs:19 () --><div>LOCAL COMPONENT: Value: 1</div><!-- </Combo.Template.CEExEngine.Compiler.DebugAnnotation.local_with_root> -->"
-  #   end
+        assert render_compiled("<.local_with_root value='1'/>") ==
+                 "<!-- <Combo.HTML.DebugAnnotations.local_with_root> test/support/debug_annotations.exs:19 () --><div>LOCAL COMPONENT: Value: 1</div><!-- </Combo.HTML.DebugAnnotations.local_with_root> -->"
+      end
 
-  #   test "nesting" do
-  #     assigns = %{}
+      test "nesting" do
+        assigns = %{}
 
-  #     assert render_compiled("<DebugAnnotation.nested value='1'/>") ==
-  #              "<!-- <Combo.Template.CEExEngine.Compiler.DebugAnnotation.nested> test/support/phoenix/template/html_engine/compiler/debug_annotation.exs:23 () --><div>\n  <!-- @caller test/support/phoenix/template/html_engine/compiler/debug_annotation.exs:25 () --><!-- <Combo.Template.CEExEngine.Compiler.DebugAnnotation.local_with_root> test/support/phoenix/template/html_engine/compiler/debug_annotation.exs:19 () --><div>LOCAL COMPONENT: Value: local</div><!-- </Combo.Template.CEExEngine.Compiler.DebugAnnotation.local_with_root> -->\n</div><!-- </Combo.Template.CEExEngine.Compiler.DebugAnnotation.nested> -->"
-  #   end
-  # end
+        assert render_compiled("<DebugAnnotations.nested value='1'/>") ==
+                 "<!-- <Combo.HTML.DebugAnnotations.nested> test/support/debug_annotations.exs:23 () --><div>\n  <!-- @caller test/support/debug_annotations.exs:25 () --><!-- <Combo.HTML.DebugAnnotations.local_with_root> test/support/debug_annotations.exs:19 () --><div>LOCAL COMPONENT: Value: local</div><!-- </Combo.HTML.DebugAnnotations.local_with_root> -->\n</div><!-- </Combo.HTML.DebugAnnotations.nested> -->"
+      end
+  end
 
   describe "handle function components" do
     test "remote call (self close)" do
