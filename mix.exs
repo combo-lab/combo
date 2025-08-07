@@ -93,10 +93,7 @@ defmodule Combo.MixProject do
 
       # Test dependencies
       {:mint, "~> 1.4", only: :test},
-      {:mint_web_socket, "~> 1.0.0", only: :test},
-
-      # Dev dependencies
-      {:esbuild, "~> 0.8", only: :dev}
+      {:mint_web_socket, "~> 1.0.0", only: :test}
     ]
   end
 
