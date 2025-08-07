@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  * @jest-environment-options {"url": "http://example.com/"}
  */
-import { Socket } from "../../src/phoenix"
+import { Socket } from "../../src/socket"
 
 // sadly, jsdom can only be configured globally for a file
 
@@ -16,8 +16,6 @@ describe("protocol", function () {
 describe("endpointURL", function () {
   it("returns endpoint for given path on http host", function () {
     const socket = new Socket("/socket")
-    expect(socket.endPointURL()).toBe(
-      "ws://example.com/socket/websocket?vsn=2.0.0",
-    )
+    expect(socket.endPointURL()).toBe("ws://example.com/socket/websocket?vsn=2.0.0")
   })
 })

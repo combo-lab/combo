@@ -6,10 +6,14 @@
  * @param {number} timeout - The push timeout in milliseconds
  */
 export default class Push {
-  constructor(channel, event, payload, timeout){
+  constructor(channel, event, payload, timeout) {
     this.channel = channel
     this.event = event
-    this.payload = payload || function (){ return {} }
+    this.payload =
+      payload ||
+      function () {
+        return {}
+      }
     this.receivedResp = null
     this.timeout = timeout
     this.timeoutTimer = null
@@ -21,7 +25,7 @@ export default class Push {
    *
    * @param {number} timeout
    */
-  resend(timeout){
+  resend(timeout) {
     this.timeout = timeout
     this.reset()
     this.send()
@@ -30,8 +34,10 @@ export default class Push {
   /**
    *
    */
-  send(){
-    if(this.hasReceived("timeout")){ return }
+  send() {
+    if (this.hasReceived("timeout")) {
+      return
+    }
     this.startTimeout()
     this.sent = true
     this.channel.socket.push({
@@ -39,7 +45,7 @@ export default class Push {
       event: this.event,
       payload: this.payload(),
       ref: this.ref,
-      join_ref: this.channel.joinRef()
+      join_ref: this.channel.joinRef(),
     })
   }
 
@@ -48,19 +54,19 @@ export default class Push {
    * @param {*} status
    * @param {*} callback
    */
-  receive(status, callback){
-    if(this.hasReceived(status)){
+  receive(status, callback) {
+    if (this.hasReceived(status)) {
       callback(this.receivedResp.response)
     }
 
-    this.recHooks.push({status, callback})
+    this.recHooks.push({ status, callback })
     return this
   }
 
   /**
    * @private
    */
-  reset(){
+  reset() {
     this.cancelRefEvent()
     this.ref = null
     this.refEvent = null
@@ -71,23 +77,24 @@ export default class Push {
   /**
    * @private
    */
-  matchReceive({status, response, _ref}){
-    this.recHooks.filter(h => h.status === status)
-      .forEach(h => h.callback(response))
+  matchReceive({ status, response, _ref }) {
+    this.recHooks.filter((h) => h.status === status).forEach((h) => h.callback(response))
   }
 
   /**
    * @private
    */
-  cancelRefEvent(){
-    if(!this.refEvent){ return }
+  cancelRefEvent() {
+    if (!this.refEvent) {
+      return
+    }
     this.channel.off(this.refEvent)
   }
 
   /**
    * @private
    */
-  cancelTimeout(){
+  cancelTimeout() {
     clearTimeout(this.timeoutTimer)
     this.timeoutTimer = null
   }
@@ -95,12 +102,14 @@ export default class Push {
   /**
    * @private
    */
-  startTimeout(){
-    if(this.timeoutTimer){ this.cancelTimeout() }
+  startTimeout() {
+    if (this.timeoutTimer) {
+      this.cancelTimeout()
+    }
     this.ref = this.channel.socket.makeRef()
     this.refEvent = this.channel.replyEventName(this.ref)
 
-    this.channel.on(this.refEvent, payload => {
+    this.channel.on(this.refEvent, (payload) => {
       this.cancelRefEvent()
       this.cancelTimeout()
       this.receivedResp = payload
@@ -115,14 +124,14 @@ export default class Push {
   /**
    * @private
    */
-  hasReceived(status){
+  hasReceived(status) {
     return this.receivedResp && this.receivedResp.status === status
   }
 
   /**
    * @private
    */
-  trigger(status, response){
-    this.channel.trigger(this.refEvent, {status, response})
+  trigger(status, response) {
+    this.channel.trigger(this.refEvent, { status, response })
   }
 }

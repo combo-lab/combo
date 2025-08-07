@@ -16,14 +16,14 @@
  * @param {Function} timerCalc
  */
 export default class Timer {
-  constructor(callback, timerCalc){
+  constructor(callback, timerCalc) {
     this.callback = callback
     this.timerCalc = timerCalc
     this.timer = null
     this.tries = 0
   }
 
-  reset(){
+  reset() {
     this.tries = 0
     clearTimeout(this.timer)
   }
@@ -31,12 +31,15 @@ export default class Timer {
   /**
    * Cancels any previous scheduleTimeout and schedules callback
    */
-  scheduleTimeout(){
+  scheduleTimeout() {
     clearTimeout(this.timer)
 
-    this.timer = setTimeout(() => {
-      this.tries = this.tries + 1
-      this.callback()
-    }, this.timerCalc(this.tries + 1))
+    this.timer = setTimeout(
+      () => {
+        this.tries = this.tries + 1
+        this.callback()
+      },
+      this.timerCalc(this.tries + 1),
+    )
   }
 }

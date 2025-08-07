@@ -1,27 +1,21 @@
 {
-  "name": "phoenix",
-  "version": "1.8.0-rc.3",
-  "description": "The official JavaScript client for the Phoenix web framework.",
-  "license": "MIT",
-  "module": "./priv/static/phoenix.mjs",
-  "main": "./priv/static/phoenix.cjs.js",
-  "unpkg": "./priv/static/phoenix.min.js",
-  "jsdelivr": "./priv/static/phoenix.min.js",
+  "name": "combo",
+  "version": "0.1.0",
+  "description": "The JavaScript client for Combo",
   "exports": {
-    "import": "./priv/static/phoenix.mjs",
-    "require": "./priv/static/phoenix.cjs.js"
+    "./socket": {
+      "import": "./priv/static/socket.esm.js",
+      "require": "./priv/static/socket.cjs.js"
+    },
+    "./html": {
+      "import": "./priv/static/html.esm.js",
+      "require": "./priv/static/html.cjs.js"
+    }
   },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/phoenixframework/phoenix.git"
-  },
-  "author": "Chris McCord <chris@chrismccord.com> (https://www.phoenixframework.org)",
   "files": [
-    "README.md",
     "LICENSE.md",
     "package.json",
-    "priv/static/*",
-    "assets/js/phoenix/*"
+    "priv/static/*"
   ],
   "devDependencies": {
     "@babel/cli": "7.28.0",
@@ -42,6 +36,6 @@
     "test": "jest",
     "test.coverage": "jest --coverage",
     "test.watch": "jest --watch",
-    "docs": "documentation build assets/js/phoenix/index.js -f html -o doc/js"
+    "docs": "documentation build assets/src/socket/index.js -f html -o doc/js"
   }
 }

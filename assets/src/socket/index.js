@@ -198,10 +198,4 @@ import Presence from "./presence"
 import Serializer from "./serializer"
 import Socket from "./socket"
 
-export {
-  Channel,
-  LongPoll,
-  Presence,
-  Serializer,
-  Socket
-}
+export { Channel, LongPoll, Presence, Serializer, Socket }

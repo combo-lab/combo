@@ -1,5 +1,5 @@
-import {jest} from "@jest/globals"
-import {Channel, Socket} from "../../src/phoenix"
+import { jest } from "@jest/globals"
+import { Channel, Socket } from "../../src/socket"
 
 let channel, socket
 
@@ -7,34 +7,34 @@ const defaultRef = 1
 const defaultTimeout = 10000
 
 class WSMock {
-  constructor(url, protocols){
+  constructor(url, protocols) {
     this.url = url
     this.protocols = protocols
   }
-  close(){}
-  send(){}
+  close() {}
+  send() {}
 }
 
-describe("with transport", function (){
-  beforeAll(function (){
+describe("with transport", function () {
+  beforeAll(function () {
     global.WebSocket = WSMock
   })
 
-  afterAll(function (){
+  afterAll(function () {
     global.WebSocket = null
   })
 
-  describe("constructor", function (){
-    beforeEach(function (){
-      socket = new Socket("/", {timeout: 1234})
+  describe("constructor", function () {
+    beforeEach(function () {
+      socket = new Socket("/", { timeout: 1234 })
     })
 
-    it("sets defaults", function (){
-      channel = new Channel("topic", {one: "two"}, socket)
+    it("sets defaults", function () {
+      channel = new Channel("topic", { one: "two" }, socket)
 
       expect(channel.state).toBe("closed")
       expect(channel.topic).toBe("topic")
-      expect(channel.params()).toEqual({one: "two"})
+      expect(channel.params()).toEqual({ one: "two" })
       expect(channel.socket).toBe(socket)
       expect(channel.timeout).toBe(1234)
       expect(channel.joinedOnce).toBe(false)
@@ -42,73 +42,73 @@ describe("with transport", function (){
       expect(channel.pushBuffer).toEqual([])
     })
 
-    it("sets up joinPush object with literal params", function (){
-      channel = new Channel("topic", {one: "two"}, socket)
+    it("sets up joinPush object with literal params", function () {
+      channel = new Channel("topic", { one: "two" }, socket)
       const joinPush = channel.joinPush
 
       expect(joinPush.channel).toBe(channel)
-      expect(joinPush.payload()).toEqual({one: "two"})
+      expect(joinPush.payload()).toEqual({ one: "two" })
       expect(joinPush.event).toBe("phx_join")
       expect(joinPush.timeout).toBe(1234)
     })
 
-    it("sets up joinPush object with closure params", function (){
-      channel = new Channel("topic", () => ({one: "two"}), socket)
+    it("sets up joinPush object with closure params", function () {
+      channel = new Channel("topic", () => ({ one: "two" }), socket)
       const joinPush = channel.joinPush
 
       expect(joinPush.channel).toBe(channel)
-      expect(joinPush.payload()).toEqual({one: "two"})
+      expect(joinPush.payload()).toEqual({ one: "two" })
       expect(joinPush.event).toBe("phx_join")
       expect(joinPush.timeout).toBe(1234)
     })
 
-    it("sets subprotocols when authToken is provided", function (){
+    it("sets subprotocols when authToken is provided", function () {
       const authToken = "1234"
-      const socket = new Socket("/socket", {authToken})
-      
+      const socket = new Socket("/socket", { authToken })
+
       socket.connect()
       expect(socket.conn.protocols).toEqual(["phoenix", "base64url.bearer.phx.MTIzNA"])
     })
   })
 
-  describe("updating join params", function (){
-    it("can update the join params", function (){
+  describe("updating join params", function () {
+    it("can update the join params", function () {
       let counter = 0
-      let params = () => ({value: counter})
-      socket = {timeout: 1234, onError: function (){}, onOpen: function (){}}
+      let params = () => ({ value: counter })
+      socket = { timeout: 1234, onError: function () {}, onOpen: function () {} }
 
       channel = new Channel("topic", params, socket)
       const joinPush = channel.joinPush
 
       expect(joinPush.channel).toBe(channel)
-      expect(joinPush.payload()).toEqual({value: 0})
+      expect(joinPush.payload()).toEqual({ value: 0 })
       expect(joinPush.event).toBe("phx_join")
       expect(joinPush.timeout).toBe(1234)
 
       counter++
 
       expect(joinPush.channel).toBe(channel)
-      expect(joinPush.payload()).toEqual({value: 1})
-      expect(channel.params()).toEqual({value: 1})
+      expect(joinPush.payload()).toEqual({ value: 1 })
+      expect(channel.params()).toEqual({ value: 1 })
       expect(joinPush.event).toBe("phx_join")
       expect(joinPush.timeout).toBe(1234)
     })
   })
 
-  describe("join", function (){
-    beforeEach(function (){
-      socket = new Socket("/socket", {timeout: defaultTimeout})
+  describe("join", function () {
+    beforeEach(function () {
+      socket = new Socket("/socket", { timeout: defaultTimeout })
 
-      channel = socket.channel("topic", {one: "two"})
+      channel = socket.channel("topic", { one: "two" })
     })
 
-    it("sets state to joining", function (){
+    it("sets state to joining", function () {
       channel.join()
 
       expect(channel.state).toBe("joining")
     })
 
-    it("sets joinedOnce to true", function (){
+    it("sets joinedOnce to true", function () {
       expect(channel.joinedOnce).toBe(false)
 
       channel.join()
@@ -116,13 +116,13 @@ describe("with transport", function (){
       expect(channel.joinedOnce).toBe(true)
     })
 
-    it("throws if attempting to join multiple times", function (){
+    it("throws if attempting to join multiple times", function () {
       channel.join()
 
       expect(() => channel.join()).toThrow(/^tried to join multiple times/)
     })
 
-    it("triggers socket push with channel params", function (){
+    it("triggers socket push with channel params", function () {
       jest.spyOn(socket, "makeRef").mockReturnValue(defaultRef)
       const spy = jest.spyOn(socket, "push")
 
@@ -132,13 +132,13 @@ describe("with transport", function (){
       expect(spy).toHaveBeenCalledWith({
         topic: "topic",
         event: "phx_join",
-        payload: {one: "two"},
+        payload: { one: "two" },
         ref: defaultRef,
         join_ref: channel.joinRef(),
       })
     })
 
-    it("can set timeout on joinPush", function (){
+    it("can set timeout on joinPush", function () {
       const newTimeout = 2000
       const joinPush = channel.joinPush
 
@@ -149,7 +149,7 @@ describe("with transport", function (){
       expect(joinPush.timeout).toBe(newTimeout)
     })
 
-    it("leaves existing duplicate topic on new join", function (done){
+    it("leaves existing duplicate topic on new join", function (done) {
       channel.join().receive("ok", () => {
         let newChannel = socket.channel("topic")
         expect(channel.isJoined()).toBe(true)
@@ -161,26 +161,26 @@ describe("with transport", function (){
       channel.joinPush.trigger("ok", {})
     })
 
-    describe("timeout behavior", function (){
+    describe("timeout behavior", function () {
       let joinPush
 
       const helpers = {
-        receiveSocketOpen(){
+        receiveSocketOpen() {
           jest.spyOn(socket, "isConnected").mockReturnValue(true)
           socket.onConnOpen()
         },
       }
 
-      beforeEach(function (){
+      beforeEach(function () {
         jest.useFakeTimers()
         joinPush = channel.joinPush
       })
 
-      afterEach(function (){
+      afterEach(function () {
         jest.useRealTimers()
       })
 
-      it("succeeds before timeout", function (){
+      it("succeeds before timeout", function () {
         const spy = jest.spyOn(socket, "push")
         const timeout = joinPush.timeout
 
@@ -201,7 +201,7 @@ describe("with transport", function (){
         expect(spy).toHaveBeenCalledTimes(1)
       })
 
-      it("retries with backoff after timeout", function (){
+      it("retries with backoff after timeout", function () {
         const spy = jest.spyOn(socket, "push")
         const timeoutSpy = jest.fn()
         const timeout = joinPush.timeout
@@ -228,7 +228,7 @@ describe("with transport", function (){
         expect(channel.state).toBe("joined")
       })
 
-      it("with socket and join delay", function (){
+      it("with socket and join delay", function () {
         const spy = jest.spyOn(socket, "push")
         jest.useFakeTimers()
         const joinPush = channel.joinPush
@@ -258,7 +258,7 @@ describe("with transport", function (){
         expect(spy).toHaveBeenCalledTimes(3) // leave pushed to server
       })
 
-      it("with socket delay only", function (){
+      it("with socket delay only", function () {
         jest.useFakeTimers()
         const joinPush = channel.joinPush
 
@@ -281,54 +281,59 @@ describe("with transport", function (){
     })
   })
 
-  describe("joinPush", function (){
+  describe("joinPush", function () {
     let joinPush
     let response
 
     const helpers = {
-      receiveOk(){
+      receiveOk() {
         jest.advanceTimersByTime(joinPush.timeout / 2) // before timeout
-        return joinPush.channel.trigger("phx_reply", {status: "ok", response: response}, joinPush.ref, joinPush.ref)
+        return joinPush.channel.trigger(
+          "phx_reply",
+          { status: "ok", response: response },
+          joinPush.ref,
+          joinPush.ref,
+        )
         // return joinPush.trigger("ok", response)
       },
 
-      receiveTimeout(){
+      receiveTimeout() {
         jest.advanceTimersByTime(joinPush.timeout * 2) // after timeout
       },
 
-      receiveError(){
+      receiveError() {
         jest.advanceTimersByTime(joinPush.timeout / 2) // before timeout
         return joinPush.trigger("error", response)
       },
 
-      getBindings(event){
-        return channel.bindings.filter(bind => bind.event === event)
+      getBindings(event) {
+        return channel.bindings.filter((bind) => bind.event === event)
       },
     }
 
-    beforeEach(function (){
+    beforeEach(function () {
       jest.useFakeTimers()
 
-      socket = new Socket("/socket", {timeout: defaultTimeout})
+      socket = new Socket("/socket", { timeout: defaultTimeout })
       jest.spyOn(socket, "isConnected").mockReturnValue(true)
       jest.spyOn(socket, "push").mockReturnValue(true)
 
-      channel = socket.channel("topic", {one: "two"})
+      channel = socket.channel("topic", { one: "two" })
       joinPush = channel.joinPush
 
       channel.join()
     })
 
-    afterEach(function (){
+    afterEach(function () {
       jest.useRealTimers()
     })
 
-    describe("receives 'ok'", function (){
-      beforeEach(function (){
-        response = {chan: "reply"}
+    describe("receives 'ok'", function () {
+      beforeEach(function () {
+        response = { chan: "reply" }
       })
 
-      it("sets channel state to joined", function (){
+      it("sets channel state to joined", function () {
         expect(channel.state).not.toBe("joined")
 
         helpers.receiveOk()
@@ -336,7 +341,7 @@ describe("with transport", function (){
         expect(channel.state).toBe("joined")
       })
 
-      it("triggers receive('ok') callback after ok response", function (){
+      it("triggers receive('ok') callback after ok response", function () {
         const spyOk = jest.fn()
 
         joinPush.receive("ok", spyOk)
@@ -346,7 +351,7 @@ describe("with transport", function (){
         expect(spyOk).toHaveBeenCalledTimes(1)
       })
 
-      it("triggers receive('ok') callback if ok response already received", function (){
+      it("triggers receive('ok') callback if ok response already received", function () {
         const spyOk = jest.fn()
 
         helpers.receiveOk()
@@ -356,7 +361,7 @@ describe("with transport", function (){
         expect(spyOk).toHaveBeenCalledTimes(1)
       })
 
-      it("does not trigger other receive callbacks after ok response", function (){
+      it("does not trigger other receive callbacks after ok response", function () {
         const spyError = jest.fn()
         const spyTimeout = jest.fn()
 
@@ -369,7 +374,7 @@ describe("with transport", function (){
         expect(spyTimeout).not.toHaveBeenCalled()
       })
 
-      it("clears timeoutTimer", function (){
+      it("clears timeoutTimer", function () {
         expect(joinPush.timeoutTimer).toBeTruthy()
 
         helpers.receiveOk()
@@ -377,15 +382,15 @@ describe("with transport", function (){
         expect(joinPush.timeoutTimer).toBeNull()
       })
 
-      it("sets receivedResp", function (){
+      it("sets receivedResp", function () {
         expect(joinPush.receivedResp).toBeNull()
 
         helpers.receiveOk()
 
-        expect(joinPush.receivedResp).toEqual({status: "ok", response})
+        expect(joinPush.receivedResp).toEqual({ status: "ok", response })
       })
 
-      it("removes channel bindings", function (){
+      it("removes channel bindings", function () {
         let bindings = helpers.getBindings("chan_reply_3")
         expect(bindings.length).toBe(1)
 
@@ -395,7 +400,7 @@ describe("with transport", function (){
         expect(bindings.length).toBe(0)
       })
 
-      it("resets channel rejoinTimer", function (){
+      it("resets channel rejoinTimer", function () {
         expect(channel.rejoinTimer).toBeTruthy()
 
         const spy = jest.spyOn(channel.rejoinTimer, "reset")
@@ -405,8 +410,8 @@ describe("with transport", function (){
         expect(spy).toHaveBeenCalledTimes(1)
       })
 
-      it("sends and empties channel's buffered pushEvents", function (done){
-        const pushEvent = {send(){}}
+      it("sends and empties channel's buffered pushEvents", function (done) {
+        const pushEvent = { send() {} }
         const spy = jest.spyOn(pushEvent, "send")
 
         channel.pushBuffer.push(pushEvent)
@@ -421,8 +426,8 @@ describe("with transport", function (){
       })
     })
 
-    describe("receives 'timeout'", function (){
-      it("sets channel state to errored", function (done){
+    describe("receives 'timeout'", function () {
+      it("sets channel state to errored", function (done) {
         joinPush.receive("timeout", () => {
           expect(channel.state).toBe("errored")
           done()
@@ -431,7 +436,7 @@ describe("with transport", function (){
         helpers.receiveTimeout()
       })
 
-      it("triggers receive('timeout') callback after ok response", function (){
+      it("triggers receive('timeout') callback after ok response", function () {
         const spyTimeout = jest.fn()
 
         joinPush.receive("timeout", spyTimeout)
@@ -441,23 +446,26 @@ describe("with transport", function (){
         expect(spyTimeout).toHaveBeenCalledTimes(1)
       })
 
-      it("does not trigger other receive callbacks after timeout response", function (done){
+      it("does not trigger other receive callbacks after timeout response", function (done) {
         const spyOk = jest.fn()
         const spyError = jest.fn()
         jest.spyOn(channel.rejoinTimer, "scheduleTimeout").mockReturnValue(true)
 
         channel.test = true
-        joinPush.receive("ok", spyOk).receive("error", spyError).receive("timeout", () => {
-          expect(spyOk).not.toHaveBeenCalled()
-          expect(spyError).not.toHaveBeenCalled()
-          done()
-        })
+        joinPush
+          .receive("ok", spyOk)
+          .receive("error", spyError)
+          .receive("timeout", () => {
+            expect(spyOk).not.toHaveBeenCalled()
+            expect(spyError).not.toHaveBeenCalled()
+            done()
+          })
 
         helpers.receiveTimeout()
         helpers.receiveOk()
       })
 
-      it("schedules rejoinTimer timeout", function (){
+      it("schedules rejoinTimer timeout", function () {
         expect(channel.rejoinTimer).toBeTruthy()
 
         const spy = jest.spyOn(channel.rejoinTimer, "scheduleTimeout")
@@ -468,12 +476,12 @@ describe("with transport", function (){
       })
     })
 
-    describe("receives 'error'", function (){
-      beforeEach(function (){
-        response = {chan: "fail"}
+    describe("receives 'error'", function () {
+      beforeEach(function () {
+        response = { chan: "fail" }
       })
 
-      it("triggers receive('error') callback after error response", function (){
+      it("triggers receive('error') callback after error response", function () {
         const spyError = jest.fn()
 
         expect(channel.state).toBe("joining")
@@ -485,7 +493,7 @@ describe("with transport", function (){
         expect(spyError).toHaveBeenCalledTimes(1)
       })
 
-      it("triggers receive('error') callback if error response already received", function (){
+      it("triggers receive('error') callback if error response already received", function () {
         const spyError = jest.fn()
 
         helpers.receiveError()
@@ -495,15 +503,18 @@ describe("with transport", function (){
         expect(spyError).toHaveBeenCalledTimes(1)
       })
 
-      it("does not trigger other receive callbacks after error response", function (){
+      it("does not trigger other receive callbacks after error response", function () {
         const spyOk = jest.fn()
         const spyError = jest.fn()
         const spyTimeout = jest.fn()
 
-        joinPush.receive("ok", spyOk).receive("error", () => {
-          spyError()
-          channel.leave()
-        }).receive("timeout", spyTimeout)
+        joinPush
+          .receive("ok", spyOk)
+          .receive("error", () => {
+            spyError()
+            channel.leave()
+          })
+          .receive("timeout", spyTimeout)
 
         helpers.receiveError()
         jest.advanceTimersByTime(channel.timeout * 2) // attempt timeout
@@ -513,7 +524,7 @@ describe("with transport", function (){
         expect(spyTimeout).not.toHaveBeenCalled()
       })
 
-      it("clears timeoutTimer", function (){
+      it("clears timeoutTimer", function () {
         expect(joinPush.timeoutTimer).toBeTruthy()
 
         helpers.receiveError()
@@ -521,10 +532,10 @@ describe("with transport", function (){
         expect(joinPush.timeoutTimer).toBeNull()
       })
 
-      it("sets receivedResp with error trigger after binding", function (done){
+      it("sets receivedResp with error trigger after binding", function (done) {
         expect(joinPush.receivedResp).toBeNull()
 
-        joinPush.receive("error", resp => {
+        joinPush.receive("error", (resp) => {
           expect(resp).toEqual(response)
           done()
         })
@@ -532,24 +543,24 @@ describe("with transport", function (){
         helpers.receiveError()
       })
 
-      it("sets receivedResp with error trigger before binding", function (done){
+      it("sets receivedResp with error trigger before binding", function (done) {
         expect(joinPush.receivedResp).toBeNull()
 
         helpers.receiveError()
-        joinPush.receive("error", resp => {
+        joinPush.receive("error", (resp) => {
           expect(resp).toEqual(response)
           done()
         })
       })
 
-      it("does not set channel state to joined", function (){
+      it("does not set channel state to joined", function () {
         helpers.receiveError()
 
         expect(channel.state).toBe("errored")
       })
 
-      it("does not trigger channel's buffered pushEvents", function (){
-        const pushEvent = {send: () => {}}
+      it("does not trigger channel's buffered pushEvents", function () {
+        const pushEvent = { send: () => {} }
         const spy = jest.spyOn(pushEvent, "send")
 
         channel.pushBuffer.push(pushEvent)
@@ -562,17 +573,17 @@ describe("with transport", function (){
     })
   })
 
-  describe("onError", function (){
+  describe("onError", function () {
     let joinPush
 
-    beforeEach(function (){
+    beforeEach(function () {
       jest.useFakeTimers()
 
-      socket = new Socket("/socket", {timeout: defaultTimeout})
+      socket = new Socket("/socket", { timeout: defaultTimeout })
       jest.spyOn(socket, "isConnected").mockReturnValue(true)
       jest.spyOn(socket, "push").mockReturnValue(true)
 
-      channel = socket.channel("topic", {one: "two"})
+      channel = socket.channel("topic", { one: "two" })
 
       joinPush = channel.joinPush
 
@@ -580,11 +591,11 @@ describe("with transport", function (){
       joinPush.trigger("ok", {})
     })
 
-    afterEach(function (){
+    afterEach(function () {
       jest.useRealTimers()
     })
 
-    it("sets state to 'errored'", function (){
+    it("sets state to 'errored'", function () {
       expect(channel.state).not.toBe("errored")
 
       channel.trigger("phx_error")
@@ -592,7 +603,7 @@ describe("with transport", function (){
       expect(channel.state).toBe("errored")
     })
 
-    it("does not trigger redundant errors during backoff", function (){
+    it("does not trigger redundant errors during backoff", function () {
       const spy = jest.spyOn(joinPush, "send").mockImplementation(() => {})
 
       expect(spy).toHaveBeenCalledTimes(0)
@@ -608,7 +619,7 @@ describe("with transport", function (){
       expect(spy).toHaveBeenCalledTimes(1)
     })
 
-    it("does not rejoin if channel leaving", function (){
+    it("does not rejoin if channel leaving", function () {
       channel.state = "leaving"
 
       const spy = jest.spyOn(joinPush, "send")
@@ -624,7 +635,7 @@ describe("with transport", function (){
       expect(channel.state).toBe("leaving")
     })
 
-    it("does not rejoin if channel closed", function (){
+    it("does not rejoin if channel closed", function () {
       channel.state = "closed"
 
       const spy = jest.spyOn(joinPush, "send")
@@ -640,7 +651,7 @@ describe("with transport", function (){
       expect(channel.state).toBe("closed")
     })
 
-    it("triggers additional callbacks after join", function (){
+    it("triggers additional callbacks after join", function () {
       const spy = jest.fn()
       channel.onError(spy)
       joinPush.trigger("ok", {})
@@ -654,28 +665,28 @@ describe("with transport", function (){
     })
   })
 
-  describe("onClose", function (){
+  describe("onClose", function () {
     let joinPush
 
-    beforeEach(function (){
+    beforeEach(function () {
       jest.useFakeTimers()
 
-      socket = new Socket("/socket", {timeout: defaultTimeout})
+      socket = new Socket("/socket", { timeout: defaultTimeout })
       jest.spyOn(socket, "isConnected").mockReturnValue(true)
       jest.spyOn(socket, "push").mockReturnValue(true)
 
-      channel = socket.channel("topic", {one: "two"})
+      channel = socket.channel("topic", { one: "two" })
 
       joinPush = channel.joinPush
 
       channel.join()
     })
 
-    afterEach(function (){
+    afterEach(function () {
       jest.useRealTimers()
     })
 
-    it("sets state to 'closed'", function (){
+    it("sets state to 'closed'", function () {
       expect(channel.state).not.toBe("closed")
 
       channel.trigger("phx_close")
@@ -683,7 +694,7 @@ describe("with transport", function (){
       expect(channel.state).toBe("closed")
     })
 
-    it("does not rejoin", function (){
+    it("does not rejoin", function () {
       const spy = jest.spyOn(joinPush, "send")
 
       channel.trigger("phx_close")
@@ -695,7 +706,7 @@ describe("with transport", function (){
       expect(spy).toHaveBeenCalledTimes(0)
     })
 
-    it("triggers additional callbacks", function (){
+    it("triggers additional callbacks", function () {
       const spy = jest.fn()
       channel.onClose(spy)
 
@@ -706,7 +717,7 @@ describe("with transport", function (){
       expect(spy).toHaveBeenCalledTimes(1)
     })
 
-    it("removes channel from socket", function (){
+    it("removes channel from socket", function () {
       expect(socket.channels.length).toBe(1)
       expect(socket.channels[0]).toBe(channel)
 
@@ -716,32 +727,32 @@ describe("with transport", function (){
     })
   })
 
-  describe("onMessage", function (){
-    it("returns payload by default", function (){
+  describe("onMessage", function () {
+    it("returns payload by default", function () {
       socket = new Socket("/socket")
-      channel = socket.channel("topic", {one: "two"})
+      channel = socket.channel("topic", { one: "two" })
       jest.spyOn(socket, "makeRef").mockReturnValue(defaultRef)
-      const payload = channel.onMessage("event", {one: "two"}, defaultRef)
+      const payload = channel.onMessage("event", { one: "two" }, defaultRef)
 
-      expect(payload).toEqual({one: "two"})
+      expect(payload).toEqual({ one: "two" })
     })
   })
 
-  describe("canPush", function (){
-    beforeEach(function (){
+  describe("canPush", function () {
+    beforeEach(function () {
       socket = new Socket("/socket")
 
-      channel = socket.channel("topic", {one: "two"})
+      channel = socket.channel("topic", { one: "two" })
     })
 
-    it("returns true when socket connected and channel joined", function (){
+    it("returns true when socket connected and channel joined", function () {
       jest.spyOn(socket, "isConnected").mockReturnValue(true)
       channel.state = "joined"
 
       expect(channel.canPush()).toBe(true)
     })
 
-    it("otherwise returns false", function (){
+    it("otherwise returns false", function () {
       const isConnectedStub = jest.spyOn(socket, "isConnected")
 
       isConnectedStub.mockReturnValue(false)
@@ -761,15 +772,15 @@ describe("with transport", function (){
     })
   })
 
-  describe("on", function (){
-    beforeEach(function (){
+  describe("on", function () {
+    beforeEach(function () {
       socket = new Socket("/socket")
       jest.spyOn(socket, "makeRef").mockReturnValue(defaultRef)
 
-      channel = socket.channel("topic", {one: "two"})
+      channel = socket.channel("topic", { one: "two" })
     })
 
-    it("sets up callback for event", function (){
+    it("sets up callback for event", function () {
       const spy = jest.fn()
 
       channel.trigger("event", {}, defaultRef)
@@ -782,7 +793,7 @@ describe("with transport", function (){
       expect(spy).toHaveBeenCalled()
     })
 
-    it("other event callbacks are ignored", function (){
+    it("other event callbacks are ignored", function () {
       const spy = jest.fn()
       const ignoredSpy = jest.fn()
 
@@ -797,13 +808,13 @@ describe("with transport", function (){
       expect(ignoredSpy).not.toHaveBeenCalled()
     })
 
-    it("generates unique refs for callbacks", function (){
+    it("generates unique refs for callbacks", function () {
       const ref1 = channel.on("event1", () => 0)
       const ref2 = channel.on("event2", () => 0)
       expect(ref1 + 1).toBe(ref2)
     })
 
-    it("calls all callbacks for event if they modified during event processing", function (){
+    it("calls all callbacks for event if they modified during event processing", function () {
       const spy = jest.fn()
 
       const ref = channel.on("event", () => {
@@ -817,15 +828,15 @@ describe("with transport", function (){
     })
   })
 
-  describe("off", function (){
-    beforeEach(function (){
+  describe("off", function () {
+    beforeEach(function () {
       socket = new Socket("/socket")
       jest.spyOn(socket, "makeRef").mockReturnValue(defaultRef)
 
-      channel = socket.channel("topic", {one: "two"})
+      channel = socket.channel("topic", { one: "two" })
     })
 
-    it("removes all callbacks for event", function (){
+    it("removes all callbacks for event", function () {
       const spy1 = jest.fn()
       const spy2 = jest.fn()
       const spy3 = jest.fn()
@@ -844,7 +855,7 @@ describe("with transport", function (){
       expect(spy3).toHaveBeenCalled()
     })
 
-    it("removes callback by its ref", function (){
+    it("removes callback by its ref", function () {
       const spy1 = jest.fn()
       const spy2 = jest.fn()
 
@@ -859,7 +870,7 @@ describe("with transport", function (){
     })
   })
 
-  describe("push", function (){
+  describe("push", function () {
     let joinPush
     let socketSpy
 
@@ -867,37 +878,37 @@ describe("with transport", function (){
       return {
         topic: "topic",
         event: "event",
-        payload: {foo: "bar"},
+        payload: { foo: "bar" },
         join_ref: channel.joinRef(),
         ref: defaultRef,
       }
     }
 
-    beforeEach(function (){
+    beforeEach(function () {
       jest.useFakeTimers()
 
-      socket = new Socket("/socket", {timeout: defaultTimeout})
+      socket = new Socket("/socket", { timeout: defaultTimeout })
       jest.spyOn(socket, "makeRef").mockReturnValue(defaultRef)
       jest.spyOn(socket, "isConnected").mockReturnValue(true)
       socketSpy = jest.spyOn(socket, "push").mockReturnValue(undefined)
 
-      channel = socket.channel("topic", {one: "two"})
+      channel = socket.channel("topic", { one: "two" })
     })
 
-    afterEach(function (){
+    afterEach(function () {
       jest.useRealTimers()
     })
 
-    it("sends push event when successfully joined", function (){
+    it("sends push event when successfully joined", function () {
       channel.join().trigger("ok", {})
-      channel.push("event", {foo: "bar"})
+      channel.push("event", { foo: "bar" })
 
       expect(socketSpy).toHaveBeenCalledWith(pushParams(channel))
     })
 
-    it("enqueues push event to be sent once join has succeeded", function (){
+    it("enqueues push event to be sent once join has succeeded", function () {
       joinPush = channel.join()
-      channel.push("event", {foo: "bar"})
+      channel.push("event", { foo: "bar" })
 
       expect(socketSpy).not.toHaveBeenCalledWith(pushParams(channel))
 
@@ -907,9 +918,9 @@ describe("with transport", function (){
       expect(socketSpy).toHaveBeenCalledWith(pushParams(channel))
     })
 
-    it("does not push if channel join times out", function (){
+    it("does not push if channel join times out", function () {
       joinPush = channel.join()
-      channel.push("event", {foo: "bar"})
+      channel.push("event", { foo: "bar" })
 
       expect(socketSpy).not.toHaveBeenCalledWith(pushParams(channel))
 
@@ -919,11 +930,11 @@ describe("with transport", function (){
       expect(socketSpy).not.toHaveBeenCalledWith(pushParams(channel))
     })
 
-    it("uses channel timeout by default", function (){
+    it("uses channel timeout by default", function () {
       const timeoutSpy = jest.fn()
       channel.join().trigger("ok", {})
 
-      channel.push("event", {foo: "bar"}).receive("timeout", timeoutSpy)
+      channel.push("event", { foo: "bar" }).receive("timeout", timeoutSpy)
 
       jest.advanceTimersByTime(channel.timeout / 2)
       expect(timeoutSpy).not.toHaveBeenCalled()
@@ -932,11 +943,11 @@ describe("with transport", function (){
       expect(timeoutSpy).toHaveBeenCalled()
     })
 
-    it("accepts timeout arg", function (){
+    it("accepts timeout arg", function () {
       const timeoutSpy = jest.fn()
       channel.join().trigger("ok", {})
 
-      channel.push("event", {foo: "bar"}, channel.timeout * 2).receive("timeout", timeoutSpy)
+      channel.push("event", { foo: "bar" }, channel.timeout * 2).receive("timeout", timeoutSpy)
 
       jest.advanceTimersByTime(channel.timeout)
       expect(timeoutSpy).not.toHaveBeenCalled()
@@ -945,10 +956,10 @@ describe("with transport", function (){
       expect(timeoutSpy).toHaveBeenCalled()
     })
 
-    it("does not time out after receiving 'ok'", function (){
+    it("does not time out after receiving 'ok'", function () {
       channel.join().trigger("ok", {})
       const timeoutSpy = jest.fn()
-      const push = channel.push("event", {foo: "bar"})
+      const push = channel.push("event", { foo: "bar" })
       push.receive("timeout", timeoutSpy)
 
       jest.advanceTimersByTime(push.timeout / 2)
@@ -960,30 +971,30 @@ describe("with transport", function (){
       expect(timeoutSpy).not.toHaveBeenCalled()
     })
 
-    it("throws if channel has not been joined", function (){
+    it("throws if channel has not been joined", function () {
       expect(() => channel.push("event", {})).toThrow(/^tried to push.*before joining/)
     })
   })
 
-  describe("leave", function (){
+  describe("leave", function () {
     let socketSpy
 
-    beforeEach(function (){
+    beforeEach(function () {
       jest.useFakeTimers()
 
-      socket = new Socket("/socket", {timeout: defaultTimeout})
+      socket = new Socket("/socket", { timeout: defaultTimeout })
       jest.spyOn(socket, "isConnected").mockReturnValue(true)
       socketSpy = jest.spyOn(socket, "push").mockReturnValue(undefined)
 
-      channel = socket.channel("topic", {one: "two"})
+      channel = socket.channel("topic", { one: "two" })
       channel.join().trigger("ok", {})
     })
 
-    afterEach(function (){
+    afterEach(function () {
       jest.useRealTimers()
     })
 
-    it("unsubscribes from server events", function (){
+    it("unsubscribes from server events", function () {
       jest.spyOn(socket, "makeRef").mockReturnValue(defaultRef)
       const joinRef = channel.joinRef()
 
@@ -998,8 +1009,8 @@ describe("with transport", function (){
       })
     })
 
-    it("closes channel on 'ok' from server", function (){
-      const anotherChannel = socket.channel("another", {three: "four"})
+    it("closes channel on 'ok' from server", function () {
+      const anotherChannel = socket.channel("another", { three: "four" })
       expect(socket.channels.length).toBe(2)
 
       channel.leave().trigger("ok", {})
@@ -1008,7 +1019,7 @@ describe("with transport", function (){
       expect(socket.channels[0]).toBe(anotherChannel)
     })
 
-    it("sets state to closed on 'ok' event", function (){
+    it("sets state to closed on 'ok' event", function () {
       expect(channel.state).not.toBe("closed")
 
       channel.leave().trigger("ok", {})
@@ -1020,7 +1031,7 @@ describe("with transport", function (){
     // behavior can be fixed; currently, 'ok' is triggered immediately
     // within Channel.leave so timeout callbacks are never reached
     //
-    it.skip("sets state to leaving initially", function (){
+    it.skip("sets state to leaving initially", function () {
       expect(channel.state).not.toBe("leaving")
 
       channel.leave()
@@ -1028,7 +1039,7 @@ describe("with transport", function (){
       expect(channel.state).toBe("leaving")
     })
 
-    it.skip("closes channel on 'timeout'", function (){
+    it.skip("closes channel on 'timeout'", function () {
       channel.leave()
 
       jest.advanceTimersByTime(channel.timeout)
@@ -1036,7 +1047,7 @@ describe("with transport", function (){
       expect(channel.state).toBe("closed")
     })
 
-    it.skip("accepts timeout arg", function (){
+    it.skip("accepts timeout arg", function () {
       channel.leave(channel.timeout * 2)
 
       jest.advanceTimersByTime(channel.timeout)

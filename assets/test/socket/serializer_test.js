@@ -2,10 +2,10 @@
  * @jest-environment node
  */
 
-import {TextEncoder, TextDecoder} from "util"
-import {Serializer} from "../../src/phoenix"
+import { TextEncoder, TextDecoder } from "util"
+import { Serializer } from "../../src/socket"
 
-let exampleMsg = {join_ref: "0", ref: "1", topic: "t", event: "e", payload: {foo: 1}}
+let exampleMsg = { join_ref: "0", ref: "1", topic: "t", event: "e", payload: { foo: 1 } }
 
 let binPayload = () => {
   let buffer = new ArrayBuffer(1)
@@ -16,13 +16,13 @@ let binPayload = () => {
 describe("JSON", () => {
   it("encodes general pushes", (done) => {
     Serializer.encode(exampleMsg, (result) => {
-      expect(result).toBe("[\"0\",\"1\",\"t\",\"e\",{\"foo\":1}]")
+      expect(result).toBe('["0","1","t","e",{"foo":1}]')
       done()
     })
   })
 
   it("decodes", (done) => {
-    Serializer.decode("[\"0\",\"1\",\"t\",\"e\",{\"foo\":1}]", (result) => {
+    Serializer.decode('["0","1","t","e",{"foo":1}]', (result) => {
       expect(result).toEqual(exampleMsg)
       done()
     })
@@ -34,20 +34,26 @@ describe("binary", () => {
     let buffer = binPayload()
     let bin = "\0\x01\x01\x01\x0101te\x01"
     let decoder = new TextDecoder()
-    Serializer.encode({join_ref: "0", ref: "1", topic: "t", event: "e", payload: buffer}, (result) => {
-      expect(decoder.decode(result)).toBe(bin)
-      done()
-    })
+    Serializer.encode(
+      { join_ref: "0", ref: "1", topic: "t", event: "e", payload: buffer },
+      (result) => {
+        expect(decoder.decode(result)).toBe(bin)
+        done()
+      },
+    )
   })
 
   it("encodes variable length segments", (done) => {
     let buffer = binPayload()
     let bin = "\0\x02\x01\x03\x02101topev\x01"
     let decoder = new TextDecoder()
-    Serializer.encode({join_ref: "10", ref: "1", topic: "top", event: "ev", payload: buffer}, (result) => {
-      expect(decoder.decode(result)).toBe(bin)
-      done()
-    })
+    Serializer.encode(
+      { join_ref: "10", ref: "1", topic: "top", event: "ev", payload: buffer },
+      (result) => {
+        expect(decoder.decode(result)).toBe(bin)
+        done()
+      },
+    )
   })
 
   it("decodes push", (done) => {
