@@ -1,7 +1,7 @@
 import {jest} from "@jest/globals"
 import {WebSocket, Server as WebSocketServer} from "mock-socket"
 import {encode} from "./serializer"
-import {Socket, LongPoll} from "../src/phoenix"
+import {Socket, LongPoll} from "../../src/phoenix"
 
 let socket
 
