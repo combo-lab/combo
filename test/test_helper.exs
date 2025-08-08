@@ -23,11 +23,14 @@ setup_dirs =
 
 for dir <- setup_dirs do
   setup_file = Path.join(dir, "setup.exs")
+
   if File.exists?(setup_file) do
     IO.puts("> eval test/#{Path.relative_to(setup_file, __DIR__)}")
     Code.eval_file(setup_file)
   end
 end
+
+IO.write("\n")
 
 Code.require_file("support/router_helper.exs", __DIR__)
 
