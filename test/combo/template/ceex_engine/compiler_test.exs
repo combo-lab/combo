@@ -596,38 +596,6 @@ defmodule Combo.Template.CEExEngine.CompilerTest do
     end
   end
 
-  describe "debug annotations" do
-    alias Combo.HTML.DebugAnnotations
-    import Combo.HTML.DebugAnnotations
-
-    test "without root tag" do
-      assigns = %{}
-
-      assert render_compiled("<DebugAnnotations.remote value='1'/>") ==
-               "<!-- <Combo.HTML.DebugAnnotations.remote> test/support/debug_annotations.exs:7 () -->REMOTE COMPONENT: Value: 1<!-- </Combo.HTML.DebugAnnotations.remote> -->"
-
-      assert render_compiled("<.local value='1'/>") ==
-               "<!-- <Combo.HTML.DebugAnnotations.local> test/support/debug_annotations.exs:15 () -->LOCAL COMPONENT: Value: 1<!-- </Combo.HTML.DebugAnnotations.local> -->"
-    end
-
-      test "with root tag" do
-        assigns = %{}
-
-        assert render_compiled("<DebugAnnotations.remote_with_root value='1'/>") ==
-                 "<!-- <Combo.HTML.DebugAnnotations.remote_with_root> test/support/debug_annotations.exs:11 () --><div>REMOTE COMPONENT: Value: 1</div><!-- </Combo.HTML.DebugAnnotations.remote_with_root> -->"
-
-        assert render_compiled("<.local_with_root value='1'/>") ==
-                 "<!-- <Combo.HTML.DebugAnnotations.local_with_root> test/support/debug_annotations.exs:19 () --><div>LOCAL COMPONENT: Value: 1</div><!-- </Combo.HTML.DebugAnnotations.local_with_root> -->"
-      end
-
-      test "nesting" do
-        assigns = %{}
-
-        assert render_compiled("<DebugAnnotations.nested value='1'/>") ==
-                 "<!-- <Combo.HTML.DebugAnnotations.nested> test/support/debug_annotations.exs:23 () --><div>\n  <!-- @caller test/support/debug_annotations.exs:25 () --><!-- <Combo.HTML.DebugAnnotations.local_with_root> test/support/debug_annotations.exs:19 () --><div>LOCAL COMPONENT: Value: local</div><!-- </Combo.HTML.DebugAnnotations.local_with_root> -->\n</div><!-- </Combo.HTML.DebugAnnotations.nested> -->"
-      end
-  end
-
   describe "handle function components" do
     test "remote call (self close)" do
       assigns = %{}

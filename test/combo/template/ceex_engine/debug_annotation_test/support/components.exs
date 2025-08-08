@@ -1,7 +1,5 @@
-# Note this file is intentionally a .exs file because it is loaded
-# in the test helper with debug_heex_annotations turned on.
-defmodule Combo.HTML.DebugAnnotations do
-  use Combo.HTML
+defmodule Combo.Template.CEExEngine.DebugAnnotationTest.Components do
+  use Combo.Template.CEExEngine
 
   def remote(assigns) do
     ~CE"REMOTE COMPONENT: Value: {@value}"
