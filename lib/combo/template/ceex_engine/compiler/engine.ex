@@ -156,10 +156,10 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     {t_type, t_name, new_t_attrs, new_t_meta}
   end
 
-  defp remove_phx_attr({"phx-no-format", _, _}, token, _state),
+  defp remove_phx_attr({"ceex-no-format", _, _}, token, _state),
     do: token
 
-  defp remove_phx_attr({"phx-no-curly-interpolation", _, _}, token, _state),
+  defp remove_phx_attr({"ceex-no-curly-interpolation", _, _}, token, _state),
     do: token
 
   defp remove_phx_attr(attr, {t_type, t_name, t_attrs, t_meta}, _state),
