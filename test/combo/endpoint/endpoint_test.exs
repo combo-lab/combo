@@ -182,15 +182,15 @@ defmodule Combo.Endpoint.EndpointTest do
 
   @tag :capture_log
   test "uses url configuration for static path" do
-    Application.put_env(:combo, __MODULE__.UrlEndpoint, url: [path: "/api"])
+    Application.put_env(:combo, __MODULE__.UrlEndpoint, url: [path: "/admin"])
 
     defmodule UrlEndpoint do
       use Combo.Endpoint, otp_app: :combo
     end
 
     UrlEndpoint.start_link()
-    assert UrlEndpoint.path("/phoenix.png") =~ "/api/phoenix.png"
-    assert UrlEndpoint.static_path("/phoenix.png") =~ "/api/phoenix.png"
+    assert UrlEndpoint.path("/users") == "/admin/users"
+    assert UrlEndpoint.static_path("/logo.png") == "/admin/logo.png"
   after
     :code.purge(__MODULE__.UrlEndpoint)
     :code.delete(__MODULE__.UrlEndpoint)
@@ -205,8 +205,8 @@ defmodule Combo.Endpoint.EndpointTest do
     end
 
     StaticEndpoint.start_link()
-    assert StaticEndpoint.path("/phoenix.png") =~ "/phoenix.png"
-    assert StaticEndpoint.static_path("/phoenix.png") =~ "/static/phoenix.png"
+    assert StaticEndpoint.path("/users") == "/users"
+    assert StaticEndpoint.static_path("/logo.png") == "/static/logo.png"
   after
     :code.purge(__MODULE__.StaticEndpoint)
     :code.delete(__MODULE__.StaticEndpoint)

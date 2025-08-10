@@ -1,5 +1,5 @@
 .absolute_path_logo {
-  background-image: url("/phoenix.png");
+  background-image: url("/logo.png");
 }
 
 .relative_path_logo {
@@ -10,6 +10,6 @@
   background-image: url(http://www.example.com/absolute.png);
 }
 
-.absolute_path_logo{background-image:url(/phoenix.png)}
+.absolute_path_logo{background-image:url(/logo.png)}
 .relative_path_logo{background-image:url(../images/relative.png)}
 .absolute_url_logo{background-image:url(http://www.example.com/absolute.png)}

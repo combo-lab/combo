@@ -27,8 +27,8 @@ defmodule Combo.DigesterTest do
       assert :ok = Combo.Digester.compile(input_path, @output_path, true)
       output_files = assets_files(@output_path)
 
-      assert "phoenix.png" in output_files
-      refute "phoenix.png.gz" in output_files
+      assert "logo.png" in output_files
+      refute "logo.png.gz" in output_files
       assert "app.js" in output_files
       assert "app.js.gz" in output_files
       assert "app.js.map" in output_files
@@ -38,11 +38,11 @@ defmodule Combo.DigesterTest do
       assert "manifest.json" in output_files
       assert "manifest.json.gz" in output_files
       assert "cache_manifest.json" in output_files
-      assert Enum.any?(output_files, &String.match?(&1, ~r/(phoenix-#{@hash_regex}\.png)/))
-      refute Enum.any?(output_files, &String.match?(&1, ~r/(phoenix-#{@hash_regex}\.png\.gz)/))
+      assert Enum.any?(output_files, &String.match?(&1, ~r/(logo-#{@hash_regex}\.png)/))
+      refute Enum.any?(output_files, &String.match?(&1, ~r/(logo-#{@hash_regex}\.png\.gz)/))
 
       json = Path.join(@output_path, "cache_manifest.json") |> json_read!()
-      assert json["latest"]["phoenix.png"] =~ ~r"phoenix-#{@hash_regex}.png"
+      assert json["latest"]["logo.png"] =~ ~r"logo-#{@hash_regex}.png"
       assert json["version"] == 1
     end
 
@@ -82,10 +82,10 @@ defmodule Combo.DigesterTest do
                       2
 
       # Add new entries
-      key = Enum.find(Map.keys(json["digests"]), &(&1 =~ ~r"phoenix-#{@hash_regex}.png"))
+      key = Enum.find(Map.keys(json["digests"]), &(&1 =~ ~r"logo-#{@hash_regex}.png"))
       assert json["version"] == 1
       assert is_integer(json["digests"][key]["mtime"])
-      assert json["digests"][key]["logical_path"] == "phoenix.png"
+      assert json["digests"][key]["logical_path"] == "logo.png"
       assert json["digests"][key]["size"] == 13900
       assert json["digests"][key]["digest"] =~ ~r"#{@hash_regex}"
 
@@ -165,14 +165,14 @@ defmodule Combo.DigesterTest do
 
       output_files = assets_files(@output_path)
 
-      assert "static/phoenix.png" in output_files
-      refute "static/phoenix.png.gz" in output_files
+      assert "static/logo.png" in output_files
+      refute "static/logo.png.gz" in output_files
       assert "cache_manifest.json" in output_files
-      assert Enum.any?(output_files, &String.match?(&1, ~r/(phoenix-#{@hash_regex}\.png)/))
-      refute Enum.any?(output_files, &String.match?(&1, ~r/(phoenix-#{@hash_regex}\.png\.gz)/))
+      assert Enum.any?(output_files, &String.match?(&1, ~r/(logo-#{@hash_regex}\.png)/))
+      refute Enum.any?(output_files, &String.match?(&1, ~r/(logo-#{@hash_regex}\.png\.gz)/))
 
       json = Path.join(@output_path, "cache_manifest.json") |> json_read!()
-      assert json["latest"]["static/phoenix.png"] =~ ~r"static/phoenix-#{@hash_regex}\.png"
+      assert json["latest"]["static/logo.png"] =~ ~r"static/logo-#{@hash_regex}\.png"
     end
 
     test "keeps old version in cache manifest when digesting twice" do
@@ -233,9 +233,9 @@ defmodule Combo.DigesterTest do
         Path.join(@output_path, digested_css_filename)
         |> File.read!()
 
-      refute digested_css =~ ~r"/phoenix\.png"
+      refute digested_css =~ ~r"/logo\.png"
       refute digested_css =~ ~r"\.\./images/relative\.png"
-      assert digested_css =~ ~r"/phoenix-#{@hash_regex}\.png\?vsn=d"
+      assert digested_css =~ ~r"/logo-#{@hash_regex}\.png\?vsn=d"
       assert digested_css =~ ~r"\.\./images/relative-#{@hash_regex}\.png\?vsn=d"
 
       refute digested_css =~ ~r"http://www.example.com/absolute-#{@hash_regex}.png"
@@ -254,9 +254,9 @@ defmodule Combo.DigesterTest do
         Path.join(@output_path, digested_css_filename)
         |> File.read!()
 
-      refute digested_css =~ ~r"/phoenix\.png"
+      refute digested_css =~ ~r"/logo\.png"
       refute digested_css =~ ~r"\.\./images/relative\.png"
-      assert digested_css =~ ~r"/phoenix-#{@hash_regex}\.png"
+      assert digested_css =~ ~r"/logo-#{@hash_regex}\.png"
       assert digested_css =~ ~r"\.\./images/relative-#{@hash_regex}\.png"
 
       refute digested_css =~ ~r"http://www.example.com/absolute-#{@hash_regex}.png"
@@ -334,9 +334,9 @@ defmodule Combo.DigesterTest do
         Path.join(@output_path, "css/app.css")
         |> File.read!()
 
-      assert undigested_css =~ ~r"/phoenix\.png"
+      assert undigested_css =~ ~r"/logo\.png"
       assert undigested_css =~ ~r"\.\./images/relative\.png"
-      refute undigested_css =~ ~r"/phoenix-#{@hash_regex}\.png"
+      refute undigested_css =~ ~r"/logo-#{@hash_regex}\.png"
       refute undigested_css =~ ~r"\.\./images/relative-#{@hash_regex}\.png"
     end
 
