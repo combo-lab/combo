@@ -22,7 +22,7 @@ defmodule Combo.Template.CEExEngine.Formatter do
 
   @impl true
   def format(source, opts) do
-    if opts[:sigil] === :H and opts[:modifiers] === ~c"noformat" do
+    if opts[:sigil] === :CE and opts[:modifiers] === ~c"noformat" do
       source
     else
       line_length = opts[:ceex_line_length] || opts[:line_length] || @default_line_length
