@@ -174,12 +174,12 @@ defmodule Combo.Router.RouteTest do
   end
 
   test "as a plug, it forwards and sets path_info and script_name for target, then resumes" do
-    conn = %Plug.Conn{path_info: ["admin", "stats"], script_name: ["phoenix"]}
+    conn = %Plug.Conn{path_info: ["admin", "stats"], script_name: ["demo_app"]}
     conn = call(conn, {["admin"], AdminRouter, []})
     fwd_conn = conn.assigns[:fwd_conn]
     assert fwd_conn.path_info == ["stats"]
-    assert fwd_conn.script_name == ["phoenix", "admin"]
+    assert fwd_conn.script_name == ["demo_app", "admin"]
     assert conn.path_info == ["admin", "stats"]
-    assert conn.script_name == ["phoenix"]
+    assert conn.script_name == ["demo_app"]
   end
 end

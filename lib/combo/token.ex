@@ -91,7 +91,7 @@ defmodule Combo.Token do
         def connect(_params, _socket, _connect_info), do: :error
       end
 
-  In this example, the phoenix.js client will send the token in the
+  In this example, the client JavaScript code will send the token in the
   `connect` command which is then validated by the server.
 
   `Combo.Token` can also be used for validating APIs, handling

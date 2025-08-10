@@ -329,7 +329,7 @@ defmodule Combo.Router.RoutingTest do
       on_exit(fn -> :telemetry.detach(test_name) end)
     end
 
-    test "phoenix.router_dispatch.start and .stop are emitted on success" do
+    test "combo.router_dispatch.start and .stop are emitted on success" do
       call(Router, :get, "/users/123")
 
       assert_received {:telemetry_event, @router_start_event, {_, %{route: "/users/:id"}, _}}
@@ -339,7 +339,7 @@ defmodule Combo.Router.RoutingTest do
       refute_received {:telemetry_event, @router_exception_event, {_, %{route: "/users/:id"}, _}}
     end
 
-    test "phoenix.router_dispatch.start and .stop are emitted when conn halted in router" do
+    test "combo.router_dispatch.start and .stop are emitted when conn halted in router" do
       conn = call(Router, :get, "/halt-plug")
 
       assert conn.halted
@@ -352,7 +352,7 @@ defmodule Combo.Router.RoutingTest do
       refute_received {:telemetry_event, @router_exception_event, {_, %{route: "/halt-plug"}, _}}
     end
 
-    test "phoenix.router_dispatch.start and .stop are emitted when conn is halted in controller" do
+    test "combo.router_dispatch.start and .stop are emitted when conn is halted in controller" do
       conn = call(Router, :get, "/halt-controller")
 
       assert conn.halted
@@ -367,7 +367,7 @@ defmodule Combo.Router.RoutingTest do
                        {_, %{route: "/halt-controller"}, _}}
     end
 
-    test "phoenix.router_dispatch.start and .exception are emitted on crash" do
+    test "combo.router_dispatch.start and .exception are emitted on crash" do
       assert_raise Plug.Conn.WrapperError, ~r/UndefinedFunctionError/, fn ->
         call(Router, :get, "/route_that_crashes")
       end
@@ -382,7 +382,7 @@ defmodule Combo.Router.RoutingTest do
                        {_, %{route: "/route_that_crashes"}, _}}
     end
 
-    test "phoenix.router_dispatch.start and .exception are emitted on exit" do
+    test "combo.router_dispatch.start and .exception are emitted on exit" do
       catch_exit(call(Router, :get, "/exit"))
 
       assert_received {:telemetry_event, @router_start_event, {_, %{route: "/exit"}, _}}
@@ -392,7 +392,7 @@ defmodule Combo.Router.RoutingTest do
       refute_received {:telemetry_event, @router_stop_event, {_, %{route: "/exit"}, _}}
     end
 
-    test "phoenix.router_dispatch.start has supported measurements and metadata" do
+    test "combo.router_dispatch.start has supported measurements and metadata" do
       call(Router, :get, "/users/123")
 
       assert_received {:telemetry_event, @router_start_event,
@@ -412,7 +412,7 @@ defmodule Combo.Router.RoutingTest do
              } = meta
     end
 
-    test "phoenix.router_dispatch.stop has supported measurements and metadata" do
+    test "combo.router_dispatch.stop has supported measurements and metadata" do
       call(Router, :get, "/users/123")
 
       assert_received {:telemetry_event, @router_stop_event,
@@ -432,7 +432,7 @@ defmodule Combo.Router.RoutingTest do
              } = meta
     end
 
-    test "phoenix.router_dispatch.exception has supported measurements and metadata on crash" do
+    test "combo.router_dispatch.exception has supported measurements and metadata on crash" do
       assert_raise Plug.Conn.WrapperError, "** (RuntimeError) boom", fn ->
         call(Router, :get, "/users/123/raise")
       end
@@ -464,7 +464,7 @@ defmodule Combo.Router.RoutingTest do
       assert is_list(stacktrace) && length(stacktrace) > 0
     end
 
-    test "phoenix.router_dispatch.exception has supported measurements and metadata on exit" do
+    test "combo.router_dispatch.exception has supported measurements and metadata on exit" do
       catch_exit(call(Router, :get, "/exit"))
 
       assert_received {:telemetry_event, @router_exception_event,
