@@ -238,8 +238,8 @@ defmodule Combo.DigesterTest do
       assert digested_css =~ ~r"/phoenix-#{@hash_regex}\.png\?vsn=d"
       assert digested_css =~ ~r"\.\./images/relative-#{@hash_regex}\.png\?vsn=d"
 
-      refute digested_css =~ ~r"http://www.phoenixframework.org/absolute-#{@hash_regex}.png"
-      assert digested_css =~ ~r"http://www.phoenixframework.org/absolute.png"
+      refute digested_css =~ ~r"http://www.example.com/absolute-#{@hash_regex}.png"
+      assert digested_css =~ ~r"http://www.example.com/absolute.png"
     end
 
     test "digests only absolute and relative asset paths found within stylesheets without vsn" do
@@ -259,8 +259,8 @@ defmodule Combo.DigesterTest do
       assert digested_css =~ ~r"/phoenix-#{@hash_regex}\.png"
       assert digested_css =~ ~r"\.\./images/relative-#{@hash_regex}\.png"
 
-      refute digested_css =~ ~r"http://www.phoenixframework.org/absolute-#{@hash_regex}.png"
-      assert digested_css =~ ~r"http://www.phoenixframework.org/absolute.png"
+      refute digested_css =~ ~r"http://www.example.com/absolute-#{@hash_regex}.png"
+      assert digested_css =~ ~r"http://www.example.com/absolute.png"
     end
 
     test "sha512 matches content of digested file" do
