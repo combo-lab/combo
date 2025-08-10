@@ -90,7 +90,7 @@ defmodule Combo.DigesterTest do
       assert json["digests"][key]["digest"] =~ ~r"#{@hash_regex}"
 
       assert json["digests"][key]["sha512"] ==
-               "93pY5dBa8nHHi0Zfj75O/vXCBXb+UvEVCyU7Yd3pzOJ7o1wkYBWbvs3pVXhBChEmo8MDANT11vsggo2+bnYqoQ=="
+               "bL4PYnBzlNPY791VxrT4tHXHBPEDRd9pJ0sbaOzveAd+ih66kZPHeY3ZWJZHac+PwLdBZ6/rlpGEC5sbDwy/+w=="
     after
       File.rm_rf!("tmp/digest")
     end
