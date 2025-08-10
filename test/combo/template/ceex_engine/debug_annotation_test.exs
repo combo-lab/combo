@@ -1,7 +1,7 @@
 defmodule Combo.Template.CEExEngine.DebugAnnotationTest do
   use ExUnit.Case
 
-  import ComboTest.Template.CEExEngine.Helper, only: [render_compiled: 1]
+  import ComboTest.Template.CEExEngine.Helper
 
   test "remote component (without root tag)" do
     alias __MODULE__.Components
