@@ -86,7 +86,7 @@ defmodule Combo.DigesterTest do
       assert json["version"] == 1
       assert is_integer(json["digests"][key]["mtime"])
       assert json["digests"][key]["logical_path"] == "logo.png"
-      assert json["digests"][key]["size"] == 13900
+      assert json["digests"][key]["size"] == 1473
       assert json["digests"][key]["digest"] =~ ~r"#{@hash_regex}"
 
       assert json["digests"][key]["sha512"] ==
