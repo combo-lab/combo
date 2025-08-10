@@ -25,81 +25,25 @@ defmodule Combo.HTML.Components do
 
   ## JavaScript dependency
 
-  In order to support links where `:method` is not `"get"` or use the above data attributes,
-  `Combo.HTML` relies on JavaScript. You can load `priv/static/phoenix_html.js` into your
-  build tool.
+  In order to support links where `:method` is not `"get"` or use the above
+  data attributes, `Combo.HTML` relies on JavaScript. You can load in your
+  build tool like:
+
+  ```javascript
+  import html from `combo/html`
+
+  html.init()
+  ```
+
+  To customize the default behaviour of the JavaScript dependency, check
+  out the doc of `combo/html`.
 
   ### Data attributes
 
-  Data attributes are added as a keyword list passed to the `data` key. The following data
-  attributes are supported:
+  The following data attributes are supported:
 
-    * `data-confirm` - shows a confirmation prompt before generating and submitting the form when
-      `:method` is not `"get"`.
-
-  ### Overriding the default confirm behaviour
-
-  `phoenix_html.js` does trigger a custom event `phoenix.link.click` on the clicked DOM element
-  when a click happened. This allows you to intercept the event on its way bubbling up
-  to `window` and do your own custom logic to enhance or replace how the `data-confirm`
-  attribute is handled. You could for example replace the browsers `confirm()` behavior with
-  a custom javascript implementation:
-
-  ```javascript
-  // Compared to a javascript window.confirm, the custom dialog does not block
-  // javascript execution. Therefore to make this work as expected we store
-  // the successful confirmation as an attribute and re-trigger the click event.
-  // On the second click, the `data-confirm-resolved` attribute is set and we proceed.
-  const RESOLVED_ATTRIBUTE = "data-confirm-resolved";
-  // listen on document.body, so it's executed before the default of
-  // phoenix_html, which is listening on the window object
-  document.body.addEventListener('phoenix.link.click', function (e) {
-    // Prevent default implementation
-    e.stopPropagation();
-    // Introduce alternative implementation
-    var message = e.target.getAttribute("data-confirm");
-    if(!message){ return; }
-
-    // Confirm is resolved execute the click event
-    if (e.target?.hasAttribute(RESOLVED_ATTRIBUTE)) {
-      e.target.removeAttribute(RESOLVED_ATTRIBUTE);
-      return;
-    }
-
-    // Confirm is needed, preventDefault and show your modal
-    e.preventDefault();
-    e.target?.setAttribute(RESOLVED_ATTRIBUTE, "");
-
-    vex.dialog.confirm({
-      message: message,
-      callback: function (value) {
-        if (value == true) {
-          // Customer confirmed, re-trigger the click event.
-          e.target?.click();
-        } else {
-          // Customer canceled
-          e.target?.removeAttribute(RESOLVED_ATTRIBUTE);
-        }
-      }
-    })
-  }, false);
-  ```
-
-  Or you could attach your own custom behavior.
-
-  ```javascript
-  window.addEventListener('phoenix.link.click', function (e) {
-    // Introduce custom behaviour
-    var message = e.target.getAttribute("data-prompt");
-    var answer = e.target.getAttribute("data-prompt-answer");
-    if(message && answer && (answer != window.prompt(message))) {
-      e.preventDefault();
-    }
-  }, false);
-  ```
-
-  The latter could also be bound to any `click` event, but this way you can be sure your custom
-  code is only executed when the code of `phoenix_html.js` is run.
+    * `data-confirm` - shows a confirmation prompt before submitting the
+      form when `:method` is not `"get"`.
 
   ## CSRF Protection
 
@@ -455,10 +399,10 @@ defmodule Combo.HTML.Components do
   the form is the one actually submitting it. This module generates a
   CSRF token by default. Your application should check this token on
   the server to avoid attackers from making requests on your server on
-  behalf of other users. Phoenix by default checks this token.
+  behalf of other users. Combo by default checks this token.
 
   When posting a form with a host in its address, such as "//host.com/path"
-  instead of only "/path", Phoenix will include the host signature in the
+  instead of only "/path", Combo will include the host signature in the
   token and validate the token only if the accessed host is the same as
   the host in the token. This is to avoid tokens from leaking to third
   party applications. If this behaviour is problematic, you can generate

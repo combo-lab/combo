@@ -1,11 +1,20 @@
 defmodule Combo.HTML do
   @moduledoc ~S'''
-  All the things about HTML templates.
+  Building blocks for working with HTML.
+
+  ## Features
+
+    * Components
+    * Form handling
+
+  ## Note
 
   This module is built on top of:
 
     * `Combo.Template`
     * `Combo.Template.CEExEngine`
+
+  And, by design, they are hidden from daily use.
 
   ## Syntax
 
@@ -768,88 +777,6 @@ defmodule Combo.HTML do
   check that module for more information.
   '''
 
-  @doc """
-  Building blocks for working with HTML.
-
-
-  It provides following main functionalities:
-
-    * Form handling
-    * A tiny JavaScript library to enhance applications
-
-  ## HTML safety
-
-  It is to provide convenience functions for escaping and marking HTML code
-  as safe.
-
-  By default, interpolated data in templates is considered unsafe:
-
-  ```ch
-  <%= "<hello>" %>
-  ```
-
-  will be rendered as:
-
-  ```html
-  &lt;hello&gt;
-  ```
-
-  However, in some cases, you may want to tag it as safe and show its "raw"
-  contents:
-
-  ```ch
-  <%= raw "<hello>" %>
-  ```
-
-  will be rendered as
-
-  ```html
-  <hello>
-  ```
-
-  ## Form handling
-
-  See `Combo.HTML.Form`.
-
-  ## JavaScript library
-
-  This project ships with a tiny bit of JavaScript that listens
-  to all click events to:
-
-    * Support `data-confirm="message"` attributes, which shows
-      a confirmation modal with the given message
-
-    * Support `data-method="patch|post|put|delete"` attributes,
-      which sends the current click as a PATCH/POST/PUT/DELETE
-      HTTP request. You will need to add `data-to` with the URL
-      and `data-csrf` with the CSRF token value
-
-    * Dispatch a "phoenix.link.click" event. You can listen to this
-      event to customize the behaviour above. Returning false from
-      this event will disable `data-method`. Stopping propagation
-      will disable `data-confirm`
-
-  To use the functionality above, you must load `priv/static/phoenix_html.js`
-  into your build tool.
-
-  ### Overriding the default confirmation behaviour
-
-  You can override the default implementation by hooking
-  into `phoenix.link.click`. Here is an example:
-
-  ```javascript
-  window.addEventListener('phoenix.link.click', function (e) {
-    // Introduce custom behaviour
-    var message = e.target.getAttribute("data-prompt");
-    var answer = e.target.getAttribute("data-prompt-answer");
-    if(message && answer && (answer != window.prompt(message))) {
-      e.preventDefault();
-    }
-  }, false);
-  ```
-
-  """
-
   @doc false
   defmacro __using__(opts \\ []) do
     default =
@@ -873,6 +800,31 @@ defmodule Combo.HTML do
   Marks the given content as raw.
 
   This means any HTML code inside the given string won't be escaped.
+
+  By default, interpolated data in templates is considered unsafe:
+
+  ```ceex
+  <%= "<hello>" %>
+  ```
+
+  which renders:
+
+  ```html
+  &lt;hello&gt;
+  ```
+
+  However, in some cases, you may want to tag it as safe and show its
+  "raw" contents:
+
+  ```ceex
+  <%= raw "<hello>" %>
+  ```
+
+  which renders:
+
+  ```html
+  <hello>
+  ```
 
   ## Examples
 
