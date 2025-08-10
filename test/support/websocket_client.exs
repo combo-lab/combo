@@ -61,7 +61,7 @@ defmodule Phoenix.Integration.WebsocketClient do
   Sends a heartbeat event
   """
   def send_heartbeat(socket) do
-    send_event(socket, "phoenix", "heartbeat", %{})
+    send_event(socket, "combo", "heartbeat", %{})
   end
 
   @doc """

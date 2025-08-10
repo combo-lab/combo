@@ -68,7 +68,7 @@ describe('with transport', function () {
       const socket = new Socket('/socket', { authToken })
 
       socket.connect()
-      expect(socket.conn.protocols).toEqual(['phoenix', 'base64url.bearer.phx.MTIzNA'])
+      expect(socket.conn.protocols).toEqual(['combo', 'base64url.bearer.combo.MTIzNA'])
     })
   })
 

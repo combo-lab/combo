@@ -332,7 +332,7 @@ defmodule Phoenix.Integration.WebSocketChannelsTest do
 
         test "transport sec-websocket-* headers are extracted to the socket connect_info" do
           extra_headers = [
-            {"sec-websocket-protocol", "phoenix, 123"},
+            {"sec-websocket-protocol", "combo, 123"},
             {"sec-websocket-extensions", "permessage-deflate; client_max_window_bits=15"}
           ]
 
@@ -351,7 +351,7 @@ defmodule Phoenix.Integration.WebSocketChannelsTest do
             payload: %{
               "connect_info" => %{
                 "sec_websocket_headers" => %{
-                  "sec-websocket-protocol" => "phoenix, 123",
+                  "sec-websocket-protocol" => "combo, 123",
                   "sec-websocket-extensions" => "permessage-deflate; client_max_window_bits=15"
                 }
               }
@@ -748,7 +748,7 @@ defmodule Phoenix.Integration.WebSocketChannelsTest do
             event: "phx_reply",
             payload: %{"response" => %{}, "status" => "ok"},
             ref: "1",
-            topic: "phoenix"
+            topic: "combo"
           }
 
           assert_receive {:DOWN, _, :process, ^socket, :normal}, 400

@@ -1,6 +1,6 @@
 import {
   global,
-  phxWindow,
+  comboWindow,
   CHANNEL_EVENTS,
   DEFAULT_TIMEOUT,
   DEFAULT_VSN,
@@ -136,14 +136,14 @@ export default class Socket {
       this.decode = this.defaultDecoder
     }
     let awaitingConnectionOnPageShow = null
-    if (phxWindow && phxWindow.addEventListener) {
-      phxWindow.addEventListener('pagehide', (_e) => {
+    if (comboWindow && comboWindow.addEventListener) {
+      comboWindow.addEventListener('pagehide', (_e) => {
         if (this.conn) {
           this.disconnect()
           awaitingConnectionOnPageShow = this.connectClock
         }
       })
-      phxWindow.addEventListener('pageshow', (_e) => {
+      comboWindow.addEventListener('pageshow', (_e) => {
         if (awaitingConnectionOnPageShow === this.connectClock) {
           awaitingConnectionOnPageShow = null
           this.connect()
@@ -365,7 +365,7 @@ export default class Socket {
     }
     let ref = this.makeRef()
     let startTime = Date.now()
-    this.push({ topic: 'phoenix', event: 'heartbeat', payload: {}, ref: ref })
+    this.push({ topic: 'combo', event: 'heartbeat', payload: {}, ref: ref })
     let onMsgRef = this.onMessage((msg) => {
       if (msg.ref === ref) {
         this.off([onMsgRef])
@@ -386,7 +386,7 @@ export default class Socket {
     // Sec-WebSocket-Protocol based token
     // (longpoll uses Authorization header instead)
     if (this.authToken) {
-      protocols = ['phoenix', `${AUTH_TOKEN_PREFIX}${btoa(this.authToken).replace(/=/g, '')}`]
+      protocols = ['combo', `${AUTH_TOKEN_PREFIX}${btoa(this.authToken).replace(/=/g, '')}`]
     }
     this.conn = new this.transport(this.endPointURL(), protocols)
     this.conn.binaryType = this.binaryType
@@ -691,7 +691,7 @@ export default class Socket {
     }
     this.pendingHeartbeatRef = this.makeRef()
     this.push({
-      topic: 'phoenix',
+      topic: 'combo',
       event: 'heartbeat',
       payload: {},
       ref: this.pendingHeartbeatRef,

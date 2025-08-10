@@ -85,7 +85,7 @@ defmodule Combo.Endpoint.SupervisorTest do
 
   test "logs info if :http or :https configuration is set but not :server when running in release" do
     # simulate running inside release
-    System.put_env("RELEASE_NAME", "phoenix-test")
+    System.put_env("RELEASE_NAME", "app-test")
     Application.put_env(:combo, ServerEndpoint, server: false, http: [], https: [])
 
     assert capture_log(fn ->

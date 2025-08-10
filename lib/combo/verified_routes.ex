@@ -1012,9 +1012,9 @@ defmodule Combo.VerifiedRoutes do
   end
 
   defp build_conn_forward_path(%Plug.Conn{} = conn, router, path) do
-    with %{combo_router: phx_router} <- conn.private,
-         %{^phx_router => script_name} when is_list(script_name) <- conn.private,
-         local_script when is_list(local_script) <- phx_router.__forward__(router) do
+    with %{combo_router: combo_router} <- conn.private,
+         %{^combo_router => script_name} when is_list(script_name) <- conn.private,
+         local_script when is_list(local_script) <- combo_router.__forward__(router) do
       path_with_script(path, script_name ++ local_script)
     else
       _ -> nil

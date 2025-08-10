@@ -15,7 +15,7 @@ let arrayBufferToBase64 = (buffer) => {
 export default class LongPoll {
   constructor(endPoint, protocols) {
     // we only support subprotocols for authToken
-    // ["phoenix", "base64url.bearer.phx.BASE64_ENCODED_TOKEN"]
+    // ["combo", "base64url.bearer.combo.BASE64_ENCODED_TOKEN"]
     if (protocols && protocols.length === 2 && protocols[1].startsWith(AUTH_TOKEN_PREFIX)) {
       this.authToken = atob(protocols[1].slice(AUTH_TOKEN_PREFIX.length))
     }

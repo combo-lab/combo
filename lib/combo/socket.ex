@@ -100,7 +100,7 @@ defmodule Combo.Socket do
   The serializer `decode!` function must return a `Combo.Socket.Message`
   which is forwarded to channels except:
 
-    * `"heartbeat"` events in the "phoenix" topic - should just emit an OK reply
+    * `"heartbeat"` events in the "combo" topic - should just emit an OK reply
     * `"phx_join"` on any topic - should join the topic
     * `"phx_leave"` on any topic - should leave the topic
 
@@ -667,10 +667,10 @@ defmodule Combo.Socket do
     end
   end
 
-  defp handle_in(_, %{ref: ref, topic: "phoenix", event: "heartbeat"}, state, socket) do
+  defp handle_in(_, %{ref: ref, topic: "combo", event: "heartbeat"}, state, socket) do
     reply = %Reply{
       ref: ref,
-      topic: "phoenix",
+      topic: "combo",
       status: :ok,
       payload: %{}
     }

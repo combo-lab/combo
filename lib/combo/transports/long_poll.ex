@@ -268,7 +268,7 @@ defmodule Combo.Transports.LongPoll do
   end
 
   defp maybe_auth_token_from_header(conn, true) do
-    case Plug.Conn.get_req_header(conn, "x-phoenix-authtoken") do
+    case Plug.Conn.get_req_header(conn, "x-combo-authtoken") do
       [] ->
         conn
 

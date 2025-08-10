@@ -17,7 +17,7 @@ defmodule Combo.Transports.WebSocket do
 
   @connect_info_opts [:check_csrf]
 
-  @auth_token_prefix "base64url.bearer.phx."
+  @auth_token_prefix "base64url.bearer.combo."
 
   import Plug.Conn
 
@@ -41,8 +41,8 @@ defmodule Combo.Transports.WebSocket do
       if opts[:auth_token] do
         # when using Sec-WebSocket-Protocol for passing an auth token
         # the server must reply with one of the subprotocols in the request;
-        # therefore we include "phoenix" as allowed subprotocol and include it on the client
-        ["phoenix" | Keyword.get(opts, :subprotocols, [])]
+        # therefore we include "combo" as allowed subprotocol and include it on the client
+        ["combo" | Keyword.get(opts, :subprotocols, [])]
       else
         opts[:subprotocols]
       end

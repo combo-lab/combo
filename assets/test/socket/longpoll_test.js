@@ -69,7 +69,7 @@ describe('LongPoll', () => {
     it('should extract authToken when valid protocols are provided', () => {
       const authToken = 'my-auth-token'
       const encodedToken = btoa(authToken)
-      const protocols = ['phoenix', `${AUTH_TOKEN_PREFIX}${encodedToken}`]
+      const protocols = ['combo', `${AUTH_TOKEN_PREFIX}${encodedToken}`]
 
       const longpoll = new LongPoll('http://localhost/socket/longpoll', protocols)
 
@@ -82,7 +82,7 @@ describe('LongPoll', () => {
     it('should include auth token in headers when present', () => {
       const authToken = 'my-auth-token'
       const encodedToken = btoa(authToken)
-      const protocols = ['phoenix', `${AUTH_TOKEN_PREFIX}${encodedToken}`]
+      const protocols = ['combo', `${AUTH_TOKEN_PREFIX}${encodedToken}`]
 
       const longpoll = new LongPoll('http://localhost/socket/longpoll', protocols)
       longpoll.timeout = 1000
@@ -181,7 +181,7 @@ describe('Socket with LongPoll', () => {
 
       // Verify that the transport was called with correct protocols array
       expect(socket.transport).toHaveBeenCalledWith(expect.any(String), [
-        'phoenix',
+        'combo',
         `${AUTH_TOKEN_PREFIX}${btoa(authToken).replace(/=/g, '')}`,
       ])
     })

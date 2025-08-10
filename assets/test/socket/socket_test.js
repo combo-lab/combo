@@ -470,7 +470,7 @@ describe('with transports', function () {
       socket.conn.readyState = 1 // open
 
       const sendSpy = jest.spyOn(socket.conn, 'send')
-      const data = '[null,"1","phoenix","heartbeat",{}]'
+      const data = '[null,"1","combo","heartbeat",{}]'
 
       socket.sendHeartbeat()
       expect(sendSpy).toHaveBeenCalledWith(data)
@@ -480,7 +480,7 @@ describe('with transports', function () {
       socket.conn.readyState = 0 // connecting
 
       const sendSpy = jest.spyOn(socket.conn, 'send')
-      const data = encode({ topic: 'phoenix', event: 'heartbeat', payload: {}, ref: '1' })
+      const data = encode({ topic: 'combo', event: 'heartbeat', payload: {}, ref: '1' })
 
       socket.sendHeartbeat()
       expect(sendSpy).not.toHaveBeenCalledWith(data)
@@ -832,7 +832,7 @@ describe('with transports', function () {
       socket.push = (msg) => {
         setTimeout(() => {
           socket.onConnMessage({
-            data: encode({ topic: 'phoenix', event: 'phx_reply', ref: msg.ref }),
+            data: encode({ topic: 'combo', event: 'phx_reply', ref: msg.ref }),
           })
         }, latency)
       }

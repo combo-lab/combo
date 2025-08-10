@@ -550,10 +550,10 @@ defmodule Combo.HTML.FormatterTest do
   test "parse EEx inside of html tags" do
     assert_formatter_output(
       """
-        <button {build_phx_attrs_dynamically()}>Test</button>
+        <button {build_combo_attrs_dynamically()}>Test</button>
       """,
       """
-      <button {build_phx_attrs_dynamically()}>Test</button>
+      <button {build_combo_attrs_dynamically()}>Test</button>
       """
     )
   end
