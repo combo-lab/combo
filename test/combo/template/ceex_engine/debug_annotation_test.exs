@@ -6,8 +6,6 @@ defmodule Combo.Template.CEExEngine.DebugAnnotationTest do
   test "remote component (without root tag)" do
     alias __MODULE__.Components
 
-    assigns = %{}
-
     assert render_string("<Components.remote value='1'/>") ==
              """
              <!-- <Combo.Template.CEExEngine.DebugAnnotationTest.Components.remote> test/combo/template/ceex_engine/debug_annotation_test/support/components.exs:5 () -->\
@@ -18,8 +16,6 @@ defmodule Combo.Template.CEExEngine.DebugAnnotationTest do
 
   test "remote component (with root tag)" do
     alias __MODULE__.Components
-
-    assigns = %{}
 
     assert render_string("<Components.remote_with_root value='1'/>") ==
              """
@@ -32,8 +28,6 @@ defmodule Combo.Template.CEExEngine.DebugAnnotationTest do
   test "local component (without root tag)" do
     import __MODULE__.Components
 
-    assigns = %{}
-
     assert render_string("<.local value='1'/>") ==
              """
              <!-- <Combo.Template.CEExEngine.DebugAnnotationTest.Components.local> test/combo/template/ceex_engine/debug_annotation_test/support/components.exs:13 () -->\
@@ -45,8 +39,6 @@ defmodule Combo.Template.CEExEngine.DebugAnnotationTest do
   test "local component (with root tag)" do
     import __MODULE__.Components
 
-    assigns = %{}
-
     assert render_string("<.local_with_root value='1'/>") ==
              """
              <!-- <Combo.Template.CEExEngine.DebugAnnotationTest.Components.local_with_root> test/combo/template/ceex_engine/debug_annotation_test/support/components.exs:17 () -->\
@@ -57,8 +49,6 @@ defmodule Combo.Template.CEExEngine.DebugAnnotationTest do
 
   test "nesting" do
     alias __MODULE__.Components
-
-    assigns = %{}
 
     assert render_string("<Components.nested value='1'/>") ==
              """
