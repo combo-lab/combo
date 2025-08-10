@@ -781,15 +781,16 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     raise_syntax_error!(message, close_t_meta, state)
   end
 
-  defp pop_tag!(state, {:close, _t_type, t_name, t_meta}) do
-    hint = closing_void_hint(t_name)
-    message = "missing opening tag for </#{t_name}>#{hint}"
+  defp pop_tag!(state, {:close, _t_type, _t_name, t_meta}) do
+    %{tag_name: tag_name} = t_meta
+    hint = closing_void_hint(tag_name)
+    message = "missing opening tag for </#{tag_name}>#{hint}"
     raise_syntax_error!(message, t_meta, state)
   end
 
-  defp closing_void_hint(t_name) do
-    if TagHandler.void_tag?(t_name) do
-      " (note <#{t_name}> is a void tag and cannot have any content)"
+  defp closing_void_hint(tag_name) do
+    if TagHandler.void_tag?(tag_name) do
+      " (note <#{tag_name}> is a void tag and cannot have any content)"
     else
       ""
     end
