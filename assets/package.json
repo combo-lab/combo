@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "watch": "node build.js --watch",
     "build": "node build.js",
     "lint": "eslint",
     "test": "jest",

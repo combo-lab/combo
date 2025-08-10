@@ -255,14 +255,14 @@ defmodule Combo.MixProject do
 
   defp aliases do
     [
-      docs: ["docs", &generate_js_docs/1],
-      "assets.build": ["esbuild module", "esbuild cdn", "esbuild cdn_min", "esbuild main"],
-      "assets.watch": "esbuild module --watch"
-    ]
-  end
+      setup: ["deps.get", "assets.deps.get"],
+      docs: ["docs", "assets.docs"],
 
-  defp generate_js_docs(_) do
-    Mix.Task.run("app.start")
-    System.cmd("npm", ["run", "docs"])
+      # bridges for npm scripts
+      "assets.deps.get": "cmd npm install --prefix assets",
+      "assets.watch": "cmd npm run watch --prefix assets",
+      "assets.build": "cmd npm run build --prefix assets",
+      "assets.docs": "cmd npm run docs --prefix assets"
+    ]
   end
 end
