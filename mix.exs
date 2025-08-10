@@ -113,7 +113,7 @@ defmodule Combo.MixProject do
       main: "overview",
       extra_section: "GUIDES",
       assets: %{"guides/assets" => "assets"},
-      formatters: ["html", "epub"],
+      formatters: ["html"],
       groups_for_modules: groups_for_modules(),
       extras: extras(),
       groups_for_extras: groups_for_extras(),
