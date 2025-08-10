@@ -1,24 +1,24 @@
-# Contributing to Phoenix
+# Contributing
 
 Please take a moment to review this document in order to make the contribution
 process easy and effective for everyone involved!
-Also make sure you read our [Code of Conduct](CODE_OF_CONDUCT.md) that outlines our commitment towards an open and welcoming environment.
+Also make sure you read our [Code of Conduct](CODE_OF_CONDUCT.md) that outlines
+our commitment towards an open and welcoming environment.
 
 ## Using the issue tracker
 
 Use the issues tracker for:
 
-* [Bug reports](#bug-reports)
-* [Submitting pull requests](#pull-requests)
+- [Bug reports](#bug-reports)
+- [Submitting pull requests](#pull-requests)
 
 For requesting help and discussing new features:
 
-* [The Phoenix subforum on the Elixir Forum](https://elixirforum.com/c/phoenix-forum)
-* **[#elixir](irc://irc.libera.chat/elixir)** on [Libera](https://libera.chat/) IRC
+- [The Combo subforum on the Elixir Forum](https://elixirforum.com/c/combo-forum)
+- **[#elixir](irc://irc.libera.chat/elixir)** on [Libera](https://libera.chat/) IRC
 
 We do our best to keep the issue tracker tidy and organized, making it useful
-for everyone. For example, we classify open issues per perceived difficulty,
-making it easier for developers to [contribute to Phoenix](#pull-requests).
+for everyone.
 
 ## Bug reports
 
@@ -38,9 +38,9 @@ Guidelines for bug reports:
    case.
 
 Please try to be as detailed as possible in your report. Include information about
-your Operating System, as well as your Erlang, Elixir and Phoenix versions. Please provide steps to
-reproduce the issue as well as the outcome you were expecting! All these details
-will help developers to fix any potential bugs.
+your Operating System, as well as your Erlang, Elixir and Combo versions. Please
+provide steps to reproduce the issue as well as the outcome you were expecting!
+All these details will help developers to fix any potential bugs.
 
 Example:
 
@@ -62,10 +62,10 @@ Example:
 
 ## Feature requests
 
-Feature requests are welcome and should be discussed on the [Phoenix subforum](https://elixirforum.com/c/phoenix-forum). But take a moment to find
-out whether your idea fits with the scope and aims of the project. It's up to *you*
-to make a strong case to convince the community of the merits of this feature.
-Please provide as much detail and context as possible.
+Feature requests are welcome and should be discussed on the [Combo subforum](https://elixirforum.com/c/combo-forum).
+But take a moment to find out whether your idea fits with the scope and aims
+of the project. It's up to _you_ to make a strong case to convince the community
+of the merits of this feature. Please provide as much detail and context as possible.
 
 ## Contributing Documentation
 
@@ -86,7 +86,7 @@ For modules, protocols, and types say what it is. For example write
 something like:
 
 ```elixir
-defmodule Phoenix.HTML do
+defmodule Combo.HTML do
   @moduledoc """
   Conveniences for working HTML strings and templates.
   ...
@@ -130,13 +130,13 @@ in order to craft an excellent pull request:
 
    ```bash
    # Clone your fork of the repo into the current directory
-   git clone https://github.com/<your-username>/phoenix
+   git clone https://github.com/<your-username>/combo
 
    # Navigate to the newly cloned directory
-   cd phoenix
+   cd combo
 
    # Assign the original repo to a remote called "upstream"
-   git remote add upstream https://github.com/phoenixframework/phoenix
+   git remote add upstream https://github.com/combo-team/combo
    ```
 
 2. If you cloned a while ago, get the latest changes from upstream, and update your fork:
@@ -177,7 +177,7 @@ in order to craft an excellent pull request:
    ```
 
 7. [Open a Pull Request](https://help.github.com/articles/about-pull-requests/)
-    with a clear title and description.
+   with a clear title and description.
 
 8. If you haven't updated your pull request for a while, you should consider
    rebasing on main and resolving any conflicts.

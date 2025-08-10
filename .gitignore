@@ -7,10 +7,5 @@
 
 /assets/node_modules/
 
-/integration_test/_build/
-/integration_test/deps/
-
 erl_crash.dump
-phoenix-*.ez
-
-.DS_Store
+combo-*.ez
