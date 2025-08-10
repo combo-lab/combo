@@ -131,10 +131,10 @@ defmodule Combo.HTML do
   #### Disabling curly-interpolation
 
   Curly-interpolation is allowed to be disabled in a given tag and its children by
-  adding the `phx-no-curly-interpolation` attribute. For example:
+  adding the `ceex-no-curly-interpolation` attribute. For example:
 
   ```ceex
-  <p phx-no-curly-interpolation>
+  <p ceex-no-curly-interpolation>
     Hello, {expression}
   </p>
   ```

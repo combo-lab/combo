@@ -458,7 +458,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
         tokens = put_attr(tokens, name, attr_meta, value)
 
         state =
-          if name == "phx-no-curly-interpolation" and state.braces == :enabled and
+          if name == "ceex-no-curly-interpolation" and state.braces == :enabled and
                not script_or_style?(tokens) do
             %{state | braces: 0}
           else
