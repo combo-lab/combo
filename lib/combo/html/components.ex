@@ -597,6 +597,7 @@ defmodule Combo.HTML.Components do
     end
   end
 
+  # TODO: fix the docs
   @doc """
   Renders nested form inputs for associations or embeds.
 
@@ -662,7 +663,6 @@ defmodule Combo.HTML.Components do
       type="button"
       name="mailing_list[emails_drop][]"
       value={ef.index}
-      phx-click={JS.dispatch("change")}
     >
       <.icon name="hero-x-mark" class="w-6 h-6 relative top-2" />
     </button>
@@ -670,7 +670,7 @@ defmodule Combo.HTML.Components do
 
   <input type="hidden" name="mailing_list[emails_drop][]" />
 
-  <button type="button" name="mailing_list[emails_sort][]" value="new" phx-click={JS.dispatch("change")}>
+  <button type="button" name="mailing_list[emails_sort][]" value="new">
     add more
   </button>
   ```

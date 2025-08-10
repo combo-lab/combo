@@ -114,8 +114,8 @@ defmodule Combo.Debug do
       iex> Combo.Debug.list_channels(pid)
       {:ok,
        [
-         %{pid: #PID<0.1702.0>, status: :joined, topic: "lv:phx-GDp9a9UZPiTxcgnE"},
-         %{pid: #PID<0.1727.0>, status: :joined, topic: "lv:sidebar"}
+         %{pid: #PID<0.1702.0>, status: :joined, topic: "t1"},
+         %{pid: #PID<0.1727.0>, status: :joined, topic: "t2"}
        ]}
 
       iex> Combo.Debug.list_channels(pid(0,456,0))

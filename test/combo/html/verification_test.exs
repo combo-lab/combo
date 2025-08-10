@@ -31,7 +31,7 @@ defmodule Combo.HTML.VerificationTest do
           def global_render(assigns) do
             ~CE"""
             <.func global="global" />
-            <.func phx-click="click" id="id" />
+            <.func id="id" />
             """
           end
 
@@ -485,7 +485,7 @@ defmodule Combo.HTML.VerificationTest do
 
           def render(assigns) do
             ~CE"""
-            <.func width="btn" size={@size} phx-no-format />
+            <.func width="btn" size={@size} />
             """
           end
         end

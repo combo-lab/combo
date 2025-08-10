@@ -225,8 +225,8 @@ defmodule Combo.HTML.FormatterTest do
 
   test "break HTML into multiple lines when it doesn't fit" do
     input = """
-    <p class="alert alert-info more-class more-class" role="alert" phx-click="lv:clear-flash" phx-value-key="info">
-      <%= live_flash(@flash, :info) %>
+    <p class="alert alert-info more-class more-class" role="alert" data-click="clear-flash" data-value-key="info">
+      <%= Combo.Flash.get(@flash, :info) %>
     </p>
     """
 
@@ -234,10 +234,10 @@ defmodule Combo.HTML.FormatterTest do
     <p
       class="alert alert-info more-class more-class"
       role="alert"
-      phx-click="lv:clear-flash"
-      phx-value-key="info"
+      data-click="clear-flash"
+      data-value-key="info"
     >
-      <%= live_flash(@flash, :info) %>
+      <%= Combo.Flash.get(@flash, :info) %>
     </p>
     """
 
@@ -246,8 +246,8 @@ defmodule Combo.HTML.FormatterTest do
 
   test "handle HTML attributes" do
     input = """
-    <p class="alert alert-info" phx-click="lv:clear-flash" phx-value-key="info">
-      <%= live_flash(@flash, :info) %>
+    <p class="alert alert-info" data-click="clear-flash" data-value-key="info">
+      <%= Combo.Flash.get(@flash, :info) %>
     </p>
     """
 
@@ -272,14 +272,14 @@ defmodule Combo.HTML.FormatterTest do
 
   test "fix indentation when it fits inline" do
     input = """
-    <section id="id" phx-hook="PhxHook">
+    <section id="id">
       <.component
         image_url={@url} />
     </section>
     """
 
     expected = """
-    <section id="id" phx-hook="PhxHook">
+    <section id="id">
       <.component image_url={@url} />
     </section>
     """
@@ -2101,7 +2101,7 @@ defmodule Combo.HTML.FormatterTest do
         type={@type}
         class={
           [
-            "phx-submit-loading:opacity-75 rounded-lg bg-zinc-900 py-2 px-3 text-sm font-semibold",
+            "rounded-lg bg-zinc-900 py-2 px-3 text-sm font-semibold",
             "leading-6 text-white hover:bg-zinc-700 active:text-white/80",
             @class
           ]
@@ -2115,7 +2115,7 @@ defmodule Combo.HTML.FormatterTest do
       <button
         type={@type}
         class={[
-          "phx-submit-loading:opacity-75 rounded-lg bg-zinc-900 py-2 px-3 text-sm font-semibold",
+          "rounded-lg bg-zinc-900 py-2 px-3 text-sm font-semibold",
           "leading-6 text-white hover:bg-zinc-700 active:text-white/80",
           @class
         ]}
