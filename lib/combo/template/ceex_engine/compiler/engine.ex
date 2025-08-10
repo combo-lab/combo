@@ -135,7 +135,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
   defp preprocess_token({t_type, _t_name, _t_attrs, _t_meta} = token, state)
        when t_type in [:html_tag, :remote_component, :local_component, :slot] do
     rules = [
-      &remove_phx_attr/3,
+      &remove_control_attr/3,
       &validate_attr!/3,
       &normalize_attr/3,
       &metafy_special_attr/3
@@ -156,13 +156,13 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     {t_type, t_name, new_t_attrs, new_t_meta}
   end
 
-  defp remove_phx_attr({"ceex-no-format", _, _}, token, _state),
+  defp remove_control_attr({"ceex-no-format", _, _}, token, _state),
     do: token
 
-  defp remove_phx_attr({"ceex-no-curly-interpolation", _, _}, token, _state),
+  defp remove_control_attr({"ceex-no-curly-interpolation", _, _}, token, _state),
     do: token
 
-  defp remove_phx_attr(attr, {t_type, t_name, t_attrs, t_meta}, _state),
+  defp remove_control_attr(attr, {t_type, t_name, t_attrs, t_meta}, _state),
     do: {t_type, t_name, [attr | t_attrs], t_meta}
 
   defp validate_attr!(
