@@ -1255,7 +1255,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
   `name` must be the assign name the slot/block will be stored
   under.
 
-  If you're using HEEx templates, you should use its higher
+  If you're using CEEx templates, you should use its higher
   level `<:slot>` notation instead. See `Phoenix.Component`
   for more information.
   """
@@ -1288,13 +1288,13 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
   and other engine implementations to render `Phoenix.Component`s. For example,
   the following:
 
-  ```heex
+  ```ceex
   <MyApp.Weather.city name="Kraków" />
   ```
 
   Is the same as:
 
-  ```heex
+  ```ceex
   <%= component(
         &MyApp.Weather.city/1,
         [name: "Kraków"],
@@ -1319,7 +1319,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
         raise RuntimeError, """
         expected #{inspect(fun)} to return a tuple {:safe, iodata()}
 
-        Ensure your render function uses ~CE to define its template.
+        Ensure the component defines its template with CEEx.
 
         Got:
 

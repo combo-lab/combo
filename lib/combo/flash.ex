@@ -8,7 +8,7 @@ defmodule Combo.Flash do
 
   ## Examples
 
-  ```heex
+  ```ceex
   <div id="info"><%= Combo.Flash.get(@flash, :info) %></div>
   <div id="error"><%= Combo.Flash.get(@flash, :error) %></div>
   ```

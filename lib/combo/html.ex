@@ -505,7 +505,7 @@ defmodule Combo.HTML do
   When calling the component, we can use the special attribute `:let` to take
   the value that the component passes back and bind it to a variable:
 
-  ```heex
+  ```ceex
   <.list :let={fruit} entries={~w(apples bananas cherries)}>
     I like <b>{fruit}</b>!
   </.list>

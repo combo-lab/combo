@@ -59,7 +59,7 @@ defmodule Combo.Token do
 
   One is via the meta tag:
 
-  ```heex
+  ```ceex
   <meta name="channel_token" content={Combo.Token.sign(@conn, "user auth", @current_user.id)}>
   ```
 

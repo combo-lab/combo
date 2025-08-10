@@ -22,7 +22,7 @@ defmodule Combo.Template.CEExEngine.Slot do
 
   For example, imagine a table component:
 
-  ```heex
+  ```ceex
   <.table rows={@users}>
     <:col :let={user} label="Name">
       {user.name}
