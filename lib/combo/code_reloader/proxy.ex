@@ -1,7 +1,9 @@
-# A tiny proxy that stores all output sent to the group leader
-# while forwarding all requests to it.
 defmodule Combo.CodeReloader.Proxy do
   @moduledoc false
+
+  # A tiny proxy that stores all output sent to the group leader while
+  # forwarding all requests to it.
+
   use GenServer
 
   def start() do

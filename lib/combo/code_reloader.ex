@@ -14,25 +14,24 @@ defmodule Combo.CodeReloader do
 
   This is configured in your application environment like:
 
-      config :your_app, YourAppWeb.Endpoint,
+      config :demo, Demo.Web.Endpoint,
         reloadable_compilers: [:gettext, :elixir],
         reloadable_apps: [:ui, :backend]
 
-  Keep in mind `:reloadable_compilers` must be a subset of the
-  `:compilers` specified in `project/0` in your `mix.exs`.
+  The `:reloadable_compilers` must be a subset of the `:compilers` specified in
+  `project/0` in your `mix.exs`.
 
-  The `:reloadable_apps` defaults to `nil`. In such case
-  default behaviour is to reload the current project if it
-  consists of a single app, or all applications within an umbrella
-  project. You can set `:reloadable_apps` to a subset of default
-  applications to reload only some of them, an empty list - to
-  effectively disable the code reloader, or include external
-  applications from library dependencies.
+  The `:reloadable_apps` defaults to `nil`. In such case, default behaviour is
+  to reload the current project if it consists of a single app, or all
+  applications within an umbrella project. You can set `:reloadable_apps` to a
+  subset of default applications to reload only some of them, an empty list to
+  effectively disable the code reloader, or include external applications from
+  library dependencies.
 
   This function is a no-op and returns `:ok` if Mix is not available.
 
-  The reloader should also be configured as a Mix listener in project's
-  mix.exs file (since Elixir v1.18):
+  The reloader should also be configured as a Mix listener in your `mix.exs`
+  since Elixir v1.18:
 
       def project do
         [
@@ -41,7 +40,7 @@ defmodule Combo.CodeReloader do
         ]
       end
 
-  This way the reloader can notice whenever the project is compiled
+  This way the reloader can notice whenever your project is compiled
   concurrently.
 
   ## Options
@@ -79,6 +78,7 @@ defmodule Combo.CodeReloader do
   @behaviour Plug
   import Plug.Conn
 
+  # TODO: adjust the style
   @style %{
     light: %{
       primary: "#EB532D",

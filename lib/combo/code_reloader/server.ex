@@ -1,5 +1,6 @@
 defmodule Combo.CodeReloader.Server do
   @moduledoc false
+
   use GenServer
 
   require Logger
@@ -49,7 +50,7 @@ defmodule Combo.CodeReloader.Server do
             Mix.Project.build_structure()
           else
             Logger.warning(
-              "Phoenix is unable to create symlinks. Phoenix's code reloader will run " <>
+              "Combo is unable to create symlinks. Combo.CodeReloader will run " <>
                 "considerably faster if symlinks are allowed." <> os_symlink(:os.type())
             )
           end
@@ -134,7 +135,7 @@ defmodule Combo.CodeReloader.Server do
     do:
       " On Windows, the lack of symlinks may even cause empty assets to be served. " <>
         "Luckily, you can address this issue by starting your Windows terminal at least " <>
-        "once with \"Run as Administrator\" and then running your Phoenix application."
+        "once with \"Run as Administrator\" and then running your application."
 
   defp os_symlink(_),
     do: ""
