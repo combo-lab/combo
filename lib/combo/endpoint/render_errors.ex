@@ -120,7 +120,7 @@ defmodule Combo.Endpoint.RenderErrors do
     format = Controller.get_format(conn)
     reason = Exception.normalize(kind, reason, stack)
     template = "#{conn.status}.#{format}"
-    assigns = %{kind: kind, reason: reason, stack: stack, status: conn.status, __changed__: nil}
+    assigns = %{kind: kind, reason: reason, stack: stack, status: conn.status}
 
     Controller.render(conn, template, assigns)
   end

@@ -1307,8 +1307,8 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       when is_function(fun, 1) and (is_map(assigns) or is_list(assigns)) do
     assigns =
       case assigns do
-        %{__changed__: _} -> assigns
-        _ -> assigns |> Map.new() |> Map.put_new(:__changed__, nil)
+        %{} -> assigns
+        _ -> Map.new(assigns)
       end
 
     case fun.(assigns) do

@@ -16,8 +16,7 @@ defmodule Combo.Endpoint.RenderErrorsTest do
         reason: _reason,
         stack: _stack,
         status: 404,
-        conn: conn,
-        __changed__: nil
+        conn: conn
       }) do
     "Got 404 from #{kind} with #{conn.method}"
   end
@@ -27,8 +26,7 @@ defmodule Combo.Endpoint.RenderErrorsTest do
         reason: _reason,
         stack: _stack,
         status: 404,
-        conn: conn,
-        __changed__: nil
+        conn: conn
       }) do
     %{error: "Got 404 from #{kind} with #{conn.method}"}
   end
@@ -38,8 +36,7 @@ defmodule Combo.Endpoint.RenderErrorsTest do
         reason: _reason,
         stack: _stack,
         status: 415,
-        conn: conn,
-        __changed__: nil
+        conn: conn
       }) do
     "Got 415 from #{kind} with #{conn.method}"
   end
@@ -49,8 +46,7 @@ defmodule Combo.Endpoint.RenderErrorsTest do
         reason: _reason,
         stack: _stack,
         status: 500,
-        conn: conn,
-        __changed__: nil
+        conn: conn
       }) do
     "Got 500 from #{kind} with #{conn.method}"
   end
