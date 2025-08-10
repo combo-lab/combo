@@ -8,7 +8,7 @@ defmodule Combo.Template.CEExEngine.DebugAnnotationTest do
 
     assigns = %{}
 
-    assert render_compiled("<Components.remote value='1'/>") ==
+    assert render_string("<Components.remote value='1'/>") ==
              """
              <!-- <Combo.Template.CEExEngine.DebugAnnotationTest.Components.remote> test/combo/template/ceex_engine/debug_annotation_test/support/components.exs:5 () -->\
              REMOTE COMPONENT: Value: 1\
@@ -21,7 +21,7 @@ defmodule Combo.Template.CEExEngine.DebugAnnotationTest do
 
     assigns = %{}
 
-    assert render_compiled("<Components.remote_with_root value='1'/>") ==
+    assert render_string("<Components.remote_with_root value='1'/>") ==
              """
              <!-- <Combo.Template.CEExEngine.DebugAnnotationTest.Components.remote_with_root> test/combo/template/ceex_engine/debug_annotation_test/support/components.exs:9 () -->\
              <div>REMOTE COMPONENT: Value: 1</div>\
@@ -34,7 +34,7 @@ defmodule Combo.Template.CEExEngine.DebugAnnotationTest do
 
     assigns = %{}
 
-    assert render_compiled("<.local value='1'/>") ==
+    assert render_string("<.local value='1'/>") ==
              """
              <!-- <Combo.Template.CEExEngine.DebugAnnotationTest.Components.local> test/combo/template/ceex_engine/debug_annotation_test/support/components.exs:13 () -->\
              LOCAL COMPONENT: Value: 1\
@@ -47,7 +47,7 @@ defmodule Combo.Template.CEExEngine.DebugAnnotationTest do
 
     assigns = %{}
 
-    assert render_compiled("<.local_with_root value='1'/>") ==
+    assert render_string("<.local_with_root value='1'/>") ==
              """
              <!-- <Combo.Template.CEExEngine.DebugAnnotationTest.Components.local_with_root> test/combo/template/ceex_engine/debug_annotation_test/support/components.exs:17 () -->\
              <div>LOCAL COMPONENT: Value: 1</div>\
@@ -60,7 +60,7 @@ defmodule Combo.Template.CEExEngine.DebugAnnotationTest do
 
     assigns = %{}
 
-    assert render_compiled("<Components.nested value='1'/>") ==
+    assert render_string("<Components.nested value='1'/>") ==
              """
              <!-- <Combo.Template.CEExEngine.DebugAnnotationTest.Components.nested> test/combo/template/ceex_engine/debug_annotation_test/support/components.exs:21 () --><div>
                <!-- @caller test/combo/template/ceex_engine/debug_annotation_test/support/components.exs:23 () -->\
