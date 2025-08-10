@@ -7,7 +7,7 @@ defmodule Combo.Socket.MessageTest do
   describe "inspect/2 custom implementation" do
     test "filters sensitive values in form submit events" do
       message = %Message{
-        topic: "lv:1",
+        topic: "t:1",
         event: "event",
         payload: %{
           "event" => "submit",
@@ -23,7 +23,7 @@ defmodule Combo.Socket.MessageTest do
 
     test "filters sensitive values at the end of form submit events" do
       message = %Message{
-        topic: "lv:1",
+        topic: "t:1",
         event: "event",
         payload: %{
           "event" => "submit",
@@ -39,7 +39,7 @@ defmodule Combo.Socket.MessageTest do
 
     test "handles malformed query strings gracefully" do
       message = %Message{
-        topic: "lv:1",
+        topic: "t:1",
         event: "event",
         payload: %{
           "event" => "submit",
