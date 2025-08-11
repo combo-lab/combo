@@ -1,6 +1,7 @@
 defmodule Combo.Endpoint.Supervisor do
   # This module contains the logic used by most functions in Combo.Endpoint
   # as well the supervisor for sockets, adapters, watchers, etc.
+
   @moduledoc false
 
   require Logger
@@ -192,12 +193,13 @@ defmodule Combo.Endpoint.Supervisor do
     [
       otp_app: otp_app,
 
-      # Compile-time config
+      ## Compile-time config
+
       code_reloader: false,
       debug_errors: false,
       render_errors: [view: render_errors(module), accepts: ~w(html), layout: false],
 
-      # Runtime config
+      ## Runtime config
 
       # Even though Bandit is the default in apps generated via the installer,
       # we continue to use Cowboy as the default if not explicitly specified for
