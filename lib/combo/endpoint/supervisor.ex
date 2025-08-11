@@ -208,9 +208,7 @@ defmodule Combo.Endpoint.Supervisor do
       http: false,
       https: false,
       reloadable_apps: nil,
-      # TODO: Gettext had a compiler in earlier versions,
-      # but not since v0.20, so we can remove it here eventually.
-      reloadable_compilers: [:gettext, :elixir, :app],
+      reloadable_compilers: [:elixir, :app],
       secret_key_base: nil,
       static_url: nil,
       url: [host: "localhost", path: "/"],
