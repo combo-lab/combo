@@ -897,13 +897,6 @@ defmodule Combo.Controller.ControllerTest do
                "use MyApp.Admin.UserController must receive the :formats option with the formats you intend to render"
     end
 
-    test "deprecated namespace" do
-      assert capture_io(:stderr, fn ->
-               assert new_layout(MyApp.Admin.UserController, namespace: MyApp.Admin, formats: []) ==
-                        {MyApp.Admin.LayoutView, :app}
-             end) =~ "the :namespace option given to MyApp.Admin.UserController is deprecated"
-    end
-
     test "returns view modules based on format" do
       assert new_view(MyApp.Admin.UserController, formats: [:html, :json]) ==
                [html: MyApp.Admin.UserHTML, json: MyApp.Admin.UserJSON]

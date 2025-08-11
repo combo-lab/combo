@@ -1894,19 +1894,6 @@ defmodule Combo.Controller do
 
           :error ->
             cond do
-              namespace = Keyword.get(opts, :namespace) ->
-                layout = Module.concat(namespace, "LayoutView")
-
-                IO.warn(
-                  """
-                  the :namespace option given to #{inspect(controller_module)} is deprecated.
-                  Set "plug :put_layout, html: #{inspect(layout)}" instead\
-                  """,
-                  []
-                )
-
-                {layout, :app}
-
               Keyword.has_key?(opts, :formats) ->
                 []
 
