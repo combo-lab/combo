@@ -12,8 +12,8 @@ defmodule Combo.Endpoint.BanditAdapter do
       config :demo, Demo.Web.Endpoint,
         adapter: Combo.Endpoint.BanditAdapter
 
-  Good to know that you don't have to set `:adopter` option, since it's
-  already the default one.
+  Good to know that it's the default adapter, so you don't have to set
+  `:adapter` option.
 
   ## Endpoint configuration
 

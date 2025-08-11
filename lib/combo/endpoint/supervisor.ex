@@ -1,8 +1,7 @@
 defmodule Combo.Endpoint.Supervisor do
+  @moduledoc false
   # This module contains the logic used by most functions in Combo.Endpoint
   # as well the supervisor for sockets, adapters, watchers, etc.
-
-  @moduledoc false
 
   require Logger
   use Supervisor
@@ -201,10 +200,7 @@ defmodule Combo.Endpoint.Supervisor do
 
       ## Runtime config
 
-      # Even though Bandit is the default in apps generated via the installer,
-      # we continue to use Cowboy as the default if not explicitly specified for
-      # backwards compatibility. TODO: Change this to default to Bandit in 2.0
-      adapter: Combo.Endpoint.Cowboy2Adapter,
+      adapter: Combo.Endpoint.BanditAdapter,
       cache_static_manifest: nil,
       check_origin: true,
       http: false,
