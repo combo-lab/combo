@@ -238,9 +238,8 @@ defmodule Combo.Controller do
   @unsent [:unset, :set, :set_chunked, :set_file]
 
   # View/Layout deprecation plan
-  # 1. DONE! Deprecate :namespace option in favor of :layouts on use
-  # 2. Deprecate setting a non-format view/layout on put_*
-  # 3. Deprecate rendering a view/layout from :_
+  # 1. Deprecate setting a non-format view/layout on put_*
+  # 2. Deprecate rendering a view/layout from :_
 
   @type view :: atom()
   @type layout :: {module(), layout_name :: atom()} | false
@@ -1852,45 +1851,33 @@ defmodule Combo.Controller do
 
   @doc false
   def __plugs__(controller_module, opts) do
-    if Keyword.get(opts, :put_default_views, true) do
-      base = Combo.Naming.unsuffix(controller_module, "Controller")
+    base = Combo.Naming.unsuffix(controller_module, "Controller")
 
-      case Keyword.fetch(opts, :formats) do
-        {:ok, formats} when is_list(formats) ->
-          Enum.map(formats, fn
-            format when is_atom(format) ->
-              {format, :"#{base}#{String.upcase(to_string(format))}"}
+    case Keyword.fetch(opts, :formats) do
+      {:ok, formats} when is_list(formats) ->
+        Enum.map(formats, fn
+          format when is_atom(format) ->
+            {format, :"#{base}#{String.upcase(to_string(format))}"}
 
-            {format, suffix} ->
-              {format, :"#{base}#{suffix}"}
-          end)
+          {format, suffix} ->
+            {format, :"#{base}#{suffix}"}
+        end)
 
-        :error ->
-          IO.warn(
-            """
-            use #{inspect(controller_module)} must receive the :formats option with \
-            the formats you intend to render. To keep compatibility within your app, \
-            you can list it as:
+      :error ->
+        IO.warn(
+          """
+          use #{inspect(controller_module)} must receive the :formats option with \
+          the formats you intend to render. To keep compatibility within your app, \
+          you can list it as:
 
-                formats: [html: "View", json: "View", ...]
+              formats: [html: "View", json: "View", ...]
 
-            Listing all formats your application renders.
-            """,
-            []
-          )
+          Listing all formats your application renders.
+          """,
+          []
+        )
 
-          :"#{base}View"
-      end
-    else
-      IO.warn(
-        """
-        the :put_default_views option given to #{inspect(controller_module)} is deprecated.
-        Set formats: [] instead\
-        """,
-        []
-      )
-
-      false
+        :"#{base}View"
     end
   end
 end
