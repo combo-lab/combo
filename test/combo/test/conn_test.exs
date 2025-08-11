@@ -57,7 +57,9 @@ defmodule Phoenix.Test.ConnTest do
 
   @moduletag :capture_log
 
-  Application.put_env(:combo, Phoenix.Test.ConnTest.Endpoint, [])
+  Application.put_env(:combo, Phoenix.Test.ConnTest.Endpoint, [
+    render_errors: [formats: [html: __MODULE__.ErrorView]]
+  ])
 
   defmodule Endpoint do
     use Combo.Endpoint, otp_app: :combo
@@ -66,6 +68,12 @@ defmodule Phoenix.Test.ConnTest do
     def call(conn, opts) do
       put_in(super(conn, opts).private[:endpoint], opts)
       |> Router.call(Router.init([]))
+    end
+  end
+
+  defmodule ErrorView do
+    def render(template, %{kind: kind, conn: conn}) do
+      "Got #{template} from #{kind} with #{conn.method}"
     end
   end
 
@@ -578,12 +586,12 @@ defmodule Phoenix.Test.ConnTest do
     response = assert_error_sent :not_found, fn ->
       get(build_conn(), "/stat", action: "conn_404")
     end
-    assert {404, [_h | _t], "404.html from Phoenix.ErrorView"} = response
+    assert {404, [_h | _t], "Got 404.html from error with GET"} = response
 
     response = assert_error_sent 400, fn ->
       get(build_conn(), "/stat", action: "conn_400")
     end
-    assert {400, [_h | _t], "400.html from Phoenix.ErrorView"} = response
+    assert {400, [_h | _t], "Got 400.html from error with GET"} = response
   end
 
   test "assert_error_sent/2 with status mismatch assertion" do
