@@ -2,17 +2,27 @@ defmodule Combo.Endpoint.Cowboy2Adapter do
   @moduledoc """
   The Cowboy2 adapter for `Combo.Endpoint`.
 
+  To use this adapter, plug_cowboy should be installed as a dependency:
+
+      {:plug_cowboy, "~> 2.7"}
+
+  Once plug_cowboy is installed, set the `:adapter` option to your endpoint
+  configuration. For example:
+
+      config :demo, Demo.Web.Endpoint,
+        adapter: Combo.Endpoint.Cowboy2Adapter
+
   ## Endpoint configuration
 
   This adapter uses the following endpoint configuration:
 
     * `:http` - the configuration for the HTTP server. It accepts all options
       as defined by [`Plug.Cowboy`](https://hexdocs.pm/plug_cowboy/). Defaults
-      to `false`
+      to `false`.
 
     * `:https` - the configuration for the HTTPS server. It accepts all options
       as defined by [`Plug.Cowboy`](https://hexdocs.pm/plug_cowboy/). Defaults
-      to `false`
+      to `false`.
 
     * `:drainer` - a drainer process that triggers when your application is
       shutting down to wait for any on-going request to finish. It accepts all
@@ -22,28 +32,27 @@ defmodule Combo.Endpoint.Cowboy2Adapter do
 
   ## Custom dispatch options
 
-  You can provide custom dispatch options in order to use Phoenix's
-  builtin Cowboy server with custom handlers. For example, to handle
-  raw WebSockets [as shown in Cowboy's docs](https://github.com/ninenines/cowboy/tree/master/examples)).
+  You can provide custom dispatch options in order to use Cowboy with
+  with custom handlers. For example, to handle raw WebSockets
+  [as shown in Cowboy's docs](https://github.com/ninenines/cowboy/tree/master/examples)).
 
-  The options are passed to both `:http` and `:https` keys in the
-  endpoint configuration. However, once you pass your custom dispatch
-  options, you will need to manually wire the Phoenix endpoint by
-  adding the following rule:
+  The options are passed to both `:http` and `:https` keys in the endpoint
+  configuration. However, once you pass your custom dispatch options, you will
+  need to manually wire the endpoint by adding the following rule:
 
-      {:_, Plug.Cowboy.Handler, {MyAppWeb.Endpoint, []}}
+      {:_, Plug.Cowboy.Handler, {Demo.Web.Endpoint, []}}
 
   For example:
 
-      config :myapp, MyAppWeb.Endpoint,
+      config :demo, Demo.Web.Endpoint,
         http: [dispatch: [
                 {:_, [
-                    {"/foo", MyAppWeb.CustomHandler, []},
-                    {:_, Plug.Cowboy.Handler, {MyAppWeb.Endpoint, []}}
+                    {"/foo", Demo.Web.CustomHandler, []},
+                    {:_, Plug.Cowboy.Handler, {Demo.Web.Endpoint, []}}
                   ]}]]
 
-  It is also important to specify your handlers first, otherwise
-  Phoenix will intercept the requests before they get to your handler.
+  It is also important to specify your handlers first, otherwise Combo will
+  intercept the requests before they get to your handler.
   """
 
   require Logger
