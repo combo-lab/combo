@@ -265,8 +265,8 @@ defmodule Combo.Controller do
 
       use Combo.Controller.Pipeline
 
-      with view <- Combo.Controller.__plugs__(__MODULE__, opts) do
-        plug :put_new_view, view
+      with views <- Combo.Controller.__views__(__MODULE__, opts) do
+        plug :put_new_view, views
       end
     end
   end
@@ -1857,7 +1857,7 @@ defmodule Combo.Controller do
   end
 
   @doc false
-  def __plugs__(controller_module, opts) do
+  def __views__(controller_module, opts) do
     base = Combo.Naming.unsuffix(controller_module, "Controller")
 
     case Keyword.get(opts, :formats, []) do

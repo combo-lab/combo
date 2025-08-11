@@ -874,16 +874,16 @@ defmodule Combo.Controller.ControllerTest do
   end
 
   describe "__using__" do
-    defp new_view(module, opts), do: Combo.Controller.__plugs__(module, opts)
+    defp new_views(module, opts), do: Combo.Controller.__views__(module, opts)
 
     test "returns view modules based on format" do
-      assert new_view(MyApp.Admin.UserController, []) ==
+      assert new_views(MyApp.Admin.UserController, []) ==
                []
 
-      assert new_view(MyApp.Admin.UserController, formats: [:html, :json]) ==
+      assert new_views(MyApp.Admin.UserController, formats: [:html, :json]) ==
                [html: MyApp.Admin.UserHTML, json: MyApp.Admin.UserJSON]
 
-      assert new_view(MyApp.Admin.UserController, formats: [:html, json: "View"]) ==
+      assert new_views(MyApp.Admin.UserController, formats: [:html, json: "View"]) ==
                [html: MyApp.Admin.UserHTML, json: MyApp.Admin.UserView]
     end
 
@@ -892,7 +892,7 @@ defmodule Combo.Controller.ControllerTest do
         "expected :formats option to be a list of formats or {format, suffix} tuples, got: :bad"
 
       assert_raise ArgumentError, message, fn ->
-        Combo.Controller.__plugs__(MyApp.UserController, formats: :bad)
+        new_views(MyApp.UserController, formats: :bad)
       end
     end
   end
