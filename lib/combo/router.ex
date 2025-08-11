@@ -26,24 +26,20 @@ defmodule Combo.Router do
   end
 
   @moduledoc """
-  Defines a Phoenix router.
+  Defines a router.
 
-  The router provides a set of macros for generating routes
-  that dispatch to specific controllers and actions. Those
-  macros are named after HTTP verbs. For example:
+  The router provides a set of macros for generating routes that dispatch to
+  specific controllers and actions. Those macros are named after HTTP verbs.
+  For example:
 
-      defmodule MyAppWeb.Router do
+      defmodule Demo.Web.Router do
         use Combo.Router
 
-        get "/pages/:page", PageController, :show
+        get "/pages/:page", Demo.Web.PageController, :show
       end
 
-  The `get/3` macro above accepts a request to `/pages/hello` and dispatches
-  it to `PageController`'s `show` action with `%{"page" => "hello"}` in
-  `params`.
-
-  Phoenix's router is extremely efficient, as it relies on Elixir
-  pattern matching for matching routes and serving requests.
+  Combo's router is extremely efficient, as it relies on pattern matching for
+  matching routes.
 
   ## Routing
 
@@ -54,13 +50,13 @@ defmodule Combo.Router do
 
       get "/pages", PageController, :index
 
-  matches a `GET` request to `/pages` and dispatches it to the `index` action in
-  `PageController`.
+  matches a `GET` request to `/pages` and dispatches it to the `index` action
+  in `PageController`.
 
       get "/pages/:page", PageController, :show
 
-  matches `/pages/hello` and dispatches to the `show` action with
-  `%{"page" => "hello"}` in `params`.
+  matches `/pages/hello` and dispatches to the `show` action in `PageController`
+  with `%{"page" => "hello"}` in `params`.
 
       defmodule PageController do
         def show(conn, params) do
@@ -105,73 +101,68 @@ defmodule Combo.Router do
 
   > #### Why the macros? {: .info}
   >
-  > Phoenix does its best to keep the usage of macros low. You may have noticed,
+  > Combo does its best to keep the usage of macros low. You may have noticed,
   > however, that the `Combo.Router` relies heavily on macros. Why is that?
   >
-  > We use `get`, `post`, `put`, and `delete` to define your routes. We use macros
-  > for two purposes:
+  > We use macros for two purposes:
   >
-  > * They define the routing engine, used on every request, to choose which
-  >   controller to dispatch the request to. Thanks to macros, Phoenix compiles
-  >   all of your routes to a single case-statement with pattern matching rules,
-  >   which is heavily optimized by the Erlang VM
+  > * To be faster. They define the routing engine, used on every request, to
+  >   choose which controller to dispatch the request to. Thanks to macros,
+  >   Combo compiles all of your routes to a single case-statement with pattern
+  >   matching rules, which is heavily optimized by the Erlang VM.
   >
-  > * For each route you define, we also define metadata to implement `Combo.VerifiedRoutes`.
-  >   As we will soon learn, verified routes allows to us to reference any route
-  >   as if it is a plain looking string, except it is verified by the compiler
-  >   to be valid (making it much harder to ship broken links, forms, mails, etc
-  >   to production)
+  > * To be safer. For each route you define, we also define metadata to
+  >   implement `Combo.VerifiedRoutes`. As we will soon learn, verified routes
+  >   allows us to reference any route as if it is a plain looking string,
+  >   except it is verified by the compiler to be valid (making it much harder
+  >   to ship broken links, forms, mails, etc to production). Also remember
+  >   that macros in Elixir are compile-time only, which gives plenty of
+  >   stability after the code is compiled.
   >
-  > In other words, the router relies on macros to build applications that are
-  > faster and safer. Also remember that macros in Elixir are compile-time only,
-  > which gives plenty of stability after the code is compiled. Phoenix also provides
-  > introspection for all defined routes via `mix phx.routes`.
-
-  ## Generating routes
-
-  For generating routes inside your application,  see the `Combo.VerifiedRoutes`
-  documentation for `~p` based route generation which generates route paths and
-  URLs with compile-time verification.
+  > To summarize, the router relies on macros to build applications that are
+  > faster and safer.
 
   ## Scopes and Resources
 
-  It is very common in Phoenix applications to namespace all of your
-  routes under the application scope:
+  It is very common to namespace routes under a scope. For example:
 
-      scope "/", MyAppWeb do
+      scope "/", Demo.Web do
         get "/pages/:id", PageController, :show
       end
 
-  The route above will dispatch to `MyAppWeb.PageController`. This syntax
-  is convenient for developers, since we don't have to repeat `MyAppWeb.`
-  prefix on all routes
+  The route above will dispatch to `Demo.Web.PageController`. This syntax is
+  convenient to use, since you don't have to repeat `Demo.Web.` prefix on all
+  routes.
 
   Like all paths, you can define dynamic segments that will be applied as
-  parameters in the controller:
+  parameters in the controller. For example:
 
-      scope "/api/:version", MyAppWeb do
+      scope "/api/:version", Demo.Web do
         get "/pages/:id", PageController, :show
       end
 
-  For example, the route above will match on the path `"/api/v1/pages/1"`
-  and in the controller the `params` argument will have a map with the
-  key `:version` with the value `"v1"`.
+  The route above will match on the path `"/api/v1/pages/1"` and in the
+  controller the `params` argument be a map like
+  `%{"version" => "v1", "id" => "1"}`.
 
-  Phoenix also provides a `resources/4` macro that allows developers
-  to generate "RESTful" routes to a given resource:
+  Combo also provides a `resources/4` macro that allows to generate "RESTful"
+  routes to a given resource:
 
-      defmodule MyAppWeb.Router do
+      defmodule Demo.Web.Router do
         use Combo.Router
 
         resources "/pages", PageController, only: [:show]
         resources "/users", UserController, except: [:delete]
       end
 
-  Finally, Phoenix ships with a `mix phx.routes` task that nicely
-  formats all routes in a given router. We can use it to verify all
-  routes included in the router above:
+  Check `scope/2` and `resources/4` for more information.
 
-      $ mix phx.routes
+  ## Listing routes
+
+  Combo ships with a `mix combo.routes` task that formats all routes in a given
+  router. We can use it to verify all routes included in the router above:
+
+      $ mix combo.routes Demo.Web.Router
       GET    /pages/:id       PageController.show/2
       GET    /users           UserController.index/2
       GET    /users/:id/edit  UserController.edit/2
@@ -181,50 +172,55 @@ defmodule Combo.Router do
       PATCH  /users/:id       UserController.update/2
       PUT    /users/:id       UserController.update/2
 
-  One can also pass a router explicitly as an argument to the task:
-
-      $ mix phx.routes MyAppWeb.Router
-
-  Check `scope/2` and `resources/4` for more information.
-
   ## Pipelines and plugs
 
-  Once a request arrives at the Phoenix router, it performs
-  a series of transformations through pipelines until the
-  request is dispatched to a desired route.
+  Once a request arrives at the Combo router, it performs a series of
+  transformations through pipelines until the request is dispatched to a
+  desired route.
 
-  Such transformations are defined via plugs, as defined
-  in the [Plug](https://github.com/elixir-lang/plug) specification.
+  Such transformations are defined via plugs, as defined in the
+  [Plug](https://github.com/elixir-plug/plug) specification.
+
   Once a pipeline is defined, it can be piped through per scope.
 
   For example:
 
-      defmodule MyAppWeb.Router do
+      defmodule Demo.Web.Router do
         use Combo.Router
 
+        import Combo.Controller
+        import Plug.Conn
+
         pipeline :browser do
-          plug :fetch_session
           plug :accepts, ["html"]
+          plug :fetch_session
         end
 
         scope "/" do
           pipe_through :browser
 
-          # browser related routes and resources
+          # browser related routes
+          # ...
         end
       end
 
-  `Combo.Router` imports functions from both `Plug.Conn` and `Combo.Controller`
-  to help define plugs. In the example above, `fetch_session/2`
-  comes from `Plug.Conn` while `accepts/2` comes from `Combo.Controller`.
+  In the example above, we also imports `Combo.Controller` and `Plug.Conn` to
+  help defining plugins. `accepts/2` comes from `Combo.Controller`, while
+  `fetch_session/2` comes from `Plug.Conn`.
 
   Note that router pipelines are only invoked after a route is found.
   No plug is invoked in case no matches were found.
 
+  ## Generating routes
+
+  For generating routes inside your application, see the `Combo.VerifiedRoutes`
+  documentation for `~p` based route generation which generates route paths and
+  URLs with compile-time verification.
+
   ## Learn more
 
-  See the [Routing](routing.md) guide for more information and examples
-  within an actual Phoenix application.
+  See the [Routing](routing.md) guide for more information and examples within
+  an actual application.
   """
 
   alias Combo.Router.{Resource, Scope, Route}
