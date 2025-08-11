@@ -200,15 +200,15 @@ defmodule Combo.Endpoint.Supervisor do
 
       ## Runtime config
 
+      url: [host: "localhost", path: "/"],
+      static_url: nil,
       adapter: Combo.Endpoint.BanditAdapter,
       http: false,
       https: false,
       check_origin: true,
       secret_key_base: nil,
-      url: [host: "localhost", path: "/"],
-      static_url: nil,
       cache_static_manifest: nil,
-      cache_manifest_skip_vsn: false,
+      cache_static_manifest_skip_vsn: false,
       watchers: [],
       force_watchers: false,
       reloadable_apps: nil,
@@ -342,7 +342,7 @@ defmodule Combo.Endpoint.Supervisor do
 
   defp warmup_static(endpoint, %{"latest" => latest, "digests" => digests}) do
     Combo.Config.put(endpoint, :cache_static_manifest_latest, latest)
-    with_vsn? = !endpoint.config(:cache_manifest_skip_vsn)
+    with_vsn? = !endpoint.config(:cache_static_manifest_skip_vsn)
 
     Enum.each(latest, fn {key, _} ->
       Combo.Config.cache(endpoint, {:__combo_static__, "/" <> key}, fn _ ->

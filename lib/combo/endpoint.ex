@@ -108,12 +108,12 @@ defmodule Combo.Endpoint do
       have your own static handling mechanism, you may want to set this value
       explicitly.
 
-    * `:cache_manifest_skip_vsn` - when `true`, skips the appended query string
-      "?vsn=d" when generating paths to static assets. This query string is
-      used by `Plug.Static` to set long expiry dates, therefore, you should set
-      this option to `true` only if you are not using `Plug.Static` to serve
-      assets. For example, if you are using a CDN. If you are setting this
-      option, you should also consider passing `--no-vsn` to `mix phx.digest`.
+    * `:cache_static_manifest_skip_vsn` - when `true`, skips the appended query
+      string "?vsn=d" when generating paths to static assets. This query string
+      is used by `Plug.Static` to set long expiry dates, therefore, you should
+      set this option to `true` only if you are not using `Plug.Static` to
+      serve assets. For example, if you are using a CDN. If you are setting this
+      option, you should also consider passing `--no-vsn` to `mix combo.digest`.
       Defaults to `false`.
 
     * `:check_origin` - configure the `:check_origin` option for transports.

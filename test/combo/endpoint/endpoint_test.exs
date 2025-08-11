@@ -14,8 +14,8 @@ defmodule Combo.Endpoint.EndpointTest do
     http: [port: 80],
     https: [port: 443],
     force_ssl: [subdomains: true],
-    cache_manifest_skip_vsn: false,
     cache_static_manifest: "../../../../test/fixtures/digest/compile/cache_manifest.json",
+    cache_static_manifest_skip_vsn: false,
     pubsub_server: :endpoint_pub
   ]
 
@@ -159,17 +159,17 @@ defmodule Combo.Endpoint.EndpointTest do
   end
 
   test "uses correct path accordingly to vsn setting" do
-    config = put_in(@config[:cache_manifest_skip_vsn], false)
+    config = put_in(@config[:cache_static_manifest_skip_vsn], false)
     assert Endpoint.config_change([{Endpoint, config}], []) == :ok
     assert Endpoint.static_path("/foo.css") == "/foo-d978852bea6530fcd197b5445ed008fd.css?vsn=d"
 
-    config = put_in(@config[:cache_manifest_skip_vsn], true)
+    config = put_in(@config[:cache_static_manifest_skip_vsn], true)
     assert Endpoint.config_change([{Endpoint, config}], []) == :ok
     assert Endpoint.static_path("/foo.css") == "/foo-d978852bea6530fcd197b5445ed008fd.css"
   end
 
   test "uses correct path for resources with fragment identifier" do
-    config = put_in(@config[:cache_manifest_skip_vsn], false)
+    config = put_in(@config[:cache_static_manifest_skip_vsn], false)
     assert Endpoint.config_change([{Endpoint, config}], []) == :ok
 
     assert Endpoint.static_path("/foo.css#info") ==
