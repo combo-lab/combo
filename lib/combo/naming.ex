@@ -1,6 +1,6 @@
 defmodule Combo.Naming do
   @moduledoc """
-  Conveniences for inflecting and working with names in Phoenix.
+  Conveniences for working with names.
   """
 
   @doc """
@@ -8,14 +8,14 @@ defmodule Combo.Naming do
 
   ## Examples
 
-      iex> Combo.Naming.resource_name(MyApp.User)
+      iex> Combo.Naming.resource_name(Demo.Core.User)
       "user"
 
-      iex> Combo.Naming.resource_name(MyApp.UserView, "View")
+      iex> Combo.Naming.resource_name(Demo.Web.UserHTML, "HTML")
       "user"
 
   """
-  @spec resource_name(String.Chars.t, String.t) :: String.t
+  @spec resource_name(String.Chars.t(), String.t()) :: String.t()
   def resource_name(alias, suffix \\ "") do
     alias
     |> to_string()
@@ -30,14 +30,14 @@ defmodule Combo.Naming do
 
   ## Examples
 
-      iex> Combo.Naming.unsuffix("MyApp.User", "View")
-      "MyApp.User"
+      iex> Combo.Naming.unsuffix("Demo.Core.User", "HTML")
+      "Demo.Core.User"
 
-      iex> Combo.Naming.unsuffix("MyApp.UserView", "View")
-      "MyApp.User"
+      iex> Combo.Naming.unsuffix("Demo.Web.UserHTML", "HTML")
+      "Demo.Web.User"
 
   """
-  @spec unsuffix(String.t, String.t) :: String.t
+  @spec unsuffix(String.t(), String.t()) :: String.t()
   def unsuffix(value, suffix) do
     string = to_string(value)
     suffix_size = byte_size(suffix)
@@ -51,20 +51,22 @@ defmodule Combo.Naming do
   @doc """
   Converts a string to underscore case.
 
+
   ## Examples
 
-      iex> Combo.Naming.underscore("MyApp")
-      "my_app"
+      iex> Combo.Naming.underscore("DemoApp")
+      "demo_app"
 
-  In general, `underscore` can be thought of as the reverse of
-  `camelize`, however, in some cases formatting may be lost:
+  ## Note
 
-      Combo.Naming.underscore "SAPExample"  #=> "sap_example"
-      Combo.Naming.camelize   "sap_example" #=> "SapExample"
+  In general, `underscore` can be thought of as the reverse of `camelize`,
+  however, in some cases formatting may be lost:
+
+      Combo.Naming.underscore("SAPExample")  #=> "sap_example"
+      Combo.Naming.camelize("sap_example")   #=> "SapExample"
 
   """
-  @spec underscore(String.t) :: String.t
-
+  @spec underscore(String.t()) :: String.t()
   def underscore(value), do: Macro.underscore(value)
 
   defp to_lower_char(char) when char in ?A..?Z, do: char + 32
@@ -77,23 +79,25 @@ defmodule Combo.Naming do
 
   ## Examples
 
-      iex> Combo.Naming.camelize("my_app")
-      "MyApp"
+      iex> Combo.Naming.camelize("demo_app")
+      "DemoApp"
 
-      iex> Combo.Naming.camelize("my_app", :lower)
-      "myApp"
+      iex> Combo.Naming.camelize("demo_app", :lower)
+      "demoApp"
 
-  In general, `camelize` can be thought of as the reverse of
-  `underscore`, however, in some cases formatting may be lost:
+  ## Note
 
-      Combo.Naming.underscore "SAPExample"  #=> "sap_example"
-      Combo.Naming.camelize   "sap_example" #=> "SapExample"
+  In general, `camelize` can be thought of as the reverse of `underscore`,
+  however, in some cases formatting may be lost:
+
+      Combo.Naming.underscore("SAPExample")  #=> "sap_example"
+      Combo.Naming.camelize("sap_example")   #=> "SapExample"
 
   """
-  @spec camelize(String.t) :: String.t
+  @spec camelize(String.t()) :: String.t()
   def camelize(value), do: Macro.camelize(value)
 
-  @spec camelize(String.t, :lower) :: String.t
+  @spec camelize(String.t(), :lower) :: String.t()
   def camelize("", :lower), do: ""
   def camelize(<<?_, t :: binary>>, :lower) do
     camelize(t, :lower)
@@ -110,15 +114,18 @@ defmodule Combo.Naming do
 
       iex> Combo.Naming.humanize(:username)
       "Username"
+
       iex> Combo.Naming.humanize(:created_at)
       "Created at"
+
       iex> Combo.Naming.humanize("user_id")
       "User"
 
   """
-  @spec humanize(atom | String.t) :: String.t
+  @spec humanize(atom() | String.t()) :: String.t()
   def humanize(atom) when is_atom(atom),
     do: humanize(Atom.to_string(atom))
+
   def humanize(bin) when is_binary(bin) do
     bin =
       if String.ends_with?(bin, "_id") do
