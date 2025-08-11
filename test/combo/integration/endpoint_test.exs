@@ -18,12 +18,16 @@ defmodule Phoenix.Integration.EndpointTest do
   @prod_inet6 prod_inet6
 
   Application.put_env(:endpoint_int, ProdEndpoint,
+    adapter: Combo.Endpoint.Cowboy2Adapter,
     http: [port: @prod], url: [host: "example.com"], server: true, drainer: false,
     render_errors: [accepts: ~w(html json)])
+
   Application.put_env(:endpoint_int, DevEndpoint,
+    adapter: Combo.Endpoint.Cowboy2Adapter,
     http: [port: @dev], debug_errors: true, drainer: false)
 
   Application.put_env(:endpoint_int, ProdInet6Endpoint,
+    adapter: Combo.Endpoint.Cowboy2Adapter,
     http: [port: @prod_inet6, transport_options: [socket_opts: [:inet6]]],
     url: [host: "example.com"],
     server: true)
