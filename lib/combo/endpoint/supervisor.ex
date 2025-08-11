@@ -71,8 +71,7 @@ defmodule Combo.Endpoint.Supervisor do
 
     extra_conf = [
       endpoint_id: :crypto.strong_rand_bytes(16) |> Base.encode64(padding: false),
-      # TODO: Remove this once :pubsub is removed
-      pubsub_server: secret_conf[:pubsub_server] || secret_conf[:pubsub][:name]
+      pubsub_server: secret_conf[:pubsub_server]
     ]
 
     secret_conf = extra_conf ++ secret_conf
@@ -95,39 +94,12 @@ defmodule Combo.Endpoint.Supervisor do
     children =
       config_children(mod, secret_conf, default_conf) ++
         warmup_children(mod) ++
-        pubsub_children(mod, conf) ++
         socket_children(mod, conf, :child_spec) ++
         server_children(mod, conf, server?) ++
         socket_children(mod, conf, :drainer_spec) ++
         watcher_children(mod, conf, server?)
 
     Supervisor.init(children, strategy: :one_for_one)
-  end
-
-  defp pubsub_children(mod, conf) do
-    pub_conf = conf[:pubsub]
-
-    if pub_conf do
-      Logger.warning("""
-      The :pubsub key in your #{inspect(mod)} is deprecated.
-
-      You must now start the pubsub in your application supervision tree.
-      Go to lib/my_app/application.ex and add the following:
-
-          {Phoenix.PubSub, #{inspect(pub_conf)}}
-
-      Now, back in your config files in config/*, you can remove the :pubsub
-      key and add the :pubsub_server key, with the PubSub name:
-
-          pubsub_server: #{inspect(pub_conf[:name])}
-      """)
-    end
-
-    if pub_conf[:adapter] do
-      [{Phoenix.PubSub, pub_conf}]
-    else
-      []
-    end
   end
 
   defp socket_children(endpoint, conf, fun) do
