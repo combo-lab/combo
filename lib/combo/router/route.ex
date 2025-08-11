@@ -1,7 +1,4 @@
 defmodule Combo.Router.Route do
-  # This module defines the Route struct that is used
-  # throughout Phoenix's router. This struct is private
-  # as it contains internal routing information.
   @moduledoc false
 
   alias Combo.Router.Route
@@ -22,6 +19,7 @@ defmodule Combo.Router.Route do
     * `:pipe_through` - the pipeline names as a list of atoms
     * `:metadata` - general metadata used on telemetry events and route info
     * `:warn_on_verify?` - whether or not to warn on route verification
+
   """
 
   defstruct [
@@ -42,10 +40,10 @@ defmodule Combo.Router.Route do
 
   @type t :: %Route{}
 
-  @doc "Used as a plug on forwarding"
+  @doc "Used as a plug on forwarding."
   def init(opts), do: opts
 
-  @doc "Used as a plug on forwarding"
+  @doc "Used as a plug on forwarding."
   def call(%{path_info: path, script_name: script} = conn, {fwd_segments, plug, opts}) do
     new_path = path -- fwd_segments
     {base, ^new_path} = Enum.split(path, length(path) - length(new_path))
@@ -55,8 +53,8 @@ defmodule Combo.Router.Route do
   end
 
   @doc """
-  Receives the verb, path, plug, options and helper
-  and returns a `Combo.Router.Route` struct.
+  Receives the verb, path, plug, options and helper and returns a
+  `Combo.Router.Route` struct.
   """
   @spec build(
           non_neg_integer,
@@ -147,7 +145,8 @@ defmodule Combo.Router.Route do
     rewrite_segments(segments)
   end
 
-  # We rewrite segments to use consistent variable naming as we want to group routes later on.
+  # We rewrite segments to use consistent variable naming as we want to group
+  # routes later on.
   defp rewrite_segments(segments) do
     {segments, {binding, _counter}} =
       Macro.prewalk(segments, {[], 0}, fn

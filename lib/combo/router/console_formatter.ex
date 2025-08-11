@@ -1,14 +1,12 @@
 defmodule Combo.Router.ConsoleFormatter do
   @moduledoc false
 
+  @socket_verb "WS"
+  @longpoll_verbs ["GET", "POST"]
+
   @doc """
   Format the routes for printing.
   """
-
-  @socket_verb "WS"
-
-  @longpoll_verbs ["GET", "POST"]
-
   def format(router, endpoint \\ nil) do
     routes = router.formatted_routes([])
 
@@ -34,6 +32,7 @@ defmodule Combo.Router.ConsoleFormatter do
     end
   end
 
+  # TODO: change it to Combo.LiveReloader.Socket
   defp format_websocket({_path, Phoenix.LiveReloader.Socket, _opts}, _), do: ""
 
   defp format_websocket({path, module, opts}, widths) do
@@ -51,6 +50,7 @@ defmodule Combo.Router.ConsoleFormatter do
     end
   end
 
+  # TODO: change it to Combo.LiveReloader.Socket
   defp format_longpoll({_path, Phoenix.LiveReloader.Socket, _opts}, _), do: ""
 
   defp format_longpoll({path, module, opts}, widths) do

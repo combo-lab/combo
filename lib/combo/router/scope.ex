@@ -1,6 +1,7 @@
 defmodule Combo.Router.Scope do
-  alias Combo.Router.Scope
   @moduledoc false
+
+  alias Combo.Router.Scope
 
   @stack :combo_router_scopes
   @pipes :combo_pipeline_scopes
@@ -273,7 +274,7 @@ defmodule Combo.Router.Scope do
 
   defp get_attribute(module, attr) do
     Module.get_attribute(module, attr) ||
-      raise "Phoenix router scope was not initialized"
+      raise "Combo router scope was not initialized"
   end
 
   defp update_attribute(module, attr, fun) do

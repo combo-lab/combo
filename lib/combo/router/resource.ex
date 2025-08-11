@@ -1,7 +1,4 @@
 defmodule Combo.Router.Resource do
-  # This module defines the Resource struct that is used
-  # throughout Phoenix's router. This struct is private
-  # as it contains internal routing information.
   @moduledoc false
 
   alias Combo.Router.Resource
