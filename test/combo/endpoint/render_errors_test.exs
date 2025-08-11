@@ -5,7 +5,7 @@ defmodule Combo.Endpoint.RenderErrorsTest do
   Application.put_env(:combo, __MODULE__.Endpoint, [])
 
   import ExUnit.CaptureLog
-  view = __MODULE__
+  error_view = __MODULE__
 
   def render("app.html", assigns) do
     "Layout: " <> assigns.inner_content
@@ -57,7 +57,7 @@ defmodule Combo.Endpoint.RenderErrorsTest do
 
   defmodule Router do
     use Plug.Router
-    use Combo.Endpoint.RenderErrors, view: view, accepts: ~w(html json)
+    use Combo.Endpoint.RenderErrors, formats: [html: error_view, json: error_view]
 
     plug :match
     plug :dispatch
@@ -174,7 +174,7 @@ defmodule Combo.Endpoint.RenderErrorsTest do
       catch
         kind, reason ->
           stack = __STACKTRACE__
-          opts = [view: __MODULE__, accepts: ~w(html)]
+          opts = [html: __MODULE__]
           Combo.Endpoint.RenderErrors.__catch__(conn, kind, reason, stack, opts)
       else
         _ -> flunk("function should have failed")
@@ -193,9 +193,7 @@ defmodule Combo.Endpoint.RenderErrorsTest do
       if opts[:formats] do
         opts
       else
-        opts
-        |> Keyword.put_new(:view, __MODULE__)
-        |> Keyword.put_new(:accepts, ~w(html))
+        opts |> Keyword.put_new(:formats, html: __MODULE__)
       end
 
     {^status, _, body} =
@@ -254,7 +252,7 @@ defmodule Combo.Endpoint.RenderErrorsTest do
     conn = conn(:get, "/", _format: "text")
 
     body =
-      assert_render(500, conn, [accepts: ["html", "text"]], fn ->
+      assert_render(500, conn, [formats: [html: __MODULE__, text: __MODULE__]], fn ->
         throw(:hello)
       end)
 
@@ -263,13 +261,18 @@ defmodule Combo.Endpoint.RenderErrorsTest do
 
   test "exception page uses stored _format" do
     conn = conn(:get, "/") |> put_private(:combo_format, "text")
-    body = assert_render(500, conn, [accepts: ["html", "text"]], fn -> throw(:hello) end)
+
+    body =
+      assert_render(500, conn, [formats: [html: __MODULE__, text: __MODULE__]], fn ->
+        throw(:hello)
+      end)
+
     assert body == "500 in TEXT"
   end
 
   test "exception page with custom format" do
     body =
-      assert_render(500, conn(:get, "/"), [accepts: ~w(text)], fn ->
+      assert_render(500, conn(:get, "/"), [formats: [text: __MODULE__]], fn ->
         throw(:hello)
       end)
 

@@ -26,7 +26,7 @@ defmodule Combo.Endpoint.Supervisor do
 
   @doc false
   def init({otp_app, mod, opts}) do
-    default_conf = Combo.Config.merge(defaults(otp_app, mod), opts)
+    default_conf = Combo.Config.merge(defaults(otp_app), opts)
     env_conf = Combo.Config.from_env(otp_app, mod, default_conf)
 
     secret_conf =
@@ -188,7 +188,7 @@ defmodule Combo.Endpoint.Supervisor do
     end)
   end
 
-  defp defaults(otp_app, module) do
+  defp defaults(otp_app) do
     [
       otp_app: otp_app,
 
@@ -196,7 +196,7 @@ defmodule Combo.Endpoint.Supervisor do
 
       code_reloader: false,
       debug_errors: false,
-      render_errors: [view: render_errors(module), accepts: ~w(html), layout: false],
+      render_errors: [layout: false],
 
       ## Runtime config
 
@@ -216,12 +216,6 @@ defmodule Combo.Endpoint.Supervisor do
     ]
   end
 
-  defp render_errors(module) do
-    module
-    |> Module.split()
-    |> Enum.at(0)
-    |> Module.concat("ErrorView")
-  end
 
   @doc """
   Callback that changes the configuration from the app callback.

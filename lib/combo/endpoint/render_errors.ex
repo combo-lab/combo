@@ -2,13 +2,15 @@ defmodule Combo.Endpoint.RenderErrors do
   @moduledoc false
   # This module is used to catch failures and render them using a view.
   #
-  # This module is automatically used in `Combo.Endpoint` where it
-  # overrides `call/2` to provide rendering. Once the error is
-  # rendered, the error is reraised unless it is a NoRouteError.
+  # This module is automatically used in `Combo.Endpoint` where it overrides
+  # `call/2` to provide rendering. Once the error is rendered, the error is
+  # reraised unless it is a NoRouteError.
   #
   # ## Options
   #
   #   * `:formats` - the format to use when none is available from the request
+  #   * `:root_layout`
+  #   * `:layout`
   #   * `:log` - the `t:Logger.level/0` or `false` to disable logging rendered errors
   #
 
@@ -137,20 +139,15 @@ defmodule Combo.Endpoint.RenderErrors do
 
   defp fetch_view_format(conn, opts) do
     # We ignore params["_format"] although we respect any already stored.
-    view = opts[:view]
     formats = opts[:formats]
-    accepts = opts[:accepts]
 
     cond do
       formats ->
         put_formats(conn, Enum.map(formats, fn {k, v} -> {Atom.to_string(k), v} end))
 
-      view && accepts ->
-        put_formats(conn, Enum.map(accepts, &{&1, view}))
-
       true ->
         raise ArgumentError,
-              "expected :render_errors to have :formats or :view/:accepts, but got: #{inspect(opts)}"
+              "expected :render_errors to have :formats, but got: #{inspect(opts)}"
     end
   end
 
