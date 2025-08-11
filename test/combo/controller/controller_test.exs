@@ -876,30 +876,24 @@ defmodule Combo.Controller.ControllerTest do
   describe "__using__" do
     defp new_view(module, opts), do: Combo.Controller.__plugs__(module, opts)
 
-    test "deprecated when lacking formats" do
-      assert capture_io(:stderr, fn ->
-               assert Combo.Controller.__plugs__(UserController, []) == UserView
-             end) =~
-               "use UserController must receive the :formats option with the formats you intend to render"
-
-      assert capture_io(:stderr, fn ->
-               assert Combo.Controller.__plugs__(MyApp.UserController, []) == MyApp.UserView
-             end) =~
-               "use MyApp.UserController must receive the :formats option with the formats you intend to render"
-
-      assert capture_io(:stderr, fn ->
-               assert Combo.Controller.__plugs__(MyApp.Admin.UserController, []) ==
-                        MyApp.Admin.UserView
-             end) =~
-               "use MyApp.Admin.UserController must receive the :formats option with the formats you intend to render"
-    end
-
     test "returns view modules based on format" do
+      assert new_view(MyApp.Admin.UserController, []) ==
+               []
+
       assert new_view(MyApp.Admin.UserController, formats: [:html, :json]) ==
                [html: MyApp.Admin.UserHTML, json: MyApp.Admin.UserJSON]
 
       assert new_view(MyApp.Admin.UserController, formats: [:html, json: "View"]) ==
                [html: MyApp.Admin.UserHTML, json: MyApp.Admin.UserView]
+    end
+
+    test "raises on bad formats" do
+      message =
+        "expected :formats option to be a list of formats or {format, suffix} tuples, got: :bad"
+
+      assert_raise ArgumentError, message, fn ->
+        Combo.Controller.__plugs__(MyApp.UserController, formats: :bad)
+      end
     end
   end
 

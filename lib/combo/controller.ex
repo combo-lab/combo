@@ -100,20 +100,27 @@ defmodule Combo.Controller do
   template rendering:
 
     * `:formats` - the formats this controller will render by default.
-      It can be a list of formats, or a list of `{format, suffix}` tuples.
+      It can be a list of formats or `{format, suffix}` tuples.
 
-  When specifying `formats: [:html, :json]` for a controller named
-  `Demo.Web.UserController`, it will invoke `Demo.Web.UserHTML` and
-  `Demo.Web.UserJSON` when respectively rendering each format.
+  If you don't expect to render any format upfront, you can ignore `:formats`
+  option or set it to an empty list:
 
-  If you want to customize the name of inferred view modules, you should
-  specify `formats: [{format, suffix}, ...]` for a controller. Let's continue
-  using `Demo.Web.UserController` as an example. When specifying
-  `formats: [html: "View", json: "View"]` for it， it will invoke
-  `Demo.Web.UserView` when rendering each format.
+      use Combo.Controller
+      use Combo.Controller, formats: []
 
-  If you don't expect to render any format upfront, you should set `:formats`
-  option to an empty list.
+  If you want to follow the Combo convention for inferring view names, you can
+  set `:formats` to a list of formats:
+
+      use Combo.Controller, formats: [:html, :json]
+      # If the controller name is `Demo.Web.UserController`, the inferred view
+      # names are `Demo.Web.UserHTML` and `Demo.Web.UserJSON`.
+
+  If you want to customize the view names, you can set `:formats` to a list of
+  `{format, suffix}` tuples:
+
+      use Combo.Controller, formats: [html: "View", json: "View"]
+      # If the controller name is `Demo.Web.UserController`, the inferred view
+      # names are `Demo.Web.UserView` and `Demo.Web.UserView`.
 
   ## Connection
 
@@ -1853,8 +1860,8 @@ defmodule Combo.Controller do
   def __plugs__(controller_module, opts) do
     base = Combo.Naming.unsuffix(controller_module, "Controller")
 
-    case Keyword.fetch(opts, :formats) do
-      {:ok, formats} when is_list(formats) ->
+    case Keyword.get(opts, :formats, []) do
+      formats when is_list(formats) ->
         Enum.map(formats, fn
           format when is_atom(format) ->
             {format, :"#{base}#{String.upcase(to_string(format))}"}
@@ -1863,21 +1870,10 @@ defmodule Combo.Controller do
             {format, :"#{base}#{suffix}"}
         end)
 
-      :error ->
-        IO.warn(
-          """
-          use #{inspect(controller_module)} must receive the :formats option with \
-          the formats you intend to render. To keep compatibility within your app, \
-          you can list it as:
-
-              formats: [html: "View", json: "View", ...]
-
-          Listing all formats your application renders.
-          """,
-          []
-        )
-
-        :"#{base}View"
+      other ->
+        raise ArgumentError,
+              "expected :formats option to be a list of formats or {format, suffix} tuples," <>
+                " got: #{inspect(other)}"
     end
   end
 end
