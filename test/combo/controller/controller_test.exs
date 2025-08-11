@@ -874,25 +874,22 @@ defmodule Combo.Controller.ControllerTest do
   end
 
   describe "__using__" do
-    defp new_layout(module, opts), do: Combo.Controller.__plugs__(module, opts) |> elem(0)
-    defp new_view(module, opts), do: Combo.Controller.__plugs__(module, opts) |> elem(1)
+    defp new_view(module, opts), do: Combo.Controller.__plugs__(module, opts)
 
     test "deprecated when lacking formats" do
       assert capture_io(:stderr, fn ->
-               assert Combo.Controller.__plugs__(UserController, []) ==
-                        {{LayoutView, :app}, UserView}
+               assert Combo.Controller.__plugs__(UserController, []) == UserView
              end) =~
                "use UserController must receive the :formats option with the formats you intend to render"
 
       assert capture_io(:stderr, fn ->
-               assert Combo.Controller.__plugs__(MyApp.UserController, []) ==
-                        {{MyApp.LayoutView, :app}, MyApp.UserView}
+               assert Combo.Controller.__plugs__(MyApp.UserController, []) == MyApp.UserView
              end) =~
                "use MyApp.UserController must receive the :formats option with the formats you intend to render"
 
       assert capture_io(:stderr, fn ->
                assert Combo.Controller.__plugs__(MyApp.Admin.UserController, []) ==
-                        {{MyApp.LayoutView, :app}, MyApp.Admin.UserView}
+                        MyApp.Admin.UserView
              end) =~
                "use MyApp.Admin.UserController must receive the :formats option with the formats you intend to render"
     end
@@ -903,22 +900,6 @@ defmodule Combo.Controller.ControllerTest do
 
       assert new_view(MyApp.Admin.UserController, formats: [:html, json: "View"]) ==
                [html: MyApp.Admin.UserHTML, json: MyApp.Admin.UserView]
-    end
-
-    test "returns the layout module based on controller module" do
-      assert new_layout(MyApp.Admin.UserController, formats: []) == []
-
-      assert new_layout(MyApp.Admin.UserController,
-               layouts: [html: MyApp.LayoutHTML],
-               formats: []
-             ) ==
-               [html: {MyApp.LayoutHTML, :app}]
-
-      assert new_layout(MyApp.Admin.UserController,
-               layouts: [html: {MyApp.LayoutHTML, :application}],
-               formats: []
-             ) ==
-               [html: {MyApp.LayoutHTML, :application}]
     end
   end
 

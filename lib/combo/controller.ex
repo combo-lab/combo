@@ -1,47 +1,119 @@
 defmodule Combo.Controller do
-  import Plug.Conn
-  alias Plug.Conn.AlreadySentError
-
-  require Logger
-  require Combo.Endpoint
-
-  @unsent [:unset, :set, :set_chunked, :set_file]
-
-  # View/Layout deprecation plan
-  # 1. DONE! Deprecate :namespace option in favor of :layouts on use
-  # 2. Deprecate the :layouts option in use Combo.Controller
-  # 3. Deprecate setting a non-format view/layout on put_*
-  # 4. Deprecate rendering a view/layout from :_
-
-  @type view :: atom()
-  @type layout :: {module(), layout_name :: atom()} | false
-
   @moduledoc """
-  Controllers are used to group common functionality in the same
-  (pluggable) module.
+  Defines a controller.
 
-  For example, the route:
+  ## Terms
 
-      get "/users/:id", MyAppWeb.UserController, :show
+  A controller is a module that contain actions.
 
-  will invoke the `show/2` action in the `MyAppWeb.UserController`:
+  An action is a regular function that receive the connection and the request
+  params as arguments.
 
-      defmodule MyAppWeb.UserController do
-        use MyAppWeb, :controller
+  A connection is a `Plug.Conn` struct, which is specified by `Plug` library.
+
+  Request params are a map, whose keys are strings.
+
+  ## Usage
+
+  For example, there's a route defination:
+
+      get "/users/:id", Demo.Web.UserController, :show
+
+  It invokes the `show/2` action in the `Demo.Web.UserController`:
+
+      defmodule Demo.Web.UserController do
+        use Demo.Web, :controller
 
         def show(conn, %{"id" => id}) do
-          user = Repo.get(User, id)
+          # user = ...
           render(conn, :show, user: user)
         end
       end
 
-  An action is a regular function that receives the connection
-  and the request parameters as arguments. The connection is a
-  `Plug.Conn` struct, as specified by the Plug library.
+  Then, the `show/2` invokes `render/3`, passing the connection, the template
+  name to render, and the `[user: user]` as assigns.
 
-  Then we invoke `render/3`, passing the connection, the template
-  to render (typically named after the action), and the `user: user`
-  as assigns. We will explore all of those concepts next.
+  We will explore all of those concepts next.
+
+  ## Rendering
+
+  One of the main features provided by controllers is the ability to perform
+  content negotiation and render templates based on information sent by the
+  client.
+
+  There are two ways to render content in a controller.
+
+  One approach is to invoke format-specific functions, such as `html/2` and
+  `json/2`.
+
+  Another approach is to invoke functions in views. Views are modules capable
+  of rendering a custom format.
+
+  The latter approach is the commonly used one. And, it's done by specifying
+  the option `:formats` when defining the controller:
+
+      use Combo.Controller, formats: [:html, :json]
+
+   Now, when invoking `render/3`, a controller named `Demo.Web.UserController`
+   will invoke `Demo.Web.UserHTML` and `Demo.Web.UserJSON` respectively
+   when rendering each format:
+
+      def show(conn, %{"id" => id}) do
+        user = Repo.get(User, id)
+
+        # Will invoke UserHTML.show(%{user: user}) for HTML requests
+        # Will invoke UserJSON.show(%{user: user}) for JSON requests
+        render(conn, :show, user: user)
+      end
+
+  You can also specify formats to render by calling `put_view/2` directly with
+  a connection. For example, instead of inferring the the view names from the
+  controller, as done in:
+
+      use Combo.Controller, formats: [:html, :json]
+
+  You can write the above explicitly in your actions as:
+
+      put_view(conn, html: Demo.Web.UserHTML, json: Demo.Web.UserJSON)
+
+  Or as a plug:
+
+      plug :put_view, html: Demo.Web.UserHTML, json: Demo.Web.UserJSON
+
+  ## Layouts
+
+  Many applications have shared content, most often the `<head>` tag and its
+  contents. In Combo, this is done via the `put_root_layout/2`:
+
+      put_root_layout(conn, html: {Demo.Web.Layouts, :root})
+
+  Or, as a plug:
+
+      plug :put_root_layout, html: {Demo.Web.Layouts, :root}
+
+  You can also specify controller-specific layouts using `put_layout/2`,
+  although this functionality is discouraged in favor of using components.
+
+  ## Options
+
+  When used, the controller supports the following options to customize
+  template rendering:
+
+    * `:formats` - the formats this controller will render by default.
+      It can be a list of formats, or a list of `{format, suffix}` tuples.
+
+  When specifying `formats: [:html, :json]` for a controller named
+  `Demo.Web.UserController`, it will invoke `Demo.Web.UserHTML` and
+  `Demo.Web.UserJSON` when respectively rendering each format.
+
+  If you want to customize the name of inferred view modules, you should
+  specify `formats: [{format, suffix}, ...]` for a controller. Let's continue
+  using `Demo.Web.UserController` as an example. When specifying
+  `formats: [html: "View", json: "View"]` for it， it will invoke
+  `Demo.Web.UserView` when rendering each format.
+
+  If you don't expect to render any format upfront, you should set `:formats`
+  option to an empty list.
 
   ## Connection
 
@@ -60,83 +132,6 @@ defmodule Combo.Controller do
   without fully implementing the controller, you can import both
   modules directly instead of `use Combo.Controller`.
 
-  ## Rendering
-
-  One of the main features provided by controllers is the ability
-  to perform content negotiation and render templates based on
-  information sent by the client.
-
-  There are two ways to render content in a controller. One option
-  is to invoke format-specific functions, such as `html/2` and `json/2`.
-
-  However, most commonly controllers invoke custom modules called
-  views. Views are modules capable of rendering a custom format.
-  This is done by specifying the option `:formats` when defining
-  the controller:
-
-      use Combo.Controller, formats: [:html, :json]
-
-   Now, when invoking `render/3`, a controller named `MyAppWeb.UserController`
-   will invoke `MyAppWeb.UserHTML` and `MyAppWeb.UserJSON` respectively
-   when rendering each format:
-
-      def show(conn, %{"id" => id}) do
-        user = Repo.get(User, id)
-        # Will invoke UserHTML.show(%{user: user}) for html requests
-        # Will invoke UserJSON.show(%{user: user}) for json requests
-        render(conn, :show, user: user)
-      end
-
-  You can also specify formats to render by calling `put_view/2`
-  directly with a connection. For example, instead of inferring the
-  the view names from the controller, as done in:
-
-      use Combo.Controller, formats: [:html, :json]
-
-  You can write the above explicitly in your actions as:
-
-      put_view(conn, html: MyAppWeb.UserHTML, json: MyAppWeb.UserJSON)
-
-  Or as a plug:
-
-      plug :put_view, html: MyAppWeb.UserHTML, json: MyAppWeb.UserJSON
-
-  ## Layouts
-
-  Many applications have shared content that they want to include on every
-  page, most often the `<head>` tag and its contents. In Phoenix, this is
-  done via the `put_root_layout` function:
-
-      put_root_layout(conn, html: {MyAppWeb.Layouts, :root})
-
-  In most applications, this is invoked as a Plug in your application router:
-
-      plug :put_root_layout, html: {MyAppWeb.Layouts, :root}
-
-  This layout is shared by all controllers, and also by `Phoenix.LiveView`.
-
-  However, you can also specify controller-specific layouts using `put_layout/2`,
-  although this functionality is discouraged in Phoenix v1.8 in favor of using
-  function components to build your application.
-
-  ## Options
-
-  When used, the controller supports the following options to customize
-  template rendering:
-
-    * `:formats` - the formats this controller will render
-      by default. For example, specifying `formats: [:html, :json]`
-      for a controller named `MyAppWeb.UserController` will
-      invoke `MyAppWeb.UserHTML` and `MyAppWeb.UserJSON` when
-      respectively rendering each format.
-
-  The `:formats` option is required. You may set it to an empty list
-  if you don't expect to render any format upfront. If `:formats` is not
-  set, the default view is set to `MyAppWeb.UserView` for backwards
-  compatibility. This behaviour can be explicitly retained by passing a
-  suffix to the `:formats` option:
-
-      use Combo.Controller, formats: [html: "View", json: "View"]
 
   ## Plug pipeline
 
@@ -233,6 +228,23 @@ defmodule Combo.Controller do
       end
 
   """
+
+  import Plug.Conn
+  alias Plug.Conn.AlreadySentError
+
+  require Logger
+  require Combo.Endpoint
+
+  @unsent [:unset, :set, :set_chunked, :set_file]
+
+  # View/Layout deprecation plan
+  # 1. DONE! Deprecate :namespace option in favor of :layouts on use
+  # 2. Deprecate setting a non-format view/layout on put_*
+  # 3. Deprecate rendering a view/layout from :_
+
+  @type view :: atom()
+  @type layout :: {module(), layout_name :: atom()} | false
+
   defmacro __using__(opts) do
     opts =
       if Macro.quoted_literal?(opts) do
@@ -247,8 +259,7 @@ defmodule Combo.Controller do
 
       use Combo.Controller.Pipeline
 
-      with {layout, view} <- Combo.Controller.__plugs__(__MODULE__, opts) do
-        plug :put_new_layout, layout
+      with view <- Combo.Controller.__plugs__(__MODULE__, opts) do
         plug :put_new_view, view
       end
     end
@@ -1844,74 +1855,32 @@ defmodule Combo.Controller do
     if Keyword.get(opts, :put_default_views, true) do
       base = Combo.Naming.unsuffix(controller_module, "Controller")
 
-      view =
-        case Keyword.fetch(opts, :formats) do
-          {:ok, formats} when is_list(formats) ->
-            Enum.map(formats, fn
-              format when is_atom(format) ->
-                {format, :"#{base}#{String.upcase(to_string(format))}"}
+      case Keyword.fetch(opts, :formats) do
+        {:ok, formats} when is_list(formats) ->
+          Enum.map(formats, fn
+            format when is_atom(format) ->
+              {format, :"#{base}#{String.upcase(to_string(format))}"}
 
-              {format, suffix} ->
-                {format, :"#{base}#{suffix}"}
-            end)
+            {format, suffix} ->
+              {format, :"#{base}#{suffix}"}
+          end)
 
-          :error ->
-            IO.warn(
-              """
-              use #{inspect(controller_module)} must receive the :formats option with \
-              the formats you intend to render. To keep compatibility within your app, \
-              you can list it as:
+        :error ->
+          IO.warn(
+            """
+            use #{inspect(controller_module)} must receive the :formats option with \
+            the formats you intend to render. To keep compatibility within your app, \
+            you can list it as:
 
-                  formats: [html: "View", json: "View", ...]
+                formats: [html: "View", json: "View", ...]
 
-              Listing all formats your application renders.
-              """,
-              []
-            )
+            Listing all formats your application renders.
+            """,
+            []
+          )
 
-            :"#{base}View"
-        end
-
-      layouts =
-        case Keyword.fetch(opts, :layouts) do
-          {:ok, formats} when is_list(formats) ->
-            # TODO: Deprecate passing :layouts altogether in Phoenix v1.9,
-            # use Combo.Controller should only set views
-            Enum.map(formats, fn
-              {format, mod} when is_atom(mod) ->
-                {format, {mod, :app}}
-
-              {format, {mod, template}} when is_atom(mod) and is_atom(template) ->
-                {format, {mod, template}}
-
-              other ->
-                raise ArgumentError, """
-                expected :layouts to be a list of format module pairs of the form: [html: DemoWeb.Layouts] or [html: {DemoWeb.Layouts, :app}]
-
-                Got: #{inspect(other)}
-                """
-            end)
-
-          :error ->
-            cond do
-              Keyword.has_key?(opts, :formats) ->
-                []
-
-              true ->
-                layout =
-                  controller_module
-                  |> Atom.to_string()
-                  |> String.split(".")
-                  |> Enum.drop(-1)
-                  |> Enum.take(2)
-                  |> Kernel.++(["LayoutView"])
-                  |> Module.concat()
-
-                {layout, :app}
-            end
-        end
-
-      {layouts, view}
+          :"#{base}View"
+      end
     else
       IO.warn(
         """
