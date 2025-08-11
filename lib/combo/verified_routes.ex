@@ -2,35 +2,37 @@ defmodule Combo.VerifiedRoutes do
   @moduledoc ~S'''
   Provides route generation with compile-time verification.
 
-  Use of the `sigil_p` macro allows paths and URLs throughout your
-  application to be compile-time verified against your Phoenix router(s).
+  Use of the `sigil_p` macro allows paths and URLs throughout your application
+  to be compile-time verified against your defined routes.
+
   For example, the following path and URL usages:
 
-      ~H"""
+      ~CE"""
       <.link href={~p"/sessions/new"} method="post">Log in</.link>
       """
 
       redirect(to: url(~p"/posts/#{post}"))
 
-  Will be verified against your standard `Combo.Router` definitions:
+  Will be verified against your route definitions:
 
-      get "/posts/:post_id", PostController, :show
       post "/sessions/new", SessionController, :create
+      get "/posts/:post_id", PostController, :show
 
-  Unmatched routes will issue compiler warnings:
+  Unmatched routes will issue compile-time warnings:
 
   ```console
-  warning: no route path for AppWeb.Router matches "/postz/#{post}"
-    lib/app_web/controllers/post_controller.ex:100: AppWeb.PostController.show/2
+  warning: no route path for Demo.Web.Router matches "/postz/#{post}"
   ```
 
-  Additionally, interpolated ~p values are encoded via the `Combo.Param` protocol.
-  For example, a `%Post{}` struct in your application may derive the `Combo.Param`
-  protocol to generate slug-based paths rather than ID based ones. This allows you to
-  use `~p"/posts/#{post}"` rather than `~p"/posts/#{post.slug}"` throughout your
-  application. See the `Combo.Param` documentation for more details.
+  Additionally, interpolated ~p values are encoded via the `Combo.Param`
+  protocol. For example, a `%Post{}` struct in your application may derive
+  the `Combo.Param` protocol to generate slug-based paths rather than ID
+  based ones. This allows you to use `~p"/posts/#{post}"` rather than
+  `~p"/posts/#{post.slug}"` throughout your application. Check `Combo.Param`
+  for more details.
 
-  Finally, query strings are also supported in verified routes, either in traditional form:
+  Finally, query strings are also supported in verified routes, either in
+  traditional form:
 
       ~p"/posts?page=#{page}"
 
@@ -39,56 +41,61 @@ defmodule Combo.VerifiedRoutes do
       params = %{page: 1, direction: "asc"}
       ~p"/posts?#{params}"
 
-  Like path segments, query strings params are proper URL encoded and may be interpolated
-  directly into the ~p string.
+  Like path segments, query strings params are proper URL encoded and may
+  be interpolated directly into the ~p string.
 
   ## What about named routes?
 
-  Many web frameworks, and early versions of Phoenix, provided a feature called "named routes".
-  The idea is that, when you define routes in your web applications, you could give them names
-  too. In Phoenix that was done as follows:
-
-      get "/login", SessionController, :create, as: :login
-
-  And now you could generate the route using the `login_path` function.
-
-  Named routes exist to avoid hardcoding routes in your templates, if you wrote `<a href="/login">`
-  and then changed your router, the link would point to a page that no longer exist. By using
-  `login_path`, we make sure it always points to a valid URL in our router. However, named routes
-  come with the downsides of indirection: when you look at the code, it is not immediately clear
-  which URL will be generated. Furthermore, if you have an existing URL and you want to add it
-  to a template, you need to do a reverse lookup and find its name in the router. At the end of
-  the day, named routes are arbitrary names that need to be memorized by developers, adding
+  Many web frameworks provided a feature called "named routes". The idea is
+  that, when you define routes in your web applications, you could give them
+  names too. Named routes exist to avoid hardcoding routes in your templates,
+  if you wrote `<a href="/login">` and then changed your router, the link
+  would point to a page that no longer exist. By using named routes, we make
+  sure it always points to a valid URL in our router. However, named routes
+  come with the downsides of indirection: when you look at the code, it is
+  not immediately clear which URL will be generated. Furthermore, if you have
+  an existing URL and you want to add it to a template, you need to do a
+  reverse lookup and find its name in the router. At the end of the day, named
+  routes are arbitrary names that need to be memorized by developers, adding
   cognitive overhead.
 
-  Verified routes tackle this problem by allowing the routes to be written as we would read them
-  in a browser, but using the `~p` sigil to guarantee they actually exist at compilation time.
-  They remove the indirection of named routes while keeping their guarantees.
+  Verified routes tackle this problem by allowing the routes to be written as
+  we would read them in a browser, but using the `~p` sigil to guarantee they
+  actually exist at compile-time. They remove the indirection of named routes
+  while keeping their guarantees.
 
-  In any case, if part of your application requires features similar to named routes, then
-  remember you can still leverage Elixir features to achieve the same result. For example,
-  you can define several functions as named routes to be reused across modules:
+  In any case, if part of your application requires features similar to named
+  routes, then remember you can still leverage Elixir features to achieve the
+  same result. For example, you can define several functions as named routes
+  to be reused across modules:
 
       def login_path, do: ~p"/login"
       def user_home_path(user), do: ~p"/users/#{user.username}"
 
-  ## Options
+  ## Usage
 
-  To verify routes in your application modules, such as controller, templates, and views,
-  `use Combo.VerifiedRoutes`, which supports the following options:
+  To setup verified routes, `use Combo.VerifiedRoutes`.
 
-    * `:router` - The required router to verify `~p` paths against
-    * `:endpoint` - Optional endpoint for URL generation
-    * `:statics` - Optional list of static directories to treat as verified paths
-    * `:path_prefixes` - Optional list of path prefixes to be added to every generated path.
-      See "Path prefixes" for more information
+  ### Options
 
-  For example:
+  `use Combo.VerifiedRoutes` supports the following options:
+
+    * `:endpoint` - Optional endpoint for URL generation.
+    * `:router` - The required router to verify `~p` paths against.
+    * `:statics` - Optional list of static directories to treat as verified
+      paths.
+    * `:path_prefixes` - Optional list of path prefixes to be added to every
+      generated path. See "Path prefixes" for more information.
+
+  ### Examples
 
       use Combo.VerifiedRoutes,
-        router: AppWeb.Router,
-        endpoint: AppWeb.Endpoint,
+        router: Demo.Web.Router,
+        endpoint: Demo.Web.Endpoint,
         statics: ~w(images)
+
+  Then, you can define verified routes with `url/_`, `path/_`, `static_url/_`,
+  `static_path/_` and `sigil_p`.
 
   ## Connection/socket-based route generation
 
@@ -100,26 +107,30 @@ defmodule Combo.VerifiedRoutes do
   That said, there are some circumstances where `path/2`, `path/3`, `url/2`, and `url/3`
   are required:
 
-    * When the runtime values of the `%Plug.Conn{}`, `%Phoenix.LiveSocket{}`, or a `%URI{}`
-      dictate the formation of the path or URL, which happens under the following scenarios:
+    * When the runtime values of the `%Plug.Conn{}` or a `%URI{}` dictate the
+      formation of the path or URL, which happens under the following scenarios:
 
       - `Combo.Controller.put_router_url/2` is used to override the endpoint's URL
       - `Combo.Controller.put_static_url/2` is used to override the endpoint's static URL
 
-    * When the Router module differs from the one passed to `use Combo.VerifiedRoutes`,
-      such as library code, or application code that relies on multiple routers. In such cases,
-      the router module can be provided explicitly to `path/3` and `url/3`.
+    * When the router module differs from the one passed to
+      `use Combo.VerifiedRoutes`, such as library code, or application code
+      that relies on multiple routers. In such cases, the router module can be
+      provided explicitly to `path/3` and `url/3`.
 
   ## Tracking warnings
 
-  All static path segments must start with forward slash, and you must have a static segment
-  between dynamic interpolations in order for a route to be verified without warnings.
+  All static path segments must start with forward slash, and you must have a
+  static segment between dynamic interpolations in order for a route to be
+  verified without warnings.
+
   For example, imagine you have these two routes:
 
       get "/media/posts/:id"
       get "/media/images/:id"
 
-  The following route will be verified and emit a warning as it does not match the router:
+  The following route will be verified and emit a warning as it does not match
+  the router:
 
       ~p"/media/post/#{post}"
 
@@ -128,74 +139,79 @@ defmodule Combo.VerifiedRoutes do
       type = "post"
       ~p"/media/#{type}/#{post}"
 
-  If you find yourself needing to generate dynamic URLs which are defined statically
-  in the router, that's a good indicator you should refactor it into one or more
-  function, such as `posts_path/1` and `images_path/1`.
+  If you find yourself needing to generate dynamic URLs which are defined
+  statically in the router, that's a good indicator you should refactor it
+  into one or more function, such as `posts_path/1` and `images_path/1`.
 
-  Like any other compilation warning, the Elixir compiler will warn any time the file
-  that a `~p` resides in changes, or if the router is changed.
+  Like any other compile-time warning, the Elixir compiler will warn any
+  time the file that a `~p` resides in changes, or if the router is changed.
 
   ## Localized routes and path prefixes
 
   Applications that need to support internationalization (i18n) and localization (l10n)
-  often do so at the URL level. In such cases, there are different approaches one can
-  choose.
+  often do so at the URL level. In such cases, there are different approaches
+  one can choose.
 
-  One option is to perform i18n at the domain level. You can have `example.com` (in which
-  you would detect the locale based on the "Accept-Language" HTTP header), `en.example.com`,
-  `en-GB.example.com` and so forth. In this case, you would have a plug that looks at the
-  host and at HTTP headers and calls `Gettext.get_locale/1` accordingly. The biggest benefit
-  of this approach is that you don't have to change the routes in your application and
-  verified routes works as is.
+  One option is to perform i18n at the domain level. You can have `example.com`
+  (in which you would detect the locale based on the "Accept-Language" HTTP
+  header),`en.example.com`, `en-GB.example.com` and so forth. In this case, you
+  would have a plug that looks at the host and at HTTP headers and calls
+  `Gettext.get_locale/1` accordingly. The biggest benefit of this approach is
+  that you don't have to change the routes in your application and verified
+  routes works as is.
 
-  Some applications, however, like to add the locale as part of the URL prefix:
+  Another option is to perform i18n at path level. For example, adding the
+  locale as part of the path prefix:
 
       scope "/:locale" do
         get "/posts"
         get "/images"
       end
 
-  For such cases, VerifiedRoutes allow you to configure a `path_prefixes` option, which
-  is a list of segments to prepend to the URL. For example:
+  For such cases, `Combo.VerifiedRoutes` allow you to configure a
+  `path_prefixes` option, which is a list of segments to prepend to the URL.
+  For example:
 
       use Combo.VerifiedRoutes,
-        router: AppWeb.Router,
-        endpoint: AppWeb.Endpoint,
-        path_prefixes: [{Gettext, :get_locale, []}]
+        router: Demo.Web.Router,
+        endpoint: Demo.Web.Endpoint,
+        path_prefixes: [{Demo.Gettext, :get_locale, []}]
 
-  The above will prepend `"/#{Gettext.get_locale()}"` to every path and url generated with
-  `~p`. If your website has a handful of URLs that do not require the locale prefix, then
-  we suggest defining them in a separate module, where you use `Combo.VerifiedRoutes`
-  without the prefix option:
+  The above will prepend `"/#{Demo.Gettext.get_locale()}"` to every path and
+  url generated with `~p`. If your website has a handful of URLs that do not
+  require the locale prefix, then we suggest defining them in a separate module,
+  where you use `Combo.VerifiedRoutes` without the prefix option:
 
-      defmodule UnlocalizedRoutes do
+      defmodule Demo.Web.UnlocalizedRoutes do
         use Combo.VerifiedRoutes,
-          router: AppWeb.Router,
-          endpoint: AppWeb.Endpoint,
+          router: Demo.Web.Router,
+          endpoint: Demo.Web.Endpoint,
 
         # Since :path_prefixes was not declared,
         # the code below won't prepend the locale and still be verified
         def root, do: ~p"/"
       end
 
-  Finally, for even more complex use cases, where the whole URL needs to localized,
-  see projects such as [`routex`](https://hex.pm/packages/routex) and
-  [`ex_cldr_routes`](https://hex.pm/packages/ex_cldr_routes).
+  Finally, for even more complex use cases, where the whole URL needs to
+  localized, see projects such as [`routex`](https://hex.pm/packages/routex)
+  and [`ex_cldr_routes`](https://hex.pm/packages/ex_cldr_routes).
 
   ## Usage with custom plugs
 
-  Sometimes, when we want to do dynamic routing, we will forward to custom plugs.
-  It is possible to make these dynamic routers support `mix phx.routes` and verified
-  routes at compile time by adopting the `Combo.VerifiedRoutes` behaviour.
+  Sometimes, when we want to do dynamic routing, we will forward to custom
+  plugs. It is possible to make these dynamic routers support
+  `mix combo.routes` and verified routes at compile-time by adopting the
+  `Combo.VerifiedRoutes` behaviour.
+
   For example:
 
-      defmodule MyApp.LocaleRouter do
+      defmodule Demo.Web.LocaleRouter do
         use Plug.Router
         @behaviour Combo.VerifiedRoutes
 
         # custom routing rules
 
-        # for displaying in `mix phx.routes`
+        # for displaying in `mix combo.routes`
         def formatted_routes(plug_opts) do
           for locale <- supported_locales(plug_opts) do
             %{verb: "GET", path: "/#{locale}/*subpath"}
@@ -210,6 +226,7 @@ defmodule Combo.VerifiedRoutes do
           end)
         end
       end
+
   '''
   @doc false
   defstruct router: nil,
@@ -242,8 +259,8 @@ defmodule Combo.VerifiedRoutes do
   def __using__(mod, opts) do
     Module.register_attribute(mod, :combo_verified_routes, accumulate: true)
     Module.put_attribute(mod, :before_compile, __MODULE__)
-    Module.put_attribute(mod, :router, Keyword.fetch!(opts, :router))
     Module.put_attribute(mod, :endpoint, Keyword.get(opts, :endpoint))
+    Module.put_attribute(mod, :router, Keyword.fetch!(opts, :router))
 
     statics =
       case Keyword.get(opts, :statics, []) do
@@ -275,7 +292,8 @@ defmodule Combo.VerifiedRoutes do
         }
 
   @doc """
-  Returns the necessary information about routes for display in `mix phx.routes`.
+  Returns the necessary information about routes for display in
+  `mix combo.routes`.
 
   The `plug_opts` is typically only passed when the router is mounted within
   a `Combo.Router`. Otherwise it defaults to `[]`.
@@ -283,7 +301,7 @@ defmodule Combo.VerifiedRoutes do
   @callback formatted_routes(plug_opts()) :: [formatted_route()]
 
   @doc """
-  Returns `true` if the path is verified, and false if not.
+  Returns `true` if the path is verified, and `false` if not.
 
   The `plug_opts` is typically only passed when the router is mounted within
   a `Combo.Router`. Otherwise it defaults to `[]`.
@@ -338,15 +356,15 @@ defmodule Combo.VerifiedRoutes do
 
   ## Examples
 
-      use Combo.VerifiedRoutes, endpoint: MyAppWeb.Endpoint, router: MyAppWeb.Router
+      use Combo.VerifiedRoutes,
+        endpoint: Demo.Web.Endpoint,
+        router: Demo.Web.Router
 
       redirect(to: ~p"/users/top")
-
       redirect(to: ~p"/users/#{@user}")
 
-      ~H"""
+      ~CE"""
       <.link href={~p"/users?page=#{@page}"}>profile</.link>
-
       <.link href={~p"/users?#{@params}"}>profile</.link>
       """
   '''
@@ -413,13 +431,12 @@ defmodule Combo.VerifiedRoutes do
 
       import Combo.VerifiedRoutes
 
-      redirect(to: path(conn, MyAppWeb.Router, ~p"/users/top"))
+      redirect(to: path(conn, Demo.Web.Router, ~p"/users/top"))
+      redirect(to: path(conn, Demo.Web.Router, ~p"/users/#{@user}"))
 
-      redirect(to: path(conn, MyAppWeb.Router, ~p"/users/#{@user}"))
-
-      ~H"""
-      <.link href={path(@uri, MyAppWeb.Router, "/users?page=#{@page}")}>profile</.link>
-      <.link href={path(@uri, MyAppWeb.Router, "/users?#{@params}")}>profile</.link>
+      ~CE"""
+      <.link href={path(@uri, Demo.Web.Router, "/users?page=#{@page}")}>profile</.link>
+      <.link href={path(@uri, Demo.Web.Router, "/users?#{@params}")}>profile</.link>
       """
   '''
   defmacro path(
@@ -449,10 +466,9 @@ defmodule Combo.VerifiedRoutes do
       import Combo.VerifiedRoutes
 
       redirect(to: path(conn, ~p"/users/top"))
-
       redirect(to: path(conn, ~p"/users/#{@user}"))
 
-      ~H"""
+      ~CE"""
       <.link href={path(@uri, "/users?page=#{@page}")}>profile</.link>
       <.link href={path(@uri, "/users?#{@params}")}>profile</.link>
       """
@@ -481,32 +497,33 @@ defmodule Combo.VerifiedRoutes do
 
   ## Examples
 
-      use Combo.VerifiedRoutes, endpoint: MyAppWeb.Endpoint, router: MyAppWeb.Router
+      use Combo.VerifiedRoutes,
+        endpoint: Demo.Web.Endpoint,
+        router: Demo.Web.Router
 
       redirect(to: url(conn, ~p"/users/top"))
-
       redirect(to: url(conn, ~p"/users/#{@user}"))
 
-      ~H"""
+      ~CE"""
       <.link href={url(@uri, "/users?#{[page: @page]}")}>profile</.link>
       """
 
-  The router may also be provided in cases where you want to verify routes for a
-  router other than the one passed to `use Combo.VerifiedRoutes`:
+  The router may also be provided in cases where you want to verify routes
+  for a router other than the one passed to `use Combo.VerifiedRoutes`:
 
       redirect(to: url(conn, OtherRouter, ~p"/users"))
 
   Forwarded routes are also resolved automatically. For example, imagine you
   have a forward path to an admin router in your main router:
 
-      defmodule AppWeb.Router do
+      defmodule Demo.Web.Router do
         ...
-        forward "/admin", AppWeb.AdminRouter
+        forward "/admin", Demo.Web.AdminRouter
       end
 
-      defmodule AppWeb.AdminRouter do
+      defmodule Demo.Web.AdminRouter do
         ...
-        get "/users", AppWeb.Admin.UserController
+        get "/users", Demo.Web.Admin.UserController
       end
 
   Forwarded paths in your main application router will be verified as usual,
@@ -524,7 +541,8 @@ defmodule Combo.VerifiedRoutes do
   defmacro url(other), do: raise_invalid_route(other)
 
   @doc """
-  Generates the router url with route verification from the connection, socket, or URI.
+  Generates the router url with route verification from the connection,
+  socket, or URI.
 
   See `url/1` for more information.
   """
@@ -542,7 +560,8 @@ defmodule Combo.VerifiedRoutes do
   defmacro url(_conn_or_socket_or_endpoint_or_uri, other), do: raise_invalid_route(other)
 
   @doc """
-  Generates the url with route verification from the connection, socket, or URI and router.
+  Generates the url with route verification from the connection, socket,
+  or URI and router.
 
   See `url/1` for more information.
   """
@@ -563,7 +582,8 @@ defmodule Combo.VerifiedRoutes do
   @doc """
   Generates url to a static asset given its file path.
 
-  See `c:Combo.Endpoint.static_url/0` and `c:Combo.Endpoint.static_path/1` for more information.
+  See `c:Combo.Endpoint.static_url/0` and `c:Combo.Endpoint.static_path/1` for
+  more information.
 
   ## Examples
 
@@ -573,8 +593,9 @@ defmodule Combo.VerifiedRoutes do
       iex> static_url(socket, "/assets/js/app.js")
       "https://example.com/assets/js/app-813dfe33b5c7f8388bccaaa38eec8382.js"
 
-      iex> static_url(AppWeb.Endpoint, "/assets/js/app.js")
+      iex> static_url(Demo.Web.Endpoint, "/assets/js/app.js")
       "https://example.com/assets/js/app-813dfe33b5c7f8388bccaaa38eec8382.js"
+
   """
   def static_url(conn_or_socket_or_endpoint, path)
 
@@ -609,6 +630,7 @@ defmodule Combo.VerifiedRoutes do
 
       iex> unverified_url(conn, "/posts", page: 1)
       "https://example.com/posts?page=1"
+
   """
   def unverified_url(conn_or_socket_or_endpoint_or_uri, path, params \\ %{})
       when (is_map(params) or is_list(params)) and is_binary(path) do
@@ -659,11 +681,12 @@ defmodule Combo.VerifiedRoutes do
       iex> static_path(socket, "assets/js/app.js")
       "/assets/js/app-813dfe33b5c7f8388bccaaa38eec8382.js"
 
-      iex> static_path(AppWeb.Endpoint, "assets/js/app.js")
+      iex> static_path(Demo.Web.Endpoint, "assets/js/app.js")
       "/assets/js/app-813dfe33b5c7f8388bccaaa38eec8382.js"
 
       iex> static_path(%URI{path: "/subresource"}, "/assets/js/app.js")
       "/subresource/assets/js/app-813dfe33b5c7f8388bccaaa38eec8382.js"
+
   """
   def static_path(conn_or_socket_or_endpoint_or_uri, path)
 
@@ -691,11 +714,12 @@ defmodule Combo.VerifiedRoutes do
 
   ## Examples
 
-      iex> unverified_path(conn, AppWeb.Router, "/posts")
+      iex> unverified_path(conn, Demo.Web.Router, "/posts")
       "/posts"
 
-      iex> unverified_path(conn, AppWeb.Router, "/posts", page: 1)
+      iex> unverified_path(conn, Demo.Web.Router, "/posts", page: 1)
       "/posts?page=1"
+
   """
   def unverified_path(conn_or_socket_or_endpoint_or_uri, router, path, params \\ %{})
 
@@ -858,8 +882,9 @@ defmodule Combo.VerifiedRoutes do
       iex> static_integrity(socket, "/assets/js/app.js")
       "813dfe33b5c7f8388bccaaa38eec8382"
 
-      iex> static_integrity(AppWeb.Endpoint, "/assets/js/app.js")
+      iex> static_integrity(Demo.Web.Endpoint, "/assets/js/app.js")
       "813dfe33b5c7f8388bccaaa38eec8382"
+
   """
   def static_integrity(conn_or_socket_or_endpoint, path)
 
