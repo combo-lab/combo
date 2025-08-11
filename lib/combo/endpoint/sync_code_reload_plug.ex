@@ -1,7 +1,7 @@
 defmodule Combo.Endpoint.SyncCodeReloadPlug do
-  @moduledoc ~S"""
-  Wraps an Endpoint, attempting to sync with Phoenix's code reloader if 
-  an exception is raised which indicates that we may be in the middle of a reload.
+  @moduledoc """
+  Wraps an endpoint, attempting to sync with `Combo.CodeReloader` if an 
+  exception is raised which indicates that we may be in the middle of a reload.
 
   We detect this by looking at the raised exception and seeing if it indicates
   that the endpoint is not defined. This indicates that the code reloader may be 

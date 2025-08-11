@@ -1,4 +1,5 @@
 defmodule Combo.Endpoint.RenderErrors do
+  @moduledoc false
   # This module is used to catch failures and render them using a view.
   #
   # This module is automatically used in `Combo.Endpoint` where it
@@ -10,7 +11,6 @@ defmodule Combo.Endpoint.RenderErrors do
   #   * `:formats` - the format to use when none is available from the request
   #   * `:log` - the `t:Logger.level/0` or `false` to disable logging rendered errors
   #
-  @moduledoc false
 
   import Plug.Conn
 

@@ -1,5 +1,6 @@
 defmodule Combo.Endpoint.Watcher do
   @moduledoc false
+
   require Logger
 
   def child_spec(args) do
