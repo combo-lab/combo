@@ -3,7 +3,7 @@ System.put_env("ENDPOINT_TEST_PORT", "80")
 System.put_env("ENDPOINT_TEST_ASSET_HOST", "assets.example.com")
 System.put_env("ENDPOINT_TEST_ASSET_PORT", "443")
 
-defmodule Combo.Endpoint.EndpointTest do
+defmodule Combo.EndpointTest do
   use ExUnit.Case, async: true
   use RouterHelper
 
