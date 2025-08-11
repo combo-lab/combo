@@ -201,20 +201,18 @@ defmodule Combo.Endpoint.Supervisor do
       ## Runtime config
 
       adapter: Combo.Endpoint.BanditAdapter,
-      cache_static_manifest: nil,
-      check_origin: true,
       http: false,
       https: false,
-      reloadable_apps: nil,
-      reloadable_compilers: [:elixir, :app],
+      check_origin: true,
       secret_key_base: nil,
-      static_url: nil,
       url: [host: "localhost", path: "/"],
+      static_url: nil,
+      cache_static_manifest: nil,
       cache_manifest_skip_vsn: false,
-
-      # Supervisor config
       watchers: [],
-      force_watchers: false
+      force_watchers: false,
+      reloadable_apps: nil,
+      reloadable_compilers: [:elixir, :app]
     ]
   end
 
