@@ -83,8 +83,8 @@ defmodule Combo.Endpoint.RenderErrorsTest do
       # Those are always ignored and must be explicitly opted-in.
       conn =
         conn
-        |> Combo.Controller.put_layout({Unknown, "layout"})
-        |> Combo.Controller.put_root_layout({Unknown, "root"})
+        |> Combo.Controller.put_root_layout(html: {Unknown, :root})
+        |> Combo.Controller.put_layout(html: {Unknown, :layout})
 
       reason = ArgumentError.exception("oops")
       raise Plug.Conn.WrapperError, conn: conn, kind: :error, stack: stack, reason: reason
@@ -279,18 +279,18 @@ defmodule Combo.Endpoint.RenderErrorsTest do
     assert body == "500 in TEXT"
   end
 
-  test "exception page with layout" do
+  test "exception page with root layout" do
     body =
-      assert_render(500, conn(:get, "/"), [layout: {__MODULE__, :app}], fn ->
+      assert_render(500, conn(:get, "/"), [root_layout: [html: {__MODULE__, :app}]], fn ->
         throw(:hello)
       end)
 
     assert body == "Layout: Got 500 from throw with GET"
   end
 
-  test "exception page with root layout" do
+  test "exception page with layout" do
     body =
-      assert_render(500, conn(:get, "/"), [root_layout: {__MODULE__, :app}], fn ->
+      assert_render(500, conn(:get, "/"), [layout: [html: {__MODULE__, :app}]], fn ->
         throw(:hello)
       end)
 

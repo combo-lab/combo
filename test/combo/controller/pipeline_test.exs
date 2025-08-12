@@ -3,6 +3,7 @@ defmodule Combo.Controller.PipelineTest do
   use RouterHelper
 
   import Combo.Controller
+  import Combo.Conn
 
   defmodule MyController do
     use Combo.Controller, formats: []
@@ -139,8 +140,9 @@ defmodule Combo.Controller.PipelineTest do
   test "does not override previous views/layouts" do
     conn =
       stack_conn()
-      |> put_view(Hello)
-      |> put_layout(false)
+      |> put_format(:html)
+      |> put_view(html: Hello)
+      |> put_layout(html: false)
       |> MyController.call(:create)
 
     assert view_module(conn) == Hello
@@ -150,8 +152,9 @@ defmodule Combo.Controller.PipelineTest do
   test "does not set default view/layout" do
     conn =
       stack_conn()
+      |> put_format(:html)
       |> NoViewsController.call(:show)
-      |> put_new_view(Hello)
+      |> put_new_view(html: Hello)
 
     assert view_module(conn) == Hello
     assert layout(conn) == false
