@@ -484,7 +484,7 @@ defmodule Combo.VerifiedRoutesTest do
 
     test "combo_router_url with string takes precedence over endpoint" do
       url = "https://example.com"
-      conn = Combo.Controller.put_router_url(conn_with_endpoint(), url)
+      conn = Combo.Conn.put_router_url(conn_with_endpoint(), url)
 
       assert url(conn, ~p"/") == url <> "/"
       assert url(conn, ~p"/admin/new/messages/1") == url <> "/admin/new/messages/1"
@@ -493,7 +493,7 @@ defmodule Combo.VerifiedRoutesTest do
 
     test "combo_router_url with URI takes precedence over endpoint" do
       uri = %URI{scheme: "https", host: "example.com", port: 123, path: "/path"}
-      conn = Combo.Controller.put_router_url(conn_with_endpoint(), uri)
+      conn = Combo.Conn.put_router_url(conn_with_endpoint(), uri)
 
       assert url(conn, ~p"/") == "https://example.com:123/path/"
 
@@ -504,41 +504,41 @@ defmodule Combo.VerifiedRoutesTest do
     test "combo_static_url with string takes precedence over endpoint" do
       url = "https://example.com"
 
-      conn = Combo.Controller.put_static_url(conn_with_endpoint(), url)
+      conn = Combo.Conn.put_static_url(conn_with_endpoint(), url)
       assert url(conn, ~p"/images/foo.png") == url <> "/images/foo.png"
 
-      conn = Combo.Controller.put_static_url(conn_with_script_name(), url)
+      conn = Combo.Conn.put_static_url(conn_with_script_name(), url)
       assert url(conn, ~p"/images/foo.png") == url <> "/images/foo.png"
     end
 
     test "combo_static_url set to string with path results in static url with that path" do
       url = "https://example.com/path"
-      conn = Combo.Controller.put_static_url(conn_with_endpoint(), url)
+      conn = Combo.Conn.put_static_url(conn_with_endpoint(), url)
       assert url(conn, ~p"/images/foo.png") == url <> "/images/foo.png"
 
-      conn = Combo.Controller.put_static_url(conn_with_script_name(), url)
+      conn = Combo.Conn.put_static_url(conn_with_script_name(), url)
       assert url(conn, ~p"/images/foo.png") == url <> "/images/foo.png"
     end
 
     test "combo_static_url with URI takes precedence over endpoint" do
       uri = %URI{scheme: "https", host: "example.com", port: 123}
 
-      conn = Combo.Controller.put_static_url(conn_with_endpoint(), uri)
+      conn = Combo.Conn.put_static_url(conn_with_endpoint(), uri)
       assert url(conn, ~p"/images/foo.png") == "https://example.com:123/images/foo.png"
 
-      conn = Combo.Controller.put_static_url(conn_with_script_name(), uri)
+      conn = Combo.Conn.put_static_url(conn_with_script_name(), uri)
       assert url(conn, ~p"/images/foo.png") == "https://example.com:123/images/foo.png"
     end
 
     test "combo_static_url set to URI with path results in static url with that path" do
       uri = %URI{scheme: "https", host: "example.com", port: 123, path: "/path"}
 
-      conn = Combo.Controller.put_static_url(conn_with_endpoint(), uri)
+      conn = Combo.Conn.put_static_url(conn_with_endpoint(), uri)
 
       assert url(conn, ~p"/images/foo.png") ==
                "https://example.com:123/path/images/foo.png"
 
-      conn = Combo.Controller.put_static_url(conn_with_script_name(), uri)
+      conn = Combo.Conn.put_static_url(conn_with_script_name(), uri)
 
       assert url(conn, ~p"/images/foo.png") ==
                "https://example.com:123/path/images/foo.png"

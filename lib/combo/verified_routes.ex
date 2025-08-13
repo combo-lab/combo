@@ -110,8 +110,8 @@ defmodule Combo.VerifiedRoutes do
     * When the runtime values of the `%Plug.Conn{}` or a `%URI{}` dictate the
       formation of the path or URL, which happens under the following scenarios:
 
-      - `Combo.Controller.put_router_url/2` is used to override the endpoint's URL
-      - `Combo.Controller.put_static_url/2` is used to override the endpoint's static URL
+      - `Combo.Conn.put_router_url/2` is used to override the endpoint's URL
+      - `Combo.Conn.put_static_url/2` is used to override the endpoint's static URL
 
     * When the router module differs from the one passed to
       `use Combo.VerifiedRoutes`, such as library code, or application code
