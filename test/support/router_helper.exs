@@ -1,19 +1,19 @@
-defmodule RouterHelper do
+defmodule Support.RouterHelper do
   @moduledoc """
   Conveniences for testing routers and controllers.
 
-  Must not be used to test endpoints as it does some
-  pre-processing (like fetching params) which could
-  skew endpoint tests.
+  Must not be used to test endpoints as it does some pre-processing
+  (like fetching params) which could skew endpoint tests.
   """
 
   import Plug.Test
 
   defmacro __using__(_) do
     quote do
+      import Support.RouterHelper
+      import Combo.Conn
       import Plug.Test
       import Plug.Conn
-      import RouterHelper
     end
   end
 
@@ -26,7 +26,7 @@ defmodule RouterHelper do
   end
 
   def action(controller, verb, action, params \\ nil) do
-    conn = conn(verb, "/", params) |> Plug.Conn.fetch_query_params
+    conn = conn(verb, "/", params) |> Plug.Conn.fetch_query_params()
     controller.call(conn, controller.init(action))
   end
 end

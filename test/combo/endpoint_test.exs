@@ -5,7 +5,7 @@ System.put_env("ENDPOINT_TEST_ASSET_PORT", "443")
 
 defmodule Combo.EndpointTest do
   use ExUnit.Case, async: true
-  use RouterHelper
+  use Support.RouterHelper
 
   @config [
     url: [host: System.get_env("ENDPOINT_TEST_HOST"), path: "/api"],

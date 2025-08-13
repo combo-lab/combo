@@ -1,6 +1,6 @@
 defmodule Combo.Router.ResourcesTest do
   use ExUnit.Case, async: true
-  use RouterHelper
+  use Support.RouterHelper
 
   defmodule UserController do
     use Support.Controller

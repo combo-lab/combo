@@ -1,6 +1,6 @@
 defmodule Combo.Controller.PipelineTest do
   use ExUnit.Case, async: true
-  use RouterHelper
+  use Support.RouterHelper
 
   import Combo.Controller
   import Combo.Conn

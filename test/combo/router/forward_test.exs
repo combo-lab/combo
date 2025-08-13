@@ -5,7 +5,7 @@ end
 
 defmodule Combo.Router.ForwardTest do
   use ExUnit.Case, async: true
-  use RouterHelper
+  use Support.RouterHelper
 
   defmodule Controller do
     use Support.Controller

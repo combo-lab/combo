@@ -1,7 +1,7 @@
 defmodule Combo.Endpoint.RenderErrorsTest do
   use ExUnit.Case, async: true
 
-  use RouterHelper
+  use Support.RouterHelper
   import ExUnit.CaptureLog
 
   defmodule Layouts do

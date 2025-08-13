@@ -1,6 +1,6 @@
 defmodule Combo.Socket.TransportTest do
   use ExUnit.Case, async: true
-  use RouterHelper
+  use Support.RouterHelper
 
   import ExUnit.CaptureLog
 

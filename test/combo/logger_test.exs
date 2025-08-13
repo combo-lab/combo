@@ -1,6 +1,6 @@
 defmodule Combo.LoggerTest do
   use ExUnit.Case, async: true
-  use RouterHelper
+  use Support.RouterHelper
 
   describe "filter_values/2 with discard strategy" do
     test "in top level map" do

@@ -1,6 +1,6 @@
 defmodule Combo.CodeReloaderTest do
   use ExUnit.Case, async: true
-  use RouterHelper
+  use Support.RouterHelper
 
   defmodule Endpoint do
     def config(:reloadable_compilers), do: [:unknown_compiler, :elixir]

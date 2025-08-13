@@ -80,7 +80,7 @@ alias Combo.Router.PipelineTest.Router
 
 defmodule Combo.Router.PipelineTest do
   use ExUnit.Case, async: true
-  use RouterHelper
+  use Support.RouterHelper
 
   setup do
     Logger.disable(self())

@@ -1,6 +1,6 @@
 defmodule Combo.Router.ScopedRoutingTest do
   use ExUnit.Case, async: true
-  use RouterHelper
+  use Support.RouterHelper
 
   # Path scoping
 
