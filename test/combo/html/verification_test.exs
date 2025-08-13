@@ -1,5 +1,5 @@
 defmodule Combo.HTML.VerificationTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case
 
   import ExUnit.CaptureIO
   import Combo.HTMLTest
