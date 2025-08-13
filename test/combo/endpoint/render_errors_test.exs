@@ -6,19 +6,11 @@ defmodule Combo.Endpoint.RenderErrorsTest do
 
   defmodule Layouts do
     def render("root.html", assigns) do
-      "Root Layout: " <> assigns.inner_content
-    end
-
-    def render("app.html", assigns) do
       "Layout: " <> assigns.inner_content
     end
   end
 
   defmodule ErrorHTML do
-    def render("app.html", assigns) do
-      "Layout: " <> assigns.inner_content
-    end
-
     def render("404.html", %{kind: kind, reason: _reason, stack: _stack, status: 404, conn: conn}) do
       "HTML: Got 404 from #{kind} with #{conn.method}"
     end
@@ -271,36 +263,13 @@ defmodule Combo.Endpoint.RenderErrorsTest do
     assert body == "TEXT: Got 500 from throw with GET"
   end
 
-  test "exception page with root layout" do
-    body =
-      assert_render(500, conn(:get, "/"), [root_layout: [html: {Layouts, :root}]], fn ->
-        throw(:hello)
-      end)
-
-    assert body == "Root Layout: HTML: Got 500 from throw with GET"
-  end
-
   test "exception page with layout" do
     body =
-      assert_render(500, conn(:get, "/"), [layout: [html: {Layouts, :app}]], fn ->
+      assert_render(500, conn(:get, "/"), [layout: [html: {Layouts, :root}]], fn ->
         throw(:hello)
       end)
 
     assert body == "Layout: HTML: Got 500 from throw with GET"
-  end
-
-  test "exception page with root layout and layout" do
-    body =
-      assert_render(
-        500,
-        conn(:get, "/"),
-        [root_layout: [html: {Layouts, :root}], layout: [html: {Layouts, :app}]],
-        fn ->
-          throw(:hello)
-        end
-      )
-
-    assert body == "Root Layout: Layout: HTML: Got 500 from throw with GET"
   end
 
   test "exception page is shown even with invalid format" do

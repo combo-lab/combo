@@ -71,16 +71,13 @@ defmodule Combo.Controller do
   ## Layouts
 
   Many applications have shared content, most often the `<head>` tag and its
-  contents. In Combo, this is done via the `put_root_layout/2`:
+  contents. In Combo, this is done via the `put_layout/2`:
 
-      put_root_layout(conn, html: {Demo.Web.Layouts, :root})
+      put_layout(conn, html: {Demo.Web.Layouts, :root})
 
   Or, as a plug:
 
-      plug :put_root_layout, html: {Demo.Web.Layouts, :root}
-
-  You can also specify controller-specific layouts using `put_layout/2`,
-  although this functionality is discouraged in favor of using components.
+      plug :put_layout, html: {Demo.Web.Layouts, :root}
 
   ## Connection
 
@@ -210,6 +207,28 @@ defmodule Combo.Controller do
 
     * `:formats` - the formats a controller can render.
 
+  ## The `:formats` option
+
+  This option helps to infer the view modules to be used when rendering
+  templates. For example:
+
+      defmodule Demo.Web.UserController do
+        use Combo.Controller, formats: [:html, :json]
+
+        # the inferred view modules are:
+        # * `Demo.Web.UserHTML`
+        # * `Demo.Web.UserJSON`
+      end
+
+  If you want to customize the view names, you can set this option to a list
+  `{format, suffix}` tuples. For example:
+
+      defmodule Demo.Web.UserController do
+        use Combo.Controller, formats: [html: "View", json: "View"]
+
+        # the inferred view modules is `Demo.Web.UserView`
+      end
+
   If you don't expect to render any format upfront, you can ignore `:formats`
   option:
 
@@ -218,20 +237,6 @@ defmodule Combo.Controller do
   Or, set it to an empty list:
 
       use Combo.Controller, formats: []
-
-  If you want to render some formats, and follow the Combo convention for
-  inferring view names, you can set `:formats` option to a list of formats:
-
-      use Combo.Controller, formats: [:html, :json]
-      # If the controller name is `Demo.Web.UserController`, the inferred
-      # view names are `Demo.Web.UserHTML` and `Demo.Web.UserJSON`.
-
-  If you want to customize the view names, you can set `:formats` option to
-  a list of `{format, suffix}` tuples:
-
-      use Combo.Controller, formats: [html: "View", json: "View"]
-      # If the controller name is `Demo.Web.UserController`, the inferred view
-      # names are `Demo.Web.UserView` and `Demo.Web.UserView`.
 
   """
   @spec __using__(opts()) :: Macro.t()

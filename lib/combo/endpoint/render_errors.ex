@@ -8,7 +8,6 @@ defmodule Combo.Endpoint.RenderErrors do
   #
   # ## Options
   #
-  #   * `:root_layout` - optional, it will be passed to `put_root_layout/2`
   #   * `:layout`  - optional, it will be passed to `put_layout/2`
   #   * `:formats` - required, it will be passed to `put_view/2`
   #   * `:log` - optional, the `t:Logger.level/0` or `false` to disable
@@ -25,7 +24,6 @@ defmodule Combo.Endpoint.RenderErrors do
       accepts: 2,
       put_format: 2,
       get_format: 1,
-      put_root_layout: 2,
       put_layout: 2,
       put_view: 2,
       view_module: 2,
@@ -143,7 +141,6 @@ defmodule Combo.Endpoint.RenderErrors do
   def __debugger_banner__(_conn, _status, _kind, _reason, _stack), do: nil
 
   defp render(conn, status, kind, reason, stack, opts) do
-    root_layout = opts[:root_layout] || []
     layout = opts[:layout] || []
     formats = opts[:formats]
 
@@ -166,7 +163,6 @@ defmodule Combo.Endpoint.RenderErrors do
     conn =
       conn
       |> maybe_fetch_query_params()
-      |> put_root_layout(root_layout)
       |> put_layout(layout)
       |> put_view(formats)
       |> detect_format(formats)

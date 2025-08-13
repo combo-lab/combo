@@ -320,7 +320,7 @@ defmodule Combo.Conn do
     * `false`, which means disabling the layout.
 
   """
-  @type layout :: {module :: module(), name :: atom()} | false
+  @type layout :: {module :: module(), name :: atom() | String.t()} | false
   @type layout_formats :: [{format(), layout()}]
 
   @type view :: module() | false
@@ -328,55 +328,6 @@ defmodule Combo.Conn do
 
   defguard is_layout_formats(formats) when is_list(formats)
   defguard is_view_formats(formats) when is_list(formats)
-
-  @doc """
-  Sets the root layout for rendering.
-
-  Raises `Plug.Conn.AlreadySentError` if `conn` is already sent.
-
-  ## Examples
-
-      iex> root_layout(conn)
-      false
-
-      iex> conn = put_root_layout(conn, html: {Demo.Web.Layouts, :root})
-      iex> root_layout(conn)
-      {Demo.Web.Layouts, :root}
-
-  """
-  @spec put_root_layout(Conn.t(), layout_formats()) :: Conn.t()
-  def put_root_layout(%Plug.Conn{state: state} = conn, formats)
-      when state in @unsent and is_layout_formats(formats) do
-    put_private_layout(conn, :combo_root_layout, :replace, formats)
-  end
-
-  def put_root_layout(%Plug.Conn{} = conn, formats) do
-    raise Conn.AlreadySentError, """
-    the response was already sent.
-
-        Status code: #{conn.status}
-        Request path: #{conn.request_path}
-        Method: #{conn.method}
-        Root layout formats: #{inspect(formats)}
-    """
-  end
-
-  @doc """
-  Gets the current root layout for the given format.
-
-  If no format is given, takes the current one from the connection.
-
-  ## Examples
-
-      iex> root_layout(conn, "html")
-      iex> root_layout(conn)
-
-  """
-  @spec root_layout(Conn.t(), format() | nil) :: layout()
-  def root_layout(conn, format \\ nil) do
-    format = format || get_format(conn)
-    get_private_format_value(conn, :combo_root_layout, format)
-  end
 
   @doc """
   Sets the layout for rendering.
@@ -854,16 +805,19 @@ defmodule Combo.Conn do
 
   ## Responses - by rendering templates
 
+  @type template :: atom() | String.t()
+  @type assigns :: Keyword.t() | map()
+
   @doc """
   Render the given template or the default template specified by the current
   action with the given assigns.
 
   See `render/3` for more information.
   """
-  @spec render(Conn.t(), Keyword.t() | map() | binary() | atom()) :: Conn.t()
+  @spec render(Conn.t(), template() | assigns()) :: Conn.t()
   def render(conn, template_or_assigns \\ [])
 
-  def render(conn, template) when is_binary(template) or is_atom(template) do
+  def render(conn, template) when is_atom(template) or is_binary(template) do
     render(conn, template, [])
   end
 
@@ -880,33 +834,37 @@ defmodule Combo.Conn do
 
   ## Arguments
 
-    * `conn` - the `Plug.Conn` struct
+    * `conn` - a `%Plug.Conn{}` struct.
 
-    * `template` - which may be an atom or a string. If an atom, like `:index`,
-      it will render a template with the same format as the one returned by
+    * `template` - an atom or a string. If an atom, like `:index`, it will
+      render a template with the same format as the one returned by
       `get_format/1`. For example, for an HTML request, it will render the
       "index.html" template. If the template is a string, it must contain the
       extension too, like "index.html".
 
-    * `assigns` - a map to be used in the view. It is merged into
-      `conn.assigns` assigns and have higher precedence than `conn.assigns`.
+    * `assigns` - a keyword list or a map. It's merged into `conn.assigns` and
+      have higher precedence than `conn.assigns`. The merged assigns will be
+      used in the template.
 
   ## Examples
 
-  To render a template, you must configure your controller with the formats
-  to render. You can do so on `use`, which will infer the modules based on
-  the controller name:
+  Before rendering a template, you must configure the view modules to be used.
+  There are multiple ways to do that:
+
+    * use `use Combo.Controller`, which infers the view modules at compile-time.
+    * use `Combo.Conn.put_view/2`, which sets the view modules at runtime.
+
+  ### `use Combo.Controller`
+
+  After the viets set, you can render in two ways, either passing a string
+  with the template name and explicit format:
 
       defmodule Demo.Web.UserController do
         use Combo.Controller, formats: [:html, :json]
-        # will use Demo.Web.UserHTML and Demo.Web.UserJSON
-      end
 
-  With the formats set, you can render in two ways, either passing a string
-  with the template name and explicit format:
-
-      def show(conn, _params) do
-        render(conn, "show.html", message: "Hello")
+        def show(conn, _params) do
+          render(conn, "show.html", message: "Hello")
+        end
       end
 
   The example above renders a template "show.html" from the `Demo.Web.UserHTML`
@@ -918,6 +876,8 @@ defmodule Combo.Conn do
       def show(conn, _params) do
         render(conn, :show, message: "Hello")
       end
+
+  ### `Combo.Conn.put_view/2`
 
   If the formats are not known at compile-time, you can call `put_view/2` at
   runtime:
@@ -933,14 +893,15 @@ defmodule Combo.Conn do
       end
 
   """
-  @spec render(Conn.t(), binary() | atom(), Keyword.t() | map()) :: Conn.t()
+  @spec render(Conn.t(), template(), assigns()) :: Conn.t()
   def render(conn, template, assigns)
       when is_atom(template) and (is_map(assigns) or is_list(assigns)) do
     format =
       get_format(conn) ||
         raise """
-        cannot render template #{inspect(template)} because conn.params[\"_format\"] is not set. \
-        Please set `plug :accepts, ["html", "json", ...]` in your pipeline.\
+        cannot render template #{inspect(template)} because the format is not set. \
+        Please set format via `plug :accepts, ["html", "json", ...]`, \
+        or `Combo.Conn.put_format/2`, etc.\
         """
 
     render_and_send(conn, format, Atom.to_string(template), assigns)
@@ -949,31 +910,43 @@ defmodule Combo.Conn do
   def render(conn, template, assigns)
       when is_binary(template) and (is_map(assigns) or is_list(assigns)) do
     {base, format} = split_template(template)
-    conn |> put_format(format) |> render_and_send(format, base, assigns)
+    conn = put_format(conn, format)
+    render_and_send(conn, format, base, assigns)
   end
 
   defp render_and_send(conn, format, template, assigns) do
     view = view_module!(conn, format)
     conn = prepare_assigns(conn, assigns, template, format)
-    data = render_with_layouts(conn, view, template, format)
+    data = render_with_layout(conn, view, template, format)
 
     conn
     |> ensure_resp_content_type(MIME.type(format))
     |> send_resp(conn.status || 200, data)
   end
 
-  defp render_with_layouts(conn, view, template, format) do
-    render_assigns = Map.put(conn.assigns, :conn, conn)
+  defp prepare_assigns(conn, assigns, template, format) do
+    assigns = to_map(assigns)
 
-    case root_layout(conn, format) do
-      {layout_mod, layout_tpl} ->
-        {layout_base, _} = split_template(layout_tpl)
-        inner = template_render(view, template, format, render_assigns)
-        root_assigns = render_assigns |> Map.put(:inner_content, inner) |> Map.delete(:layout)
-        template_render_to_iodata(layout_mod, layout_base, format, root_assigns)
+    conn
+    |> put_private(:combo_template, template <> "." <> format)
+    |> Map.update!(:assigns, fn prev -> Map.merge(prev, assigns) end)
+  end
+
+  defp to_map(assigns) when is_map(assigns), do: assigns
+  defp to_map(assigns) when is_list(assigns), do: :maps.from_list(assigns)
+
+  defp render_with_layout(conn, view, template, format) do
+    assigns = Map.put(conn.assigns, :conn, conn)
+
+    case layout(conn, format) do
+      {layout_mod, layout_template} ->
+        {layout_base, _} = split_template(layout_template)
+        inner_content = template_render(view, template, format, assigns)
+        layout_assigns = Map.put(assigns, :inner_content, inner_content)
+        template_render_to_iodata(layout_mod, layout_base, format, layout_assigns)
 
       false ->
-        template_render_to_iodata(view, template, format, render_assigns)
+        template_render_to_iodata(view, template, format, assigns)
     end
   end
 
@@ -993,28 +966,6 @@ defmodule Combo.Conn do
     end)
   end
 
-  defp prepare_assigns(conn, assigns, template, format) do
-    assigns = to_map(assigns)
-
-    layout =
-      case layout(conn, format) do
-        {mod, layout} when is_binary(layout) -> {mod, Path.rootname(layout)}
-        {mod, layout} when is_atom(layout) -> {mod, Atom.to_string(layout)}
-        false -> false
-      end
-
-    conn
-    |> put_private(:combo_template, template <> "." <> format)
-    |> Map.update!(:assigns, fn prev ->
-      prev
-      |> Map.merge(assigns)
-      |> Map.put(:layout, layout)
-    end)
-  end
-
-  defp to_map(assigns) when is_map(assigns), do: assigns
-  defp to_map(assigns) when is_list(assigns), do: :maps.from_list(assigns)
-
   defp split_template(name) when is_atom(name), do: {Atom.to_string(name), nil}
 
   defp split_template(name) when is_binary(name) do
@@ -1023,8 +974,10 @@ defmodule Combo.Conn do
         {base, format}
 
       [^name] ->
-        raise "cannot render template #{inspect(name)} without format. Use an atom if the " <>
-                "template format is meant to be set dynamically based on the request format"
+        raise """
+        cannot render template #{inspect(name)} without format. Use an atom if the \
+        template format is meant to be set dynamically based on the request format\
+        """
 
       [base | formats] ->
         {base, List.last(formats)}
