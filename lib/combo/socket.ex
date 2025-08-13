@@ -196,7 +196,6 @@ defmodule Combo.Socket do
   """
 
   require Logger
-  require Combo.Endpoint
   alias Combo.Socket
   alias Combo.Socket.{Broadcast, Message, Reply}
 

@@ -6,7 +6,6 @@ defmodule Combo.Controller.Pipeline do
     quote do
       @behaviour Plug
 
-      require Combo.Endpoint
       import Combo.Controller.Pipeline
 
       Module.register_attribute(__MODULE__, :plugs, accumulate: true)
