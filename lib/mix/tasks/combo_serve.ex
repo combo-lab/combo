@@ -1,13 +1,13 @@
-defmodule Mix.Tasks.Combo.Server do
+defmodule Mix.Tasks.Combo.Serve do
   use Mix.Task
 
-  @shortdoc "Starts applications and their servers"
+  @shortdoc "Serves all endpoints"
 
   @moduledoc """
-  Starts the application by configuring all endpoints servers to run.
+  Serve all endpoints.
 
-  Note: to start the endpoint without using this mix task you must set
-  `server: true` in your `Combo.Endpoint` configuration.
+  Note: To start the endpoint without using this mix task, you must set
+  `server: true` in your endpoint configuration.
 
   ## Command line options
 
@@ -16,18 +16,18 @@ defmodule Mix.Tasks.Combo.Server do
   Furthermore, this task accepts the same command-line options as
   `mix run`.
 
-  For example, to run `combo.server` without recompiling:
+  For example, to run `combo.serve` without recompiling:
 
-      $ mix combo.server --no-compile
+      $ mix combo.serve --no-compile
 
   The `--no-halt` flag is automatically added.
 
   Note that the `--no-deps-check` flag cannot be used this way,
-  because Mix needs to check dependencies to find `combo.server`.
+  because Mix needs to check dependencies to find `combo.serve`.
 
-  To run `combo.server` without checking dependencies, you can run:
+  To run `combo.serve` without checking dependencies, you can run:
 
-      $ mix do deps.loadpaths --no-deps-check, combo.server
+      $ mix do deps.loadpaths --no-deps-check, combo.serve
 
   """
 

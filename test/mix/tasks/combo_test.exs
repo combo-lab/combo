@@ -3,7 +3,7 @@ defmodule Mix.Tasks.Combo.Test do
 
   test "provide a list of available phx mix tasks" do
     Mix.Tasks.Combo.run []
-    assert_received {:mix_shell, :info, ["mix combo.server" <> _]}
+    assert_received {:mix_shell, :info, ["mix combo.serve" <> _]}
     assert_received {:mix_shell, :info, ["mix combo.routes" <> _]}
     assert_received {:mix_shell, :info, ["mix combo.digest" <> _]}
     assert_received {:mix_shell, :info, ["mix combo.digest.clean" <> _]}

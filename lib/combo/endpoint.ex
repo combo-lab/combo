@@ -125,7 +125,7 @@ defmodule Combo.Endpoint do
       Defaults to `nil` as it must be set per application.
 
     * `:server` - when `true`, starts the web server when the endpoint
-      supervision tree starts. Defaults to `false`. The `mix combo.server` task
+      supervision tree starts. Defaults to `false`. The `mix combo.serve` task
       automatically sets this to `true`.
 
     * `:url` - a keyword list for generating URLs. Accepts the `:scheme`,
