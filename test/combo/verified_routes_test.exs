@@ -34,6 +34,8 @@ end
 
 defmodule Combo.VerifiedRoutesTest do
   use ExUnit.Case, async: true
+
+  import ExUnit.CaptureIO
   import Plug.Test
 
   @derive {Combo.Param, key: :slug}
@@ -211,7 +213,7 @@ defmodule Combo.VerifiedRoutesTest do
     assert ~p"/posts/123/info#bar" == "/posts/123/info#bar"
 
     warnings =
-      ExUnit.CaptureIO.capture_io(:stderr, fn ->
+      capture_io(:stderr, fn ->
         defmodule Hash do
           use Combo.VerifiedRoutes, endpoint: unquote(@endpoint), router: unquote(@router)
 
@@ -548,7 +550,7 @@ defmodule Combo.VerifiedRoutesTest do
   describe "warnings" do
     test "forwards" do
       warnings =
-        ExUnit.CaptureIO.capture_io(:stderr, fn ->
+        capture_io(:stderr, fn ->
           defmodule Forwards do
             use Combo.VerifiedRoutes, endpoint: unquote(@endpoint), router: unquote(@router)
 
@@ -576,7 +578,7 @@ defmodule Combo.VerifiedRoutesTest do
 
     test "~p warns on unmatched path" do
       warnings =
-        ExUnit.CaptureIO.capture_io(:stderr, fn ->
+        capture_io(:stderr, fn ->
           defmodule Unmatched do
             use Combo.VerifiedRoutes, endpoint: unquote(@endpoint), router: unquote(@router)
 
@@ -603,7 +605,7 @@ defmodule Combo.VerifiedRoutesTest do
 
     test "~p warns on warn_on_verify: true route" do
       warnings =
-        ExUnit.CaptureIO.capture_io(:stderr, fn ->
+        capture_io(:stderr, fn ->
           defmodule VerifyFalse do
             use Combo.VerifiedRoutes, endpoint: unquote(@endpoint), router: unquote(@router)
 
@@ -620,7 +622,7 @@ defmodule Combo.VerifiedRoutesTest do
 
     test "~p does not warn if route without warn_on_verify: true matches first" do
       warnings =
-        ExUnit.CaptureIO.capture_io(:stderr, fn ->
+        capture_io(:stderr, fn ->
           defmodule VerifyFalseTrueMatchesFirst do
             use Combo.VerifiedRoutes,
               endpoint: unquote(@endpoint),
@@ -638,7 +640,7 @@ defmodule Combo.VerifiedRoutesTest do
 
     test "routers implementing verified routes behavior warn as expected" do
       warnings =
-        ExUnit.CaptureIO.capture_io(:stderr, fn ->
+        capture_io(:stderr, fn ->
           defmodule VerifyForwardedRouter do
             use Combo.VerifiedRoutes,
               endpoint: unquote(@endpoint),

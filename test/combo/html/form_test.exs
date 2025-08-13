@@ -3,6 +3,7 @@ defmodule Combo.HTML.FormTest do
 
   import Combo.SafeHTML, only: [safe_to_string: 1]
   import Combo.HTML.Form
+  import ExUnit.CaptureIO
   doctest Combo.HTML.Form
 
   defp form(map \\ %{}, opts \\ []) do
@@ -10,7 +11,7 @@ defmodule Combo.HTML.FormTest do
   end
 
   test "warns on string keys" do
-    assert ExUnit.CaptureIO.capture_io(:stderr, fn -> form(%{foo: 123}) end) =~
+    assert capture_io(:stderr, fn -> form(%{foo: 123}) end) =~
              "a map with atom keys was given to a form. Maps are always considered parameters and " <>
                "therefore must have string keys, got: %{foo: 123}"
   end
