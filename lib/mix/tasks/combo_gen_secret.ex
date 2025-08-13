@@ -1,14 +1,14 @@
 defmodule Mix.Tasks.Combo.Gen.Secret do
+  @shortdoc "Generates a secret and prints it to the stdout"
+
   @moduledoc """
-  Generates a secret and prints it to the stdout.
+  #{@shortdoc}.
 
       $ mix combo.gen.secret [length]
 
   The default value for `length` is `64`.
   The minimum value for `length` is `32`.
   """
-
-  @shortdoc "Generates a secret"
 
   use Mix.Task
 

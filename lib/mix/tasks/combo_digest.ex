@@ -1,23 +1,21 @@
 defmodule Mix.Tasks.Combo.Digest do
-  use Mix.Task
-  @default_input_path "priv/static"
-
-  @shortdoc "Digests and compresses static files"
-  @recursive true
+  @shortdoc "Digests and compresses files"
 
   @moduledoc """
-  Digests and compresses static files.
+  #{@shortdoc}.
 
-      $ mix combo.digest
-      $ mix combo.digest priv/static -o /www/public
+  ```console
+  $ mix combo.digest
+  $ mix combo.digest priv/static -o /www/public
+  ```
 
   The first argument is the path where the static files are located. The
-  `-o` option indicates the path that will be used to save the digested and
+  `-o` option specifies the path that will be used to save the digested and
   compressed files.
 
   If no path is given, it will use `priv/static` as the input and output path.
 
-  The output folder will contain:
+  It will generate following files:
 
     * the original file
     * the file compressed with gzip
@@ -25,7 +23,7 @@ defmodule Mix.Tasks.Combo.Digest do
     * a compressed file containing the file name and its digest
     * a cache manifest file
 
-  Example of generated files:
+  An example of generated files:
 
     * app.js
     * app.js.gz
@@ -34,7 +32,11 @@ defmodule Mix.Tasks.Combo.Digest do
     * cache_manifest.json
 
   You can use `mix combo.digest.clean` to prune stale versions of the assets.
-  If you want to remove all produced files, run `mix combo.digest.clean --all`.
+  If you want to remove all generated files:
+
+  ```console
+  $ mix combo.digest.clean --all
+  ```
 
   ## vsn
 
@@ -43,19 +45,23 @@ defmodule Mix.Tasks.Combo.Digest do
 
   ## Options
 
-    * `-o, --output` - indicates the path to your compiled
-      assets directory. Defaults to `priv/static`
+    * `-o, --output` - specifies the path of output directory.
+      Defaults to `priv/static`.
 
-    * `--no-vsn` - do not add version query string to assets
+    * `--no-vsn` - do not add version query string to file references.
 
-    * `--no-compile` - do not run mix compile
+    * `--no-compile` - do not run mix compile.
 
   """
 
+  use Mix.Task
+
+  @default_input_path "priv/static"
   @default_opts [vsn: true]
+
   @switches [output: :string, vsn: :boolean]
 
-  @doc false
+  @impl Mix.Task
   def run(all_args) do
     # Ensure all compressors are compiled.
     if "--no-compile" not in all_args do
@@ -78,12 +84,12 @@ defmodule Mix.Tasks.Combo.Digest do
         # build_embedded set to true. In case it's not true,
         # build structure is mostly a no-op, so we are fine.
         Mix.Project.build_structure()
-        Mix.shell().info [:green, "Check your digested files at #{inspect output_path}"]
+        Mix.shell().info([:green, "Check your digested files at #{inspect(output_path)}"])
 
       {:error, :invalid_path} ->
         # Do not exit with status code on purpose because
         # in an umbrella not all apps are digestable.
-        Mix.shell().error "The input path #{inspect input_path} does not exist"
+        Mix.shell().error("The input path #{inspect(input_path)} does not exist")
     end
   end
 end

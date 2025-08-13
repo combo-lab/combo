@@ -1,37 +1,40 @@
 defmodule Mix.Tasks.Combo.Serve do
-  use Mix.Task
-
   @shortdoc "Serves all endpoints"
 
   @moduledoc """
-  Serve all endpoints.
+  #{@shortdoc}.
 
   Note: To start the endpoint without using this mix task, you must set
   `server: true` in your endpoint configuration.
 
-  ## Command line options
+  ## Options
 
-    * `--open` - open browser window for each started endpoint
+    * `--open` - open the base URL of each started endpoint in browser.
 
-  Furthermore, this task accepts the same command-line options as
-  `mix run`.
+  ## Additional options
+
+  Furthermore, this task accepts the same command-line options as `mix run`.
 
   For example, to run `combo.serve` without recompiling:
 
-      $ mix combo.serve --no-compile
+  ```console
+  $ mix combo.serve --no-compile
+  ```
 
-  The `--no-halt` flag is automatically added.
+  If the IEx is running, the `--no-halt` flag is automatically added.
 
-  Note that the `--no-deps-check` flag cannot be used this way,
-  because Mix needs to check dependencies to find `combo.serve`.
+  Note that the `--no-deps-check` flag cannot be used this way, because Mix
+  needs to check dependencies to find `combo.serve`. To run `combo.serve`
+  without checking dependencies, you can run:
 
-  To run `combo.serve` without checking dependencies, you can run:
-
-      $ mix do deps.loadpaths --no-deps-check, combo.serve
-
+  ```console
+  $ mix do deps.loadpaths --no-deps-check, combo.serve
+  ```
   """
 
-  @impl true
+  use Mix.Task
+
+  @impl Mix.Task
   def run(args) do
     Application.put_env(:combo, :serve_endpoints, true, persistent: true)
     Mix.Tasks.Run.run(run_args() ++ open_args(args))
