@@ -228,16 +228,16 @@ defmodule Combo.Router do
   @http_methods [:get, :post, :put, :patch, :delete, :options, :connect, :trace, :head]
 
   @doc false
-  defmacro __using__(opts) do
+  defmacro __using__(_) do
     quote do
-      unquote(prelude(opts))
+      unquote(prelude())
       unquote(defs())
       unquote(match_dispatch())
       unquote(verified_routes())
     end
   end
 
-  defp prelude(_opts) do
+  defp prelude do
     quote do
       Module.register_attribute(__MODULE__, :combo_routes, accumulate: true)
 
@@ -255,7 +255,7 @@ defmodule Combo.Router do
   # affects compilation. We work around it by defining
   # those functions only once and calling it over and
   # over again.
-  defp defs() do
+  defp defs do
     quote unquote: false do
       var!(add_resources, Combo.Router) = fn resource ->
         path = resource.path
@@ -375,7 +375,7 @@ defmodule Combo.Router do
     end
   end
 
-  defp match_dispatch() do
+  defp match_dispatch do
     quote location: :keep, generated: true do
       @behaviour Plug
 
@@ -407,7 +407,7 @@ defmodule Combo.Router do
     end
   end
 
-  defp verified_routes() do
+  defp verified_routes do
     quote location: :keep, generated: true do
       @behaviour Combo.VerifiedRoutes
 
