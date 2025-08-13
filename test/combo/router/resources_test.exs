@@ -3,7 +3,7 @@ defmodule Combo.Router.ResourcesTest do
   use RouterHelper
 
   defmodule UserController do
-    use Combo.Controller, formats: []
+    use Support.Controller
     def show(conn, _params), do: text(conn, "show users")
     def index(conn, _params), do: text(conn, "index users")
     def new(conn, _params), do: text(conn, "new users")
@@ -14,14 +14,14 @@ defmodule Combo.Router.ResourcesTest do
   end
 
   defmodule Api.FileController do
-    use Combo.Controller, formats: []
+    use Support.Controller
     def show(conn, _params), do: text(conn, "show files")
     def index(conn, _params), do: text(conn, "index files")
     def new(conn, _params), do: text(conn, "new files")
   end
 
   defmodule Api.CommentController do
-    use Combo.Controller, formats: []
+    use Support.Controller
     def show(conn, _params), do: text(conn, "show comments")
     def index(conn, _params), do: text(conn, "index comments")
     def new(conn, _params), do: text(conn, "new comments")
@@ -32,7 +32,7 @@ defmodule Combo.Router.ResourcesTest do
   end
 
   defmodule Router do
-    use Combo.Router
+    use Support.Router
 
     resources "/users", UserController, alias: Api do
       resources "/comments", CommentController do
@@ -269,7 +269,7 @@ defmodule Combo.Router.ResourcesTest do
                  ~r/supported singleton actions: \[:edit, :new, :show, :create, :update, :delete\]/,
                  fn ->
                    defmodule SingletonRouter.Router do
-                     use Combo.Router
+                     use Support.Router
                      resources "/", UserController, singleton: true, only: [:index]
                    end
                  end
@@ -280,7 +280,7 @@ defmodule Combo.Router.ResourcesTest do
                  ~r/supported actions: \[:index, :edit, :new, :show, :create, :update, :delete\]/,
                  fn ->
                    defmodule SingletonRouter.Router do
-                     use Combo.Router
+                     use Support.Router
                      resources "/", UserController, only: [:bad_index]
                    end
                  end
@@ -291,7 +291,7 @@ defmodule Combo.Router.ResourcesTest do
                  ~r/supported actions: \[:index, :edit, :new, :show, :create, :update, :delete\]/,
                  fn ->
                    defmodule SingletonRouter.Router do
-                     use Combo.Router
+                     use Support.Router
                      resources "/", UserController, except: [:bad_index]
                    end
                  end

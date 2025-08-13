@@ -20,13 +20,13 @@ end
 alias Phoenix.Test.ConnTest.CatchAll
 
 defmodule Phoenix.Test.ConnTest.RedirRouter do
-  use Combo.Router
+  use Support.Router
   get "/", CatchAll, :foo
   get "/posts/:id", CatchAll, :some_action
 end
 
 defmodule Phoenix.Test.ConnTest.Router do
-  use Combo.Router
+  use Support.Router
 
   pipeline :browser do
     plug :put_bypass, :browser

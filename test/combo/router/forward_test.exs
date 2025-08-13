@@ -1,5 +1,5 @@
 defmodule Combo.Router.HealthController do
-  use Combo.Controller, formats: []
+  use Support.Controller
   def health(conn, _params), do: text(conn, "health")
 end
 
@@ -8,7 +8,7 @@ defmodule Combo.Router.ForwardTest do
   use RouterHelper
 
   defmodule Controller do
-    use Combo.Controller, formats: []
+    use Support.Controller
     plug :assign_fwd_script
 
     def index(conn, _params), do: text(conn, "admin index")
@@ -19,7 +19,7 @@ defmodule Combo.Router.ForwardTest do
   end
 
   defmodule ApiRouter do
-    use Combo.Router
+    use Support.Router
 
     get "/", Controller, :api_root
     get "/users", Controller, :api_users
@@ -30,7 +30,7 @@ defmodule Combo.Router.ForwardTest do
   end
 
   defmodule AdminDashboard do
-    use Combo.Router
+    use Support.Router
 
     get "/", Controller, :index, as: :page
     get "/stats", Controller, :stats, as: :page
@@ -48,7 +48,7 @@ defmodule Combo.Router.ForwardTest do
   end
 
   defmodule Router do
-    use Combo.Router
+    use Support.Router
 
     scope "/" do
       get "/stats", Controller, :stats
@@ -83,7 +83,7 @@ defmodule Combo.Router.ForwardTest do
     router =
       quote do
         defmodule BadRouter do
-          use Combo.Router
+          use Support.Router
           forward "/api/:version", ApiRouter
         end
       end
@@ -118,7 +118,7 @@ defmodule Combo.Router.ForwardTest do
 
     assert_raise(ArgumentError, error_message, fn ->
       defmodule BrokenRouter do
-        use Combo.Router
+        use Support.Router
 
         scope "/" do
           forward "/health", to: HealthController

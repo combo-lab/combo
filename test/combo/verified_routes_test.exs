@@ -40,13 +40,13 @@ defmodule Combo.VerifiedRoutesTest do
   defstruct [:id, :slug]
 
   defmodule AdminRouter do
-    use Combo.Router
+    use Support.Router
 
     get "/dashboard", Combo.VerifiedRoutesTest.UserController, :index
   end
 
   defmodule Router do
-    use Combo.Router
+    use Support.Router
     alias Combo.VerifiedRoutesTest.{PostController, UserController}
 
     get "/posts/top", PostController, :top
@@ -77,7 +77,7 @@ defmodule Combo.VerifiedRoutesTest do
   end
 
   defmodule CatchAllWarningRouter do
-    use Combo.Router
+    use Support.Router
     alias Combo.VerifiedRoutesTest.PostController
 
     get "/", PostController, :root
@@ -85,7 +85,7 @@ defmodule Combo.VerifiedRoutesTest do
   end
 
   defmodule ForwardedRouter do
-    use Combo.Router
+    use Support.Router
 
     forward "/", PlugRouterWithVerifiedRoutes
   end

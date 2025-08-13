@@ -3,7 +3,7 @@ defmodule Combo.Router.ResourceTest do
   use RouterHelper
 
   defmodule Api.GenericController do
-    use Combo.Controller, formats: []
+    use Support.Controller
     def show(conn, _params), do: text(conn, "show")
     def new(conn, _params), do: text(conn, "new")
     def edit(conn, _params), do: text(conn, "edit")
@@ -13,7 +13,7 @@ defmodule Combo.Router.ResourceTest do
   end
 
   defmodule Router do
-    use Combo.Router
+    use Support.Router
 
     resources "/account", Api.GenericController, alias: Api, singleton: true do
       resources "/comments", GenericController

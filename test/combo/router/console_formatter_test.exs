@@ -10,7 +10,7 @@ defmodule Combo.Router.ConsoleFormatterTest do
   alias Combo.Router.ConsoleFormatter
 
   defmodule RouterTestSingleRoutes do
-    use Combo.Router
+    use Support.Router
 
     get "/", RouteFormatter.PageController, :index, as: :page
     post "/images", RouteFormatter.ImageController, :upload, as: :upload_image
@@ -34,7 +34,7 @@ defmodule Combo.Router.ConsoleFormatterTest do
   end
 
   defmodule RouterTestResources do
-    use Combo.Router
+    use Support.Router
     resources "/images", RouteFormatter.ImageController
   end
 
@@ -52,7 +52,7 @@ defmodule Combo.Router.ConsoleFormatterTest do
   end
 
   defmodule RouterTestResource do
-    use Combo.Router
+    use Support.Router
     resources "/image", RouteFormatter.ImageController, singleton: true
     forward "/admin", RouteFormatter.PageController, [], as: :admin
     forward "/f1", RouteFormatter.ImageController

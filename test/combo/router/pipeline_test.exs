@@ -1,5 +1,5 @@
 defmodule Combo.Router.PipelineTest.SampleController do
-  use Combo.Controller, formats: []
+  use Support.Controller
   def index(conn, _params), do: text(conn, "index")
   def crash(_conn, _params), do: raise("crash!")
   def noop_plug(conn, _opts), do: conn
@@ -8,7 +8,7 @@ end
 alias Combo.Router.PipelineTest.SampleController
 
 defmodule Combo.Router.PipelineTest.Router do
-  use Combo.Router
+  use Support.Router
 
   # This should work even if the import comes
   # after the Combo.Router definition
@@ -128,7 +128,7 @@ defmodule Combo.Router.PipelineTest do
   test "duplicate pipe_through's raises" do
     assert_raise ArgumentError, ~r{duplicate pipe_through for :browser}, fn ->
       defmodule DupPipeThroughRouter do
-        use Combo.Router, otp_app: :combo
+        use Support.Router, otp_app: :combo
 
         pipeline :browser do
         end
@@ -142,7 +142,7 @@ defmodule Combo.Router.PipelineTest do
 
     assert_raise ArgumentError, ~r{duplicate pipe_through for :browser}, fn ->
       defmodule DupScopedPipeThroughRouter do
-        use Combo.Router, otp_app: :combo
+        use Support.Router, otp_app: :combo
 
         pipeline :browser do
         end
@@ -161,7 +161,7 @@ defmodule Combo.Router.PipelineTest do
   test "pipeline raises on conflict" do
     assert_raise ArgumentError, ~r{there is an import from Kernel with the same name}, fn ->
       defmodule ConflictingPipeline do
-        use Combo.Router, otp_app: :combo
+        use Support.Router, otp_app: :combo
 
         pipeline :raise do
           plug Plug.Head

@@ -10,17 +10,17 @@ defmodule PageController do
 end
 
 defmodule ComboTestWeb.Router do
-  use Combo.Router
+  use Support.Router
   get "/", PageController, :index, as: :page
 end
 
 defmodule ComboTestLiveWeb.Router do
-  use Combo.Router
+  use Support.Router
   get "/", PageController, :index, metadata: %{mfa: {PageController.Live, :init, 1}}
 end
 
 defmodule ComboTestWeb.ForwardedRouter do
-  use Combo.Router
+  use Support.Router
   forward "/", ComboTestWeb.PlugRouterWithVerifiedRoutes
 end
 

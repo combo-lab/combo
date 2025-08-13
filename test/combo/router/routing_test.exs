@@ -10,7 +10,7 @@ defmodule Combo.Router.RoutingTest do
   end
 
   defmodule UserController do
-    use Combo.Controller, formats: []
+    use Support.Controller
     def index(conn, _params), do: text(conn, "users index")
     def show(conn, _params), do: text(conn, "users show")
     def top(conn, _params), do: text(conn, "users top")
@@ -38,7 +38,7 @@ defmodule Combo.Router.RoutingTest do
   end
 
   defmodule Router do
-    use Combo.Router
+    use Support.Router
 
     get "/", UserController, :index, as: :users
     get "/users/top", UserController, :top, as: :top

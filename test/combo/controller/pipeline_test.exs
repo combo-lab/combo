@@ -6,7 +6,7 @@ defmodule Combo.Controller.PipelineTest do
   import Combo.Conn
 
   defmodule MyController do
-    use Combo.Controller, formats: []
+    use Support.Controller
 
     @secret_actions [:secret]
 
@@ -51,13 +51,13 @@ defmodule Combo.Controller.PipelineTest do
   end
 
   defmodule NoViewsController do
-    use Combo.Controller, formats: []
+    use Support.Controller
 
     def show(conn, _), do: conn
   end
 
   defmodule FallbackFunctionController do
-    use Combo.Controller, formats: []
+    use Support.Controller
 
     action_fallback :function_plug
 
@@ -77,7 +77,7 @@ defmodule Combo.Controller.PipelineTest do
   end
 
   defmodule ActionController do
-    use Combo.Controller, formats: []
+    use Support.Controller
 
     action_fallback Combo.Controller.PipelineTest
 
@@ -227,7 +227,7 @@ defmodule Combo.Controller.PipelineTest do
     test "raises when calling more than once", config do
       assert_raise RuntimeError, ~r/can only be called a single time/, fn ->
         defmodule config.test do
-          use Combo.Controller, formats: []
+          use Support.Controller
           action_fallback Ok
           action_fallback Boom
         end

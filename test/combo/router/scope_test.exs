@@ -5,7 +5,7 @@ defmodule Combo.Router.ScopedRoutingTest do
   # Path scoping
 
   defmodule Api.V1.UserController do
-    use Combo.Controller, formats: []
+    use Support.Controller
     def show(conn, _params), do: text(conn, "api v1 users show")
     def delete(conn, _params), do: text(conn, "api v1 users delete")
     def edit(conn, _params), do: text(conn, "api v1 users edit")
@@ -33,7 +33,7 @@ defmodule Combo.Router.ScopedRoutingTest do
   end
 
   defmodule Router do
-    use Combo.Router
+    use Support.Router
 
     scope "/admin", host: "baz." do
       get "/users/:id", Api.V1.UserController, :baz_host
@@ -213,7 +213,7 @@ defmodule Combo.Router.ScopedRoutingTest do
                  "expected router scope :host to be compile-time string or list of strings, got: nil",
                  fn ->
                    defmodule BadRouter do
-                     use Combo.Router
+                     use Support.Router
 
                      scope "/admin", host: ["foo.", nil] do
                        get "/users/:id", Api.V1.UserController, :baz_host
@@ -253,14 +253,14 @@ defmodule Combo.Router.ScopedRoutingTest do
   test "string paths are enforced" do
     assert_raise ArgumentError, ~r{router paths must be strings, got: :bar}, fn ->
       defmodule SomeRouter do
-        use Combo.Router, otp_app: :combo
+        use Support.Router, otp_app: :combo
         get :bar, Router, []
       end
     end
 
     assert_raise ArgumentError, ~r{router paths must be strings, got: :bar}, fn ->
       defmodule SomeRouter do
-        use Combo.Router, otp_app: :combo
+        use Support.Router, otp_app: :combo
         get "/foo", Router, []
 
         scope "/another" do
@@ -285,7 +285,7 @@ defmodule Combo.Router.ScopedRoutingTest do
   test "raises for reserved prefixes" do
     assert_raise ArgumentError, ~r/`static` is a reserved route prefix/, fn ->
       defmodule ErrorRouter do
-        use Combo.Router
+        use Support.Router
 
         scope "/" do
           get "/", StaticController, :index
@@ -295,7 +295,7 @@ defmodule Combo.Router.ScopedRoutingTest do
 
     assert_raise ArgumentError, ~r/`static` is a reserved route prefix/, fn ->
       defmodule ErrorRouter do
-        use Combo.Router
+        use Support.Router
 
         scope "/" do
           get "/", Api.V1.UserController, :show, as: :static
