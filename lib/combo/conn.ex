@@ -463,10 +463,10 @@ defmodule Combo.Conn do
     formats =
       Map.new(formats, fn
         {format, false} ->
-          {Atom.to_string(format), false}
+          {to_string(format), false}
 
         {format, {mod, layout}} when is_atom(mod) and is_atom(layout) ->
-          {Atom.to_string(format), {mod, layout}}
+          {to_string(format), {mod, layout}}
 
         _ ->
           raise_layout_bad_formats(formats)
@@ -603,10 +603,10 @@ defmodule Combo.Conn do
     formats =
       Map.new(formats, fn
         {format, false} ->
-          {Atom.to_string(format), false}
+          {to_string(format), false}
 
         {format, mod} when is_atom(mod) ->
-          {Atom.to_string(format), mod}
+          {to_string(format), mod}
 
         _ ->
           raise_view_bad_formats(formats)
