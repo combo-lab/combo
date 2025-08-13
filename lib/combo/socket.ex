@@ -7,7 +7,7 @@ defmodule Combo.Socket do
   the initial state is stored in the `Combo.Socket` struct.
 
   The same socket can be used to receive events from different transports.
-  Phoenix supports `websocket` and `longpoll` options when invoking
+  Combo supports `websocket` and `longpoll` options when invoking
   `Combo.Endpoint.socket/3` in your endpoint. `websocket` is set by default
   and `longpoll` can also be configured explicitly.
 
@@ -119,9 +119,9 @@ defmodule Combo.Socket do
 
     * `"phx_close"` - the channel was gracefully closed
 
-  Phoenix ships with a JavaScript implementation of both websocket
-  and long polling that interacts with Combo.Socket and can be
-  used as reference for those interested in implementing custom clients.
+  Combo ships with a JavaScript implementation of both websocket and long
+  polling that interacts with `Combo.Socket` and can be used as reference
+  for those interested in implementing custom clients.
 
   ## Custom sockets and transports
 

@@ -33,15 +33,15 @@ defmodule Combo.Token do
   The first argument to `sign/4`, `verify/4`, `encrypt/4`, and
   `decrypt/4` can be one of:
 
-    * the module name of a Phoenix endpoint (shown above) - where
-      the secret key base is extracted from the endpoint
-    * `Plug.Conn` - where the secret key base is extracted from the
-      endpoint stored in the connection
-    * `Combo.Socket` or `Phoenix.LiveView.Socket` - where the secret
-      key base is extracted from the endpoint stored in the socket
-    * a string, representing the secret key base itself. A key base
-      with at least 20 randomly generated characters should be used
-      to provide adequate entropy
+    * the module name of an endpoint - the secret key base is extracted from
+      the endpoint.
+    * `Plug.Conn` - the secret key base is extracted from the endpoint stored
+      in the connection.
+    * `Combo.Socket` - the secret key base is extracted from the endpoint
+      stored in the socket.
+    * a string - representing the secret key base itself. A key base with at
+      least 20 randomly generated characters should be used to provide adequate
+      entropy.
 
   The second argument is a [cryptographic salt](https://en.wikipedia.org/wiki/Salt_(cryptography))
   which must be the same in both calls to `sign/4` and `verify/4`, or
@@ -73,7 +73,7 @@ defmodule Combo.Token do
 
   Once the token is sent, the client may now send it back to the server
   as an authentication mechanism. For example, we can use it to authenticate
-  a user on a Phoenix channel:
+  a user on a channel:
 
       defmodule MyApp.UserSocket do
         use Combo.Socket

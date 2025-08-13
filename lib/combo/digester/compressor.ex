@@ -5,15 +5,14 @@ defmodule Combo.Digester.Compressor do
 
   A custom compressor expects 2 functions to be implemented.
 
-  By default, Phoenix uses only `Combo.Digester.Gzip` to compress
-  static files, but additional compressors can be defined and added
-  to the digest process.
+  By default, Combo uses only `Combo.Digester.Gzip` to compress static files,
+  but additional compressors can be defined and added to the digest process.
 
   ## Example
 
-  If you wanted to compress files using an external brotli compression
-  library, you could define a new module implementing the behaviour and add the
-  module to the list of configured Phoenix static compressors.
+  If you wanted to compress files using an external brotli compression library
+  , you could define a new module implementing the behaviour and add the module
+  to the list of configured static compressors.
 
       defmodule MyApp.BrotliCompressor do
         @behaviour Combo.Digester.Compressor

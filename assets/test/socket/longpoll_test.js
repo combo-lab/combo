@@ -92,7 +92,7 @@ describe('LongPoll', () => {
       expect(Ajax.request).toHaveBeenCalledWith(
         'GET',
         expect.any(String),
-        { 'Accept': 'application/json', 'X-Phoenix-AuthToken': authToken },
+        { 'Accept': 'application/json', 'X-Combo-AuthToken': authToken },
         null,
         expect.any(Number),
         expect.any(Function),

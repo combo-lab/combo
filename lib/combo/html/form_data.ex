@@ -4,9 +4,9 @@ defprotocol Combo.HTML.FormData do
 
   ## Ecto integration
 
-  Phoenix provides integration of forms with Ecto changesets and data
-  structures via the [combo_ecto](https://hex.pm/packages/combo_ecto) package.
-  If a project was generated without Ecto support that dependency will need to be
+  Combo provides integration of forms with Ecto changesets and data structures
+  via the [combo_ecto](https://hex.pm/packages/combo_ecto) package. If a
+  project was generated without Ecto support that dependency will need to be
   manually added.
   """
 

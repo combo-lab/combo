@@ -79,24 +79,6 @@ defmodule Combo.Controller do
 
       plug :put_layout, html: {Demo.Web.Layouts, :root}
 
-  ## Connection
-
-  A controller by default provides many convenience functions for
-  manipulating the connection, rendering templates, and more.
-
-  Those functions are imported from two modules:
-
-    * `Plug.Conn` - a collection of low-level functions to work with
-      the connection
-
-    * `Combo.Controller` - functions provided by Phoenix
-      to support rendering, and other Phoenix specific behaviour
-
-  If you want to have functions that manipulate the connection
-  without fully implementing the controller, you can import both
-  modules directly instead of `use Combo.Controller`.
-
-
   ## Plug pipeline
 
   As with routers, controllers also have their own plug pipeline.
@@ -168,26 +150,24 @@ defmodule Combo.Controller do
 
   ### Overriding `action/2` for custom arguments
 
-  Phoenix injects an `action/2` plug in your controller which calls the
-  function matched from the router. By default, it passes the conn and params.
-  In some cases, overriding the `action/2` plug in your controller is a
-  useful way to inject arguments into your actions that you would otherwise
-  need to repeatedly fetch off the connection. For example, imagine if you
-  stored a `conn.assigns.current_user` in the connection and wanted quick
-  access to the user for every action in your controller:
+  Combo injects an `action/2` plug in your controller which calls the function
+  matched from the router. By default, it passes the conn and params. In some
+  cases, overriding the `action/2` plug in your controller is a useful way to
+  inject arguments into your actions that you would otherwise need to
+  repeatedly fetch off the connection. For example, imagine if you stored a
+  `conn.assigns.current_user` in the connection and wanted quick access to the
+  user for every action in your controller:
 
       def action(conn, _) do
         args = [conn, conn.params, conn.assigns.current_user]
         apply(__MODULE__, controller_action_name!(conn), args)
       end
 
-      def index(conn, _params, user) do
-        videos = Repo.all(user_videos(user))
+      def index(conn, params, user) do
         # ...
       end
 
-      def delete(conn, %{"id" => id}, user) do
-        video = Repo.get!(user_videos(user), id)
+      def delete(conn, params, user) do
         # ...
       end
 

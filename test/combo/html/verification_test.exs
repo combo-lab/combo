@@ -372,16 +372,16 @@ defmodule Combo.HTML.VerificationTest do
             <%!-- those are not arity 1 functions --%>
             <.func arity_1={fn _, _ -> nil end} />
             <.func arity_1={&String.split/2} />
-            <.func arity_1={&Phoenix.LiveView.send_update(@myself, completed: &1, nice: &2)} />
+            <.func arity_1={&Fake.send_update(@myself, completed: &1, nice: &2)} />
             <.func arity_1={1.23} />
             <%!-- those are valid arity 2 functions --%>
             <.func arity_2={fn _, _ -> nil end} />
             <.func arity_2={&String.split/2} />
-            <.func arity_2={&Phoenix.LiveView.send_update(@myself, completed: &1, nice: &2)} />
+            <.func arity_2={&Fake.send_update(@myself, completed: &1, nice: &2)} />
             <%!-- those are not arity 2 functions --%>
             <.func arity_2={fn _ -> nil end} />
             <.func arity_2={&Function.identity/1} />
-            <.func arity_2={&Phoenix.LiveView.send_update(@myself, completed: &1)} />
+            <.func arity_2={&Fake.send_update(@myself, completed: &1)} />
             <.func arity_2="foo" />
             <%!-- also works for slots --%>
             <.func>
@@ -1284,13 +1284,13 @@ defmodule Combo.HTML.VerificationTest do
 
           def render(assigns) do
             ~CE"""
-            <Phoenix.LiveViewTest.Support.FunctionComponentWithAttrs.fun_attr_any unknown="foo" />
+            <Combo.Test.Support.FunctionComponentWithAttrs.fun_attr_any unknown="foo" />
             """
           end
         end
       end)
 
     assert warnings =~
-             "undefined attribute \"unknown\" for component Phoenix.LiveViewTest.Support.FunctionComponentWithAttrs"
+             "undefined attribute \"unknown\" for component Combo.Test.Support.FunctionComponentWithAttrs"
   end
 end

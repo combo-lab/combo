@@ -32,8 +32,7 @@ defmodule Combo.Router.ConsoleFormatter do
     end
   end
 
-  # TODO: change it to Combo.LiveReloader.Socket
-  defp format_websocket({_path, Phoenix.LiveReloader.Socket, _opts}, _), do: ""
+  defp format_websocket({_path, Combo.LiveReloader.Socket, _opts}, _), do: ""
 
   defp format_websocket({path, module, opts}, widths) do
     if opts[:websocket] != false do
@@ -50,8 +49,7 @@ defmodule Combo.Router.ConsoleFormatter do
     end
   end
 
-  # TODO: change it to Combo.LiveReloader.Socket
-  defp format_longpoll({_path, Phoenix.LiveReloader.Socket, _opts}, _), do: ""
+  defp format_longpoll({_path, Combo.LiveReloader.Socket, _opts}, _), do: ""
 
   defp format_longpoll({path, module, opts}, widths) do
     if opts[:longpoll] != false do

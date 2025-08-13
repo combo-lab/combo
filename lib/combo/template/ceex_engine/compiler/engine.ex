@@ -1256,8 +1256,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
   under.
 
   If you're using CEEx templates, you should use its higher
-  level `<:slot>` notation instead. See `Phoenix.Component`
-  for more information.
+  level `<:slot>` notation instead.
   """
   defmacro build_inner_block(_name, do: do_block) do
     case do_block do
@@ -1284,9 +1283,8 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
   @doc """
   Renders a component defined by the given function.
 
-  This function is rarely invoked directly by users. Instead, it is used by `~CE`
-  and other engine implementations to render `Phoenix.Component`s. For example,
-  the following:
+  This function is rarely invoked directly by users. Instead, it is used by
+  this engine when rendering components. For example:
 
   ```ceex
   <MyApp.Weather.city name="Kraków" />

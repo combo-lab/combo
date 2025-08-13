@@ -1,4 +1,4 @@
-defmodule Phoenix.Test.ConnTest.CatchAll do
+defmodule Combo.Test.ConnTest.CatchAll do
   defmodule ConnError do
     defexception [message: "hello", plug_status: 500]
   end
@@ -17,15 +17,15 @@ defmodule Phoenix.Test.ConnTest.CatchAll do
   def call(conn, _opts), do: Plug.Conn.assign(conn, :catch_all, true)
 end
 
-alias Phoenix.Test.ConnTest.CatchAll
+alias Combo.Test.ConnTest.CatchAll
 
-defmodule Phoenix.Test.ConnTest.RedirRouter do
+defmodule Combo.Test.ConnTest.RedirRouter do
   use Support.Router
   get "/", CatchAll, :foo
   get "/posts/:id", CatchAll, :some_action
 end
 
-defmodule Phoenix.Test.ConnTest.Router do
+defmodule Combo.Test.ConnTest.Router do
   use Support.Router
 
   pipeline :browser do
@@ -39,7 +39,7 @@ defmodule Phoenix.Test.ConnTest.Router do
   scope "/" do
     pipe_through :browser
     get "/stat", CatchAll, :stat, private: %{route: :stat}
-    forward "/redir", Phoenix.Test.ConnTest.RedirRouter
+    forward "/redir", Combo.Test.ConnTest.RedirRouter
     forward "/", CatchAll
   end
 
@@ -49,15 +49,15 @@ defmodule Phoenix.Test.ConnTest.Router do
   end
 end
 
-defmodule Phoenix.Test.ConnTest do
+defmodule Combo.Test.ConnTest do
   use ExUnit.Case, async: true
   import Plug.Conn
   import Combo.ConnTest
-  alias Phoenix.Test.ConnTest.{Router, RedirRouter}
+  alias Combo.Test.ConnTest.{Router, RedirRouter}
 
   @moduletag :capture_log
 
-  Application.put_env(:combo, Phoenix.Test.ConnTest.Endpoint, [
+  Application.put_env(:combo, Combo.Test.ConnTest.Endpoint, [
     render_errors: [formats: [html: __MODULE__.ErrorView]]
   ])
 

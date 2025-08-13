@@ -1,12 +1,12 @@
 Code.require_file("../../support/websocket_client.exs", __DIR__)
 
-defmodule Phoenix.Integration.WebSocketChannelsTest do
+defmodule Combo.Integration.WebSocketChannelsTest do
   # TODO: use parameterized tests once we require Elixir 1.18
   use ExUnit.Case
 
   import ExUnit.CaptureLog
 
-  alias Phoenix.Integration.WebsocketClient
+  alias Combo.Integration.WebsocketClient
   alias Combo.Socket.{V1, V2, Message}
   alias __MODULE__.Endpoint
 
@@ -221,7 +221,7 @@ defmodule Phoenix.Integration.WebSocketChannelsTest do
   @endpoint Endpoint
 
   for %{adapter: adapter} <- [
-        %{adapter: Bandit.PhoenixAdapter},
+        %{adapter: Combo.Endpoint.BanditAdapter},
         %{adapter: Combo.Endpoint.Cowboy2Adapter}
       ] do
     for {serializer, vsn, join_ref} <- [
@@ -312,7 +312,7 @@ defmodule Phoenix.Integration.WebSocketChannelsTest do
         end
 
         test "transport x_headers are extracted to the socket connect_info" do
-          extra_headers = [{"x-application", "Phoenix"}]
+          extra_headers = [{"x-application", "Demo"}]
 
           {:ok, sock} =
             WebsocketClient.connect(
@@ -326,7 +326,7 @@ defmodule Phoenix.Integration.WebSocketChannelsTest do
 
           assert_receive %Message{
             event: "joined",
-            payload: %{"connect_info" => %{"x_headers" => %{"x-application" => "Phoenix"}}}
+            payload: %{"connect_info" => %{"x_headers" => %{"x-application" => "Demo"}}}
           }
         end
 
@@ -528,7 +528,7 @@ defmodule Phoenix.Integration.WebSocketChannelsTest do
                 WebsocketClient.connect(self(), "#{@vsn_path}&logging=enabled", @serializer)
             end)
 
-          assert log =~ "CONNECTED TO Phoenix.Integration.WebSocketChannelsTest.UserSocket in "
+          assert log =~ "CONNECTED TO Combo.Integration.WebSocketChannelsTest.UserSocket in "
           assert log =~ "  Transport: :websocket"
           assert log =~ "  Serializer: #{inspect(@serializer)}"
           assert log =~ "  Parameters: %{\"logging\" => \"enabled\", \"vsn\" => #{inspect(@vsn)}}"
@@ -576,7 +576,7 @@ defmodule Phoenix.Integration.WebSocketChannelsTest do
             end)
 
           assert log =~
-                   "HANDLED new_msg INCOMING ON room:admin-lobby2 (Phoenix.Integration.WebSocketChannelsTest.RoomChannel)"
+                   "HANDLED new_msg INCOMING ON room:admin-lobby2 (Combo.Integration.WebSocketChannelsTest.RoomChannel)"
 
           assert log =~ "Parameters: %{\"in\" => \"yes\", \"password\" => \"[FILTERED]\"}"
         end
@@ -775,7 +775,7 @@ defmodule Phoenix.Integration.WebSocketChannelsTest do
             end)
 
           assert log =~
-                   "Ignoring unmatched topic \"unmatched-topic\" in Phoenix.Integration.WebSocketChannelsTest.UserSocket"
+                   "Ignoring unmatched topic \"unmatched-topic\" in Combo.Integration.WebSocketChannelsTest.UserSocket"
         end
       end
     end

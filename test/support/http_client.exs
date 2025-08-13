@@ -1,4 +1,4 @@
-defmodule Phoenix.Integration.HTTPClient do
+defmodule Combo.Integration.HTTPClient do
   @doc """
   Performs HTTP Request and returns Response
 

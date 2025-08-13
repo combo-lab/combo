@@ -1,4 +1,4 @@
-defmodule Phoenix.Integration.EndpointHelper do
+defmodule Combo.Integration.EndpointHelper do
   @moduledoc """
   Utility functions for integration testing endpoints.
   """

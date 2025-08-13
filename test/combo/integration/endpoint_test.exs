@@ -1,15 +1,15 @@
 Code.require_file("../../support/http_client.exs", __DIR__)
 Code.require_file("../../support/endpoint_helper.exs", __DIR__)
 
-defmodule Phoenix.Integration.EndpointTest do
+defmodule Combo.Integration.EndpointTest do
   use ExUnit.Case, async: false
   import ExUnit.CaptureLog
 
-  import Phoenix.Integration.EndpointHelper
+  import Combo.Integration.EndpointHelper
 
-  alias Phoenix.Integration.AdapterTest.ProdEndpoint
-  alias Phoenix.Integration.AdapterTest.DevEndpoint
-  alias Phoenix.Integration.AdapterTest.ProdInet6Endpoint
+  alias Combo.Integration.AdapterTest.ProdEndpoint
+  alias Combo.Integration.AdapterTest.DevEndpoint
+  alias Combo.Integration.AdapterTest.ProdInet6Endpoint
 
   # Find available ports to use for this test
   [dev, prod, prod_inet6] = get_unused_port_numbers(3)
@@ -86,10 +86,10 @@ defmodule Phoenix.Integration.EndpointTest do
     A wrapper around the endpoint call to extract information.
 
     This exists so we can verify that the exception handling
-    in the Phoenix endpoint is working as expected. In order
-    to do that, we need to wrap the endpoint.call/2 in a
-    before compile callback so it wraps the whole stack,
-    including render errors and debug errors functionality.
+    in the endpoint is working as expected. In order to do that,
+    we need to wrap the endpoint.call/2 in a before compile
+    callback so it wraps the whole stack, including render errors
+    and debug errors functionality.
     """
 
     defmacro __before_compile__(_) do
@@ -135,7 +135,7 @@ defmodule Phoenix.Integration.EndpointTest do
     end
   end
 
-  alias Phoenix.Integration.HTTPClient
+  alias Combo.Integration.HTTPClient
 
   test "starts drainer in supervision tree if configured" do
     capture_log(fn ->

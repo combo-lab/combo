@@ -1,12 +1,12 @@
 Code.require_file("../../support/http_client.exs", __DIR__)
 
-defmodule Phoenix.Integration.LongPollChannelsTest do
+defmodule Combo.Integration.LongPollChannelsTest do
   # TODO: use parameterized tests once we require Elixir 1.18
   use ExUnit.Case
 
   import ExUnit.CaptureLog
 
-  alias Phoenix.Integration.HTTPClient
+  alias Combo.Integration.HTTPClient
   alias Combo.Socket.{Broadcast, Message, V1, V2}
   alias __MODULE__.Endpoint
 
@@ -311,7 +311,7 @@ defmodule Phoenix.Integration.LongPollChannelsTest do
   end
 
   for %{adapter: adapter} <- [
-        %{adapter: Bandit.PhoenixAdapter},
+        %{adapter: Combo.Endpoint.BanditAdapter},
         %{adapter: Combo.Endpoint.Cowboy2Adapter}
       ] do
     describe "adapter: #{inspect(adapter)}" do
@@ -361,7 +361,7 @@ defmodule Phoenix.Integration.LongPollChannelsTest do
         test "#{@mode}: transport x_headers are extracted to the socket connect_info" do
           session =
             join("/ws/connect_info", "room:lobby", @vsn, "1", @mode, %{}, %{}, %{
-              "x-application" => "Phoenix"
+              "x-application" => "Demo"
             })
 
           # pull messages
@@ -370,7 +370,7 @@ defmodule Phoenix.Integration.LongPollChannelsTest do
 
           [_phx_reply, _user_entered, status_msg] = resp.body["messages"]
 
-          assert %{"connect_info" => %{"x_headers" => %{"x-application" => "Phoenix"}}} =
+          assert %{"connect_info" => %{"x_headers" => %{"x-application" => "Demo"}}} =
                    status_msg.payload
         end
 
@@ -396,7 +396,7 @@ defmodule Phoenix.Integration.LongPollChannelsTest do
         test "#{@mode}: transport peer_data is extracted to the socket connect_info" do
           session =
             join("/ws/connect_info", "room:lobby", @vsn, "1", @mode, %{}, %{}, %{
-              "x-application" => "Phoenix"
+              "x-application" => "Demo"
             })
 
           # pull messages
@@ -412,7 +412,7 @@ defmodule Phoenix.Integration.LongPollChannelsTest do
         test "#{@mode}: transport uri is extracted to the socket connect_info" do
           session =
             join("/ws/connect_info", "room:lobby", @vsn, "1", @mode, %{}, %{}, %{
-              "x-application" => "Phoenix"
+              "x-application" => "Demo"
             })
 
           # pull messages

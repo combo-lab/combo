@@ -1,6 +1,6 @@
 defmodule Combo.ChannelTest do
   @moduledoc """
-  Conveniences for testing Phoenix channels.
+  Conveniences for testing channels.
 
   In channel tests, we interact with channels via process
   communication, sending and receiving messages. It is also

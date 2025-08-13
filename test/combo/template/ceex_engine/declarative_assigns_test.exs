@@ -921,7 +921,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
 
   test "inserts attr & slot docs into function component @doc string" do
     {_, _, :elixir, "text/markdown", _, _, docs} =
-      Code.fetch_docs(Phoenix.LiveViewTest.Support.FunctionComponentWithAttrs)
+      Code.fetch_docs(Combo.Test.Support.FunctionComponentWithAttrs)
 
     components = %{
       fun_attr_any: """
@@ -993,7 +993,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
       fun_attr_struct: """
       ## Attributes
 
-      * `attr` (`Phoenix.LiveViewTest.Support.FunctionComponentWithAttrs.Struct`)
+      * `attr` (`Combo.Test.Support.FunctionComponentWithAttrs.Struct`)
       """,
       fun_attr_required: """
       ## Attributes
@@ -1131,7 +1131,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
   end
 
   test "stores correct line number on AST" do
-    module = Phoenix.LiveViewTest.Support.FunctionComponentWithAttrs
+    module = Combo.Test.Support.FunctionComponentWithAttrs
 
     {^module, binary, _file} = :code.get_object_code(module)
 
@@ -1151,7 +1151,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
 
   test "does not override signature of Elixir functions" do
     {:docs_v1, _, :elixir, "text/markdown", _, _, docs} =
-      Code.fetch_docs(Phoenix.LiveViewTest.Support.FunctionComponentWithAttrs)
+      Code.fetch_docs(Combo.Test.Support.FunctionComponentWithAttrs)
 
     assert {{:function, :identity, 1}, _, ["identity(var)"], _, %{}} =
              List.keyfind(docs, {:function, :identity, 1}, 0)
@@ -1159,17 +1159,17 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     assert {{:function, :map_identity, 1}, _, ["map_identity(map)"], _, %{}} =
              List.keyfind(docs, {:function, :map_identity, 1}, 0)
 
-    assert Phoenix.LiveViewTest.Support.FunctionComponentWithAttrs.identity(:not_a_map) ==
+    assert Combo.Test.Support.FunctionComponentWithAttrs.identity(:not_a_map) ==
              :not_a_map
 
-    assert Phoenix.LiveViewTest.Support.FunctionComponentWithAttrs.identity(%{}) == %{}
+    assert Combo.Test.Support.FunctionComponentWithAttrs.identity(%{}) == %{}
   end
 
   test "raise if attr :doc is not a string" do
     msg = ~r"doc must be a string or false, got: :foo"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.AttrDocsInvalidType do
+      defmodule Combo.ComponentTest.AttrDocsInvalidType do
         use Elixir.Combo.HTML
 
         attr :invalid, :any, doc: :foo
@@ -1182,7 +1182,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"doc must be a string or false, got: :foo"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.SlotDocsInvalidType do
+      defmodule Combo.ComponentTest.SlotDocsInvalidType do
         use Elixir.Combo.HTML
 
         slot :invalid, doc: :foo
@@ -1193,7 +1193,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
 
   test "raise on invalid attr/2 args" do
     assert_raise FunctionClauseError, fn ->
-      defmodule Phoenix.ComponentTest.AttrMacroInvalidName do
+      defmodule Combo.ComponentTest.AttrMacroInvalidName do
         use Elixir.Combo.HTML
 
         attr "not an atom", :any
@@ -1202,7 +1202,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     end
 
     assert_raise FunctionClauseError, fn ->
-      defmodule Phoenix.ComponentTest.AttrMacroInvalidOpts do
+      defmodule Combo.ComponentTest.AttrMacroInvalidOpts do
         use Elixir.Combo.HTML
 
         attr :attr, :any, "not a list"
@@ -1213,7 +1213,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
 
   test "raise on invalid slot/3 args" do
     assert_raise FunctionClauseError, fn ->
-      defmodule Phoenix.ComponentTest.SlotMacroInvalidName do
+      defmodule Combo.ComponentTest.SlotMacroInvalidName do
         use Elixir.Combo.HTML
 
         slot("not an atom")
@@ -1222,7 +1222,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     end
 
     assert_raise FunctionClauseError, fn ->
-      defmodule Phoenix.ComponentTest.SlotMacroInvalidOpts do
+      defmodule Combo.ComponentTest.SlotMacroInvalidOpts do
         use Elixir.Combo.HTML
 
         slot :slot, "not a list"
@@ -1235,7 +1235,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"attributes must be defined before the first function clause at line \d+"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.MultiClauseWrong do
+      defmodule Combo.ComponentTest.MultiClauseWrong do
         use Elixir.Combo.HTML
 
         attr :foo, :any
@@ -1252,7 +1252,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"slots must be defined before the first function clause at line \d+"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.MultiClauseWrong do
+      defmodule Combo.ComponentTest.MultiClauseWrong do
         use Elixir.Combo.HTML
 
         slot :inner_block
@@ -1270,7 +1270,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
       ~r"cannot declare attributes for function func\/2\. Components must be functions with arity 1"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.AttrOnInvalidFunction do
+      defmodule Combo.ComponentTest.AttrOnInvalidFunction do
         use Elixir.Combo.HTML
 
         attr :foo, :any
@@ -1284,7 +1284,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
       ~r"cannot declare slots for function func\/2\. Components must be functions with arity 1"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.SlotOnInvalidFunction do
+      defmodule Combo.ComponentTest.SlotOnInvalidFunction do
         use Elixir.Combo.HTML
 
         slot :inner_block
@@ -1297,7 +1297,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"cannot define attributes without a related function component"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.AttrOnInvalidFunction do
+      defmodule Combo.ComponentTest.AttrOnInvalidFunction do
         use Elixir.Combo.HTML
 
         def func(assigns = %{baz: _}), do: ~CE[]
@@ -1311,7 +1311,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"cannot define slots without a related function component"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.SlotOnInvalidFunction do
+      defmodule Combo.ComponentTest.SlotOnInvalidFunction do
         use Elixir.Combo.HTML
 
         def func(assigns = %{baz: _}), do: ~CE[]
@@ -1325,7 +1325,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"invalid type :not_a_type for attr :foo"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.AttrTypeNotSupported do
+      defmodule Combo.ComponentTest.AttrTypeNotSupported do
         use Elixir.Combo.HTML
 
         attr :foo, :not_a_type
@@ -1338,7 +1338,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"invalid type {:fun, \"a\"} for attr :foo"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.AttrTypeNotSupported do
+      defmodule Combo.ComponentTest.AttrTypeNotSupported do
         use Elixir.Combo.HTML
 
         attr :foo, {:fun, "a"}
@@ -1351,7 +1351,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"invalid type {:invalid, 1} for attr :foo"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.AttrTypeNotSupported do
+      defmodule Combo.ComponentTest.AttrTypeNotSupported do
         use Elixir.Combo.HTML
 
         attr :foo, {:invalid, 1}
@@ -1364,7 +1364,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"invalid type :not_a_type for attr :foo in slot :named"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.SlotAttrTypeNotSupported do
+      defmodule Combo.ComponentTest.SlotAttrTypeNotSupported do
         use Elixir.Combo.HTML
 
         slot :named do
@@ -1380,7 +1380,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"invalid type {:fun, \"a\"} for attr :foo in slot :named"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.SlotAttrTypeNotSupported do
+      defmodule Combo.ComponentTest.SlotAttrTypeNotSupported do
         use Elixir.Combo.HTML
 
         slot :named do
@@ -1396,7 +1396,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"invalid type {:invalid, 1} for attr :foo in slot :named"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.SlotAttrTypeNotSupported do
+      defmodule Combo.ComponentTest.SlotAttrTypeNotSupported do
         use Elixir.Combo.HTML
 
         slot :named do
@@ -1412,7 +1412,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"cannot define :global slot attributes"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.SlotAttrGlobalNotSupported do
+      defmodule Combo.ComponentTest.SlotAttrGlobalNotSupported do
         use Elixir.Combo.HTML
 
         slot :named do
@@ -1426,7 +1426,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
 
   test "reraise exceptions in slot/3 blocks" do
     assert_raise RuntimeError, "boom!", fn ->
-      defmodule Phoenix.ComponentTest.SlotExceptionRaised do
+      defmodule Combo.ComponentTest.SlotExceptionRaised do
         use Elixir.Combo.HTML
 
         slot :named do
@@ -1442,7 +1442,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"expected the values for attr :foo to be a :string, got: :not_a_string"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.AttrValueTypeMismatch do
+      defmodule Combo.ComponentTest.AttrValueTypeMismatch do
         use Elixir.Combo.HTML
 
         attr :foo, :string, values: ["a string", :not_a_string]
@@ -1456,7 +1456,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"expected the examples for attr :foo to be a :string, got: :not_a_string"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.AttrExampleTypeMismatch do
+      defmodule Combo.ComponentTest.AttrExampleTypeMismatch do
         use Elixir.Combo.HTML
 
         attr :foo, :string, examples: ["a string", :not_a_string]
@@ -1470,7 +1470,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r":values must be a non-empty enumerable, got: :ok"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.AttrsValuesNotAList do
+      defmodule Combo.ComponentTest.AttrsValuesNotAList do
         use Elixir.Combo.HTML
 
         attr :foo, :string, values: :ok
@@ -1484,7 +1484,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r":examples must be a non-empty list, got: :ok"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.AttrsExamplesNotAList do
+      defmodule Combo.ComponentTest.AttrsExamplesNotAList do
         use Elixir.Combo.HTML
 
         attr :foo, :string, examples: :ok
@@ -1498,7 +1498,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r":values must be a non-empty enumerable, got: \[\]"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.AttrsValuesEmptyList do
+      defmodule Combo.ComponentTest.AttrsValuesEmptyList do
         use Elixir.Combo.HTML
 
         attr :foo, :string, values: []
@@ -1512,7 +1512,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r":examples must be a non-empty list, got: \[\]"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.AttrsExamplesEmptyList do
+      defmodule Combo.ComponentTest.AttrsExamplesEmptyList do
         use Elixir.Combo.HTML
 
         attr :foo, :string, examples: []
@@ -1526,7 +1526,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"only one of :values or :examples must be given"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.AttrDefaultTypeMismatch do
+      defmodule Combo.ComponentTest.AttrDefaultTypeMismatch do
         use Elixir.Combo.HTML
 
         attr :foo, :string, values: ["a string"], examples: ["a string"]
@@ -1540,7 +1540,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"expected the default value for attr :foo to be a :string, got: :not_a_string"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.AttrDefaultTypeMismatch do
+      defmodule Combo.ComponentTest.AttrDefaultTypeMismatch do
         use Elixir.Combo.HTML
 
         attr :foo, :string, default: :not_a_string
@@ -1555,7 +1555,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
       ~r'expected the default value for attr :foo to be one of \["foo", "bar", "baz"\], got: "boom"'
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.AttrDefaultValuesMismatch do
+      defmodule Combo.ComponentTest.AttrDefaultValuesMismatch do
         use Elixir.Combo.HTML
 
         attr :foo, :string, default: "boom", values: ["foo", "bar", "baz"]
@@ -1569,7 +1569,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r'expected the default value for attr :foo to be one of 1\.\.10, got: 11'
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.AttrDefaultValuesMismatch do
+      defmodule Combo.ComponentTest.AttrDefaultValuesMismatch do
         use Elixir.Combo.HTML
 
         attr :foo, :integer, default: 11, values: 1..10
@@ -1582,7 +1582,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r" invalid option :default for attr :foo in slot :named"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.SlotAttrDefault do
+      defmodule Combo.ComponentTest.SlotAttrDefault do
         use Elixir.Combo.HTML
 
         slot :named do
@@ -1598,7 +1598,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"invalid option :not_an_opt for attr :foo"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.AttrOptionNotSupported do
+      defmodule Combo.ComponentTest.AttrOptionNotSupported do
         use Elixir.Combo.HTML
 
         attr :foo, :any, not_an_opt: true
@@ -1611,7 +1611,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"invalid option :not_an_opt for attr :foo in slot :named"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.SlotAttrOptionNotSupported do
+      defmodule Combo.ComponentTest.SlotAttrOptionNotSupported do
         use Elixir.Combo.HTML
 
         slot :named do
@@ -1627,7 +1627,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"a duplicate attribute with name :foo already exists"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.AttrDup do
+      defmodule Combo.ComponentTest.AttrDup do
         use Elixir.Combo.HTML
 
         attr :foo, :any, required: true
@@ -1641,7 +1641,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"a duplicate slot with name :foo already exists"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.SlotDup do
+      defmodule Combo.ComponentTest.SlotDup do
         use Elixir.Combo.HTML
 
         slot :foo
@@ -1655,7 +1655,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"a duplicate attribute with name :foo in slot :named already exists"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.SlotAttrDup do
+      defmodule Combo.ComponentTest.SlotAttrDup do
         use Elixir.Combo.HTML
 
         slot :named do
@@ -1743,7 +1743,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"cannot define :global attribute :rest2 because one is already defined as :rest"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.MultiGlobal do
+      defmodule Combo.ComponentTest.MultiGlobal do
         use Elixir.Combo.HTML
 
         attr :rest, :global
@@ -1757,7 +1757,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"global attributes do not support the :required option"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.GlobalRequiredOpts do
+      defmodule Combo.ComponentTest.GlobalRequiredOpts do
         use Elixir.Combo.HTML
 
         attr :rest, :global, required: true
@@ -1770,7 +1770,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"global attributes do not support the :values option"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.GlobalValueOpts do
+      defmodule Combo.ComponentTest.GlobalValueOpts do
         use Elixir.Combo.HTML
 
         attr :rest, :global, values: ["placeholder", "rel"]
@@ -1783,7 +1783,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"global attributes do not support the :examples option"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.GlobalExampleOpts do
+      defmodule Combo.ComponentTest.GlobalExampleOpts do
         use Elixir.Combo.HTML
 
         attr :rest, :global, examples: ["placeholder", "rel"]
@@ -1796,7 +1796,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     msg = ~r"invalid options .* for slot :foo. The supported options are"
 
     assert_raise CompileError, msg, fn ->
-      defmodule Phoenix.ComponentTest.InvalidSlotAttr do
+      defmodule Combo.ComponentTest.InvalidSlotAttr do
         use Elixir.Combo.HTML
 
         slot :foo, require: true

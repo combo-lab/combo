@@ -1,5 +1,5 @@
 /**
- * Phoenix Channels JavaScript client
+ * Combo Channels JavaScript client
  *
  * ## Socket Connection
  *
@@ -189,7 +189,7 @@
  *   displayUsers(presence.list())
  * })
  * ```
- * @module phoenix
+ * @module socket
  */
 
 import Channel from './channel'

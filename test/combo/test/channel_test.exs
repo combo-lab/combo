@@ -1,4 +1,4 @@
-defmodule Phoenix.Test.ChannelTest do
+defmodule Combo.Test.ChannelTest do
   use ExUnit.Case, async: true
 
   alias Combo.Socket
@@ -6,7 +6,7 @@ defmodule Phoenix.Test.ChannelTest do
   alias __MODULE__.{UserSocket, Endpoint}
 
   Application.put_env(:combo, Endpoint,
-    pubsub_server: Phoenix.Test.ChannelTest.PubSub,
+    pubsub_server: Combo.Test.ChannelTest.PubSub,
     server: false
   )
 
@@ -36,7 +36,7 @@ defmodule Phoenix.Test.ChannelTest do
     end
 
     def join("foo:external", _, socket) do
-      :ok = Phoenix.PubSub.subscribe(Phoenix.Test.ChannelTest.PubSub, "external:topic")
+      :ok = Phoenix.PubSub.subscribe(Combo.Test.ChannelTest.PubSub, "external:topic")
       {:ok, socket}
     end
 
@@ -176,7 +176,7 @@ defmodule Phoenix.Test.ChannelTest do
 
   setup_all do
     start_supervised! @endpoint
-    start_supervised! {Phoenix.PubSub, name: Phoenix.Test.ChannelTest.PubSub}
+    start_supervised! {Phoenix.PubSub, name: Combo.Test.ChannelTest.PubSub}
     :ok
   end
 
@@ -190,7 +190,7 @@ defmodule Phoenix.Test.ChannelTest do
     assert %Socket{
              endpoint: @endpoint,
              handler: UserSocket,
-             pubsub_server: Phoenix.Test.ChannelTest.PubSub,
+             pubsub_server: Combo.Test.ChannelTest.PubSub,
              serializer: Combo.ChannelTest.NoopSerializer
            } = socket(UserSocket)
   end
@@ -200,7 +200,7 @@ defmodule Phoenix.Test.ChannelTest do
              id: "user:id",
              assigns: %{hello: :world},
              endpoint: @endpoint,
-             pubsub_server: Phoenix.Test.ChannelTest.PubSub,
+             pubsub_server: Combo.Test.ChannelTest.PubSub,
              serializer: Combo.ChannelTest.NoopSerializer,
              handler: UserSocket
            } = socket(UserSocket, "user:id", %{hello: :world})
@@ -215,7 +215,7 @@ defmodule Phoenix.Test.ChannelTest do
                  id: "user:id",
                  assigns: %{hello: :world},
                  endpoint: @endpoint,
-                 pubsub_server: Phoenix.Test.ChannelTest.PubSub,
+                 pubsub_server: Combo.Test.ChannelTest.PubSub,
                  serializer: Combo.ChannelTest.NoopSerializer,
                  handler: UserSocket
                } = socket(UserSocket, "user:id", %{hello: :world}, test_process: pid)
@@ -232,7 +232,7 @@ defmodule Phoenix.Test.ChannelTest do
 
     assert socket.channel == Channel
     assert socket.endpoint == @endpoint
-    assert socket.pubsub_server == Phoenix.Test.ChannelTest.PubSub
+    assert socket.pubsub_server == Combo.Test.ChannelTest.PubSub
     assert socket.topic == "foo:socket"
     assert {Combo.ChannelTest, _} = socket.transport
     assert socket.transport_pid == self()

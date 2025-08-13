@@ -1,12 +1,12 @@
 Code.require_file("../../support/http_client.exs", __DIR__)
 
-defmodule Phoenix.Integration.LongPollSocketTest do
+defmodule Combo.Integration.LongPollSocketTest do
   # TODO: use parameterized tests once we require Elixir 1.18
   use ExUnit.Case
 
   import ExUnit.CaptureLog
 
-  alias Phoenix.Integration.HTTPClient
+  alias Combo.Integration.HTTPClient
   alias __MODULE__.Endpoint
 
   @moduletag :capture_log
@@ -98,7 +98,7 @@ defmodule Phoenix.Integration.LongPollSocketTest do
   end
 
   for %{adapter: adapter} <- [
-        %{adapter: Bandit.PhoenixAdapter},
+        %{adapter: Combo.Endpoint.BanditAdapter},
         %{adapter: Combo.Endpoint.Cowboy2Adapter}
       ] do
     describe "adapter: #{inspect(adapter)}" do

@@ -1,13 +1,13 @@
 Code.require_file("../../support/websocket_client.exs", __DIR__)
 Code.require_file("../../support/http_client.exs", __DIR__)
 
-defmodule Phoenix.Integration.WebSocketTest do
+defmodule Combo.Integration.WebSocketTest do
   # TODO: use parameterized tests once we require Elixir 1.18
   use ExUnit.Case
 
   import ExUnit.CaptureLog
 
-  alias Phoenix.Integration.{HTTPClient, WebsocketClient}
+  alias Combo.Integration.{HTTPClient, WebsocketClient}
   alias __MODULE__.Endpoint
 
   @moduletag :capture_log
@@ -112,7 +112,7 @@ defmodule Phoenix.Integration.WebSocketTest do
   end
 
   for %{adapter: adapter} <- [
-        %{adapter: Bandit.PhoenixAdapter},
+        %{adapter: Combo.Endpoint.BanditAdapter},
         %{adapter: Combo.Endpoint.Cowboy2Adapter}
       ] do
     describe "adapter: #{inspect(adapter)}" do

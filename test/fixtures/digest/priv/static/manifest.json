@@ -1,10 +1,10 @@
 {
-  "name": "MyPhoenixApp",
-  "short_name": "MyPhoenixApp",
+  "name": "DemoApp",
+  "short_name": "DemoApp",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#F67938",
-  "description": "A simple Phoenix app.",
+  "description": "A demo app.",
   "icons": [{
     "src": "images/touch/homescreen48.png",
     "sizes": "48x48",

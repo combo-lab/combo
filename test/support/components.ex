@@ -1,4 +1,4 @@
-defmodule Phoenix.LiveViewTest.Support.FunctionComponent do
+defmodule Combo.Test.Support.FunctionComponent do
   use Combo.Template.CEExEngine
 
   def render(assigns) do
@@ -14,7 +14,7 @@ defmodule Phoenix.LiveViewTest.Support.FunctionComponent do
   end
 end
 
-defmodule Phoenix.LiveViewTest.Support.FunctionComponentWithAttrs do
+defmodule Combo.Test.Support.FunctionComponentWithAttrs do
   use Combo.Template.CEExEngine
 
   defmodule Struct do

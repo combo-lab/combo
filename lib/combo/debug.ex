@@ -1,10 +1,9 @@
 defmodule Combo.Debug do
   @moduledoc """
-  Functions for runtime introspection and debugging of Phoenix applications.
+  Functions for runtime introspection and debugging.
 
-  This module provides utilities for inspecting and debugging Phoenix applications.
-  At the moment, it only includes functions related to `Combo.Socket` and `Combo.Channel`
-  processes.
+  At the moment, it only includes functions related to `Combo.Socket` and
+  `Combo.Channel` processes.
 
   It allows you to:
 
@@ -22,16 +21,12 @@ defmodule Combo.Debug do
   are not listed.
 
   Each process corresponds to one connection that can have multiple channels.
-
-  For example, when using Phoenix LiveView, the browser establishes a socket
-  connection when initially navigating to the page, and each live navigation
-  retains the same socket connection. Nested LiveViews also share the same
-  connection, each being a different channel. See `Combo.Debug.channels/1`.
+  See `Combo.Debug.channels/1`.
 
   ## Examples
 
       iex> Combo.Debug.list_sockets()
-      [%{pid: #PID<0.123.0>, module: Phoenix.LiveView.Socket, id: nil}]
+      [%{pid: #PID<0.123.0>, module: Combo.Socket, id: nil}]
 
   """
   def list_sockets do
@@ -104,8 +99,9 @@ defmodule Combo.Debug do
     - `:status` - the status of the channel
     - `:topic` - the topic of the channel
 
-  Note that this list also contains [custom channels](https://hexdocs.pm/combo/Combo.Socket.html#module-custom-channels)
-  like LiveViews. You can check if a channel is a custom channel by using the `channel?/1`
+  Note that this list also contains
+  [custom channels](https://hexdocs.pm/combo/Combo.Socket.html#module-custom-channels)
+  You can check if a channel is a custom channel by using the `channel?/1`
   function, which returns `false` for custom channels.
 
   ## Examples
@@ -143,7 +139,6 @@ defmodule Combo.Debug do
   Returns the socket of the channel process.
 
   Note: this only works for channels defined with `use Combo.Channel`.
-  For LiveViews, use the functions defined in `Phoenix.LiveView.Debug` instead.
 
   ## Examples
 

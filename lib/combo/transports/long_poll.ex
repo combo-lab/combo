@@ -188,7 +188,7 @@ defmodule Combo.Transports.LongPoll do
     |> status_token_messages_json(conn.params["token"], messages)
   end
 
-  # Retrieves the serialized `Phoenix.LongPoll.Server` pid
+  # Retrieves the serialized `Combo.LongPoll.Server` pid
   # by publishing a message in the encrypted private topic.
   defp resume_session(%Plug.Conn{} = conn, %{"token" => token}, endpoint, opts) do
     case verify_token(endpoint, token, opts) do

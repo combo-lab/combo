@@ -1,4 +1,4 @@
-defmodule Phoenix.Integration.WebsocketClient do
+defmodule Combo.Integration.WebsocketClient do
   @moduledoc """
   A WebSocket client used to test Combo.Channel
   """

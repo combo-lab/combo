@@ -1,5 +1,6 @@
 defmodule Combo.Channel.Server do
   @moduledoc false
+
   use GenServer, restart: :temporary
 
   require Logger
@@ -420,13 +421,13 @@ defmodule Combo.Channel.Server do
       The :pubsub_server was not configured for endpoint #{inspect(socket.endpoint)}.
       Make sure to start a PubSub process in your application supervision tree:
 
-          {Phoenix.PubSub, [name: YOURAPP.PubSub, adapter: Phoenix.PubSub.PG2]}
+          {Phoenix.PubSub, [name: Demo.PubSub, adapter: Phoenix.PubSub.PG2]}
 
       And then add it to your endpoint config:
 
-          config :YOURAPP, YOURAPPWeb.Endpoint,
+          config :demo, Demo.Web.Endpoint,
             # ...
-            pubsub_server: YOURAPP.PubSub
+            pubsub_server: Demo.PubSub
       """
     end
 

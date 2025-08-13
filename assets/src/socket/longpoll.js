@@ -65,7 +65,7 @@ export default class LongPoll {
   poll() {
     const headers = { Accept: 'application/json' }
     if (this.authToken) {
-      headers['X-Phoenix-AuthToken'] = this.authToken
+      headers['X-Combo-AuthToken'] = this.authToken
     }
     this.ajax(
       'GET',

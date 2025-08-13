@@ -86,11 +86,11 @@ defmodule Combo.Socket.Transport do
 
   ### Booting
 
-  When you list a socket under `Combo.Endpoint.socket/3`, Phoenix
+  When you list a socket under `Combo.Endpoint.socket/3`, Combo
   will automatically start the socket module under its supervision tree,
-  however Phoenix does not manage any transport.
+  however Combo does not manage any transport.
 
-  Whenever your endpoint starts, Phoenix invokes the `child_spec/1` on
+  Whenever your endpoint starts, Combo invokes the `child_spec/1` on
   each listed socket and start that specification under the endpoint
   supervisor. Since the socket supervision tree is started by the endpoint,
   any custom transport must be started after the endpoint.

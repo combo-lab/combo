@@ -26,7 +26,7 @@ import Timer from './timer'
  *                                               `"wss://example.com"`
  *                                               `"/socket"` (inherited host & protocol)
  * @param {Object} [opts] - Optional configuration
- * @param {Function} [opts.transport] - The Websocket Transport, for example WebSocket or Phoenix.LongPoll.
+ * @param {Function} [opts.transport] - The transport, for example WebSocket or LongPoll.
  *
  * Defaults to WebSocket with automatic LongPoll fallback if WebSocket is not defined.
  * To fallback to LongPoll when WebSocket attempts fail, use `longPollFallbackMs: 2500`.
@@ -96,8 +96,8 @@ import Timer from './timer'
  * Defaults to DEFAULT_VSN.
  *
  * @param {Object} [opts.sessionStorage] - An optional Storage compatible object
- * Phoenix uses sessionStorage for longpoll fallback history. Overriding the store is
- * useful when Phoenix won't have access to `sessionStorage`. For example, This could
+ * Combo uses sessionStorage for longpoll fallback history. Overriding the store is
+ * useful when Combo won't have access to `sessionStorage`. For example, This could
  * happen if a site loads a cross-domain channel in an iframe. Example usage:
  *
  *     class InMemoryStorage {

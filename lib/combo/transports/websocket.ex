@@ -1,9 +1,9 @@
 defmodule Combo.Transports.WebSocket do
   @moduledoc false
   #
-  # How WebSockets Work In Phoenix
+  # How WebSockets work in Combo
   #
-  # WebSocket support in Phoenix is implemented on top of the `WebSockAdapter` library. Upgrade
+  # WebSocket support is implemented on top of the `WebSockAdapter` library. Upgrade
   # requests from clients originate as regular HTTP requests that get routed to this module via
   # Plug. These requests are then upgraded to WebSocket connections via
   # `WebSockAdapter.upgrade/4`, which takes as an argument the handler for a given socket endpoint

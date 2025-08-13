@@ -382,7 +382,7 @@ defmodule Combo.HTML.Components do
   set it to `:validate` or anything else to avoid giving the impression that a
   database operation has actually been attempted.
 
-  ## Example: outside LiveView (regular HTTP requests)
+  ## Examples
 
   ```ceex
   <.form :let={f} for={@changeset} action={~p"/path"}>
@@ -628,7 +628,7 @@ defmodule Combo.HTML.Components do
   containing the index of the child as its value.
 
   Like before, this tells Ecto to delete the child at this index when the button is
-  clicked. We use `phx-click={JS.dispatch("change")}` on the button to tell LiveView
+  clicked. We use `phx-click={JS.dispatch("change")}` on the button to tell XX
   to treat this button click as a change event, rather than a submit event on the form,
   which invokes our form's `phx-change` binding.
 
@@ -657,8 +657,8 @@ defmodule Combo.HTML.Components do
   > sent by the client (when using `drop_param`). This makes the `form[:field].value`
   > impractical for deriving or computing other properties.
   >
-  > The correct way to approach this problem is by computing any property either in
-  > your LiveViews, by traversing the relevant changesets and data structures, or by
+  > The correct way to approach this problem is by computing any property either
+  > by traversing the relevant changesets and data structures, or by
   > moving the logic to the `Ecto.Changeset` itself.
   >
   > As an example, imagine you are building a time tracking application where:
