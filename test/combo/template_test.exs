@@ -86,7 +86,7 @@ defmodule Combo.TemplateTest do
     end
 
     defmodule OptionsTemplates do
-      [{"layout1html1ceex", _}, {"show1html1ceex", _} | _] =
+      [{"show1html1ceex", _} | _] =
         Template.compile_all(
           &(&1 |> Path.basename() |> String.replace(".", "1")),
           Path.expand("../fixtures/templates", __DIR__),
@@ -129,44 +129,11 @@ defmodule Combo.TemplateTest do
                "<div>Show! hello!</div>\n"
     end
 
-    test "render/4 with layout" do
-      assigns = %{message: "hello!", layout: {AllTemplates, "layout_html_ceex"}}
-
-      assert Template.render(AllTemplates, "show_html_ceex", "html", assigns)
-             |> safe_to_string() ==
-               "<html><div>Show! hello!</div>\n</html>"
-    end
-
-    test "render/4 with bad layout" do
-      msg = ~r/no "bad_layout" html template defined for Combo.TemplateTest.AllTemplates/
-
-      assert_raise ArgumentError, msg, fn ->
-        assigns = %{message: "hello!", layout: {AllTemplates, "bad_layout"}}
-        Template.render(AllTemplates, "show_html_ceex", "html", assigns)
-      end
-    end
-
     test "render_to_iodata/4" do
       assigns = %{message: "hello!"}
 
       assert Template.render_to_iodata(AllTemplates, "show_html_ceex", "html", assigns) ==
                ["<div", ">", "Show! ", "hello!", "</div>", "\n"]
-    end
-
-    test "render_to_iodata/4 with layout" do
-      assigns = %{message: "hello!", layout: {AllTemplates, "layout_html_ceex"}}
-
-      assert Template.render_to_iodata(AllTemplates, "show_html_ceex", "html", assigns) ==
-               ["<html", ">", ["<div", ">", "Show! ", "hello!", "</div>", "\n"], "</html>"]
-    end
-
-    test "render_to_iodata/4 with bad layout" do
-      msg = ~r/no "bad_layout" html template defined for Combo.TemplateTest.AllTemplates/
-
-      assert_raise ArgumentError, msg, fn ->
-        assigns = %{message: "hello!", layout: {AllTemplates, "bad_layout"}}
-        Template.render_to_iodata(AllTemplates, "show_html_ceex", "html", assigns)
-      end
     end
 
     test "render_to_string/4" do

@@ -158,7 +158,15 @@ defmodule Combo.Template do
   def render_to_iodata(module, template, format, assigns) do
     module
     |> render(template, format, assigns)
-    |> encode(format)
+    |> encode_to_iodata(format)
+  end
+
+  defp encode_to_iodata(content, format) do
+    if encoder = format_encoder(format) do
+      encoder.encode_to_iodata!(content)
+    else
+      content
+    end
   end
 
   @doc """
@@ -194,58 +202,14 @@ defmodule Combo.Template do
       Combo.Template.render(DemoWeb.UserHTML, "index", "html", name: "Charie Brown")
       #=> {:safe, "Hello, Charlie Brown"}
 
-  ## Preserved assigns
-
-  There are keys under assigns that are specially handled by Combo, they are:
-
-    * `:layout` - tells Combo to wrap the rendered result in the given layout.
-      See next section.
-
-  ## Layouts
-
-  Templates can be rendered within other templates using the `:layout` option.
-  `:layout` accepts a tuple of the form `{LayoutModule, "template.extension"}`.
-
-  The rendered template content is injected into the layout via the
-  `@inner_content` assign:
-
-  ```eex
-  <%= @inner_content %>
-  ```
   """
   def render(module, template, format, assigns) do
-    assigns
-    |> Map.new()
-    |> Map.pop(:layout, false)
-    |> render_within_layout(module, template, format)
-  end
-
-  defp render_within_layout({false, assigns}, module, template, format) do
+    assigns = to_map(assigns)
     render_with_fallback(module, template, format, assigns)
   end
 
-  defp render_within_layout({{layout_mod, layout_tpl}, assigns}, module, template, format)
-       when is_atom(layout_mod) and is_binary(layout_tpl) do
-    content = render_with_fallback(module, template, format, assigns)
-    assigns = Map.put(assigns, :inner_content, content)
-    render_with_fallback(layout_mod, layout_tpl, format, assigns)
-  end
-
-  defp render_within_layout({layout, _assigns}, _module, _template, _format) do
-    raise ArgumentError, """
-    invalid value for reserved key :layout in Combo.Template.render/4 assigns.
-    :layout accepts a tuple of the form {LayoutModule, "template.extension"},
-    got: #{inspect(layout)}
-    """
-  end
-
-  defp encode(content, format) do
-    if encoder = format_encoder(format) do
-      encoder.encode_to_iodata!(content)
-    else
-      content
-    end
-  end
+  defp to_map(assigns) when is_map(assigns), do: assigns
+  defp to_map(assigns) when is_list(assigns), do: :maps.from_list(assigns)
 
   defp render_with_fallback(module, template, format, assigns)
        when is_atom(module) and is_binary(template) and is_binary(format) and is_map(assigns) do
