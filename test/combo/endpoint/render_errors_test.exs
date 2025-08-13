@@ -1,63 +1,52 @@
 defmodule Combo.Endpoint.RenderErrorsTest do
   use ExUnit.Case, async: true
+
   use RouterHelper
-
-  Application.put_env(:combo, __MODULE__.Endpoint, [])
-
   import ExUnit.CaptureLog
-  error_view = __MODULE__
 
-  def render("app.html", assigns) do
-    "Layout: " <> assigns.inner_content
+  defmodule Layouts do
+    def render("root.html", assigns) do
+      "Root Layout: " <> assigns.inner_content
+    end
+
+    def render("app.html", assigns) do
+      "Layout: " <> assigns.inner_content
+    end
   end
 
-  def render("404.html", %{
-        kind: kind,
-        reason: _reason,
-        stack: _stack,
-        status: 404,
-        conn: conn
-      }) do
-    "Got 404 from #{kind} with #{conn.method}"
+  defmodule ErrorHTML do
+    def render("app.html", assigns) do
+      "Layout: " <> assigns.inner_content
+    end
+
+    def render("404.html", %{kind: kind, reason: _reason, stack: _stack, status: 404, conn: conn}) do
+      "HTML: Got 404 from #{kind} with #{conn.method}"
+    end
+
+    def render("415.html", %{kind: kind, reason: _reason, stack: _stack, status: 415, conn: conn}) do
+      "HTML: Got 415 from #{kind} with #{conn.method}"
+    end
+
+    def render("500.html", %{kind: kind, reason: _reason, stack: _stack, status: 500, conn: conn}) do
+      "HTML: Got 500 from #{kind} with #{conn.method}"
+    end
   end
 
-  def render("404.json", %{
-        kind: kind,
-        reason: _reason,
-        stack: _stack,
-        status: 404,
-        conn: conn
-      }) do
-    %{error: "Got 404 from #{kind} with #{conn.method}"}
+  defmodule ErrorJSON do
+    def render("500.json", %{kind: kind, reason: _reason, stack: _stack, status: 500, conn: conn}) do
+      "JSON: Got 500 from #{kind} with #{conn.method}"
+    end
   end
 
-  def render("415.html", %{
-        kind: kind,
-        reason: _reason,
-        stack: _stack,
-        status: 415,
-        conn: conn
-      }) do
-    "Got 415 from #{kind} with #{conn.method}"
-  end
-
-  def render("500.html", %{
-        kind: kind,
-        reason: _reason,
-        stack: _stack,
-        status: 500,
-        conn: conn
-      }) do
-    "Got 500 from #{kind} with #{conn.method}"
-  end
-
-  def render("500.text", _) do
-    "500 in TEXT"
+  defmodule ErrorTEXT do
+    def render("500.text", %{kind: kind, reason: _reason, stack: _stack, status: 500, conn: conn}) do
+      "TEXT: Got 500 from #{kind} with #{conn.method}"
+    end
   end
 
   defmodule Router do
     use Plug.Router
-    use Combo.Endpoint.RenderErrors, formats: [html: error_view, json: error_view]
+    use Combo.Endpoint.RenderErrors, formats: [html: ErrorHTML, text: ErrorTEXT]
 
     plug :match
     plug :dispatch
@@ -79,12 +68,6 @@ defmodule Combo.Endpoint.RenderErrorsTest do
         rescue
           _ -> __STACKTRACE__
         end
-
-      # Those are always ignored and must be explicitly opted-in.
-      conn =
-        conn
-        |> Combo.Controller.put_root_layout(html: {Unknown, :root})
-        |> Combo.Controller.put_layout(html: {Unknown, :layout})
 
       reason = ArgumentError.exception("oops")
       raise Plug.Conn.WrapperError, conn: conn, kind: :error, stack: stack, reason: reason
@@ -188,18 +171,18 @@ defmodule Combo.Endpoint.RenderErrorsTest do
     Plug.Conn.put_private(conn, :combo_endpoint, Endpoint)
   end
 
-  defp assert_render(status, conn, opts, func) do
+  defp assert_render(status, conn, opts, fun) do
     opts =
       if opts[:formats] do
         opts
       else
-        opts |> Keyword.put_new(:formats, html: __MODULE__)
+        opts |> Keyword.put_new(:formats, html: ErrorHTML, text: ErrorTEXT)
       end
 
     {^status, _, body} =
       Combo.ConnTest.assert_error_sent(status, fn ->
         try do
-          func.()
+          fun.()
         catch
           kind, reason ->
             stack = __STACKTRACE__
@@ -218,7 +201,7 @@ defmodule Combo.Endpoint.RenderErrorsTest do
         throw(:hello)
       end)
 
-    assert body == "Got 500 from throw with GET"
+    assert body == "HTML: Got 500 from throw with GET"
   end
 
   test "exception page for errors" do
@@ -227,16 +210,7 @@ defmodule Combo.Endpoint.RenderErrorsTest do
         :erlang.error(:badarg)
       end)
 
-    assert body == "Got 500 from error with GET"
-  end
-
-  test "exception page for exceptions" do
-    body =
-      assert_render(415, conn(:get, "/"), [], fn ->
-        raise Plug.Parsers.UnsupportedMediaTypeError, media_type: "foo/bar"
-      end)
-
-    assert body == "Got 415 from error with GET"
+    assert body == "HTML: Got 500 from error with GET"
   end
 
   test "exception page for exits" do
@@ -245,77 +219,100 @@ defmodule Combo.Endpoint.RenderErrorsTest do
         exit({:timedout, {GenServer, :call, [:foo, :bar]}})
       end)
 
-    assert body == "Got 500 from exit with GET"
+    assert body == "HTML: Got 500 from exit with GET"
   end
 
-  test "exception page ignores params _format" do
+  test "exception page for exceptions" do
+    body =
+      assert_render(415, conn(:get, "/"), [], fn ->
+        raise Plug.Parsers.UnsupportedMediaTypeError, media_type: "foo/bar"
+      end)
+
+    assert body == "HTML: Got 415 from error with GET"
+  end
+
+  test "exception page uses params _format" do
     conn = conn(:get, "/", _format: "text")
 
     body =
-      assert_render(500, conn, [formats: [html: __MODULE__, text: __MODULE__]], fn ->
+      assert_render(500, conn, [], fn ->
         throw(:hello)
       end)
 
-    assert body == "500 in TEXT"
+    assert body == "TEXT: Got 500 from throw with GET"
   end
 
-  test "exception page uses stored _format" do
+  test "exception page uses stored format" do
     conn = conn(:get, "/") |> put_private(:combo_format, "text")
 
     body =
-      assert_render(500, conn, [formats: [html: __MODULE__, text: __MODULE__]], fn ->
+      assert_render(500, conn, [], fn ->
         throw(:hello)
       end)
 
-    assert body == "500 in TEXT"
+    assert body == "TEXT: Got 500 from throw with GET"
   end
 
-  test "exception page with custom format" do
+  test "exception page using fallback" do
     body =
-      assert_render(500, conn(:get, "/"), [formats: [text: __MODULE__]], fn ->
+      assert_render(500, conn(:get, "/"), [], fn ->
         throw(:hello)
       end)
 
-    assert body == "500 in TEXT"
+    assert body == "HTML: Got 500 from throw with GET"
+  end
+
+  test "exception page using customized format" do
+    body =
+      assert_render(500, conn(:get, "/"), [formats: [text: ErrorTEXT]], fn ->
+        throw(:hello)
+      end)
+
+    assert body == "TEXT: Got 500 from throw with GET"
   end
 
   test "exception page with root layout" do
     body =
-      assert_render(500, conn(:get, "/"), [root_layout: [html: {__MODULE__, :app}]], fn ->
+      assert_render(500, conn(:get, "/"), [root_layout: [html: {Layouts, :root}]], fn ->
         throw(:hello)
       end)
 
-    assert body == "Layout: Got 500 from throw with GET"
+    assert body == "Root Layout: HTML: Got 500 from throw with GET"
   end
 
   test "exception page with layout" do
     body =
-      assert_render(500, conn(:get, "/"), [layout: [html: {__MODULE__, :app}]], fn ->
+      assert_render(500, conn(:get, "/"), [layout: [html: {Layouts, :app}]], fn ->
         throw(:hello)
       end)
 
-    assert body == "Layout: Got 500 from throw with GET"
+    assert body == "Layout: HTML: Got 500 from throw with GET"
   end
 
-  test "exception page with formats" do
+  test "exception page with root layout and layout" do
     body =
-      assert_render(500, conn(:get, "/"), [formats: [text: __MODULE__]], fn ->
-        throw(:hello)
-      end)
+      assert_render(
+        500,
+        conn(:get, "/"),
+        [root_layout: [html: {Layouts, :root}], layout: [html: {Layouts, :app}]],
+        fn ->
+          throw(:hello)
+        end
+      )
 
-    assert body == "500 in TEXT"
+    assert body == "Root Layout: Layout: HTML: Got 500 from throw with GET"
   end
 
   test "exception page is shown even with invalid format" do
     conn = conn(:get, "/") |> put_req_header("accept", "unknown/unknown")
     body = assert_render(500, conn, [], fn -> throw(:hello) end)
-    assert body == "Got 500 from throw with GET"
+    assert body == "HTML: Got 500 from throw with GET"
   end
 
   test "exception page is shown even with invalid query parameters" do
-    body = assert_render(500, conn(:get, "/?q=%{"), [], fn -> throw(:hello) end)
-
-    assert body == "Got 500 from throw with GET"
+    conn = conn(:get, "/?q=%{")
+    body = assert_render(500, conn, [], fn -> throw(:hello) end)
+    assert body == "HTML: Got 500 from throw with GET"
   end
 
   test "captures warning when format is not supported" do
@@ -338,6 +335,6 @@ defmodule Combo.Endpoint.RenderErrorsTest do
 
   test "exception page for NoRouteError with plug_status 404 renders and does not reraise" do
     conn = call(Router, :get, "/unknown")
-    assert Combo.ConnTest.response(conn, 404) =~ "Got 404 from error with GET"
+    assert Combo.ConnTest.response(conn, 404) == "HTML: Got 404 from error with GET"
   end
 end
