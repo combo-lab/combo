@@ -243,10 +243,6 @@ defmodule Combo.Router do
 
       import Combo.Router
 
-      # TODO v2: No longer automatically import dependencies
-      import Plug.Conn
-      import Combo.Controller
-
       # Set up initial scope
       @combo_pipeline nil
       Combo.Router.Scope.init(__MODULE__)
@@ -486,7 +482,10 @@ defmodule Combo.Router do
       def __checks__, do: unquote({:__block__, [], checks})
 
       defp prepare(conn) do
-        merge_private(conn, [{:combo_router, __MODULE__}, {__MODULE__, conn.script_name}])
+        Plug.Conn.merge_private(conn, [
+          {:combo_router, __MODULE__},
+          {__MODULE__, conn.script_name}
+        ])
       end
 
       unquote(pipelines)
@@ -671,15 +670,15 @@ defmodule Combo.Router do
   defp add_route(kind, verb, path, plug, plug_opts, options) do
     quote do
       @combo_routes Scope.route(
-                        __ENV__.line,
-                        __ENV__.module,
-                        unquote(kind),
-                        unquote(verb),
-                        unquote(path),
-                        unquote(plug),
-                        unquote(plug_opts),
-                        unquote(options)
-                      )
+                      __ENV__.line,
+                      __ENV__.module,
+                      unquote(kind),
+                      unquote(verb),
+                      unquote(path),
+                      unquote(plug),
+                      unquote(plug_opts),
+                      unquote(options)
+                    )
     end
   end
 

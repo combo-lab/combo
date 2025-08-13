@@ -19,7 +19,7 @@ defmodule Combo.Controller.Pipeline do
       @doc false
       def call(conn, action) when is_atom(action) do
         conn
-        |> merge_private(
+        |> Plug.Conn.merge_private(
           combo_controller: __MODULE__,
           combo_action: action
         )

@@ -249,9 +249,8 @@ defmodule Combo.Controller do
       end
 
     quote bind_quoted: [opts: opts] do
-      import Plug.Conn
-      import Combo.Conn
       import Combo.Controller
+      import Combo.Conn, only: [put_new_view: 2]
 
       use Combo.Controller.Pipeline
 
