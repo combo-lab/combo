@@ -131,6 +131,7 @@ defmodule Combo.ConnTest do
 
   alias Plug.Conn
   import ExUnit.Assertions, only: [flunk: 1]
+  import Combo.Conn, only: [router_module!: 1]
 
   @doc """
   Creates a connection to be used in upcoming requests.
@@ -268,19 +269,19 @@ defmodule Combo.ConnTest do
   Fetches the flash storage.
   """
   @spec fetch_flash(Conn.t) :: Conn.t
-  defdelegate fetch_flash(conn), to: Combo.Controller
+  defdelegate fetch_flash(conn), to: Combo.Conn
 
   @doc """
   Puts the given value under key in the flash storage.
   """
   @spec put_flash(Conn.t, term, term) :: Conn.t
-  defdelegate put_flash(conn, key, value), to: Combo.Controller
+  defdelegate put_flash(conn, key, value), to: Combo.Conn
 
   @doc """
   Clears up the flash storage.
   """
   @spec clear_flash(Conn.t) :: Conn.t
-  defdelegate clear_flash(conn), to: Combo.Controller
+  defdelegate clear_flash(conn), to: Combo.Conn
 
   @doc """
   Returns the content type as long as it matches the given format.
@@ -572,7 +573,7 @@ defmodule Combo.ConnTest do
   """
   @spec redirected_params(Conn.t, status :: non_neg_integer) :: map
   def redirected_params(%Plug.Conn{} = conn, status \\ 302) do
-    router = Combo.Controller.router_module(conn)
+    router = router_module!(conn)
     %URI{path: path, host: host} = conn |> redirected_to(status) |> URI.parse()
     path = remove_script_name(conn, router, path)
 
@@ -608,7 +609,7 @@ defmodule Combo.ConnTest do
   """
   @spec path_params(Conn.t, String.t) :: map
   def path_params(%Plug.Conn{} = conn, to) when is_binary(to) do
-    router = Combo.Controller.router_module(conn)
+    router = router_module!(conn)
 
     case Combo.Router.route_info(router, "GET", to, conn.host) do
     %{path_params: path_params} ->

@@ -99,6 +99,7 @@ defmodule Combo.Token do
   """
 
   require Logger
+  import Combo.Conn, only: [endpoint_module!: 1]
 
   @type context ::
           Plug.Conn.t()
@@ -252,7 +253,7 @@ defmodule Combo.Token do
   ## Helpers
 
   defp get_key_base(%Plug.Conn{} = conn),
-    do: conn |> Combo.Controller.endpoint_module() |> get_endpoint_key_base()
+    do: conn |> endpoint_module!() |> get_endpoint_key_base()
 
   defp get_key_base(%_{endpoint: endpoint}),
     do: get_endpoint_key_base(endpoint)
