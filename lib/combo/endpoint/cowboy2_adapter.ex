@@ -56,6 +56,7 @@ defmodule Combo.Endpoint.Cowboy2Adapter do
   """
 
   require Logger
+  alias Combo.Helpers.KeywordHelper
 
   @behaviour Combo.Endpoint.Adapter
 
@@ -73,7 +74,10 @@ defmodule Combo.Endpoint.Cowboy2Adapter do
         end
 
         # Ranch options are read from the top, so we keep the user opts first.
-        opts = :proplists.delete(:port, opts) ++ [port: port_to_integer(port), otp_app: otp_app]
+        opts =
+          (:proplists.delete(:port, opts) ++ [port: port_to_integer(port), otp_app: otp_app])
+          |> put_process_limit_opts(config[:process_limit])
+
         child_spec(scheme, endpoint, opts, config[:code_reloader])
       end
 
@@ -96,6 +100,16 @@ defmodule Combo.Endpoint.Cowboy2Adapter do
     {:ok, address}
   rescue
     e -> {:error, Exception.message(e)}
+  end
+
+  defp put_process_limit_opts(opts, :infinity), do: opts
+
+  defp put_process_limit_opts(opts, limit) do
+    keys = [:transport_options, :num_acceptors]
+
+    if KeywordHelper.has_key?(opts, keys),
+      do: opts,
+      else: KeywordHelper.put(opts, keys, limit)
   end
 
   defp child_spec(scheme, endpoint, config, code_reloader?) do

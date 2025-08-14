@@ -195,6 +195,7 @@ defmodule Combo.Endpoint.Supervisor do
       ## Compile-time config
 
       code_reloader: false,
+      process_limit: :infinity,
       debug_errors: false,
       render_errors: [layout: false],
 

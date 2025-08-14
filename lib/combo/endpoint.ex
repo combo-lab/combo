@@ -69,6 +69,24 @@ defmodule Combo.Endpoint do
       only one of the apps or set the `MIX_BUILD_PATH` system environment
       variable to give them distinct build directories.
 
+    * `:live_reloader` - the configuration of `Combo.LiveReloader`.
+
+    * `:process_limit` - limits the number of processes. It can be a
+      `pos_integer()` or `:infinity`. Default to `:infinity`.
+      This configuration will be used for settings:
+
+        * the number of acceptors spawned for web server.
+        * the number of supervisors spawned for `socket/3`.
+
+      It would be useful when inspecting the hierarchical structure of
+      processes. In order to ensure optimal performance, Combo dynamically
+      adjusts the number of processes according to the hardware specifications.
+      This is good. However, in development, this can be troublesome. For
+      example, when using `:observer` on a powerful machine, you may see a large
+      number of processes, making it difficult to get an overall view of the
+      hierarchical structure of processes. This configuration helps address
+      above troublesome.
+
     * `:debug_errors` - when `true`, uses `Plug.Debugger` functionality for
       debugging failures in the application. Recommended to be set to `true`
       only in development as it allows listing of the application source
@@ -427,15 +445,22 @@ defmodule Combo.Endpoint do
       var!(code_reloading?) =
         Application.compile_env(@otp_app, [__MODULE__, :code_reloader], false)
 
+      process_limit = Application.compile_env(@otp_app, [__MODULE__, :process_limit], :infinity)
+      var!(process_limiting?) = process_limit != :infinity
+
       var!(debug_errors?) =
         Application.compile_env(@otp_app, [__MODULE__, :debug_errors], false)
 
       var!(force_ssl) =
         Application.compile_env(@otp_app, [__MODULE__, :force_ssl])
 
+      # Configurations exposed as module attributes
+      Module.put_attribute(__MODULE__, :combo_process_limit, process_limit)
+
       # Avoid unused variable warnings
       _ = var!(live_reloading?)
       _ = var!(code_reloading?)
+      _ = var!(process_limiting?)
       _ = var!(force_ssl)
     end
   end
@@ -647,6 +672,13 @@ defmodule Combo.Endpoint do
   @doc false
   defmacro __before_compile__(%{module: module}) do
     sockets = Module.get_attribute(module, :combo_sockets)
+    process_limit = Module.get_attribute(module, :combo_process_limit)
+
+    sockets =
+      for {path, socket, socket_opts} <- sockets do
+        socket_opts = put_socket_process_limit_opts(socket_opts, process_limit)
+        {path, socket, socket_opts}
+      end
 
     dispatches =
       for {path, socket, socket_opts} <- sockets,
@@ -701,6 +733,14 @@ defmodule Combo.Endpoint do
       unquote(dispatches)
       defp do_socket_dispatch(_path, conn), do: conn
     end
+  end
+
+  defp put_socket_process_limit_opts(opts, :infinity), do: opts
+
+  defp put_socket_process_limit_opts(opts, limit) do
+    if Keyword.has_key?(opts, :partitions),
+      do: opts,
+      else: Keyword.put(opts, :partitions, limit)
   end
 
   defp socket_paths(endpoint, path, socket, opts) do
