@@ -1,0 +1,93 @@
+defmodule Combo.LiveReloader.Channel do
+  @moduledoc false
+
+  use Combo.Channel
+  require Logger
+
+  def join("combo:live_reload", _msg, socket) do
+    # TODO: change it to ?
+    # {:ok, _} = Application.ensure_all_started(:phoenix_live_reload)
+    # For a quick test
+    Combo.LiveReloader.Application.start(nil, nil)
+
+    if Process.whereis(:combo_live_reloader_file_monitor) do
+      FileSystem.subscribe(:combo_live_reloader_file_monitor)
+
+      config = socket.endpoint.config(:live_reloader)
+
+      socket =
+        socket
+        |> assign(:patterns, config[:patterns] || [])
+        |> assign(:debounce, config[:debounce] || 0)
+        |> assign(:notify_patterns, config[:notify] || [])
+
+      {:ok, %{}, socket}
+    else
+      {:error, %{message: "Combo.LiveReloader's backend is not running"}}
+    end
+  end
+
+  def handle_info({:file_event, _pid, {path, _event}}, socket) do
+    %{
+      patterns: patterns,
+      debounce: debounce,
+      notify_patterns: notify_patterns
+    } = socket.assigns
+
+    if matches_any_pattern?(path, patterns) do
+      ext = Path.extname(path)
+
+      for {path, ext} <- [{path, ext} | debounce(debounce, [ext], patterns)] do
+        asset_type = remove_leading_dot(ext)
+        Logger.debug("Live reload: #{Path.relative_to_cwd(path)}")
+        push(socket, "assets_change", %{asset_type: asset_type})
+      end
+    end
+
+    for {topic, patterns} <- notify_patterns do
+      if matches_any_pattern?(path, patterns) do
+        Phoenix.PubSub.broadcast(
+          socket.pubsub_server,
+          to_string(topic),
+          {{:combo, :live_reloader}, topic, path}
+        )
+      end
+    end
+
+    {:noreply, socket}
+  end
+
+  defp debounce(0, _exts, _patterns), do: []
+
+  defp debounce(time, exts, patterns) when is_integer(time) and time > 0 do
+    Process.send_after(self(), :debounced, time)
+    debounce(exts, patterns)
+  end
+
+  defp debounce(exts, patterns) do
+    receive do
+      :debounced ->
+        []
+
+      {:file_event, _pid, {path, _event}} ->
+        ext = Path.extname(path)
+
+        if matches_any_pattern?(path, patterns) and ext not in exts do
+          [{path, ext} | debounce([ext | exts], patterns)]
+        else
+          debounce(exts, patterns)
+        end
+    end
+  end
+
+  defp matches_any_pattern?(path, patterns) do
+    path = to_string(path)
+
+    Enum.any?(patterns, fn pattern ->
+      String.match?(path, pattern) and not String.match?(path, ~r{(^|/)_build/})
+    end)
+  end
+
+  defp remove_leading_dot("." <> rest), do: rest
+  defp remove_leading_dot(rest), do: rest
+end

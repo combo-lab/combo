@@ -421,11 +421,20 @@ defmodule Combo.Endpoint do
       # Compile-time configuration checking
       # This ensures that, if a compile-time configuration is overwritten at runtime,
       # the application won't boot.
-      var!(code_reloading?) = Application.compile_env(@otp_app, [__MODULE__, :code_reloader], false)
-      var!(debug_errors?) =  Application.compile_env(@otp_app, [__MODULE__, :debug_errors], false)
-      var!(force_ssl) =  Application.compile_env(@otp_app, [__MODULE__, :force_ssl])
+      var!(live_reloading?) =
+        !!Application.compile_env(@otp_app, [__MODULE__, :live_reloader], false)
+
+      var!(code_reloading?) =
+        Application.compile_env(@otp_app, [__MODULE__, :code_reloader], false)
+
+      var!(debug_errors?) =
+        Application.compile_env(@otp_app, [__MODULE__, :debug_errors], false)
+
+      var!(force_ssl) =
+        Application.compile_env(@otp_app, [__MODULE__, :force_ssl])
 
       # Avoid unused variable warnings
+      _ = var!(live_reloading?)
       _ = var!(code_reloading?)
       _ = var!(force_ssl)
     end
