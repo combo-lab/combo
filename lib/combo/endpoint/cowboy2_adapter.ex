@@ -57,7 +57,9 @@ defmodule Combo.Endpoint.Cowboy2Adapter do
 
   require Logger
 
-  @doc false
+  @behaviour Combo.Endpoint.Adapter
+
+  @impl true
   def child_specs(endpoint, config) do
     otp_app = Keyword.fetch!(config, :otp_app)
 
@@ -82,6 +84,18 @@ defmodule Combo.Endpoint.Cowboy2Adapter do
     else
       child_specs
     end
+  end
+
+  @impl true
+  def server_info(endpoint, scheme) do
+    address =
+      endpoint
+      |> make_ref(scheme)
+      |> :ranch.get_addr()
+
+    {:ok, address}
+  rescue
+    e -> {:error, Exception.message(e)}
   end
 
   defp child_spec(scheme, endpoint, config, code_reloader?) do
@@ -144,17 +158,6 @@ defmodule Combo.Endpoint.Cowboy2Adapter do
 
   defp port_to_integer(port) when is_binary(port), do: String.to_integer(port)
   defp port_to_integer(port) when is_integer(port), do: port
-
-  def server_info(endpoint, scheme) do
-    address =
-      endpoint
-      |> make_ref(scheme)
-      |> :ranch.get_addr()
-
-    {:ok, address}
-  rescue
-    e -> {:error, Exception.message(e)}
-  end
 
   defp make_ref(endpoint, scheme) do
     Module.concat(endpoint, scheme |> Atom.to_string() |> String.upcase())

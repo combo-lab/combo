@@ -43,37 +43,11 @@ defmodule Combo.Endpoint.BanditAdapter do
 
   The original code comes from `Bandit.PhoenixAdapter` of
   [bandit](https://github.com/mtrudel/bandit) which is created by Mat Trudel.
-
   """
 
-  @doc """
-  Returns the Bandit server process for the provided scheme within the given
-  endpoint.
-  """
-  @spec bandit_pid(module()) ::
-          {:ok, Supervisor.child() | :restarting | :undefined} | {:error, :no_server_found}
-  def bandit_pid(endpoint, scheme \\ :http) do
-    endpoint
-    |> Supervisor.which_children()
-    |> Enum.find(fn {id, _, _, _} -> id == {endpoint, scheme} end)
-    |> case do
-      {_, pid, _, _} -> {:ok, pid}
-      nil -> {:error, :no_server_found}
-    end
-  end
+  @behaviour Combo.Endpoint.Adapter
 
-  @doc """
-  Returns the bound address and port of the Bandit server process for the
-  provided scheme within the given endpoint.
-  """
-  def server_info(endpoint, scheme) do
-    case bandit_pid(endpoint, scheme) do
-      {:ok, pid} -> ThousandIsland.listener_info(pid)
-      {:error, reason} -> {:error, reason}
-    end
-  end
-
-  @doc false
+  @impl true
   def child_specs(endpoint, config) do
     otp_app = Keyword.fetch!(config, :otp_app)
 
@@ -86,6 +60,14 @@ defmodule Combo.Endpoint.BanditAdapter do
     end
   end
 
+  @impl true
+  def server_info(endpoint, scheme) do
+    case bandit_pid(endpoint, scheme) do
+      {:ok, pid} -> ThousandIsland.listener_info(pid)
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
   defp resolve_plug(code_reload?, endpoint) do
     if code_reload? &&
          Code.ensure_loaded?(Combo.Endpoint.SyncCodeReloadPlug) &&
@@ -93,6 +75,20 @@ defmodule Combo.Endpoint.BanditAdapter do
       {Combo.Endpoint.SyncCodeReloadPlug, {endpoint, []}}
     else
       endpoint
+    end
+  end
+
+  # Returns the Bandit server process for the provided scheme within the given
+  # endpoint.
+  @spec bandit_pid(module(), atom()) ::
+          {:ok, Supervisor.child() | :restarting | :undefined} | {:error, :no_server_found}
+  defp bandit_pid(endpoint, scheme) do
+    endpoint
+    |> Supervisor.which_children()
+    |> Enum.find(fn {id, _, _, _} -> id == {endpoint, scheme} end)
+    |> case do
+      {_, pid, _, _} -> {:ok, pid}
+      nil -> {:error, :no_server_found}
     end
   end
 end
