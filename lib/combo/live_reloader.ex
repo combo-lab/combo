@@ -48,22 +48,7 @@ defmodule Combo.LiveReloader do
       `:top` and `:parent`. Defaults to `:parent`.
 
     * `:url` - the URL of the live reload socket connection. Defaults to
-      `/combo/live_reload/socket/\#{suffix}`.
-
-    * `:suffix` - if you are running live-reloading on an umbrella app, you may
-      want to give a different suffix to each socket connection. For example:
-
-          config :demo, DewoWeb.Endpoint,
-            live_reloader: [
-              suffix: "/proxied/app/path"
-            ]
-
-      And then configure the endpoint to use the same suffix:
-
-          if code_reloading? do
-            socket "/combo/live_reload/socket/proxied/app/path", Combo.LiveReloader.Socket
-            ...
-          end
+      `/combo/live_reload/socket`.
 
     * `:reload_page_on_css_changes` - If true, CSS changes will trigger a full
       page reload like other asset types instead of the default hot reload.
@@ -187,11 +172,11 @@ defmodule Combo.LiveReloader do
     opts
   end
 
-  def call(%Plug.Conn{path_info: ["combo", "live_reload", "frame" | _suffix]} = conn, _) do
+  def call(%Plug.Conn{path_info: ["combo", "live_reload", "frame"]} = conn, _) do
     endpoint = conn.private.combo_endpoint
     config = endpoint.config(:live_reloader)
 
-    url = config[:url] || endpoint.path("/combo/live_reload/socket#{suffix(endpoint)}")
+    url = config[:url] || endpoint.path("/combo/live_reload/socket")
     interval = config[:interval] || 100
     target_window = get_target_window(config[:target_window] || :parent)
     reload_page_on_css_changes? = config[:reload_page_on_css_changes] || false
@@ -230,7 +215,7 @@ defmodule Combo.LiveReloader do
         if has_body?(resp_body) and :code.is_loaded(endpoint) do
           {head, [last]} = Enum.split(String.split(resp_body, "</body>"), -1)
           head = Enum.intersperse(head, "</body>")
-          body = [head, reload_assets_tag(conn, endpoint, config), "</body>" | last]
+          body = [head, reload_assets_tag(conn, config), "</body>" | last]
           put_in(conn.resp_body, body)
         else
           conn
@@ -250,8 +235,8 @@ defmodule Combo.LiveReloader do
 
   defp has_body?(resp_body), do: String.contains?(resp_body, "<body")
 
-  defp reload_assets_tag(conn, endpoint, config) do
-    path = conn.private.combo_endpoint.path("/combo/live_reload/frame#{suffix(endpoint)}")
+  defp reload_assets_tag(conn, config) do
+    path = conn.private.combo_endpoint.path("/combo/live_reload/frame")
 
     attrs =
       Keyword.merge(
@@ -283,8 +268,6 @@ defmodule Combo.LiveReloader do
     |> to_string()
     |> Plug.HTML.html_escape_to_iodata()
   end
-
-  defp suffix(endpoint), do: endpoint.config(:live_reloader)[:suffix] || ""
 
   defp get_target_window(:parent), do: "parent"
 
