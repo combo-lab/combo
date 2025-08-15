@@ -28,31 +28,30 @@ defmodule Combo.LiveReloader do
 
   The following options are supported:
 
-    * `:patterns` - a list of patterns to trigger the live reloading.
-      This option is required to enable any live reloading.
+    * `:patterns` - a list of patterns to trigger the live reloading. This
+      option is required to enable any live reloading.
 
-    * `:interval` - Default to `100`ms. It's useful when you think the
-      live reloading is triggering too fast.
+    * `:interval` - Default to `100`ms. It's useful when you think the live
+      reloading is triggering too fast.
 
     * `:notify` - a keyword list of topics pointing to a list of patterns.
       A message of the form `{{:combo, :live_reloader}, topic, path}` will be
       broadcast on the topic whenever file in the list of patterns changes.
 
-    * `:debounce` - an integer in milliseconds to wait before sending
-      live reload events to the browser. Defaults to `0`.
+    * `:debounce` - an integer in milliseconds to wait before sending live
+      reload events to the browser. Defaults to `0`.
 
-    * `:iframe_attrs` - attrs to be given to the iframe injected by
-      live reload. Expects a keyword list of atom keys and string values.
+    * `:iframe_attrs` - attrs to be given to the iframe injected by live
+      reload. Expects a keyword list of atom keys and string values.
 
-    * `:target_window` - the window that will be reloaded.
-      Valid values are `:top` and `:parent`. Defaults to `:parent`.
+    * `:target_window` - the window that will be reloaded. Valid values are
+      `:top` and `:parent`. Defaults to `:parent`.
 
-    * `:url` - the URL of the live reload socket connection.
-      Defaults to `/combo/live_reload/socket/\#{suffix}`.
+    * `:url` - the URL of the live reload socket connection. Defaults to
+      `/combo/live_reload/socket/\#{suffix}`.
 
-    * `:suffix` - if you are running live-reloading on an umbrella app,
-      you may want to give a different suffix to each socket connection.
-      For example:
+    * `:suffix` - if you are running live-reloading on an umbrella app, you may
+      want to give a different suffix to each socket connection. For example:
 
           config :demo, DewoWeb.Endpoint,
             live_reloader: [
@@ -66,13 +65,13 @@ defmodule Combo.LiveReloader do
             ...
           end
 
-    * `:reload_page_on_css_changes` - If true, CSS changes will trigger
-      a full page reload like other asset types instead of the default
-      hot reload. Useful when class names are determined at runtime, for
-      example when working with CSS modules. Defaults to false.
+    * `:reload_page_on_css_changes` - If true, CSS changes will trigger a full
+      page reload like other asset types instead of the default hot reload.
+      Useful when class names are determined at runtime, for example when
+      working with CSS modules. Defaults to `false`.
 
   In an umbrella app, if you want to enable live reloading based on code
-  changes in sibling applications, set the `reloadable_apps` option on your
+  changes in sibling applications, set the `:reloadable_apps` option on your
   endpoint to ensure the code will be recompiled, then add the dirs to
   `:live_reloader` to trigger page reloads:
 
@@ -88,36 +87,31 @@ defmodule Combo.LiveReloader do
         Path.join([root_path, "apps", "app2"]),
       ]
 
-  You'll also want to be sure that the configured `:patterns` will match
-  files in the sibling application.
+  You'll also want to be sure that the configured `:patterns` will match files
+  in the sibling application.
 
   ## About `:target_window` option
 
-  Change the default target window to `:parent` to not reload the whole
-  page if a Phoenix app is shown inside an iframe. You can get the old
-  behavior back by setting the `:target_window` option to `:top`:
+  Change the default target window to `:parent` to not reload the whole page
+  if a Combo app is shown inside an iframe. You can get the old behavior back
+  by setting the `:target_window` option to `:top`:
 
       config :phoenix_live_reload, DemoWeb.Endpoint,
         target_window: :top
 
   ## Backends
 
-  This module uses [`FileSystem`](https://github.com/falood/file_system)
-  as a dependency to watch your filesystem whenever there is a change
-  and it supports the following operating systems:
+  This module uses [`FileSystem`](https://github.com/falood/file_system) to
+  watch the filesystem changes. It supports the following backends:
 
-    * Linux via [inotify](https://github.com/rvoicilas/inotify-tools/wiki)
-      (installation required)
-    * Windows via [inotify-win](https://github.com/thekid/inotify-win)
-      (no installation required)
-    * Mac OS X via fsevents
-      (no installation required)
-    * FreeBSD/OpenBSD/~BSD via [inotify](https://github.com/rvoicilas/inotify-tools/wiki)
-      (installation required)
+    * `:fs_inotify` - available on Linux and BSD. It requires installing an
+      extra package, check out [the wiki of inotify-tools](https://github.com/rvoicilas/inotify-tools/wiki)
+      for more details.
+    * `:fs_mac` - available on macOS.
+    * `:fs_windows` - available on Windows.
+    * `:fs_poll` - available on all operating systems.
 
-  There is also a `:fs_poll` backend that polls the filesystem and is
-  available on all Operating Systems in case you don't want to install
-  any dependency. You can configure the `:backend` in your `config/config.exs`:
+  In general, you don't need to configure it. But if you want, do it like:
 
       config :combo, :live_reloader, backend: :fs_poll
 
@@ -132,11 +126,11 @@ defmodule Combo.LiveReloader do
         dirs: [
           "priv/static",
           "priv/gettext",
-          "lib/demo_web/live",
-          "lib/demo_web/views",
-          "lib/demo_web/templates",
+          "lib/demo/web/live",
+          "lib/demo/web/views",
+          "lib/demo/web/templates",
           "../another_project/priv/static", # Contents of this directory is not watched
-          "/another_project/priv/static", # Contents of this directory is not watched
+          "/another_project/priv/static",   # Contents of this directory is not watched
         ],
         backend: :fs_poll,
         backend_opts: [
@@ -145,13 +139,15 @@ defmodule Combo.LiveReloader do
 
   ## Skipping remote CSS reload
 
-  All stylesheets are reloaded without a page refresh anytime a style
-  is detected as having changed. In certain cases such as serving
-  stylesheets from a remote host, you may wish to prevent unnecessary
-  reload of these stylesheets during development. For this, you can
-  include a `data-no-reload` attribute on the link tag. For example:
+  All stylesheets are reloaded without a page refresh anytime a style is
+  detected as having changed. In certain cases such as serving stylesheets
+  from a remote host, you may wish to prevent unnecessary reload of these
+  stylesheets during development. For this, you can include a `data-no-reload`
+  attribute on the link tag. For example:
 
-      <link rel="stylesheet" href="https://example.com/style.css" data-no-reload>
+  ```html
+  <link rel="stylesheet" href="https://example.com/style.css" data-no-reload>
+  ```
 
   ## Differences between `Combo.CodeReloader`
 
@@ -159,13 +155,13 @@ defmodule Combo.LiveReloader do
   if you change anything in the `lib/` directory, then the Elixir code will be
   reloaded and used on your next request.
 
-  `Combo.LiveReloader` adds a plug which injects JavaScript code into web page.
-  Then injected JavaScript code will create a WebSocket connection to the
-  server. When a specified file changed, the server will sent a message to the
-  web page, and the web page will be reloaded in response.
-  If the change was to an Elixir file then it will be recompiled and served
-  when the page is reloaded. If it is JavaScript or CSS, then only assets
-  are reloaded, without triggering a full page load.
+  `Combo.LiveReloader` injects JavaScript code into web page. Then injected
+  JavaScript code will create a WebSocket connection to the server. When a
+  specified file changed, the server will sent a message to the web page, and
+  the web page will be reloaded in response. If the change was to an Elixir
+  file then it will be recompiled and served when the page is reloaded. If
+  it is JavaScript or CSS, then only assets are reloaded, without triggering
+  a full page load.
   """
 
   import Plug.Conn
@@ -183,7 +179,6 @@ defmodule Combo.LiveReloader do
   """
 
   @html_after """
-  Combo.LiveReloader.init(url, interval, targetWindow, reloadPageOnCssChanges)
   </script>
   </body></html>
   """
@@ -209,6 +204,7 @@ defmodule Combo.LiveReloader do
       ~s[var interval = #{interval};\n],
       ~s[var targetWindow = "#{target_window}";\n],
       ~s[var reloadPageOnCssChanges = #{reload_page_on_css_changes?};\n],
+      ~s[Combo.LiveReloader.init(url, interval, targetWindow, reloadPageOnCssChanges);],
       @html_after
     ])
     |> halt()
