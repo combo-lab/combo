@@ -34,10 +34,6 @@ defmodule Combo.LiveReloader do
     * `:interval` - Default to `100`ms. It's useful when you think the live
       reloading is triggering too fast.
 
-    * `:notify` - a keyword list of topics pointing to a list of patterns.
-      A message of the form `{{:combo, :live_reloader}, topic, path}` will be
-      broadcast on the topic whenever file in the list of patterns changes.
-
     * `:debounce` - an integer in milliseconds to wait before sending live
       reload events to the browser. Defaults to `0`.
 

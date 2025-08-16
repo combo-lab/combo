@@ -16,7 +16,6 @@ defmodule Combo.LiveReloader.Channel do
           socket
           |> assign(:patterns, config[:patterns] || [])
           |> assign(:debounce, config[:debounce] || 0)
-          |> assign(:notify_patterns, config[:notify] || [])
 
         {:ok, %{}, socket}
 
@@ -28,8 +27,7 @@ defmodule Combo.LiveReloader.Channel do
   def handle_info({:file_event, _pid, {path, _event}}, socket) do
     %{
       patterns: patterns,
-      debounce: debounce,
-      notify_patterns: notify_patterns
+      debounce: debounce
     } = socket.assigns
 
     if match_patterns?(path, patterns) do
@@ -39,16 +37,6 @@ defmodule Combo.LiveReloader.Channel do
         asset_type = remove_leading_dot(ext)
         Logger.debug("Live reload: #{Path.relative_to_cwd(path)}")
         push(socket, "assets_change", %{asset_type: asset_type})
-      end
-    end
-
-    for {topic, patterns} <- notify_patterns do
-      if match_patterns?(path, patterns) do
-        Phoenix.PubSub.broadcast(
-          socket.pubsub_server,
-          to_string(topic),
-          {{:combo, :live_reloader}, topic, path}
-        )
       end
     end
 
