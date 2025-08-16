@@ -81,12 +81,6 @@ defmodule Combo.Endpoint.Supervisor do
     conf = Keyword.drop(secret_conf, [:secret_key_base])
     server? = server?(conf)
 
-    if conf[:instrumenters] do
-      Logger.warning(
-        ":instrumenters configuration for #{inspect(mod)} is deprecated and has no effect"
-      )
-    end
-
     if server? and conf[:code_reloader] do
       Combo.CodeReloader.Server.check_symlinks()
     end
@@ -216,7 +210,6 @@ defmodule Combo.Endpoint.Supervisor do
       reloadable_compilers: [:elixir, :app]
     ]
   end
-
 
   @doc """
   Callback that changes the configuration from the app callback.
