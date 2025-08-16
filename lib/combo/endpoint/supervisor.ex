@@ -64,6 +64,7 @@ defmodule Combo.Endpoint.Supervisor do
         socket_children(mod, conf, :child_spec) ++
         server_children(mod, conf, server?) ++
         socket_children(mod, conf, :drainer_spec) ++
+        live_reloader_children(mod, conf, server?) ++
         watcher_children(mod, conf, server?)
 
     Supervisor.init(children, strategy: :one_for_one)
@@ -129,6 +130,16 @@ defmodule Combo.Endpoint.Supervisor do
 
       true ->
         []
+    end
+  end
+
+  defp live_reloader_children(mod, conf, server?) do
+    config = conf[:live_reloader]
+
+    if server? && Combo.LiveReloader.enabled?(config) do
+      Combo.LiveReloader.child_specs(mod)
+    else
+      []
     end
   end
 

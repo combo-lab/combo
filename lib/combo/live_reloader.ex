@@ -149,6 +149,20 @@ defmodule Combo.LiveReloader do
   a full page load.
   """
 
+  ## Setup
+
+  @doc false
+  def enabled?(config) do
+    match?([_ | _], config[:patterns])
+  end
+
+  @doc false
+  def child_specs(endpoint) do
+    [{Combo.LiveReloader.FileSystemListener, endpoint}]
+  end
+
+  ## Plug
+
   import Plug.Conn
 
   @behaviour Plug
@@ -198,9 +212,8 @@ defmodule Combo.LiveReloader do
   def call(conn, _) do
     endpoint = conn.private.combo_endpoint
     config = endpoint.config(:live_reloader)
-    patterns_set? = match?([_ | _], config[:patterns])
 
-    if patterns_set? do
+    if enabled?(config) do
       before_send_inject_reloader(conn, endpoint, config)
     else
       conn
@@ -270,6 +283,5 @@ defmodule Combo.LiveReloader do
   end
 
   defp get_target_window(:parent), do: "parent"
-
   defp get_target_window(_), do: "top"
 end

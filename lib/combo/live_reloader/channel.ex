@@ -3,27 +3,25 @@ defmodule Combo.LiveReloader.Channel do
 
   use Combo.Channel
   require Logger
+  alias Combo.LiveReloader.FileSystemListener
 
   def join("combo:live_reload", _msg, socket) do
-    # TODO: change it to ?
-    # {:ok, _} = Application.ensure_all_started(:phoenix_live_reload)
-    # For a quick test
-    Combo.LiveReloader.Application.start(nil, nil)
+    endpoint = socket.endpoint
 
-    if Process.whereis(:combo_live_reloader_file_monitor) do
-      FileSystem.subscribe(:combo_live_reloader_file_monitor)
+    case FileSystemListener.subscribe(endpoint) do
+      :ok ->
+        config = endpoint.config(:live_reloader)
 
-      config = socket.endpoint.config(:live_reloader)
+        socket =
+          socket
+          |> assign(:patterns, config[:patterns] || [])
+          |> assign(:debounce, config[:debounce] || 0)
+          |> assign(:notify_patterns, config[:notify] || [])
 
-      socket =
-        socket
-        |> assign(:patterns, config[:patterns] || [])
-        |> assign(:debounce, config[:debounce] || 0)
-        |> assign(:notify_patterns, config[:notify] || [])
+        {:ok, %{}, socket}
 
-      {:ok, %{}, socket}
-    else
-      {:error, %{message: "Combo.LiveReloader's backend is not running"}}
+      :error ->
+        {:error, %{message: "Combo.LiveReloader.FileSystemListener is not running"}}
     end
   end
 

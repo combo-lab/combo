@@ -1,28 +1,27 @@
-defmodule Combo.LiveReloader.Application do
+defmodule Combo.LiveReloader.FileSystemListener do
   @moduledoc false
 
-  use Application
   require Logger
   alias Combo.Env
 
-  # 1. rewrite it as dynamic supervisor?
-  # 2. create one every endpoint?
-
-  @impl Application
-  def start(_type, _args) do
-    children = [%{id: __MODULE__, start: {__MODULE__, :start_link, []}}]
-    Supervisor.start_link(children, strategy: :one_for_one)
+  def child_spec(args) do
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, [args]},
+      restart: :transient
+    }
   end
 
-  def start_link do
+  def start_link(endpoint) do
+    name = build_name(endpoint)
+
     dirs = Env.get_env(:live_reloader, :dirs, [""])
     backend = Env.get_env(:live_reloader, :backend)
     backend_opts = Env.get_env(:live_reloader, :backend_opts, [])
 
     opts =
       [
-        # TODO:
-        name: :combo_live_reloader_file_monitor,
+        name: name,
         dirs: Enum.map(dirs, &Path.absname/1)
       ] ++ backend_opts
 
@@ -46,5 +45,20 @@ defmodule Combo.LiveReloader.Application do
 
         other
     end
+  end
+
+  def subscribe(endpoint) do
+    name = build_name(endpoint)
+
+    if Process.whereis(name) do
+      :ok = FileSystem.subscribe(name)
+      :ok
+    else
+      :error
+    end
+  end
+
+  defp build_name(endpoint) do
+    Module.concat(endpoint, __MODULE__)
   end
 end

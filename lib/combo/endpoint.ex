@@ -439,8 +439,8 @@ defmodule Combo.Endpoint do
       # Compile-time configuration checking
       # This ensures that, if a compile-time configuration is overwritten at runtime,
       # the application won't boot.
-      var!(live_reloading?) =
-        !!Application.compile_env(@otp_app, [__MODULE__, :live_reloader], false)
+      live_reloader = Application.compile_env(@otp_app, [__MODULE__, :live_reloader])
+      var!(live_reloading?) = Combo.LiveReloader.enabled?(live_reloader)
 
       var!(code_reloading?) =
         Application.compile_env(@otp_app, [__MODULE__, :code_reloader], false)
