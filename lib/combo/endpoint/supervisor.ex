@@ -31,33 +31,6 @@ defmodule Combo.Endpoint.Supervisor do
 
     secret_conf =
       cond do
-        Code.ensure_loaded?(mod) and function_exported?(mod, :init, 2) ->
-          IO.warn(
-            """
-            your #{inspect(mod)} defines a init/2 callback, which is now deprecated. \
-            This callback is invoked when your endpoint is initialized as part of your supervision tree. \
-            Instead, you should either:
-
-            1. Move all dynamic configuration to config/runtime.exs (preferred). For example:
-
-                # config/runtime.exs
-                import Config
-
-                if config_env() == :prod do
-                  config #{inspect(otp_app)}, #{inspect(mod)},
-                    http: [:inet6, port: System.fetch_env!("PORT")]
-                end
-
-            2. Pass the configuration you returned from the `init/2` callback \
-            as additional options when starting the endpoint in your supervision tree. \
-            For example: {#{inspect(mod)}, some_extra_options: true}
-            """,
-            []
-          )
-
-          {:ok, init_conf} = mod.init(:supervisor, env_conf)
-          init_conf
-
         is_nil(Application.get_env(otp_app, mod)) ->
           Logger.warning(
             "no configuration found for otp_app #{inspect(otp_app)} and module #{inspect(mod)}"
