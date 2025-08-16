@@ -21,7 +21,7 @@ defmodule Combo.LiveReloader.Channel do
         {:ok, %{}, socket}
 
       :error ->
-        {:error, %{message: "Combo.LiveReloader.FileSystemListener is not running"}}
+        {:error, %{message: "#{inspect(FileSystemListener)} is not running"}}
     end
   end
 
@@ -32,7 +32,7 @@ defmodule Combo.LiveReloader.Channel do
       notify_patterns: notify_patterns
     } = socket.assigns
 
-    if matches_any_pattern?(path, patterns) do
+    if match_patterns?(path, patterns) do
       ext = Path.extname(path)
 
       for {path, ext} <- [{path, ext} | debounce(debounce, [ext], patterns)] do
@@ -43,7 +43,7 @@ defmodule Combo.LiveReloader.Channel do
     end
 
     for {topic, patterns} <- notify_patterns do
-      if matches_any_pattern?(path, patterns) do
+      if match_patterns?(path, patterns) do
         Phoenix.PubSub.broadcast(
           socket.pubsub_server,
           to_string(topic),
@@ -53,6 +53,14 @@ defmodule Combo.LiveReloader.Channel do
     end
 
     {:noreply, socket}
+  end
+
+  defp match_patterns?(path, patterns) do
+    path = to_string(path)
+
+    Enum.any?(patterns, fn pattern ->
+      String.match?(path, pattern) and not String.match?(path, ~r{(^|/)_build/})
+    end)
   end
 
   defp debounce(0, _exts, _patterns), do: []
@@ -70,20 +78,12 @@ defmodule Combo.LiveReloader.Channel do
       {:file_event, _pid, {path, _event}} ->
         ext = Path.extname(path)
 
-        if matches_any_pattern?(path, patterns) and ext not in exts do
+        if match_patterns?(path, patterns) and ext not in exts do
           [{path, ext} | debounce([ext | exts], patterns)]
         else
           debounce(exts, patterns)
         end
     end
-  end
-
-  defp matches_any_pattern?(path, patterns) do
-    path = to_string(path)
-
-    Enum.any?(patterns, fn pattern ->
-      String.match?(path, pattern) and not String.match?(path, ~r{(^|/)_build/})
-    end)
   end
 
   defp remove_leading_dot("." <> rest), do: rest

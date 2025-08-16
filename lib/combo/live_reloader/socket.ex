@@ -4,10 +4,10 @@ defmodule Combo.LiveReloader.Socket do
   """
 
   use Combo.Socket, log: false
+  alias Combo.LiveReloader.Channel
 
-  channel "combo:live_reload", Combo.LiveReloader.Channel
+  channel "combo:live_reload", Channel
 
   def connect(_params, socket), do: {:ok, socket}
-
   def id(_socket), do: nil
 end
