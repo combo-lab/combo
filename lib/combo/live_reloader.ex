@@ -50,7 +50,8 @@ defmodule Combo.LiveReloader do
       a keyword list of atom keys and string values.
 
     * `:debounce` - an integer in milliseconds to wait before reloading web
-      pages. Default to `100`.
+      pages. This prevents rapid successive reloads when multiple files change
+      simultaneously. Default to `100`.
 
     * `:target_window` - the window to be reloaded. Expects `:parent` or `:top`
       . Defaults to `:parent`.
@@ -166,7 +167,7 @@ defmodule Combo.LiveReloader do
     config = endpoint.config(:live_reloader)
 
     path = endpoint.path(config[:path] || "/combo/live_reload/socket")
-    interval = config[:interval] || 100
+    debounce = config[:debounce] || 100
     target_window = config[:target_window] || :parent
     full_reload_on_css_changes? = config[:full_reload_on_css_changes] || false
 
@@ -181,11 +182,11 @@ defmodule Combo.LiveReloader do
         var LiveReloader = Combo.LiveReloader.default;
 
         var path = "#{path}";
-        var interval = #{interval};
+        var debounceTime = #{debounce};
         var targetWindow = "#{target_window}";
         var fullReloadOnCssChanges = #{full_reload_on_css_changes?};
 
-        window.liveReloader = new LiveReloader(path, interval, targetWindow, fullReloadOnCssChanges);
+        window.liveReloader = new LiveReloader(path, debounceTime, targetWindow, fullReloadOnCssChanges);
         window.liveReloader.enable();
       })();
     </script>
