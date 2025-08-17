@@ -29,7 +29,7 @@ defmodule Combo.LiveReloader do
   The following options are supported:
 
     * `:patterns` - a list of patterns to trigger the live reloading. This
-      option is required to enable any live reloading.
+      option is required to enable live reloading.
 
     * `:interval` - Default to `100`ms. It's useful when you think the live
       reloading is triggering too fast.
@@ -107,9 +107,8 @@ defmodule Combo.LiveReloader do
         dirs: [
           "priv/static",
           "priv/gettext",
-          "lib/demo/web/live",
-          "lib/demo/web/views",
-          "lib/demo/web/templates",
+          "lib/demo/web/layouts",
+          "lib/demo/web/controllers",
           "../another_project/priv/static", # Contents of this directory is not watched
           "/another_project/priv/static",   # Contents of this directory is not watched
         ],
@@ -225,21 +224,21 @@ defmodule Combo.LiveReloader do
     config = endpoint.config(:live_reloader)
 
     if enabled?(config) do
-      before_send_inject_reloader(conn, endpoint, config)
+      inject_live_reloader(conn, endpoint, config)
     else
       conn
     end
   end
 
-  defp before_send_inject_reloader(conn, endpoint, config) do
+  defp inject_live_reloader(conn, endpoint, config) do
     register_before_send(conn, fn conn ->
-      if conn.resp_body != nil and html?(conn) do
+      if inject?(conn) do
         resp_body = IO.iodata_to_binary(conn.resp_body)
 
         if has_body?(resp_body) and :code.is_loaded(endpoint) do
           {head, [last]} = Enum.split(String.split(resp_body, "</body>"), -1)
           head = Enum.intersperse(head, "</body>")
-          body = [head, reload_assets_tag(conn, config), "</body>" | last]
+          body = [head, iframe_tag(conn, config), "</body>" | last]
           put_in(conn.resp_body, body)
         else
           conn
@@ -250,16 +249,21 @@ defmodule Combo.LiveReloader do
     end)
   end
 
-  defp html?(conn) do
-    case get_resp_header(conn, "content-type") do
-      [] -> false
-      [type | _] -> String.starts_with?(type, "text/html")
-    end
+  defp inject?(conn) do
+    html? =
+      case get_resp_header(conn, "content-type") do
+        [] -> false
+        [type | _] -> String.starts_with?(type, "text/html")
+      end
+
+    has_resp_body? = conn.resp_body != nil
+
+    html? and has_resp_body?
   end
 
   defp has_body?(resp_body), do: String.contains?(resp_body, "<body")
 
-  defp reload_assets_tag(conn, config) do
+  defp iframe_tag(conn, config) do
     endpoint = endpoint_module!(conn)
     path = endpoint.path("/combo/live_reload/iframe")
 
