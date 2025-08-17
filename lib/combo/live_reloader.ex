@@ -159,31 +159,39 @@ defmodule Combo.LiveReloader do
 
   ## Plug
 
+  import Combo.Conn, only: [endpoint_module!: 1]
   import Plug.Conn
 
   @behaviour Plug
 
   live_reloader_js = Application.app_dir(:combo, "priv/static/live_reloader.js")
+  @live_reloader_js File.read!(live_reloader_js)
   @external_resource live_reloader_js
 
-  @html_before """
-  <!DOCTYPE html>
-  <html><body>
-  <script>
-  #{File.read!(live_reloader_js) |> String.replace("//# sourceMappingURL=", "// ")}
-  """
-
-  @html_after """
-  </script>
-  </body></html>
-  """
+  live_reloader_js_map = Application.app_dir(:combo, "priv/static/live_reloader.js.map")
+  @live_reloader_js_map File.read!(live_reloader_js_map)
+  @external_resource live_reloader_js_map
 
   def init(opts) do
     opts
   end
 
-  def call(%Plug.Conn{path_info: ["combo", "live_reload", "frame"]} = conn, _) do
-    endpoint = conn.private.combo_endpoint
+  def call(%Plug.Conn{path_info: ["combo", "live_reload", "live_reloader.js"]} = conn, _) do
+    conn
+    |> put_resp_content_type("text/javascript")
+    |> send_resp(200, @live_reloader_js)
+    |> halt()
+  end
+
+  def call(%Plug.Conn{path_info: ["combo", "live_reload", "live_reloader.js.map"]} = conn, _) do
+    conn
+    |> put_resp_content_type("application/json")
+    |> send_resp(200, @live_reloader_js_map)
+    |> halt()
+  end
+
+  def call(%Plug.Conn{path_info: ["combo", "live_reload", "iframe"]} = conn, _) do
+    endpoint = endpoint_module!(conn)
     config = endpoint.config(:live_reloader)
 
     url = config[:url] || endpoint.path("/combo/live_reload/socket")
@@ -193,20 +201,26 @@ defmodule Combo.LiveReloader do
 
     conn
     |> put_resp_content_type("text/html")
-    |> send_resp(200, [
-      @html_before,
-      ~s[var url = "#{url}";\n],
-      ~s[var interval = #{interval};\n],
-      ~s[var targetWindow = "#{target_window}";\n],
-      ~s[var reloadPageOnCssChanges = #{reload_page_on_css_changes?};\n],
-      ~s[Combo.LiveReloader.init(url, interval, targetWindow, reloadPageOnCssChanges);],
-      @html_after
-    ])
+    |> send_resp(200, """
+    <!DOCTYPE html>
+    <html><body>
+    <script src="#{endpoint.path("/combo/live_reload/live_reloader.js")}"></script>
+    <script>
+      (function() {
+        var url = "#{url}";
+        var interval = #{interval};
+        var targetWindow = "#{target_window}";
+        var reloadPageOnCssChanges = #{reload_page_on_css_changes?};
+        Combo.LiveReloader.init(url, interval, targetWindow, reloadPageOnCssChanges);
+      })();
+    </script>
+    </body></html>
+    """)
     |> halt()
   end
 
   def call(conn, _) do
-    endpoint = conn.private.combo_endpoint
+    endpoint = endpoint_module!(conn)
     config = endpoint.config(:live_reloader)
 
     if enabled?(config) do
@@ -245,7 +259,8 @@ defmodule Combo.LiveReloader do
   defp has_body?(resp_body), do: String.contains?(resp_body, "<body")
 
   defp reload_assets_tag(conn, config) do
-    path = conn.private.combo_endpoint.path("/combo/live_reload/frame")
+    endpoint = endpoint_module!(conn)
+    path = endpoint.path("/combo/live_reload/iframe")
 
     attrs =
       Keyword.merge(
