@@ -15,7 +15,6 @@ defmodule Combo.LiveReloader.Channel do
         socket =
           socket
           |> assign(:patterns, config[:patterns] || [])
-          |> assign(:debounce, config[:debounce] || 0)
 
         {:ok, %{}, socket}
 
@@ -25,22 +24,43 @@ defmodule Combo.LiveReloader.Channel do
   end
 
   def handle_info({:file_event, _pid, {path, _event}}, socket) do
-    %{
-      patterns: patterns,
-      debounce: debounce
-    } = socket.assigns
+    %{patterns: patterns} = socket.assigns
 
-    if match_patterns?(path, patterns) do
-      ext = Path.extname(path)
+    file_events = collect_file_events(path, patterns, [])
 
-      for {path, ext} <- [{path, ext} | debounce(debounce, [ext], patterns)] do
-        asset_type = remove_leading_dot(ext)
+    grouped_file_events =
+      Enum.group_by(
+        file_events,
+        fn {type, _path} -> type end,
+        fn {_type, path} -> path end
+      )
+
+    for {type, paths} <- grouped_file_events do
+      for path <- paths do
         Logger.debug("Live reload: #{Path.relative_to_cwd(path)}")
-        push(socket, "assets_change", %{asset_type: asset_type})
       end
+
+      push(socket, "assets_change", %{asset_type: type})
     end
 
     {:noreply, socket}
+  end
+
+  defp collect_file_events(path, patterns, acc) do
+    acc =
+      if match_patterns?(path, patterns) do
+        type = build_file_type(path)
+        [{type, path} | acc]
+      else
+        acc
+      end
+
+    receive do
+      {:file_event, _pid, {path, _event}} ->
+        collect_file_events(path, patterns, acc)
+    after
+      0 -> Enum.reverse(acc)
+    end
   end
 
   defp match_patterns?(path, patterns) do
@@ -51,27 +71,10 @@ defmodule Combo.LiveReloader.Channel do
     end)
   end
 
-  defp debounce(0, _exts, _patterns), do: []
-
-  defp debounce(time, exts, patterns) when is_integer(time) and time > 0 do
-    Process.send_after(self(), :debounced, time)
-    debounce(exts, patterns)
-  end
-
-  defp debounce(exts, patterns) do
-    receive do
-      :debounced ->
-        []
-
-      {:file_event, _pid, {path, _event}} ->
-        ext = Path.extname(path)
-
-        if match_patterns?(path, patterns) and ext not in exts do
-          [{path, ext} | debounce([ext | exts], patterns)]
-        else
-          debounce(exts, patterns)
-        end
-    end
+  defp build_file_type(path) do
+    path
+    |> Path.extname()
+    |> remove_leading_dot()
   end
 
   defp remove_leading_dot("." <> rest), do: rest

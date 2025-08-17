@@ -43,9 +43,6 @@ defmodule Combo.LiveReloader do
     * `:patterns` - a list of patterns to trigger the reloading. This option
       is required to enable live reloading.
 
-    * `:debounce` - an integer in milliseconds to wait before sending reload
-      events to the browser. Defaults to `0`.
-
     * `:path` - the path of socket's mount-point.
       Defaults to `/combo/live_reload/socket`.
 
