@@ -99,8 +99,8 @@ function buildReloadStrategies(targetWindow, fullReloadOnCssChanges) {
 }
 
 class LiveReloader {
-  constructor(url, interval, targetWindow, fullReloadOnCssChanges) {
-    this.socket = new Socket(url)
+  constructor(path, interval, targetWindow, fullReloadOnCssChanges) {
+    this.socket = new Socket(path)
     this.interval = interval
     this.reloadStrategies = buildReloadStrategies(targetWindow, fullReloadOnCssChanges)
     this.enabledOnce = false

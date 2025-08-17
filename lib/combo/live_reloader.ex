@@ -4,7 +4,7 @@ defmodule Combo.LiveReloader do
 
   ## How does it work?
 
- `Combo.LiveReloader` injects JavaScript code into web pages.
+  `Combo.LiveReloader` injects JavaScript code into web pages.
 
   The injected JavaScript code will create a WebSocket connection to the server,
   and wait the messages sent from server.
@@ -170,8 +170,8 @@ defmodule Combo.LiveReloader do
 
     path = endpoint.path(config[:path] || "/combo/live_reload/socket")
     interval = config[:interval] || 100
-    target_window = get_target_window(config[:target_window] || :parent)
-    reload_page_on_css_changes? = config[:reload_page_on_css_changes] || false
+    target_window = config[:target_window] || :parent
+    full_reload_on_css_changes? = config[:full_reload_on_css_changes] || false
 
     conn
     |> put_resp_content_type("text/html")
@@ -183,12 +183,12 @@ defmodule Combo.LiveReloader do
       (function() {
         var LiveReloader = Combo.LiveReloader.default;
 
-        var url = "#{path}";
+        var path = "#{path}";
         var interval = #{interval};
         var targetWindow = "#{target_window}";
-        var fullReloadOnCssChanges = #{reload_page_on_css_changes?};
+        var fullReloadOnCssChanges = #{full_reload_on_css_changes?};
 
-        window.liveReloader = new LiveReloader(url, interval, targetWindow, fullReloadOnCssChanges);
+        window.liveReloader = new LiveReloader(path, interval, targetWindow, fullReloadOnCssChanges);
         window.liveReloader.enable();
       })();
     </script>
@@ -253,7 +253,4 @@ defmodule Combo.LiveReloader do
 
     IO.iodata_to_binary(["<iframe", escape_attrs(attrs), "></iframe>"])
   end
-
-  defp get_target_window(:parent), do: "parent"
-  defp get_target_window(_), do: "top"
 end
