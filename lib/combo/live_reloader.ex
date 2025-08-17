@@ -164,29 +164,29 @@ defmodule Combo.LiveReloader do
 
   @behaviour Plug
 
-  live_reloader_js = Application.app_dir(:combo, "priv/static/live_reloader.js")
-  @live_reloader_js File.read!(live_reloader_js)
-  @external_resource live_reloader_js
+  live_reloader_min_js = Application.app_dir(:combo, "priv/static/live_reloader.min.js")
+  @live_reloader_min_js File.read!(live_reloader_min_js)
+  @external_resource live_reloader_min_js
 
-  live_reloader_js_map = Application.app_dir(:combo, "priv/static/live_reloader.js.map")
-  @live_reloader_js_map File.read!(live_reloader_js_map)
-  @external_resource live_reloader_js_map
+  live_reloader_min_js_map = Application.app_dir(:combo, "priv/static/live_reloader.min.js.map")
+  @live_reloader_min_js_map File.read!(live_reloader_min_js_map)
+  @external_resource live_reloader_min_js_map
 
   def init(opts) do
     opts
   end
 
-  def call(%Plug.Conn{path_info: ["combo", "live_reload", "live_reloader.js"]} = conn, _) do
+  def call(%Plug.Conn{path_info: ["combo", "live_reload", "live_reloader.min.js"]} = conn, _) do
     conn
     |> put_resp_content_type("text/javascript")
-    |> send_resp(200, @live_reloader_js)
+    |> send_resp(200, @live_reloader_min_js)
     |> halt()
   end
 
-  def call(%Plug.Conn{path_info: ["combo", "live_reload", "live_reloader.js.map"]} = conn, _) do
+  def call(%Plug.Conn{path_info: ["combo", "live_reload", "live_reloader.min.js.map"]} = conn, _) do
     conn
     |> put_resp_content_type("application/json")
-    |> send_resp(200, @live_reloader_js_map)
+    |> send_resp(200, @live_reloader_min_js_map)
     |> halt()
   end
 
@@ -204,7 +204,7 @@ defmodule Combo.LiveReloader do
     |> send_resp(200, """
     <!DOCTYPE html>
     <html><body>
-    <script src="#{endpoint.path("/combo/live_reload/live_reloader.js")}"></script>
+    <script src="#{endpoint.path("/combo/live_reload/live_reloader.min.js")}"></script>
     <script>
       (function() {
         var LiveReloader = Combo.LiveReloader.default;

@@ -83,12 +83,13 @@ const htmlBuilds = createBuilds('./src/html', outdir, {
 })
 
 const liveReloaderBuilds = createBuilds('./src/live_reloader', outdir, {
-  'live_reloader.js': {
+  'live_reloader.min.js': {
     format: 'iife',
     platform: 'browser',
     target: 'es2016',
     bundle: true,
     sourcemap: true,
+    minify: true,
     globalName: 'Combo.LiveReloader',
   },
 })
