@@ -40,11 +40,11 @@ defmodule Combo.LiveReloader do
     * `:iframe_attrs` - attrs to be given to the iframe injected by live
       reload. Expects a keyword list of atom keys and string values.
 
-    * `:target_window` - the window that will be reloaded. Valid values are
-      `:top` and `:parent`. Defaults to `:parent`.
+    * `:path` - the path of socket's mount-point.
+      Defaults to `/combo/live_reload/socket`.
 
-    * `:url` - the URL of the live reload socket connection. Defaults to
-      `/combo/live_reload/socket`.
+    * `:target_window` - the window that will be reloaded.
+      Valid values are `:top` and `:parent`. Defaults to `:parent`.
 
     * `:reload_page_on_css_changes` - If true, CSS changes will trigger a full
       page reload like other asset types instead of the default hot reload.
@@ -194,7 +194,7 @@ defmodule Combo.LiveReloader do
     endpoint = endpoint_module!(conn)
     config = endpoint.config(:live_reloader)
 
-    url = config[:url] || endpoint.path("/combo/live_reload/socket")
+    path = endpoint.path(config[:path] || "/combo/live_reload/socket")
     interval = config[:interval] || 100
     target_window = get_target_window(config[:target_window] || :parent)
     reload_page_on_css_changes? = config[:reload_page_on_css_changes] || false
@@ -207,7 +207,7 @@ defmodule Combo.LiveReloader do
     <script src="#{endpoint.path("/combo/live_reload/live_reloader.js")}"></script>
     <script>
       (function() {
-        var url = "#{url}";
+        var url = "#{path}";
         var interval = #{interval};
         var targetWindow = "#{target_window}";
         var reloadPageOnCssChanges = #{reload_page_on_css_changes?};
