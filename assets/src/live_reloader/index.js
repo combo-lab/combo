@@ -145,7 +145,7 @@ class LiveReloader {
   }
 
   dispatchConnected() {
-    parent.dispatchEvent(new CustomEvent('combo:live_reload:attached', { detail: this }))
+    parent.dispatchEvent(new CustomEvent('combo:live_reloader:connected', { detail: this }))
   }
 }
 
