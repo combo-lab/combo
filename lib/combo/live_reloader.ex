@@ -207,11 +207,15 @@ defmodule Combo.LiveReloader do
     <script src="#{endpoint.path("/combo/live_reload/live_reloader.js")}"></script>
     <script>
       (function() {
+        var LiveReloader = Combo.LiveReloader.default;
+
         var url = "#{path}";
         var interval = #{interval};
         var targetWindow = "#{target_window}";
-        var reloadPageOnCssChanges = #{reload_page_on_css_changes?};
-        Combo.LiveReloader.init(url, interval, targetWindow, reloadPageOnCssChanges);
+        var fullReloadOnCssChanges = #{reload_page_on_css_changes?};
+
+        window.liveReloader = new LiveReloader(url, interval, targetWindow, fullReloadOnCssChanges);
+        window.liveReloader.enable();
       })();
     </script>
     </body></html>
