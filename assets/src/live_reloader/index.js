@@ -1,4 +1,5 @@
 import { Socket } from '../socket'
+import debounce from 'lodash.debounce'
 
 function getFreshUrl(url) {
   const date = Math.round(Date.now() / 1000).toString()
@@ -64,6 +65,7 @@ function repaint() {
 function buildReloadStrategies(targetWindow, fullReloadOnCssChanges) {
   const fullReloadTargetWindow = {
     type: 'full_reload',
+    priority: 9,
     fun: () => {
       window[targetWindow].location.reload()
     },
@@ -71,6 +73,7 @@ function buildReloadStrategies(targetWindow, fullReloadOnCssChanges) {
 
   const hotReloadCSS = {
     type: 'hot_reload',
+    priority: 1,
     fun: () => {
       const reloadableLinkElements = window.parent.document.querySelectorAll(
         'link[rel=stylesheet]:not([data-no-reload]):not([data-pending-removal])',
@@ -99,14 +102,15 @@ function buildReloadStrategies(targetWindow, fullReloadOnCssChanges) {
 }
 
 class LiveReloader {
-  constructor(path, interval, targetWindow, fullReloadOnCssChanges) {
-    this.socket = new Socket(path)
-    this.interval = interval
-    this.reloadStrategies = buildReloadStrategies(targetWindow, fullReloadOnCssChanges)
+  constructor(path, debounceTime, targetWindow, fullReloadOnCssChanges) {
     this.enabledOnce = false
-  }
+    this.reloadQueue = []
 
-  enable() {
+    this.socket = new Socket(path)
+    this.debouncedReload = debounce(this.reload, debounceTime)
+    this.reloadStrategies = buildReloadStrategies(targetWindow, fullReloadOnCssChanges)
+
+    this.channel = this.socket.channel('combo:live_reload', {})
     this.socket.onOpen(() => {
       if (this.enabledOnce) {
         return
@@ -120,21 +124,13 @@ class LiveReloader {
         parent.addEventListener('load', () => this.dispatchConnected())
       }
     })
-
-    this.channel = this.socket.channel('combo:live_reload', {})
-    this.channel.on('assets_change', (msg) => {
-      const {asset_type: asset_type} = msg
-      const reloadStrategies = this.reloadStrategies[asset_type] || this.reloadStrategies.__default__
-
-      setTimeout(() => {
-        const { type: reload_type, fun: reload_fun } = reloadStrategies
-
-        if (reload_type == 'full_reload') {
-          this.channel.off('assets_change')
-        }
-        reload_fun()
-      }, this.interval)
+    this.channel.on('reload', (msg) => {
+      const { type: type } = msg
+      this.scheduleReload(type)
     })
+  }
+
+  enable() {
     this.channel.join()
     this.socket.connect()
   }
@@ -142,10 +138,37 @@ class LiveReloader {
   disable() {
     this.channel.leave()
     this.socket.disconnect()
+
+    this.enabledOnce = false
+    this.reloadQueue = []
   }
 
   dispatchConnected() {
     parent.dispatchEvent(new CustomEvent('combo:live_reloader:connected', { detail: this }))
+  }
+
+  scheduleReload(type) {
+    this.reloadQueue.push(type)
+    this.debouncedReload()
+  }
+
+  reload() {
+    const reloadStrategies = this.reloadQueue.map(type => this.getReloadStrategy(type))
+    const finalReloadStrategy = reloadStrategies.reduce((acc, current) => {
+      return current.priority > acc.priority ? current : acc
+    })
+
+    const { type: reload_type, fun: reload_fun } = finalReloadStrategy
+    if (reload_type == 'full_reload') {
+      this.channel.off('reload')
+    }
+    reload_fun()
+
+    this.reloadQueue = []
+  }
+
+  getReloadStrategy(type) {
+    return this.reloadStrategies[type] || this.reloadStrategies.__default__
   }
 }
 

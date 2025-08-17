@@ -40,7 +40,7 @@ defmodule Combo.LiveReloader.Channel do
         Logger.debug("Live reload: #{Path.relative_to_cwd(path)}")
       end
 
-      push(socket, "assets_change", %{asset_type: type})
+      push(socket, "reload", %{type: type})
     end
 
     {:noreply, socket}
