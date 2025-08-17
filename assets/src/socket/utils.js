@@ -2,8 +2,7 @@
 export let closure = (value) => {
   if (typeof value === 'function') {
     return value
-  }
-  else {
+  } else {
     let closure = function () {
       return value
     }

@@ -9,8 +9,7 @@ export default {
   encode(msg, callback) {
     if (msg.payload.constructor === ArrayBuffer) {
       return callback(this.binaryEncode(msg))
-    }
-    else {
+    } else {
       let payload = [msg.join_ref, msg.ref, msg.topic, msg.event, msg.payload]
       return callback(JSON.stringify(payload))
     }
@@ -19,8 +18,7 @@ export default {
   decode(rawPayload, callback) {
     if (rawPayload.constructor === ArrayBuffer) {
       return callback(this.binaryDecode(rawPayload))
-    }
-    else {
+    } else {
       let [join_ref, ref, topic, event, payload] = JSON.parse(rawPayload)
       return callback({ join_ref, ref, topic, event, payload })
     }

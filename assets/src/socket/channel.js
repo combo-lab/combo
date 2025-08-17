@@ -97,8 +97,7 @@ export default class Channel {
       throw new Error(
         'tried to join multiple times. \'join\' can only be called a single time per channel instance',
       )
-    }
-    else {
+    } else {
       this.timeout = timeout
       this.joinedOnce = true
       this.rejoin()
@@ -209,8 +208,7 @@ export default class Channel {
     )
     if (this.canPush()) {
       pushEvent.send()
-    }
-    else {
+    } else {
       pushEvent.startTimeout()
       this.pushBuffer.push(pushEvent)
     }
@@ -286,8 +284,7 @@ export default class Channel {
           joinRef,
         })
       return false
-    }
-    else {
+    } else {
       return true
     }
   }

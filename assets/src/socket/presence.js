@@ -35,8 +35,7 @@ export default class Presence {
 
       if (this.inPendingSyncState()) {
         this.pendingDiffs.push(diff)
-      }
-      else {
+      } else {
         this.state = Presence.syncDiff(this.state, diff, onJoin, onLeave)
         onSync()
       }
@@ -98,8 +97,7 @@ export default class Presence {
           leaves[key] = this.clone(currentPresence)
           leaves[key].metas = leftMetas
         }
-      }
-      else {
+      } else {
         joins[key] = newPresence
       }
     })

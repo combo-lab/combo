@@ -1,5 +1,4 @@
 import globals from 'globals'
-import js from '@eslint/js'
 import stylistic from '@stylistic/eslint-plugin'
 
 export default [
@@ -14,8 +13,9 @@ export default [
       sourceType: 'module',
     },
   },
-  js.configs.recommended,
-  stylistic.configs.recommended,
+  stylistic.configs.customize({
+    braceStyle: '1tbs',
+  }),
   {
     rules: {
       'no-unused-vars': [

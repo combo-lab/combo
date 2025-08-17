@@ -5,16 +5,13 @@ export default class Ajax {
     if (global.XDomainRequest) {
       let req = new global.XDomainRequest() // IE8, IE9
       return this.xdomainRequest(req, method, endPoint, body, timeout, ontimeout, callback)
-    }
-    else if (global.XMLHttpRequest) {
+    } else if (global.XMLHttpRequest) {
       let req = new global.XMLHttpRequest() // IE7+, Firefox, Chrome, Opera, Safari
       return this.xhrRequest(req, method, endPoint, headers, body, timeout, ontimeout, callback)
-    }
-    else if (global.fetch && global.AbortController) {
+    } else if (global.fetch && global.AbortController) {
       // Fetch with AbortController for modern browsers
       return this.fetchRequest(method, endPoint, headers, body, timeout, ontimeout, callback)
-    }
-    else {
+    } else {
       throw new Error('No suitable XMLHttpRequest implementation found')
     }
   }
@@ -39,8 +36,7 @@ export default class Ajax {
       .catch((err) => {
         if (err.name === 'AbortError' && ontimeout) {
           ontimeout()
-        }
-        else {
+        } else {
           callback && callback(null)
         }
       })
@@ -93,8 +89,7 @@ export default class Ajax {
 
     try {
       return JSON.parse(resp)
-    }
-    catch {
+    } catch {
       console && console.log('failed to parse JSON response', resp)
       return null
     }
@@ -110,8 +105,7 @@ export default class Ajax {
       let paramVal = obj[key]
       if (typeof paramVal === 'object') {
         queryStr.push(this.serialize(paramVal, paramKey))
-      }
-      else {
+      } else {
         queryStr.push(encodeURIComponent(paramKey) + '=' + encodeURIComponent(paramVal))
       }
     }

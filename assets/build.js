@@ -105,7 +105,7 @@ function formatTime() {
     hour12: false,
     hour: '2-digit',
     minute: '2-digit',
-    second: '2-digit'
+    second: '2-digit',
   })
 }
 
@@ -134,7 +134,7 @@ async function main() {
                   build.onEnd((result) => {
                     if (result.errors.length > 0) {
                       console.log(`[${formatTime()}] ❌ ${outputName} - Build failed`)
-                      result.errors.forEach(error => {
+                      result.errors.forEach((error) => {
                         console.error(`  └─ ${error.text}`)
                         if (error.location) {
                           console.error(`     at ${error.location.file}:${error.location.line}:${error.location.column}`)
@@ -142,7 +142,7 @@ async function main() {
                       })
                     } else if (result.warnings.length > 0) {
                       console.log(`[${formatTime()}] ⚠️  ${outputName} - Built with warnings`)
-                      result.warnings.forEach(warning => {
+                      result.warnings.forEach((warning) => {
                         console.warn(`  └─ ${warning.text}`)
                         if (warning.location) {
                           console.warn(`     at ${warning.location.file}:${warning.location.line}:${warning.location.column}`)
@@ -152,14 +152,14 @@ async function main() {
                       console.log(`[${formatTime()}] ✅ Built ${outputName} successfully`)
                     }
                   })
-                }
+                },
               },
-              ...(config.plugins || [])
-            ]
+              ...(config.plugins || []),
+            ],
           }
 
           return await context(enhancedConfig)
-        })
+        }),
       )
 
       console.log('👀 Watching for changes... (Press Ctrl+C to stop)')
@@ -176,8 +176,7 @@ async function main() {
       await Promise.all(builds.map(config => build(config)))
       console.log('✅ All builds completed successfully')
     }
-  }
-  catch (error) {
+  } catch (error) {
     console.error('❌ Build failed:', error)
     process.exit(1)
   }

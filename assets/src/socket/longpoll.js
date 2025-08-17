@@ -76,8 +76,7 @@ export default class LongPoll {
         if (resp) {
           var { status, token, messages } = resp
           this.token = token
-        }
-        else {
+        } else {
           status = 0
         }
 
@@ -140,11 +139,9 @@ export default class LongPoll {
     }
     if (this.currentBatch) {
       this.currentBatch.push(body)
-    }
-    else if (this.awaitingBatchAck) {
+    } else if (this.awaitingBatchAck) {
       this.batchBuffer.push(body)
-    }
-    else {
+    } else {
       this.currentBatch = [body]
       this.currentBatchTimer = setTimeout(() => {
         this.batchSend(this.currentBatch)
@@ -165,8 +162,7 @@ export default class LongPoll {
         if (!resp || resp.status !== 200) {
           this.onerror(resp && resp.status)
           this.closeAndRetry(1011, 'internal server error', false)
-        }
-        else if (this.batchBuffer.length > 0) {
+        } else if (this.batchBuffer.length > 0) {
           this.batchSend(this.batchBuffer)
           this.batchBuffer = []
         }
@@ -188,8 +184,7 @@ export default class LongPoll {
     this.currentBatchTimer = null
     if (typeof CloseEvent !== 'undefined') {
       this.onclose(new CloseEvent('close', opts))
-    }
-    else {
+    } else {
       this.onclose(opts)
     }
   }

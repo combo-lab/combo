@@ -130,8 +130,7 @@ export default class Socket {
     if (this.transport !== LongPoll) {
       this.encode = opts.encode || this.defaultEncoder
       this.decode = opts.decode || this.defaultDecoder
-    }
-    else {
+    } else {
       this.encode = this.defaultEncoder
       this.decode = this.defaultDecoder
     }
@@ -154,16 +153,14 @@ export default class Socket {
     this.rejoinAfterMs = (tries) => {
       if (opts.rejoinAfterMs) {
         return opts.rejoinAfterMs(tries)
-      }
-      else {
+      } else {
         return [1000, 2000, 5000][tries - 1] || 10000
       }
     }
     this.reconnectAfterMs = (tries) => {
       if (opts.reconnectAfterMs) {
         return opts.reconnectAfterMs(tries)
-      }
-      else {
+      } else {
         return [10, 50, 100, 150, 200, 250, 500, 1000, 2000][tries - 1] || 5000
       }
     }
@@ -284,8 +281,7 @@ export default class Socket {
     }
     if (this.longPollFallbackMs && this.transport !== LongPoll) {
       this.connectWithFallback(LongPoll, this.longPollFallbackMs)
-    }
-    else {
+    } else {
       this.transportConnect()
     }
   }
@@ -510,8 +506,7 @@ export default class Socket {
       if (this.conn) {
         if (code) {
           this.conn.close(code, reason || '')
-        }
-        else {
+        } else {
           this.conn.close()
         }
       }
@@ -663,8 +658,7 @@ export default class Socket {
 
     if (this.isConnected()) {
       this.encode(data, result => this.conn.send(result))
-    }
-    else {
+    } else {
       this.sendBuffer.push(() => this.encode(data, result => this.conn.send(result)))
     }
   }
@@ -677,8 +671,7 @@ export default class Socket {
     let newRef = this.ref + 1
     if (newRef === this.ref) {
       this.ref = 0
-    }
-    else {
+    } else {
       this.ref = newRef
     }
 
