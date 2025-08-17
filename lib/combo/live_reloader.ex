@@ -1,6 +1,20 @@
 defmodule Combo.LiveReloader do
   @moduledoc """
-  Live reloader for development.
+  Reloads web pages when files change during development.
+
+  ## How does it work?
+
+ `Combo.LiveReloader` injects JavaScript code into web pages.
+
+  The injected JavaScript code will create a WebSocket connection to the server,
+  and wait the messages sent from server.
+
+  When a specified file changed, the server will sent a message to the web page
+  , and the web page will be full-reloaded or hot-reloaded in response. By
+  default:
+
+    * CSS file changes are hot-reloaded.
+    * other file changes are full-reloaded.
 
   ## Usage
 
@@ -12,11 +26,9 @@ defmodule Combo.LiveReloader do
         plug Combo.LiveReloader
       end
 
-  ## Configuration
-
-  LiveReloader is configured via the `:live_reloader` option of your endpoint
-  configuration. And, in general, the configuration is added to
-  `config/dev.exs`. For example:
+  Then, configure it via the `:live_reloader` option of your endpoint
+  configuration. In general, the configuration is added to `config/dev.exs`.
+  For example:
 
       config :demo, Demo.Web.Endpoint,
         live_reloader: [
@@ -28,62 +40,48 @@ defmodule Combo.LiveReloader do
 
   The following options are supported:
 
-    * `:patterns` - a list of patterns to trigger the live reloading. This
-      option is required to enable live reloading.
+    * `:patterns` - a list of patterns to trigger the reloading. This option
+      is required to enable live reloading.
 
-    * `:interval` - Default to `100`ms. It's useful when you think the live
-      reloading is triggering too fast.
-
-    * `:debounce` - an integer in milliseconds to wait before sending live
-      reload events to the browser. Defaults to `0`.
-
-    * `:iframe_attrs` - attrs to be given to the iframe injected by live
-      reload. Expects a keyword list of atom keys and string values.
+    * `:debounce` - an integer in milliseconds to wait before sending reload
+      events to the browser. Defaults to `0`.
 
     * `:path` - the path of socket's mount-point.
       Defaults to `/combo/live_reload/socket`.
 
-    * `:target_window` - the window that will be reloaded.
-      Valid values are `:top` and `:parent`. Defaults to `:parent`.
+    * `:iframe_attrs` - the attrs to be given to the injected iframe. Expects
+      a keyword list of atom keys and string values.
 
-    * `:reload_page_on_css_changes` - If true, CSS changes will trigger a full
-      page reload like other asset types instead of the default hot reload.
-      Useful when class names are determined at runtime, for example when
-      working with CSS modules. Defaults to `false`.
+    * `:interval` - an integer in milliseconds to wait before reloading web
+      pages. Default to `100`.
 
-  In an umbrella app, if you want to enable live reloading based on code
-  changes in sibling applications, set the `:reloadable_apps` option on your
-  endpoint to ensure the code will be recompiled, then add the dirs to
-  `:live_reloader` to trigger page reloads:
+    * `:target_window` - the window to be reloaded. Expects `:parent` or `:top`
+      . Defaults to `:parent`.
 
-      # in config/dev.exs
-      root_path =
-        __ENV__.file
-        |> Path.dirname()
-        |> Path.join("..")
-        |> Path.expand()
-
-      config :combo, :live_reloader, dirs: [
-        Path.join([root_path, "apps", "app1"]),
-        Path.join([root_path, "apps", "app2"]),
-      ]
-
-  You'll also want to be sure that the configured `:patterns` will match files
-  in the sibling application.
+    * `:full_reload_on_css_changes` - whether to trigger full reload on CSS
+      changes. If `true`, CSS changes will trigger a full reload like other
+      asset types instead of the default hot reload. Defaults to `false`.
 
   ## About `:target_window` option
 
-  Change the default target window to `:parent` to not reload the whole page
-  if a Combo app is shown inside an iframe. You can get the old behavior back
-  by setting the `:target_window` option to `:top`:
+    * If `:parent` is set, `window.parent` will be reloaded.
+    * If `:top` is set, `window.top` will be reloaded.
 
-      config :phoenix_live_reload, DemoWeb.Endpoint,
-        target_window: :top
+  ## Skipping remote CSS reload
+
+  In certain cases such as serving stylesheets from a remote host, you may wish
+  to prevent unnecessary reload of these stylesheets during development. For
+  this, you can include a `data-no-reload` attribute on the link tag.
+  For example:
+
+  ```html
+  <link rel="stylesheet" href="https://example.com/style.css" data-no-reload>
+  ```
 
   ## Backends
 
   This module uses [`FileSystem`](https://github.com/falood/file_system) to
-  watch the filesystem changes. It supports the following backends:
+  watch the file system changes. It supports the following backends:
 
     * `:fs_inotify` - available on Linux and BSD. It requires installing an
       extra package, check out [the wiki of inotify-tools](https://github.com/rvoicilas/inotify-tools/wiki)
@@ -92,16 +90,17 @@ defmodule Combo.LiveReloader do
     * `:fs_windows` - available on Windows.
     * `:fs_poll` - available on all operating systems.
 
-  In general, you don't need to configure it. But if you want, do it like:
+  In general, the backend is set automatically. But if you want to set it
+  manually, do it like:
 
       config :combo, :live_reloader, backend: :fs_poll
 
-  By default the entire application directory is watched by the backend.
-  However, with some environments and backends, this may be inefficient,
-  resulting in slow response times to file modifications. To account for
-  this, it's possible to explicitly declare a list of directories for the
-  backend to watch (they must be relative to the project root, otherwise
-  they are just ignored), and additional options for the backend:
+  By default the entire application directory is watched. However, with some
+  environments and backends, this may be inefficient, resulting in slow response
+  times to file modifications. To account for this, it's possible to explicitly
+  declare a list of directories for the backend to watch (they must be relative
+  to the project root, otherwise they are just ignored), and additional options
+  for the backend:
 
       config :combo, :live_reloader,
         dirs: [
@@ -117,31 +116,6 @@ defmodule Combo.LiveReloader do
           interval: 500
         ]
 
-  ## Skipping remote CSS reload
-
-  All stylesheets are reloaded without a page refresh anytime a style is
-  detected as having changed. In certain cases such as serving stylesheets
-  from a remote host, you may wish to prevent unnecessary reload of these
-  stylesheets during development. For this, you can include a `data-no-reload`
-  attribute on the link tag. For example:
-
-  ```html
-  <link rel="stylesheet" href="https://example.com/style.css" data-no-reload>
-  ```
-
-  ## Differences between `Combo.CodeReloader`
-
-  `Combo.CodeReloader` recompiles code in the `lib/` directory. It means that
-  if you change anything in the `lib/` directory, then the Elixir code will be
-  reloaded and used on your next request.
-
-  `Combo.LiveReloader` injects JavaScript code into web page. Then injected
-  JavaScript code will create a WebSocket connection to the server. When a
-  specified file changed, the server will sent a message to the web page, and
-  the web page will be reloaded in response. If the change was to an Elixir
-  file then it will be recompiled and served when the page is reloaded. If
-  it is JavaScript or CSS, then only assets are reloaded, without triggering
-  a full page load.
   """
 
   ## Setup
