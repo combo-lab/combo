@@ -49,7 +49,7 @@ defmodule Combo.LiveReloader do
     * `:iframe_attrs` - the attrs to be given to the injected iframe. Expects
       a keyword list of atom keys and string values.
 
-    * `:interval` - an integer in milliseconds to wait before reloading web
+    * `:debounce` - an integer in milliseconds to wait before reloading web
       pages. Default to `100`.
 
     * `:target_window` - the window to be reloaded. Expects `:parent` or `:top`
