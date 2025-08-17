@@ -159,6 +159,7 @@ defmodule Combo.LiveReloader do
 
   ## Plug
 
+  import Combo.SafeHTML, only: [escape_attrs: 1]
   import Combo.Conn, only: [endpoint_module!: 1]
   import Plug.Conn
 
@@ -268,29 +269,7 @@ defmodule Combo.LiveReloader do
         Keyword.get(config, :iframe_attrs, [])
       )
 
-    IO.iodata_to_binary(["<iframe", attrs(attrs), "></iframe>"])
-  end
-
-  defp attrs(attrs) do
-    Enum.map(attrs, fn
-      {_key, nil} -> []
-      {_key, false} -> []
-      {key, true} -> [?\s, key(key)]
-      {key, value} -> [?\s, key(key), ?=, ?", value(value), ?"]
-    end)
-  end
-
-  defp key(key) do
-    key
-    |> to_string()
-    |> String.replace("_", "-")
-    |> Plug.HTML.html_escape_to_iodata()
-  end
-
-  defp value(value) do
-    value
-    |> to_string()
-    |> Plug.HTML.html_escape_to_iodata()
+    IO.iodata_to_binary(["<iframe", escape_attrs(attrs), "></iframe>"])
   end
 
   defp get_target_window(:parent), do: "parent"
