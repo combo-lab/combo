@@ -75,7 +75,7 @@ defmodule Combo.Logger do
 
   ## Parameter filtering
 
-  Parameter filtering is supported by the `Combo.FilteredParams` module.
+  Parameter filtering is provided by the `Combo.FilteredParams` module.
   Check it out for more details.
 
   ## Dynamic log level

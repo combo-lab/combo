@@ -20,12 +20,12 @@ defmodule Combo.FilteredParams do
 
   And, the matching on keys is case sensitive.
 
-  The default rule is `{:discard, ["password"]}`.
+  The default one is `{:discard, ["password"]}`.
 
   ## Replacements
 
-  Common replacements are `"[FILTERED]"` or `"[REDACTED]"`. The default
-  replacement is `"[FILTERED]"`.
+  Common replacements are `"[FILTERED]"` or `"[REDACTED]"`. The default one is
+  `"[FILTERED]"`.
   """
 
   @doc """
@@ -44,7 +44,7 @@ defmodule Combo.FilteredParams do
 
   defp discard(%{} = map, keys) do
     Enum.into(map, %{}, fn {k, v} ->
-      if is_binary(k) and k in keys do
+      if is_binary(k) and String.contains?(k, keys) do
         {k, replacement()}
       else
         {k, discard(v, keys)}
