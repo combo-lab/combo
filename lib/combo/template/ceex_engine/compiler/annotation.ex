@@ -1,12 +1,14 @@
 defmodule Combo.Template.CEExEngine.Compiler.Annotation do
   @moduledoc false
 
+  alias Combo.Env
+
   @doc """
   Gets annotation around the whole body of a template.
   """
   @spec get_body_annotation(caller :: Macro.Env.t()) :: {String.t(), String.t()} | nil
   def get_body_annotation(%Macro.Env{} = caller) do
-    if Application.get_env(:combo, :ceex_debug_annotations, false) do
+    if Env.get_env(:template, :ceex_debug_annotations, false) do
       %Macro.Env{module: mod, function: {fun, _}, file: file, line: line} = caller
       name = "#{inspect(mod)}.#{fun}"
       annotate_source(name, file, line)
@@ -26,7 +28,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Annotation do
           caller :: Macro.Env.t()
         ) :: {String.t(), String.t()} | nil
   def get_slot_annotation(name, %{line: line}, _close_meta, %{file: file}) do
-    if Application.get_env(:combo, :ceex_debug_annotations, false) do
+    if Env.get_env(:template, :ceex_debug_annotations, false) do
       annotate_source(":#{name}", file, line)
     end
   end
@@ -37,7 +39,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Annotation do
   # TODO: change file and line to caller, just like get_body_annotation
   @callback get_caller_annotation(file :: String.t(), line :: integer()) :: String.t() | nil
   def get_caller_annotation(file, line) do
-    if Application.get_env(:combo, :ceex_debug_annotations, false) do
+    if Env.get_env(:template, :ceex_debug_annotations, false) do
       line = if line == 0, do: 1, else: line
       file = Path.relative_to_cwd(file)
       "<!-- @caller #{file}:#{line} (#{current_otp_app()}) -->"
