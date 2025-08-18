@@ -13,11 +13,6 @@ defmodule Combo do
     _ = Combo.Template.engines()
     _ = Combo.Template.format_encoders()
 
-    # Configure proper system flags
-    if stacktrace_depth = Application.get_env(:combo, :stacktrace_depth, nil) do
-      :erlang.system_flag(:backtrace_depth, stacktrace_depth)
-    end
-
     if Application.get_env(:combo, :logger, true) do
       Combo.Logger.install()
     end
