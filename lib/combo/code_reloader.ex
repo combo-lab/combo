@@ -15,11 +15,8 @@ defmodule Combo.CodeReloader do
   This is configured in your application environment like:
 
       config :demo, Demo.Web.Endpoint,
-        reloadable_compilers: [:gettext, :elixir],
-        reloadable_apps: [:ui, :backend]
-
-  The `:reloadable_compilers` must be a subset of the `:compilers` specified in
-  `project/0` in your `mix.exs`.
+        reloadable_apps: [:ui, :backend],
+        reloadable_compilers: [:gettext, :elixir]
 
   The `:reloadable_apps` defaults to `nil`. In such case, default behaviour is
   to reload the current project if it consists of a single app, or all
@@ -27,6 +24,9 @@ defmodule Combo.CodeReloader do
   subset of default applications to reload only some of them, an empty list to
   effectively disable the code reloader, or include external applications from
   library dependencies.
+
+  The `:reloadable_compilers` must be a subset of the `:compilers` specified in
+  `project/0` in your `mix.exs`.
 
   This function is a no-op and returns `:ok` if Mix is not available.
 
@@ -76,26 +76,25 @@ defmodule Combo.CodeReloader do
   ## Plug
 
   @behaviour Plug
+  import Combo.Conn, only: [endpoint_module!: 1]
   import Plug.Conn
+  alias Combo.SafeHTML
 
-  # TODO: adjust the style
   @style %{
     light: %{
-      primary: "#EB532D",
-      accent: "#a0b0c0",
+      primary: "#D00000",
+      accent: "#A0B0C0",
       text_color: "#304050",
-      background: "#ffffff",
-      heading_background: "#f9f9fa"
+      background: "#FFFFFF",
+      heading_background: "#F9F9FA"
     },
     dark: %{
-      primary: "#FF6B4A",
-      accent: "#c0c0c0",
-      text_color: "#e5e5e5",
-      background: "#1a1a1a",
-      heading_background: "#2a2a2a"
+      primary: "#FF5F59",
+      accent: "#C0C0C0",
+      text_color: "#E5E5E5",
+      background: "#1A1A1A",
+      heading_background: "#2A2A2A"
     },
-    logo:
-      "data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgNzEgNDgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPgoJPHBhdGggZD0ibTI2LjM3MSAzMy40NzctLjU1Mi0uMWMtMy45Mi0uNzI5LTYuMzk3LTMuMS03LjU3LTYuODI5LS43MzMtMi4zMjQuNTk3LTQuMDM1IDMuMDM1LTQuMTQ4IDEuOTk1LS4wOTIgMy4zNjIgMS4wNTUgNC41NyAyLjM5IDEuNTU3IDEuNzIgMi45ODQgMy41NTggNC41MTQgNS4zMDUgMi4yMDIgMi41MTUgNC43OTcgNC4xMzQgOC4zNDcgMy42MzQgMy4xODMtLjQ0OCA1Ljk1OC0xLjcyNSA4LjM3MS0zLjgyOC4zNjMtLjMxNi43NjEtLjU5MiAxLjE0NC0uODg2bC0uMjQxLS4yODRjLTIuMDI3LjYzLTQuMDkzLjg0MS02LjIwNS43MzUtMy4xOTUtLjE2LTYuMjQtLjgyOC04Ljk2NC0yLjU4Mi0yLjQ4Ni0xLjYwMS00LjMxOS0zLjc0Ni01LjE5LTYuNjExLS43MDQtMi4zMTUuNzM2LTMuOTM0IDMuMTM1LTMuNi45NDguMTMzIDEuNzQ2LjU2IDIuNDYzIDEuMTY1LjU4My40OTMgMS4xNDMgMS4wMTUgMS43MzggMS40OTMgMi44IDIuMjUgNi43MTIgMi4zNzUgMTAuMjY1LS4wNjgtNS44NDItLjAyNi05LjgxNy0zLjI0LTEzLjMwOC03LjMxMy0xLjM2Ni0xLjU5NC0yLjctMy4yMTYtNC4wOTUtNC43ODUtMi42OTgtMy4wMzYtNS42OTItNS43MS05Ljc5LTYuNjIzQzEyLjgtLjYyMyA3Ljc0NS4xNCAyLjg5MyAyLjM2MSAxLjkyNiAyLjgwNC45OTcgMy4zMTkgMCA0LjE0OWMuNDk0IDAgLjc2My4wMDYgMS4wMzIgMCAyLjQ0Ni0uMDY0IDQuMjggMS4wMjMgNS42MDIgMy4wMjQuOTYyIDEuNDU3IDEuNDE1IDMuMTA0IDEuNzYxIDQuNzk4LjUxMyAyLjUxNS4yNDcgNS4wNzguNTQ0IDcuNjA1Ljc2MSA2LjQ5NCA0LjA4IDExLjAyNiAxMC4yNiAxMy4zNDYgMi4yNjcuODUyIDQuNTkxIDEuMTM1IDcuMTcyLjU1NVpNMTAuNzUxIDMuODUyYy0uOTc2LjI0Ni0xLjc1Ni0uMTQ4LTIuNTYtLjk2MiAxLjM3Ny0uMzQzIDIuNTkyLS40NzYgMy44OTctLjUyOC0uMTA3Ljg0OC0uNjA3IDEuMzA2LTEuMzM2IDEuNDlabTMyLjAwMiAzNy45MjRjLS4wODUtLjYyNi0uNjItLjkwMS0xLjA0LTEuMjI4LTEuODU3LTEuNDQ2LTQuMDMtMS45NTgtNi4zMzMtMi0xLjM3NS0uMDI2LTIuNzM1LS4xMjgtNC4wMzEtLjYxLS41OTUtLjIyLTEuMjYtLjUwNS0xLjI0NC0xLjI3Mi4wMTUtLjc4LjY5My0xIDEuMzEtMS4xODQuNTA1LS4xNSAxLjAyNi0uMjQ3IDEuNi0uMzgyLTEuNDYtLjkzNi0yLjg4Ni0xLjA2NS00Ljc4Ny0uMy0yLjk5MyAxLjIwMi01Ljk0MyAxLjA2LTguOTI2LS4wMTctMS42ODQtLjYwOC0zLjE3OS0xLjU2My00LjczNS0yLjQwOGwtLjA0My4wM2EyLjk2IDIuOTYgMCAwIDAgLjA0LS4wMjljLS4wMzgtLjExNy0uMTA3LS4xMi0uMTk3LS4wNTRsLjEyMi4xMDdjMS4yOSAyLjExNSAzLjAzNCAzLjgxNyA1LjAwNCA1LjI3MSAzLjc5MyAyLjggNy45MzYgNC40NzEgMTIuNzg0IDMuNzNBNjYuNzE0IDY2LjcxNCAwIDAgMSAzNyA0MC44NzdjMS45OC0uMTYgMy44NjYuMzk4IDUuNzUzLjg5OVptLTkuMTQtMzAuMzQ1Yy0uMTA1LS4wNzYtLjIwNi0uMjY2LS40Mi0uMDY5IDEuNzQ1IDIuMzYgMy45ODUgNC4wOTggNi42ODMgNS4xOTMgNC4zNTQgMS43NjcgOC43NzMgMi4wNyAxMy4yOTMuNTEgMy41MS0xLjIxIDYuMDMzLS4wMjggNy4zNDMgMy4zOC4xOS0zLjk1NS0yLjEzNy02LjgzNy01Ljg0My03LjQwMS0yLjA4NC0uMzE4LTQuMDEuMzczLTUuOTYyLjk0LTUuNDM0IDEuNTc1LTEwLjQ4NS43OTgtMTUuMDk0LTIuNTUzWm0yNy4wODUgMTUuNDI1Yy43MDguMDU5IDEuNDE2LjEyMyAyLjEyNC4xODUtMS42LTEuNDA1LTMuNTUtMS41MTctNS41MjMtMS40MDQtMy4wMDMuMTctNS4xNjcgMS45MDMtNy4xNCAzLjk3Mi0xLjczOSAxLjgyNC0zLjMxIDMuODctNS45MDMgNC42MDQuMDQzLjA3OC4wNTQuMTE3LjA2Ni4xMTcuMzUuMDA1LjY5OS4wMjEgMS4wNDcuMDA1IDMuNzY4LS4xNyA3LjMxNy0uOTY1IDEwLjE0LTMuNy44OS0uODYgMS42ODUtMS44MTcgMi41NDQtMi43MS43MTYtLjc0NiAxLjU4NC0xLjE1OSAyLjY0NS0xLjA3Wm0tOC43NTMtNC42N2MtMi44MTIuMjQ2LTUuMjU0IDEuNDA5LTcuNTQ4IDIuOTQzLTEuNzY2IDEuMTgtMy42NTQgMS43MzgtNS43NzYgMS4zNy0uMzc0LS4wNjYtLjc1LS4xMTQtMS4xMjQtLjE3bC0uMDEzLjE1NmMuMTM1LjA3LjI2NS4xNTEuNDA1LjIwNy4zNTQuMTQuNzAyLjMwOCAxLjA3LjM5NSA0LjA4My45NzEgNy45OTIuNDc0IDExLjUxNi0xLjgwMyAyLjIyMS0xLjQzNSA0LjUyMS0xLjcwNyA3LjAxMy0xLjMzNi4yNTIuMDM4LjUwMy4wODMuNzU2LjEwNy4yMzQuMDIyLjQ3OS4yNTUuNzk1LjAwMy0yLjE3OS0xLjU3NC00LjUyNi0yLjA5Ni03LjA5NC0xLjg3MlptLTEwLjA0OS05LjU0NGMxLjQ3NS4wNTEgMi45NDMtLjE0MiA0LjQ4Ni0xLjA1OS0uNDUyLjA0LS42NDMuMDQtLjgyNy4wNzYtMi4xMjYuNDI0LTQuMDMzLS4wNC01LjczMy0xLjM4My0uNjIzLS40OTMtMS4yNTctLjk3NC0xLjg4OS0xLjQ1Ny0yLjUwMy0xLjkxNC01LjM3NC0yLjU1NS04LjUxNC0yLjUuMDUuMTU0LjA1NC4yNi4xMDguMzE1IDMuNDE3IDMuNDU1IDcuMzcxIDUuODM2IDEyLjM2OSA2LjAwOFptMjQuNzI3IDE3LjczMWMtMi4xMTQtMi4wOTctNC45NTItMi4zNjctNy41NzgtLjUzNyAxLjczOC4wNzggMy4wNDMuNjMyIDQuMTAxIDEuNzI4LjM3NC4zODguNzYzLjc2OCAxLjE4MiAxLjEwNiAxLjYgMS4yOSA0LjMxMSAxLjM1MiA1Ljg5Ni4xNTUtMS44NjEtLjcyNi0xLjg2MS0uNzI2LTMuNjAxLTIuNDUyWm0tMjEuMDU4IDE2LjA2Yy0xLjg1OC0zLjQ2LTQuOTgxLTQuMjQtOC41OS00LjAwOGE5LjY2NyA5LjY2NyAwIDAgMSAyLjk3NyAxLjM5Yy44NC41ODYgMS41NDcgMS4zMTEgMi4yNDMgMi4wNTUgMS4zOCAxLjQ3MyAzLjUzNCAyLjM3NiA0Ljk2MiAyLjA3LS42NTYtLjQxMi0xLjIzOC0uODQ4LTEuNTkyLTEuNTA3Wm0xNy4yOS0xOS4zMmMwLS4wMjMuMDAxLS4wNDUuMDAzLS4wNjhsLS4wMDYuMDA2LjAwNi0uMDA2LS4wMzYtLjAwNC4wMjEuMDE4LjAxMi4wNTNabS0yMCAxNC43NDRhNy42MSA3LjYxIDAgMCAwLS4wNzItLjA0MS4xMjcuMTI3IDAgMCAwIC4wMTUuMDQzYy4wMDUuMDA4LjAzOCAwIC4wNTgtLjAwMlptLS4wNzItLjA0MS0uMDA4LS4wMzQtLjAwOC4wMS4wMDgtLjAxLS4wMjItLjAwNi4wMDUuMDI2LjAyNC4wMTRaIgogICAgICAgICAgICBmaWxsPSIjRkQ0RjAwIiAvPgo8L3N2Zz4K",
     monospace_font: "menlo, consolas, monospace"
   }
 
@@ -110,7 +109,9 @@ defmodule Combo.CodeReloader do
   API used by Plug to invoke the code reloader on every request.
   """
   def call(conn, opts) do
-    case opts[:reloader].(conn.private.combo_endpoint, opts) do
+    endpoint = endpoint_module!(conn)
+
+    case opts[:reloader].(endpoint, opts) do
       :ok ->
         conn
 
@@ -210,56 +211,8 @@ defmodule Combo.CodeReloader do
         }
 
         /*
-         * Exception logo
-         */
-
-        .exception-logo {
-            position: absolute;
-            right: 48px;
-            top: 48px;
-            pointer-events: none;
-            width: 100%;
-        }
-
-        .exception-logo:before {
-            content: '';
-            display: block;
-            height: 64px;
-            width: 100%;
-            background-size: auto 100%;
-            background-image: url("#{@style.logo}");
-            background-position: right 0;
-            background-repeat: no-repeat;
-            margin-bottom: 16px;
-        }
-
-        @media (max-width: 768px) {
-            .exception-logo {
-                position: static;
-            }
-
-            .exception-logo:before {
-                height: 32px;
-                background-position: left 0;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .exception-logo {
-                display: none;
-            }
-        }
-
-        /*
          * Exception info
          */
-
-        /* Compensate for logo placement */
-        @media (min-width: 769px) {
-            .exception-info {
-                max-width: 90%;
-            }
-        }
 
         .exception-info > .error,
         .exception-info > .subtext {
@@ -313,7 +266,6 @@ defmodule Combo.CodeReloader do
     </head>
     <body>
         <div class="heading-block">
-            <aside class="exception-logo"></aside>
             <header class="exception-info">
                 <h5 class="error">Compilation error</h5>
                 <h5 class="subtext">Console output is shown below.</h5>
@@ -331,7 +283,7 @@ defmodule Combo.CodeReloader do
     output
     |> String.trim()
     |> remove_ansi_escapes()
-    |> Plug.HTML.html_escape()
+    |> SafeHTML.escape()
   end
 
   defp remove_ansi_escapes(text) do
