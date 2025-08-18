@@ -18,10 +18,6 @@ defmodule Combo do
       :erlang.system_flag(:backtrace_depth, stacktrace_depth)
     end
 
-    if filter = Application.get_env(:combo, :filter_parameters, ["password"]) do
-      Application.put_env(:combo, :filter_parameters, Combo.Logger.compile_filter(filter))
-    end
-
     if Application.get_env(:combo, :logger, true) do
       Combo.Logger.install()
     end

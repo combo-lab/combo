@@ -1,20 +1,20 @@
 defmodule Combo.Logger do
   @moduledoc """
-  Instrumenter to handle logging of various instrumentation events.
+  Logging various instrumentation events.
 
-  ## Instrumentation
+  ## Events
 
   Combo uses the `:telemetry` library for instrumentation. The following events
   are published by Combo with the following measurements and metadata:
 
     * `[:combo, :endpoint, :init]` - dispatched by `Combo.Endpoint` after your
-      Endpoint supervision tree successfully starts
+      Endpoint supervision tree successfully starts:
       * Measurement: `%{system_time: system_time}`
       * Metadata: `%{pid: pid(), config: Keyword.t(), module: module(), otp_app: atom()}`
       * Disable logging: This event is not logged
 
-    * `[:combo, :endpoint, :start]` - dispatched by `Plug.Telemetry` in your endpoint,
-      usually after code reloading
+    * `[:combo, :endpoint, :start]` - dispatched by `Plug.Telemetry` in your
+      endpoint:
       * Measurement: `%{system_time: system_time}`
       * Metadata: `%{conn: Plug.Conn.t, options: Keyword.t}`
       * Options: `%{log: Logger.level | false}`
@@ -22,7 +22,7 @@ defmodule Combo.Logger do
       * Configure log level dynamically: `plug Plug.Telemetry, ..., log: {Mod, Fun, Args}`
 
     * `[:combo, :endpoint, :stop]` - dispatched by `Plug.Telemetry` in your
-      endpoint whenever the response is sent
+      endpoint whenever the response is sent:
       * Measurement: `%{duration: native_time}`
       * Metadata: `%{conn: Plug.Conn.t, options: Keyword.t}`
       * Options: `%{log: Logger.level | false}`
@@ -30,70 +30,53 @@ defmodule Combo.Logger do
       * Configure log level dynamically: `plug Plug.Telemetry, ..., log: {Mod, Fun, Args}`
 
     * `[:combo, :router_dispatch, :start]` - dispatched by `Combo.Router`
-      before dispatching to a matched route
+      before dispatching to a matched route:
       * Measurement: `%{system_time: System.system_time}`
       * Metadata: `%{conn: Plug.Conn.t, route: binary, plug: module, plug_opts: term, path_params: map, pipe_through: [atom], log: Logger.level | false}`
       * Disable logging: Pass `log: false` to the router macro, for example: `get("/page", PageController, :index, log: false)`
       * Configure log level dynamically: `get("/page", PageController, :index, log: {Mod, Fun, Args})`
 
     * `[:combo, :router_dispatch, :exception]` - dispatched by `Combo.Router`
-      after exceptions on dispatching a route
+      after exceptions on dispatching a route:
       * Measurement: `%{duration: native_time}`
       * Metadata: `%{conn: Plug.Conn.t, kind: :throw | :error | :exit, reason: term(), stacktrace: Exception.stacktrace()}`
       * Disable logging: This event is not logged
 
     * `[:combo, :router_dispatch, :stop]` - dispatched by `Combo.Router`
-      after successfully dispatching a matched route
+      after successfully dispatching a matched route:
       * Measurement: `%{duration: native_time}`
       * Metadata: `%{conn: Plug.Conn.t, route: binary, plug: module, plug_opts: term, path_params: map, pipe_through: [atom], log: Logger.level | false}`
       * Disable logging: This event is not logged
 
-    * `[:combo, :error_rendered]` - dispatched at the end of an error view being rendered
+    * `[:combo, :error_rendered]` - dispatched at the end of an error view being rendered:
       * Measurement: `%{duration: native_time}`
       * Metadata: `%{conn: Plug.Conn.t, status: Plug.Conn.status, kind: Exception.kind, reason: term, stacktrace: Exception.stacktrace}`
       * Disable logging: Set `render_errors: [log: false]` on your endpoint configuration
 
-    * `[:combo, :socket_connected]` - dispatched by `Combo.Socket`, at the end of a socket connection
+    * `[:combo, :socket_connected]` - dispatched by `Combo.Socket`, at the end of a socket connection:
       * Measurement: `%{duration: native_time}`
       * Metadata: `%{endpoint: atom, transport: atom, params: term, connect_info: map, vsn: binary, user_socket: atom, result: :ok | :error, serializer: atom, log: Logger.level | false}`
       * Disable logging: `use Combo.Socket, log: false` or `socket "/foo", MySocket, websocket: [log: false]` in your endpoint
 
-    * `[:combo, :socket_drain]` - dispatched by `Combo.Socket` when using the `:drainer` option
+    * `[:combo, :socket_drain]` - dispatched by `Combo.Socket` when using the `:drainer` option:
       * Measurement: `%{count: integer, total: integer, index: integer, rounds: integer}`
       * Metadata: `%{endpoint: atom, socket: atom, intervasl: integer, log: Logger.level | false}`
       * Disable logging: `use Combo.Socket, log: false` in your endpoint or pass `:log` option in the `:drainer` option
 
-    * `[:combo, :channel_joined]` - dispatched at the end of a channel join
+    * `[:combo, :channel_joined]` - dispatched at the end of a channel join:
       * Measurement: `%{duration: native_time}`
       * Metadata: `%{result: :ok | :error, params: term, socket: Combo.Socket.t}`
       * Disable logging: This event cannot be disabled
 
-    * `[:combo, :channel_handled_in]` - dispatched at the end of a channel handle in
+    * `[:combo, :channel_handled_in]` - dispatched at the end of a channel handle in:
       * Measurement: `%{duration: native_time}`
       * Metadata: `%{event: binary, params: term, socket: Combo.Socket.t}`
       * Disable logging: This event cannot be disabled
 
   ## Parameter filtering
 
-  When logging parameters, Combo can filter out sensitive parameters such as
-  passwords and tokens. Parameters to be filtered can be added via the
-  `:filter_parameters` option:
-
-      config :combo, :filter_parameters, ["password", "secret"]
-
-  With the configuration above, Combo will filter any parameter that
-  contains the terms `password` or `secret`. The match is case sensitive.
-
-  Combo's default is `["password"]`.
-
-  Combo can also filter all parameters by default and selectively keep
-  parameters. This can be configured like:
-
-      config :combo, :filter_parameters, {:keep, ["id", "order"]}
-
-  With the configuration above, Combo will filter all parameters, except
-  those that match exactly `id` or `order`. If a kept parameter matches,
-  all parameters nested under that one will also be kept.
+  Parameter filtering is supported by the `Combo.FilteredParams` module.
+  Check it out for more details.
 
   ## Dynamic log level
 
@@ -108,7 +91,7 @@ defmodule Combo.Logger do
 
   For example, in your Endpoint you might do something like this:
 
-        # lib/demo_web/endpoint.ex
+        # lib/demo/web/endpoint.ex
         plug Plug.Telemetry,
           event_prefix: [:combo, :endpoint],
           log: {__MODULE__, :log_level, []}
@@ -120,14 +103,15 @@ defmodule Combo.Logger do
   ## Disabling
 
   When you are using custom logging system it is not always desirable to
-  enable `#{inspect(__MODULE__)}` by default. You can always disable this
-  in general by:
+  enable `#{inspect(__MODULE__)}` by default. You can disable default logging
+  by:
 
       config :combo, :logger, false
 
   """
 
   require Logger
+  alias Combo.FilteredParams
 
   @doc false
   def install do
@@ -147,8 +131,14 @@ defmodule Combo.Logger do
     end
   end
 
-  @doc false
-  def duration(duration) do
+  defp log_level(nil, _conn), do: :info
+  defp log_level(level, _conn) when is_atom(level), do: level
+
+  defp log_level({mod, fun, args}, conn) when is_atom(mod) and is_atom(fun) and is_list(args) do
+    apply(mod, fun, [conn | args])
+  end
+
+  defp duration(duration) do
     duration = System.convert_time_unit(duration, :native, :microsecond)
 
     if duration > 1000 do
@@ -156,80 +146,6 @@ defmodule Combo.Logger do
     else
       [Integer.to_string(duration), "µs"]
     end
-  end
-
-  @doc false
-  def compile_filter({:compiled, _key, _value} = filter), do: filter
-  def compile_filter({:discard, params}), do: compile_discard(params)
-  def compile_filter({:keep, params}), do: {:keep, params}
-  def compile_filter(params), do: compile_discard(params)
-
-  defp compile_discard([]) do
-    {:compiled, [], []}
-  end
-
-  defp compile_discard(params) when is_list(params) or is_binary(params) do
-    key_match = :binary.compile_pattern(params)
-    value_match = params |> List.wrap() |> Enum.map(&(&1 <> "=")) |> :binary.compile_pattern()
-    {:compiled, key_match, value_match}
-  end
-
-  @doc false
-  def filter_values(values, filter \\ Application.get_env(:combo, :filter_parameters, [])) do
-    case compile_filter(filter) do
-      {:compiled, key_match, value_match} -> discard_values(values, key_match, value_match)
-      {:keep, match} -> keep_values(values, match)
-    end
-  end
-
-  defp discard_values(%{__struct__: mod} = struct, _key_match, _value_match) when is_atom(mod) do
-    struct
-  end
-
-  defp discard_values(%{} = map, key_match, value_match) do
-    Enum.into(map, %{}, fn {k, v} ->
-      cond do
-        is_binary(k) and String.contains?(k, key_match) ->
-          {k, "[FILTERED]"}
-
-        is_binary(v) and String.contains?(v, value_match) ->
-          {k, "[FILTERED]"}
-
-        true ->
-          {k, discard_values(v, key_match, value_match)}
-      end
-    end)
-  end
-
-  defp discard_values([_ | _] = list, key_match, value_match) do
-    Enum.map(list, &discard_values(&1, key_match, value_match))
-  end
-
-  defp discard_values(other, _key_match, _value_match), do: other
-
-  defp keep_values(%{__struct__: mod}, _match) when is_atom(mod), do: "[FILTERED]"
-
-  defp keep_values(%{} = map, match) do
-    Enum.into(map, %{}, fn {k, v} ->
-      if is_binary(k) and k in match do
-        {k, v}
-      else
-        {k, keep_values(v, match)}
-      end
-    end)
-  end
-
-  defp keep_values([_ | _] = list, match) do
-    Enum.map(list, &keep_values(&1, match))
-  end
-
-  defp keep_values(_other, _match), do: "[FILTERED]"
-
-  defp log_level(nil, _conn), do: :info
-  defp log_level(level, _conn) when is_atom(level), do: level
-
-  defp log_level({mod, fun, args}, conn) when is_atom(mod) and is_atom(fun) and is_list(args) do
-    apply(mod, fun, [conn | args])
   end
 
   ## Event: [:combo, :endpoint, *]
@@ -331,7 +247,7 @@ defmodule Combo.Logger do
     do: [inspect(mod), ?., Atom.to_string(fun), ?/, arity + ?0]
 
   defp params(%Plug.Conn.Unfetched{}), do: "[UNFETCHED]"
-  defp params(params), do: params |> filter_values() |> inspect()
+  defp params(params), do: params |> FilteredParams.filter() |> inspect()
 
   ## Event: [:combo, :socket_connected]
 
@@ -358,7 +274,7 @@ defmodule Combo.Logger do
         "\n  Serializer: ",
         inspect(serializer),
         "\n  Parameters: ",
-        inspect(filter_values(params))
+        inspect(FilteredParams.filter(params))
       ]
     end)
   end
@@ -400,7 +316,7 @@ defmodule Combo.Logger do
         " in ",
         duration(duration),
         "\n  Parameters: ",
-        inspect(filter_values(params))
+        inspect(FilteredParams.filter(params))
       ]
     end)
   end
@@ -425,7 +341,7 @@ defmodule Combo.Logger do
         ") in ",
         duration(duration),
         "\n  Parameters: ",
-        inspect(filter_values(params))
+        inspect(FilteredParams.filter(params))
       ]
     end)
   end

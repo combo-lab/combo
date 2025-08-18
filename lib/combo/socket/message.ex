@@ -43,7 +43,7 @@ defmodule Combo.Socket.Message do
     end
 
     defp process_message(%{payload: payload} = msg) when is_map(payload) do
-      %{msg | payload: Combo.Logger.filter_values(payload)}
+      %{msg | payload: Combo.FilteredParams.filter(payload)}
     end
 
     defp process_message(msg), do: msg
