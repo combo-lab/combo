@@ -14,15 +14,15 @@ defmodule Combo do
     _ = Combo.Template.format_encoders()
 
     # Configure proper system flags
-    if stacktrace_depth = Application.get_env(:combo, :stacktrace_depth) do
+    if stacktrace_depth = Application.get_env(:combo, :stacktrace_depth, nil) do
       :erlang.system_flag(:backtrace_depth, stacktrace_depth)
     end
 
-    if filter = Application.get_env(:combo, :filter_parameters) do
+    if filter = Application.get_env(:combo, :filter_parameters, ["password"]) do
       Application.put_env(:combo, :filter_parameters, Combo.Logger.compile_filter(filter))
     end
 
-    if Application.fetch_env!(:combo, :logger) do
+    if Application.get_env(:combo, :logger, true) do
       Combo.Logger.install()
     end
 
@@ -63,13 +63,13 @@ defmodule Combo do
   end
 
   defp warn_on_missing_json_module do
-    configured_lib = Application.get_env(:combo, :json_module)
+    module = Application.get_env(:combo, :json_module)
 
-    if configured_lib && not Code.ensure_loaded?(configured_lib) do
+    if module && not Code.ensure_loaded?(module) do
       IO.warn("""
-      found #{inspect(configured_lib)} in your application configuration
-      for Combo JSON encoding, but module #{inspect(configured_lib)} is not available.
-      Ensure #{inspect(configured_lib)} is listed as a dependency in mix.exs.
+      found #{inspect(module)} in your application configuration
+      for Combo JSON encoding, but module #{inspect(module)} is not available.
+      Ensure #{inspect(module)} is listed as a dependency in mix.exs.
       """)
     end
   end

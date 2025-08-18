@@ -53,12 +53,7 @@ defmodule Combo.MixProject do
   def application do
     [
       mod: {Combo, []},
-      extra_applications: extra_applications(Mix.env()) ++ [:logger, :eex, :crypto, :public_key],
-      env: [
-        logger: true,
-        stacktrace_depth: nil,
-        filter_parameters: ["password"],
-      ]
+      extra_applications: extra_applications(Mix.env()) ++ [:logger, :eex, :crypto, :public_key]
     ]
   end
 
