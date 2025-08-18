@@ -35,19 +35,6 @@ defmodule Combo.Socket.Message do
         raise Combo.Socket.InvalidMessageError, "missing key #{inspect(err.key)}"
     end
   end
-
-  defimpl Inspect do
-    def inspect(%Combo.Socket.Message{} = msg, opts) do
-      processed_msg = process_message(msg)
-      Inspect.Any.inspect(processed_msg, opts)
-    end
-
-    defp process_message(%{payload: payload} = msg) when is_map(payload) do
-      %{msg | payload: Combo.FilteredParams.filter(payload)}
-    end
-
-    defp process_message(msg), do: msg
-  end
 end
 
 defmodule Combo.Socket.Reply do
