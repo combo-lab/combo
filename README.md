@@ -4,6 +4,22 @@ Combines the good parts of modern web development.
 
 [![Build Status](https://github.com/combo-team/combo/workflows/CI/badge.svg)](https://github.com/combo-team/combo/actions/workflows/ci.yml) [![Hex.pm](https://img.shields.io/hexpm/v/combo.svg)](https://hex.pm/packages/combo)
 
+## About
+
+Combo started as a fork of Phoenix. Its goals includes:
+
+- being a traditional MVC framework.
+- improving the development experience.
+- ...
+
+To archive the goals, it:
+
+- strips the HEEx engine-related code from `phoenix_live_view` and completely removes the dependency on `phoenix_live_view`.
+- merges closely related dependencies, such as `phoenix_template`, `phoenix_html`, `phoenix_live_reload`, etc.
+- ...
+
+Although Combo is forked from Phoenix and will continue to track upstream changes in the future, compatibility between the two is not guaranteed.
+
 ## Getting started
 
 Read the [documentation](https://hexdocs.pm/combo).
