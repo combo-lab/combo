@@ -704,7 +704,7 @@ defmodule Combo.Conn do
   To send a file that is stored inside your application priv
   directory:
 
-      path = Application.app_dir(:my_app, "priv/prospectus.pdf")
+      path = Application.app_dir(:my_app, "priv/example.pdf")
       send_download(conn, {:file, path})
 
   When using `{:file, path}`, the filename is inferred from the
