@@ -1,4 +1,6 @@
 defmodule Combo.Digester do
+  @moduledoc false
+
   @manifest_version 1
   @empty_manifest %{
     "version" => @manifest_version,
@@ -10,7 +12,29 @@ defmodule Combo.Digester do
     :calendar.datetime_to_gregorian_seconds(:calendar.universal_time())
   end
 
-  @moduledoc false
+  @doc """
+  Lists the extensions of compressible files.
+  """
+  @spec compressible_extensions :: [String.t()]
+  def compressible_extensions do
+    Combo.Env.get_env(
+      :digester,
+      :compressible_extensions,
+      ~w(.js .map .css .txt .text .html .json .svg .eot .ttf)
+    )
+  end
+
+  @doc """
+  Lists the compressors.
+  """
+  @spec compressors :: [module()]
+  def compressors do
+    Combo.Env.get_env(
+      :digester,
+      :compressors,
+      [Combo.Digester.Gzip]
+    )
+  end
 
   @doc """
   Digests and compresses the static files in the given `input_path`
@@ -163,8 +187,7 @@ defmodule Combo.Digester do
   end
 
   defp compressed_extensions do
-    compressors = Application.fetch_env!(:combo, :static_compressors)
-    Enum.flat_map(compressors, & &1.file_extensions())
+    Enum.flat_map(compressors(), & &1.file_extensions())
   end
 
   defp map_file(file_path, input_path) do
@@ -192,9 +215,7 @@ defmodule Combo.Digester do
     path = Path.join(output_path, file.relative_path)
     File.mkdir_p!(path)
 
-    compressors = Application.fetch_env!(:combo, :static_compressors)
-
-    Enum.each(compressors, fn compressor ->
+    Enum.each(compressors(), fn compressor ->
       [file_extension | _] = compressor.file_extensions()
 
       compressed_digested_result =

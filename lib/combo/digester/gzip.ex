@@ -5,7 +5,7 @@ defmodule Combo.Digester.Gzip do
   @behaviour Combo.Digester.Compressor
 
   def compress_file(file_path, content) do
-    if Path.extname(file_path) in Application.fetch_env!(:combo, :gzippable_exts) do
+    if Path.extname(file_path) in Combo.Digester.compressible_extensions() do
       {:ok, :zlib.gzip(content)}
     else
       :error

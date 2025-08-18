@@ -58,9 +58,6 @@ defmodule Combo.MixProject do
         logger: true,
         stacktrace_depth: nil,
         filter_parameters: ["password"],
-        serve_endpoints: false,
-        gzippable_exts: ~w(.js .map .css .txt .text .html .json .svg .eot .ttf),
-        static_compressors: [Combo.Digester.Gzip]
       ]
     ]
   end

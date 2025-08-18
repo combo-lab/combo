@@ -1,7 +1,7 @@
 defmodule Combo.Digester.Compressor do
   @moduledoc ~S"""
-  Defines the `Combo.Digester.Compressor` behaviour for
-  implementing static file compressors.
+  Defines the `Combo.Digester.Compressor` behaviour for implementing static
+  file compressors.
 
   A custom compressor expects 2 functions to be implemented.
 
@@ -14,11 +14,11 @@ defmodule Combo.Digester.Compressor do
   , you could define a new module implementing the behaviour and add the module
   to the list of configured static compressors.
 
-      defmodule MyApp.BrotliCompressor do
+      defmodule Demo.Web.BrotliCompressor do
         @behaviour Combo.Digester.Compressor
 
         def compress_file(file_path, content) do
-          valid_extension = Path.extname(file_path) in Application.fetch_env!(:combo, :gzippable_exts)
+          valid_extension = Path.extname(file_path) in Combo.Digester.compressible_extensions()
           {:ok, compressed_content} = :brotli.encode(content)
 
           if valid_extension && byte_size(compressed_content) < byte_size(content) do
@@ -34,9 +34,10 @@ defmodule Combo.Digester.Compressor do
       end
 
       # config/config.exs
-      config :combo,
-        static_compressors: [Combo.Digester.Gzip, MyApp.BrotliCompressor],
+      config :combo, :digester,
+        compressors: [Combo.Digester.Gzip, Demo.Web.BrotliCompressor],
         # ...
+
   """
   @callback compress_file(Path.t(), binary()) :: {:ok, binary()} | :error
   @callback file_extensions() :: nonempty_list(String.t())

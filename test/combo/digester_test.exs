@@ -577,8 +577,8 @@ defmodule Combo.DigesterTest do
   end
 
   defp add_digest_test_compressor() do
-    compressors = Application.fetch_env!(:combo, :static_compressors)
-    Application.put_env(:combo, :static_compressors, [DigestTestCompressor | compressors])
-    on_exit(fn -> Application.put_env(:combo, :static_compressors, compressors) end)
+    compressors = Combo.Digester.compressors()
+    Combo.Env.put_env(:digester, :compressors, [DigestTestCompressor | compressors])
+    on_exit(fn -> Combo.Env.put_env(:digester, :compressors, compressors) end)
   end
 end
