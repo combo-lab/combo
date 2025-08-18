@@ -31,14 +31,26 @@ defmodule Combo do
     Supervisor.start_link(children, strategy: :one_for_one, name: Combo.Supervisor)
   end
 
+  defp warn_on_missing_json_module do
+    module = json_module()
+
+    if module && not Code.ensure_loaded?(module) do
+      IO.warn("""
+      found #{inspect(module)} in your application configuration
+      for Combo JSON encoding, but module #{inspect(module)} is not available.
+      Ensure #{inspect(module)} is listed as a dependency in mix.exs.
+      """)
+    end
+  end
+
   @doc """
   Returns the value of `:json_module` option, which specifies the module
   for JSON encoding.
-  
+
   To customize the JSON module, including the following in your
   `config/config.exs`:
-  
-      config :combo, :json_module, AlternativeJsonModule
+
+      config :combo, :json_module, JSON
 
   """
   def json_module do
@@ -56,17 +68,5 @@ defmodule Combo do
   """
   def plug_init_mode do
     Application.get_env(:combo, :plug_init_mode, :compile)
-  end
-
-  defp warn_on_missing_json_module do
-    module = Application.get_env(:combo, :json_module)
-
-    if module && not Code.ensure_loaded?(module) do
-      IO.warn("""
-      found #{inspect(module)} in your application configuration
-      for Combo JSON encoding, but module #{inspect(module)} is not available.
-      Ensure #{inspect(module)} is listed as a dependency in mix.exs.
-      """)
-    end
   end
 end
