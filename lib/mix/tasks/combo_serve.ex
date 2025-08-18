@@ -9,11 +9,7 @@ defmodule Mix.Tasks.Combo.Serve do
 
   ## Options
 
-    * `--open` - open the base URL of each started endpoint in browser.
-
-  ## Additional options
-
-  Furthermore, this task accepts the same command-line options as `mix run`.
+  This task accepts the same command-line options as `mix run`.
 
   For example, to run `combo.serve` without recompiling:
 
@@ -37,20 +33,11 @@ defmodule Mix.Tasks.Combo.Serve do
   @impl Mix.Task
   def run(args) do
     Application.put_env(:combo, :serve_endpoints, true, persistent: true)
-    Mix.Tasks.Run.run(run_args() ++ open_args(args))
+    Mix.Tasks.Run.run(run_args() ++ args)
   end
 
   defp iex_running? do
     Code.ensure_loaded?(IEx) and IEx.started?()
-  end
-
-  defp open_args(args) do
-    if "--open" in args do
-      Application.put_env(:combo, :browser_open, true)
-      args -- ["--open"]
-    else
-      args
-    end
   end
 
   defp run_args do

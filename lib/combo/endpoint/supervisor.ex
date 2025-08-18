@@ -14,7 +14,6 @@ defmodule Combo.Endpoint.Supervisor do
       # We don't use the defaults in the checks below
       conf = Keyword.merge(Application.get_env(otp_app, mod, []), opts)
       log_access_url(mod, conf)
-      browser_open(mod, conf)
 
       measurements = %{system_time: System.system_time()}
       metadata = %{pid: pid, config: conf, module: mod, otp_app: otp_app}
@@ -365,21 +364,6 @@ defmodule Combo.Endpoint.Supervisor do
   defp log_access_url(endpoint, conf) do
     if Keyword.get(conf, :log_access_url, true) && server?(conf) do
       Logger.info("Access #{inspect(endpoint)} at #{endpoint.url()}")
-    end
-  end
-
-  defp browser_open(endpoint, conf) do
-    if Application.get_env(:combo, :browser_open, false) && server?(conf) do
-      url = endpoint.url()
-
-      {cmd, args} =
-        case :os.type() do
-          {:win32, _} -> {"cmd", ["/c", "start", url]}
-          {:unix, :darwin} -> {"open", [url]}
-          {:unix, _} -> {"xdg-open", [url]}
-        end
-
-      System.cmd(cmd, args)
     end
   end
 end
