@@ -517,7 +517,6 @@ defmodule Combo.Endpoint do
         plug Plug.SSL, force_ssl
       end
 
-      # TODO: adjust the style
       if var!(debug_errors?) do
         use Plug.Debugger,
           otp_app: @otp_app,
