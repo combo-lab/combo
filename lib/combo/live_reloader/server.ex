@@ -1,4 +1,4 @@
-defmodule Combo.LiveReloader.FileSystemListener do
+defmodule Combo.LiveReloader.Server do
   @moduledoc false
 
   require Logger
@@ -12,9 +12,7 @@ defmodule Combo.LiveReloader.FileSystemListener do
     }
   end
 
-  def start_link(endpoint) do
-    name = build_name(endpoint)
-
+  def start_link(name) do
     dirs = Env.get_env(:live_reloader, :dirs, [""])
     backend = Env.get_env(:live_reloader, :backend)
     backend_opts = Env.get_env(:live_reloader, :backend_opts, [])
@@ -30,25 +28,21 @@ defmodule Combo.LiveReloader.FileSystemListener do
         do: [backend: backend] ++ opts,
         else: opts
 
-    case FileSystem.start_link(opts) do
-      {:ok, pid} ->
-        {:ok, pid}
+    FileSystem.start_link(opts)
+  end
 
-      other ->
-        Logger.warning("""
-        Could not start Combo.LiveReloader.Application because it can't listen to the \
-        file system.
+  def ensure_started do
+    name = get_name()
 
-        Don't worry! This is an optional feature used during development to refresh
-        web browser when files change, and it does not affect production.
-        """)
-
-        other
+    case DynamicSupervisor.start_child(Combo.LiveReloader.Supervisor, {__MODULE__, name}) do
+      {:ok, _pid} -> :ok
+      {:error, {:already_started, _pid}} -> :ok
+      other -> other
     end
   end
 
-  def subscribe(endpoint) do
-    name = build_name(endpoint)
+  def subscribe do
+    name = get_name()
 
     if Process.whereis(name) do
       :ok = FileSystem.subscribe(name)
@@ -58,7 +52,5 @@ defmodule Combo.LiveReloader.FileSystemListener do
     end
   end
 
-  defp build_name(endpoint) do
-    Module.concat(endpoint, __MODULE__)
-  end
+  defp get_name, do: __MODULE__
 end

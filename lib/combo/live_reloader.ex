@@ -122,15 +122,6 @@ defmodule Combo.LiveReloader do
 
   """
 
-  ## Setup
-
-  @doc false
-  def child_specs(endpoint) do
-    [{Combo.LiveReloader.FileSystemListener, endpoint}]
-  end
-
-  ## Plug
-
   import Combo.SafeHTML, only: [escape_attrs: 1]
   import Combo.Conn, only: [endpoint_module!: 1]
   import Plug.Conn

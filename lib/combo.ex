@@ -20,6 +20,7 @@ defmodule Combo do
     children = [
       # Code reloading must be serial across all Combo apps
       Combo.CodeReloader.Server,
+      {DynamicSupervisor, name: Combo.LiveReloader.Supervisor, strategy: :one_for_one},
       {DynamicSupervisor, name: Combo.Transports.LongPoll.Supervisor, strategy: :one_for_one}
     ]
 

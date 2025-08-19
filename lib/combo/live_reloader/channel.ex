@@ -3,12 +3,26 @@ defmodule Combo.LiveReloader.Channel do
 
   use Combo.Channel
   require Logger
-  alias Combo.LiveReloader.FileSystemListener
+  alias Combo.LiveReloader.Server
 
   def join("combo:live_reload", _msg, socket) do
     endpoint = socket.endpoint
 
-    case FileSystemListener.subscribe(endpoint) do
+    case Server.ensure_started() do
+      :ok ->
+        :pass
+
+      _ ->
+        Logger.warning("""
+        Could not start #{inspect(__MODULE__)} because it can't listen to the \
+        file system.
+
+        Don't worry! This is an optional feature used during development to refresh
+        web browser when files change, and it does not affect production.
+        """)
+    end
+
+    case Server.subscribe() do
       :ok ->
         config = endpoint.config(:live_reloader)
 
@@ -19,7 +33,7 @@ defmodule Combo.LiveReloader.Channel do
         {:ok, %{}, socket}
 
       :error ->
-        {:error, %{message: "#{inspect(FileSystemListener)} is not running"}}
+        {:error, %{message: "#{inspect(Server)} is not running"}}
     end
   end
 

@@ -33,7 +33,7 @@ defmodule Combo.LiveReloader.ChannelTest do
       [
         {Phoenix.PubSub, name: __MODULE__.PubSub},
         Endpoint
-      ] ++ Combo.LiveReloader.child_specs(Endpoint)
+      ]
 
     {:ok, _} = Supervisor.start_link(children, strategy: :one_for_one)
     :ok
