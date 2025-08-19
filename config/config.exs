@@ -6,4 +6,4 @@ config :logger, :console,
 
 config :combo, json_module: Jason
 
-config :combo, :template, trim_on_ceex_engine: false
+config :combo, :template, ceex_whitespace_trimming: false

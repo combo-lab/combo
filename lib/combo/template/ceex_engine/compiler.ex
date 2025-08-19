@@ -42,5 +42,5 @@ defmodule Combo.Template.CEExEngine.Compiler do
   @doc false
   defdelegate __reserved_assigns__, to: Engine
 
-  defp trim?, do: Env.get_env(:template, :trim_on_ceex_engine, true)
+  defp trim?, do: Env.get_env(:template, :ceex_whitespace_trimming, true)
 end
