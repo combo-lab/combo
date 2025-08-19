@@ -26,9 +26,16 @@ defmodule Combo.LiveReloader do
         plug Combo.LiveReloader
       end
 
-  Then, configure it via the `:live_reloader` option of your endpoint
-  configuration. In general, the configuration is added to `config/dev.exs`.
-  For example:
+  ## Configuration
+
+  `Combo.LiveReloader` is configured via the `:live_reloader` option of your
+  endpoint configuration. The option accepts three types of values:
+
+    * `true` - enable it with default options.
+    * `false` - disable it.
+    * a keyword list - enable it with customized options.
+
+  In general, the configuration is added to `config/dev.exs`. For example:
 
       config :demo, Demo.Web.Endpoint,
         live_reloader: [
@@ -40,8 +47,7 @@ defmodule Combo.LiveReloader do
 
   The following options are supported:
 
-    * `:patterns` - a list of patterns to trigger the reloading. This option
-      is required to enable live reloading.
+    * `:patterns` - a list of patterns to trigger the reloading.
 
     * `:path` - the path of socket's mount-point.
       Defaults to `/combo/live_reload/socket`.
@@ -60,7 +66,7 @@ defmodule Combo.LiveReloader do
       changes. If `true`, CSS changes will trigger a full reload like other
       asset types instead of the default hot reload. Defaults to `false`.
 
-  ## About `:target_window` option
+  ### The `:target_window` option
 
     * If `:parent` is set, `window.parent` will be reloaded.
     * If `:top` is set, `window.top` will be reloaded.
@@ -117,11 +123,6 @@ defmodule Combo.LiveReloader do
   """
 
   ## Setup
-
-  @doc false
-  def enabled?(config) do
-    match?([_ | _], config[:patterns])
-  end
 
   @doc false
   def child_specs(endpoint) do
@@ -197,9 +198,14 @@ defmodule Combo.LiveReloader do
 
   def call(conn, _) do
     endpoint = endpoint_module!(conn)
-    config = endpoint.config(:live_reloader)
 
-    if enabled?(config) do
+    config =
+      case endpoint.config(:live_reloader) do
+        true -> []
+        other -> other
+      end
+
+    if config do
       inject_live_reloader(conn, endpoint, config)
     else
       conn

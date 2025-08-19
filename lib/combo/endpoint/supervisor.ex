@@ -135,7 +135,7 @@ defmodule Combo.Endpoint.Supervisor do
   defp live_reloader_children(mod, conf, server?) do
     config = conf[:live_reloader]
 
-    if server? && Combo.LiveReloader.enabled?(config) do
+    if server? && config do
       Combo.LiveReloader.child_specs(mod)
     else
       []
@@ -171,6 +171,7 @@ defmodule Combo.Endpoint.Supervisor do
 
       ## Compile-time config
 
+      live_reloader: false,
       code_reloader: false,
       process_limit: :infinity,
       debug_errors: false,
