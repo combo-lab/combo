@@ -439,20 +439,14 @@ defmodule Combo.Endpoint do
       # Compile-time configuration checking
       # This ensures that, if a compile-time configuration is overwritten at runtime,
       # the application won't boot.
-      live_reloader = Application.compile_env(@otp_app, [__MODULE__, :live_reloader])
-      var!(live_reloading?) = Combo.LiveReloader.enabled?(live_reloader)
-
-      var!(code_reloading?) =
-        Application.compile_env(@otp_app, [__MODULE__, :code_reloader], false)
+      var!(live_reloading?) = !!Application.compile_env(@otp_app, [__MODULE__, :live_reloader])
+      var!(code_reloading?) = !!Application.compile_env(@otp_app, [__MODULE__, :code_reloader])
 
       process_limit = Application.compile_env(@otp_app, [__MODULE__, :process_limit], :infinity)
       var!(process_limiting?) = process_limit != :infinity
 
-      var!(debug_errors?) =
-        Application.compile_env(@otp_app, [__MODULE__, :debug_errors], false)
-
-      var!(force_ssl) =
-        Application.compile_env(@otp_app, [__MODULE__, :force_ssl])
+      var!(debug_errors?) = Application.compile_env(@otp_app, [__MODULE__, :debug_errors], false)
+      var!(force_ssl) = Application.compile_env(@otp_app, [__MODULE__, :force_ssl])
 
       # Configurations exposed as module attributes
       Module.put_attribute(__MODULE__, :combo_process_limit, process_limit)

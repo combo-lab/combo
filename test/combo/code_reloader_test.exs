@@ -3,8 +3,12 @@ defmodule Combo.CodeReloaderTest do
   use Support.RouterHelper
 
   defmodule Endpoint do
-    def config(:reloadable_compilers), do: [:unknown_compiler, :elixir]
-    def config(:reloadable_apps), do: nil
+    def config(:code_reloader) do
+      [
+        reloadable_apps: nil,
+        reloadable_compilers: [:unknown_compiler, :elixir]
+      ]
+    end
   end
 
   def reload(_, _) do

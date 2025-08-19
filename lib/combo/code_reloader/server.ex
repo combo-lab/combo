@@ -61,8 +61,14 @@ defmodule Combo.CodeReloader.Server do
   end
 
   def handle_call({:reload!, endpoint, opts}, from, state) do
-    compilers = endpoint.config(:reloadable_compilers)
-    apps = endpoint.config(:reloadable_apps) || default_reloadable_apps()
+    config =
+      case endpoint.config(:code_reloader) do
+        true -> []
+        other -> other
+      end
+
+    apps = config[:reloadable_apps] || default_reloadable_apps()
+    compilers = config[:reloadable_compilers] || default_reloadable_compilers()
     args = Keyword.get(opts, :reloadable_args, ["--no-all-warnings"])
 
     froms = all_waiting([from], endpoint)
@@ -123,12 +129,16 @@ defmodule Combo.CodeReloader.Server do
     {:noreply, state}
   end
 
-  defp default_reloadable_apps() do
+  defp default_reloadable_apps do
     if Mix.Project.umbrella?() do
       Enum.map(Mix.Dep.Umbrella.cached(), & &1.app)
     else
       [Mix.Project.config()[:app]]
     end
+  end
+
+  defp default_reloadable_compilers do
+    [:elixir, :app]
   end
 
   defp os_symlink({:win32, _}),

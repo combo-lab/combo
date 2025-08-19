@@ -189,8 +189,6 @@ defmodule Combo.Endpoint.Supervisor do
       cache_static_manifest_skip_vsn: false,
       watchers: [],
       force_watchers: false,
-      reloadable_apps: nil,
-      reloadable_compilers: [:elixir, :app]
     ]
   end
 

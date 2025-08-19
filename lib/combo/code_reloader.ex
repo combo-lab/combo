@@ -4,34 +4,18 @@ defmodule Combo.CodeReloader do
 
   To avoid race conditions, all code reloads are funneled through a
   sequential call operation.
-  """
 
-  ## Server delegation
+  ## Usage
 
-  @doc """
-  Reloads code for the current Mix project by invoking the
-  `:reloadable_compilers` on the list of `:reloadable_apps`.
+  Add the `Combo.CodeReloader` plug within a `code_reloading?` block in your
+  endpoint. For example:
 
-  This is configured in your application environment like:
+      if code_reloading? do
+        plug Combo.CodeReloader
+      end
 
-      config :demo, Demo.Web.Endpoint,
-        reloadable_apps: [:ui, :backend],
-        reloadable_compilers: [:gettext, :elixir]
-
-  The `:reloadable_apps` defaults to `nil`. In such case, default behaviour is
-  to reload the current project if it consists of a single app, or all
-  applications within an umbrella project. You can set `:reloadable_apps` to a
-  subset of default applications to reload only some of them, an empty list to
-  effectively disable the code reloader, or include external applications from
-  library dependencies.
-
-  The `:reloadable_compilers` must be a subset of the `:compilers` specified in
-  `project/0` in your `mix.exs`.
-
-  This function is a no-op and returns `:ok` if Mix is not available.
-
-  The reloader should also be configured as a Mix listener in your `mix.exs`
-  since Elixir v1.18:
+  And, `Combo.CodeReloader` should be configured as a Mix listener in your
+  `mix.exs` since Elixir v1.18:
 
       def project do
         [
@@ -42,6 +26,51 @@ defmodule Combo.CodeReloader do
 
   This way the reloader can notice whenever your project is compiled
   concurrently.
+
+  ## Configuration
+
+  `Combo.CodeReloader` is configured via the `:code_reloader` option of your
+  endpoint configuration. The option accepts three types of values:
+
+    * `true` - enable it with default options.
+    * `false` - disable it.
+    * a keyword list - enable it with customized options.
+
+  For example:
+
+      config :demo, Demo.Web.Endpoint, code_reloader: true
+
+      config :demo, Demo.Web.Endpoint, code_reloader: false
+
+      config :demo, Demo.Web.Endpoint,
+        code_reloader: [
+          reloadable_apps: [:ui, :backend],
+          reloadable_compilers: [:gettext, :elixir]
+        ]
+
+  ### The `:reloadable_apps` option
+
+  The `:reloadable_apps` option defaults to `nil`, which means reloading the
+  current project if it consists of a single app, or all applications within
+  an umbrella project.
+
+  You can set `:reloadable_apps` to a subset of default applications to reload
+  only some of them, an empty list to effectively disable the code reloader, or
+  include external applications from library dependencies.
+
+  ### The `:reloadable_compilers` option
+
+  The `:reloadable_compilers` option must be a subset of the `:compilers`
+  specified in `project/0` in your `mix.exs`.
+  """
+
+  ## Server delegation
+
+  @doc """
+  Reloads code for the current Mix project by invoking the
+  `:reloadable_compilers` on the list of `:reloadable_apps`.
+
+  This function is a no-op and returns `:ok` if Mix is not available.
 
   ## Options
 
