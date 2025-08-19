@@ -156,10 +156,12 @@ defmodule Combo.Endpoint.SupervisorTest do
              end)
     end
 
-    test "init/1 starts watcher children when `:server` config is false and `:force_watchers` is true" do
+    test "init/1 starts watcher children when `:server` config is false, but `mix combo.serve` is running" do
+      Application.put_env(:combo, :serve_endpoints, true)
+      on_exit(fn -> Application.put_env(:combo, :serve_endpoints, false) end)
+
       Application.put_env(:combo, WatchersEndpoint,
         server: false,
-        force_watchers: true,
         watchers: @watchers
       )
 

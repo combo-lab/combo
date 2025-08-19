@@ -145,7 +145,7 @@ defmodule Combo.Endpoint.Supervisor do
   defp watcher_children(_mod, conf, server?) do
     watchers = conf[:watchers] || []
 
-    if server? || conf[:force_watchers] do
+    if server? || mix_combo_serve?() do
       Enum.map(watchers, &{Combo.Endpoint.Watcher, &1})
     else
       []
@@ -160,9 +160,11 @@ defmodule Combo.Endpoint.Supervisor do
   end
 
   defp server?(conf) when is_list(conf) do
-    Keyword.get_lazy(conf, :server, fn ->
-      Application.get_env(:combo, :serve_endpoints, false)
-    end)
+    Keyword.get_lazy(conf, :server, fn -> mix_combo_serve?() end)
+  end
+
+  defp mix_combo_serve? do
+    Application.get_env(:combo, :serve_endpoints, false)
   end
 
   defp defaults(otp_app) do
@@ -188,8 +190,7 @@ defmodule Combo.Endpoint.Supervisor do
       secret_key_base: nil,
       cache_static_manifest: nil,
       cache_static_manifest_skip_vsn: false,
-      watchers: [],
-      force_watchers: false,
+      watchers: []
     ]
   end
 

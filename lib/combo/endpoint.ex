@@ -171,11 +171,10 @@ defmodule Combo.Endpoint do
 
     * `:watchers` - a set of watchers to run alongside the server. It expects
       a list of tuples containing the executable and its arguments.
-      Only when the server is enabled, watchers will run. But, setting
-      `:force_watchers` option to `true` makes watchers always run, no matter
-      the server is enabled or not. For example, the watcher below will run the
-      "watch" mode of the webpack when the server starts. You can configure it
-      to whatever build tool or command you want:
+      Only when the server is enabled, or `mix combo.serve` runs, watchers
+      will run. For example, the watcher below will run the "watch" mode of
+      the webpack when the server starts. You can configure it to whatever
+      build tool or command you want:
 
           [
             npx: [
@@ -197,9 +196,6 @@ defmodule Combo.Endpoint do
           [another: {Mod, :fun, [arg1, arg2]}]
 
       When `false`, watchers can be disabled.
-
-    * `:force_watchers` - when `true`, forces your watchers to start even when
-      the `:server` option is set to `false`.
 
     * `:live_reload` - configuration for the live reload option.
       Configuration requires a `:patterns` option which should be a list of
