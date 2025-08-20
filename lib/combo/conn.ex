@@ -808,6 +808,9 @@ defmodule Combo.Conn do
   @type template :: atom() | String.t()
   @type assigns :: Keyword.t() | map()
 
+  defguard is_template(template) when is_atom(template) or is_binary(template)
+  defguard is_assigns(assigns) when is_list(assigns) or is_map(assigns)
+
   @doc """
   Render the given template or the default template specified by the current
   action with the given assigns.
@@ -817,11 +820,11 @@ defmodule Combo.Conn do
   @spec render(Conn.t(), template() | assigns()) :: Conn.t()
   def render(conn, template_or_assigns \\ [])
 
-  def render(conn, template) when is_atom(template) or is_binary(template) do
+  def render(conn, template) when is_template(template) do
     render(conn, template, [])
   end
 
-  def render(conn, assigns) do
+  def render(conn, assigns) when is_assigns(assigns) do
     render(conn, controller_action_name!(conn), assigns)
   end
 
@@ -894,8 +897,7 @@ defmodule Combo.Conn do
 
   """
   @spec render(Conn.t(), template(), assigns()) :: Conn.t()
-  def render(conn, template, assigns)
-      when is_atom(template) and (is_map(assigns) or is_list(assigns)) do
+  def render(conn, template, assigns) when is_atom(template) and is_assigns(assigns) do
     format =
       get_format(conn) ||
         raise """
@@ -907,8 +909,7 @@ defmodule Combo.Conn do
     render_and_send(conn, format, Atom.to_string(template), assigns)
   end
 
-  def render(conn, template, assigns)
-      when is_binary(template) and (is_map(assigns) or is_list(assigns)) do
+  def render(conn, template, assigns) when is_binary(template) and is_assigns(assigns) do
     {base, format} = split_template(template)
     conn = put_format(conn, format)
     render_and_send(conn, format, base, assigns)

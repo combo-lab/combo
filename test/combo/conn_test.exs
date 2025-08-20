@@ -859,6 +859,149 @@ defmodule Combo.Conn.Test do
     assert status_message_from_template("whatever.html") == "Internal Server Error"
   end
 
+  defmodule Layouts do
+    import Combo.Template
+    embed_templates "./conn_test/templates/layouts/*.html"
+  end
+
+  defmodule PageHTML do
+    import Combo.Template
+    embed_templates "./conn_test/templates/pages/*.html"
+  end
+
+  # render/2 is a shortcut for render/3, hence we don't test it too much.
+  describe "render/2" do
+    test "render(conn, atom)" do
+      conn =
+        conn(:get, "/")
+        |> put_view(html: PageHTML)
+        |> put_format(:html)
+        |> render(:show)
+
+      assert conn.resp_body == "<h1>Show</h1><p>Hi!</p>"
+      assert conn.status == 200
+    end
+
+    test "render(conn, binary)" do
+      conn =
+        conn(:get, "/")
+        |> put_view(html: PageHTML)
+        |> render("show.html")
+
+      assert conn.resp_body == "<h1>Show</h1><p>Hi!</p>"
+      assert conn.status == 200
+    end
+
+    test "render(conn, assigns)" do
+      conn =
+        conn(:get, "/")
+        |> put_private(:combo_action, :show)
+        |> put_view(html: PageHTML)
+        |> put_format(:html)
+        |> render(message: "Hello!")
+
+      assert conn.resp_body == "<h1>Show</h1><p>Hello!</p>"
+      assert conn.status == 200
+    end
+  end
+
+  describe "render/3" do
+    test "render(conn, atom, assigns)" do
+      conn =
+        conn(:get, "/")
+        |> put_view(html: PageHTML)
+        |> put_format(:html)
+        |> render(:show, message: "Hello!")
+
+      assert conn.resp_body == "<h1>Show</h1><p>Hello!</p>"
+      assert conn.status == 200
+    end
+
+    test "render(conn, atom, assigns) without setting format" do
+      message = """
+      cannot render template :show because the format is not set. \
+      Please set format via `plug :accepts, ["html", "json", ...]`, or `Combo.Conn.put_format/2`, etc.\
+      """
+
+      assert_raise RuntimeError, message, fn ->
+        conn(:get, "/")
+        |> put_view(html: PageHTML)
+        |> render(:show, message: "Hello!")
+      end
+    end
+
+    test "render(conn, binary, assigns)" do
+      conn =
+        conn(:get, "/")
+        |> put_view(html: PageHTML)
+        |> render("show.html", message: "Hello!")
+
+      assert conn.resp_body == "<h1>Show</h1><p>Hello!</p>"
+      assert conn.status == 200
+    end
+
+    test "render(conn, binary, assigns) without setting format" do
+      message = """
+      cannot render template "show" without format. \
+      Use an atom if the template format is meant to be set dynamically based on the request format\
+      """
+
+      assert_raise RuntimeError, message, fn ->
+        conn(:get, "/")
+        |> put_view(html: PageHTML)
+        |> render("show", message: "Hello!")
+      end
+    end
+
+    test "renders missing template" do
+      message = """
+      no "missing" html template defined for Combo.Conn.Test.PageHTML  \
+      (the module exists but does not define missing/1 nor render/2)\
+      """
+
+      assert_raise ArgumentError, message, fn ->
+        conn(:get, "/")
+        |> put_view(html: PageHTML)
+        |> put_format(:html)
+        |> render("missing.html", message: "Hello!")
+      end
+
+      assert_raise ArgumentError, message, fn ->
+        conn(:get, "/")
+        |> put_view(html: PageHTML)
+        |> put_format(:html)
+        |> render(:missing, message: "Hello!")
+      end
+    end
+
+    test "renders template within layout" do
+      conn =
+        conn(:get, "/")
+        |> put_layout(html: {Layouts, :root})
+        |> put_view(html: PageHTML)
+        |> put_format(:html)
+        |> render(:show, message: "Hello!")
+
+      assert conn.resp_body == "<html><body><h1>Show</h1><p>Hello!</p></body></html>"
+      assert conn.status == 200
+    end
+
+    test "renders template within missing layout" do
+      message = """
+      no "missing" html template defined for Combo.Conn.Test.Layouts  \
+      (the module exists but does not define missing/1 nor render/2)\
+      """
+
+      assert_raise ArgumentError, message, fn ->
+        conn(:get, "/")
+        |> put_layout(html: {Layouts, :missing})
+        |> put_view(html: PageHTML)
+        |> put_format(:html)
+        |> render(:show, message: "Hello!")
+      end
+    end
+  end
+
   ## Flash
 
   describe "flash" do
