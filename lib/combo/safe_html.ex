@@ -103,17 +103,25 @@ defmodule Combo.SafeHTML do
   The keys and values can be of any shape, as long as they implement the
   `Combo.SafeHTML.Safe` protocol.
 
-  Furthermore, the following attributes provide behaviour:
+  Additionally, there are values which have special meanings when they are
+  used as the values of tag attributes:
 
-    * `:class` - it also accepts a list of classes as argument. Each element
-      in the list is separated by space. `nil` and `false` elements are
-      discarded. `class: ["foo", nil, "bar"]` is converted to
-      `class="foo bar"`.
+    * if a value is `true`, the attribute is treated as boolean attribute,
+      and it will be rendered with no value at all.
+
+    * if a value is `false` or `nil`, the attribute is treated as boolean
+      attribute, and it won't be rendered at all.
 
   ## Examples
 
-      iex> IO.iodata_to_binary escape_attrs(title: "the title", id: "the id", selected: true)
-      " title=\"the title\" id=\"the id\" selected"
+      iex> IO.iodata_to_binary escape_attrs(title: "the title", id: "the id")
+      " title=\"the title\" id=\"the id\""
+
+      iex> IO.iodata_to_binary escape_attrs(selected: true)
+      " selected"
+
+      iex> IO.iodata_to_binary escape_attrs(hidden: false)
+      ""
 
   """
   @spec escape_attrs(keyword() | map()) :: iodata()
