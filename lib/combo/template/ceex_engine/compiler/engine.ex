@@ -2,7 +2,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
   @moduledoc false
 
   alias Combo.Template.CEExEngine.Tokenizer
-  alias Combo.Template.CEExEngine.Tokenizer.ParseError
+  alias Combo.Template.CEExEngine.SyntaxError
   alias Combo.Template.CEExEngine.TagHandler
   alias Combo.Template.CEExEngine.Compiler.IOBuilder
   alias Combo.Template.CEExEngine.Compiler.Attr
@@ -1187,11 +1187,11 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
   ## Helpers
 
   defp raise_syntax_error!(message, meta, state) do
-    raise ParseError,
+    raise SyntaxError,
+      file: state.file,
       line: meta.line,
       column: meta.column,
-      file: state.file,
-      description: message <> ParseError.code_snippet(state.source, meta, state.indentation)
+      description: message <> SyntaxError.code_snippet(state.source, meta, state.indentation)
   end
 
   defp maybe_annotate_caller(state, t_meta) do

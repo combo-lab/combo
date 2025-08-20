@@ -2,7 +2,7 @@ defmodule Combo.HTML.FormatterTest do
   use ExUnit.Case, async: true
 
   alias Combo.HTML.Formatter
-  alias Combo.Template.CEExEngine.Tokenizer.ParseError
+  alias Combo.Template.CEExEngine.SyntaxError
 
   defp assert_formatter_output(input, expected, dot_formatter_opts \\ []) do
     dot_formatter_opts =
@@ -27,7 +27,7 @@ defmodule Combo.HTML.FormatterTest do
   end
 
   test "errors on invalid HTML" do
-    assert_raise ParseError,
+    assert_raise SyntaxError,
                  ~r/end of template reached without closing tag for <style>/,
                  fn -> assert_formatter_doesnt_change("<style>foo") end
   end

@@ -2,7 +2,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
   use ExUnit.Case, async: true
 
   alias Combo.Template.CEExEngine.Tokenizer
-  alias Combo.Template.CEExEngine.Tokenizer.ParseError
+  alias Combo.Template.CEExEngine.SyntaxError
 
   defp tokenizer_state(text), do: Tokenizer.init(text, "nofile", 0)
 
@@ -51,7 +51,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
 
     test "incomplete" do
-      assert_raise ParseError, ~r/unexpected end of string inside tag/, fn ->
+      assert_raise SyntaxError, ~r/unexpected end of string inside tag/, fn ->
         tokenize("<!doctype html")
       end
     end
@@ -230,7 +230,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         |    ^\
       """
 
-      assert_raise ParseError, message, fn ->
+      assert_raise SyntaxError, message, fn ->
         tokenize("""
         <div>
           <>\
@@ -244,7 +244,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         |  ^\
       """
 
-      assert_raise ParseError, message, fn ->
+      assert_raise SyntaxError, message, fn ->
         tokenize("<")
       end
 
@@ -255,11 +255,11 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         |  ^\
       """
 
-      assert_raise ParseError, message, fn ->
+      assert_raise SyntaxError, message, fn ->
         tokenize("<./typo>")
       end
 
-      assert_raise ParseError, ~r"nofile:1:5: expected closing `>` or `/>`", fn ->
+      assert_raise SyntaxError, ~r"nofile:1:5: expected closing `>` or `/>`", fn ->
         tokenize("<foo")
       end
     end
@@ -316,7 +316,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         |           ^\
       """
 
-      assert_raise ParseError, message, fn ->
+      assert_raise SyntaxError, message, fn ->
         tokenize("<div class")
       end
     end
@@ -330,7 +330,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         |         ^\
       """
 
-      assert_raise ParseError, message, fn ->
+      assert_raise SyntaxError, message, fn ->
         tokenize("""
         <div
           class=>\
@@ -344,7 +344,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         |             ^\
       """
 
-      assert_raise ParseError, message, fn ->
+      assert_raise SyntaxError, message, fn ->
         tokenize(~S(<div class= >))
       end
 
@@ -355,7 +355,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         |            ^\
       """
 
-      assert_raise ParseError, message, fn ->
+      assert_raise SyntaxError, message, fn ->
         tokenize("<div class=")
       end
     end
@@ -369,7 +369,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         |        ^\
       """
 
-      assert_raise ParseError, message, fn ->
+      assert_raise SyntaxError, message, fn ->
         tokenize("""
         <div>
           <div ="panel">\
@@ -383,7 +383,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         |      ^\
       """
 
-      assert_raise ParseError, message, fn ->
+      assert_raise SyntaxError, message, fn ->
         tokenize(~S(<div = >))
       end
 
@@ -394,7 +394,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         |      ^\
       """
 
-      assert_raise ParseError, message, fn ->
+      assert_raise SyntaxError, message, fn ->
         tokenize(~S(<div / >))
       end
     end
@@ -407,7 +407,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         |     ^\
       """
 
-      assert_raise ParseError, message, fn ->
+      assert_raise SyntaxError, message, fn ->
         tokenize(~S(<div'>))
       end
 
@@ -418,7 +418,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         |     ^\
       """
 
-      assert_raise ParseError, message, fn ->
+      assert_raise SyntaxError, message, fn ->
         tokenize(~S(<div">))
       end
 
@@ -429,7 +429,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         |          ^\
       """
 
-      assert_raise ParseError, message, fn ->
+      assert_raise SyntaxError, message, fn ->
         tokenize(~S(<div attr'>))
       end
 
@@ -440,7 +440,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         |                    ^\
       """
 
-      assert_raise ParseError, message, fn ->
+      assert_raise SyntaxError, message, fn ->
         tokenize(~S(<div class={"test"}">))
       end
     end
@@ -515,7 +515,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
 
     test "raise on incomplete attribute value (EOF)" do
-      assert_raise ParseError, ~r"nofile:2:15: expected closing `\"` for attribute value", fn ->
+      assert_raise SyntaxError, ~r"nofile:2:15: expected closing `\"` for attribute value", fn ->
         tokenize("""
         <div
           class="panel\
@@ -561,7 +561,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
 
     test "raise on incomplete attribute value (EOF)" do
-      assert_raise ParseError, ~r"nofile:2:15: expected closing `\'` for attribute value", fn ->
+      assert_raise SyntaxError, ~r"nofile:2:15: expected closing `\'` for attribute value", fn ->
         tokenize("""
         <div
           class='panel\
@@ -638,7 +638,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         |         ^\
       """
 
-      assert_raise ParseError, message, fn ->
+      assert_raise SyntaxError, message, fn ->
         tokenize("""
         <div
           class={panel\
@@ -720,7 +720,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         |   ^\
       """
 
-      assert_raise ParseError, message, fn ->
+      assert_raise SyntaxError, message, fn ->
         tokenize("""
         <div
           {@attrs\
@@ -759,7 +759,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         |      ^\
       """
 
-      assert_raise ParseError, message, fn ->
+      assert_raise SyntaxError, message, fn ->
         tokenize("""
         <div>
         </div text\
@@ -776,7 +776,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         |     ^\
       """
 
-      assert_raise ParseError, message, fn ->
+      assert_raise SyntaxError, message, fn ->
         tokenize("""
         <div>
           </>\
@@ -956,7 +956,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         |  ^\
       """
 
-      assert_raise ParseError, message, fn ->
+      assert_raise SyntaxError, message, fn ->
         tokenize("<:inner_block>Inner</:inner_block>")
       end
     end

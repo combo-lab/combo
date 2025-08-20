@@ -2,7 +2,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
   use ExUnit.Case, async: true
 
   alias Combo.Template.CEExEngine.Compiler
-  alias Combo.Template.CEExEngine.Tokenizer.ParseError
+  alias Combo.Template.CEExEngine.SyntaxError
 
   defp compile(template) do
     Compiler.compile_string(template, caller: __ENV__, file: __ENV__.file)
@@ -17,7 +17,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         | ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <Foo foo="bar" />
         """)
@@ -31,7 +31,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |   ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <br>
           <Oops foo={@foo}>
@@ -51,7 +51,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
       |         ^\
     """
 
-    assert_raise(ParseError, message, fn ->
+    assert_raise(SyntaxError, message, fn ->
       compile("""
       <div>Bar</div>
       <div id=>Foo</div>
@@ -69,7 +69,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |   ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         text
           </span>
@@ -86,7 +86,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |   ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         text
           </Remote.component>
@@ -103,7 +103,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |   ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         text
           </.local_component>
@@ -121,7 +121,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |           ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <link>Text</link>
         """)
@@ -139,7 +139,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         | ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <br>
         <div foo={@foo}>
@@ -154,7 +154,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |   ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         text
           <span foo={@foo}>
@@ -170,7 +170,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         | ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <div>Foo</div>
         <div>
@@ -187,7 +187,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         | ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <.Remote.component>
         """)
@@ -201,7 +201,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |   ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <%= if true do %>
           <.Remote.component>
@@ -218,7 +218,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         | ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <.local_component>
         """)
@@ -232,7 +232,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |   ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <%= if true do %>
           <.local_component>
@@ -256,7 +256,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         | ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <br>
         <div>
@@ -277,7 +277,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         | ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <br>
         <div>
@@ -297,7 +297,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |                ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("<div><link>Text</link></div>")
       end)
     end
@@ -311,7 +311,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
       |      ^\
     """
 
-    assert_raise(ParseError, message, fn ->
+    assert_raise(SyntaxError, message, fn ->
       compile("Begin<!-- <%= 123 %>")
     end)
   end
@@ -327,7 +327,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |          ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <div foo={<%= @foo %>}>bar</div>
         """)
@@ -343,7 +343,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |   ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <div foo=
           {<%= @foo %>}>bar</div>
@@ -360,7 +360,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |      ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
            <div foo=
              {<%= @foo %>}>bar</div>
@@ -378,7 +378,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |      ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <div :let={@user}>Content</div>
         """)
@@ -396,7 +396,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |   ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <br>
         <Remote.component value='1'
@@ -416,7 +416,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |   ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <br>
         <.local_component value='1'
@@ -436,7 +436,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |                             ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <br>
         <Remote.component value='1' :let="1" />
@@ -451,7 +451,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |                             ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <br>
         <.local_component value='1' :let="1" />
@@ -467,7 +467,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |                   ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <Remote.component :let={var} />
         """)
@@ -480,7 +480,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |                   ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <.local_component :let={var} />
         """)
@@ -496,7 +496,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |                   ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <.local_component>
           <:sample id="1" :let={var} />
@@ -515,7 +515,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |                 ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <div :if={true} :if={true}>content</div>
         """)
@@ -528,7 +528,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |                              ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <Remote.component :if={true} :if={true}>content</Remote.component>
         """)
@@ -541,7 +541,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |                              ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <.local_component :if={true} :if={true}>content</.local_component>
         """)
@@ -556,7 +556,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |      ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <div :if="1">content</div>
         """)
@@ -573,7 +573,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |                            ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <div :for={item <- [1, 2]} :for={item <- [1, 2]}>content</div>
         """)
@@ -586,7 +586,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |                                         ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <Remote.component :for={item <- [1, 2]} :for={item <- [1, 2]}>content</Remote.component>
         """)
@@ -599,7 +599,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |                                         ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <.local_component :for={item <- [1, 2]} :for={item <- [1, 2]}>content</.local_component>
         """)
@@ -614,7 +614,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |      ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <div :for="1">content</div>
         """)
@@ -627,7 +627,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |      ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <div :for={@user}>content</div>
         """)
@@ -644,7 +644,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |      ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <div :unknown="something" />
         """)
@@ -661,7 +661,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         | ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <:slot>
           content
@@ -676,7 +676,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         | ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <:slot>
           <p>content</p>
@@ -692,7 +692,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |   ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <div>
           <:slot>
@@ -711,7 +711,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |   ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <Remote.component>
         <%= if true do %>
@@ -732,7 +732,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         |     ^\
       """
 
-      assert_raise(ParseError, message, fn ->
+      assert_raise(SyntaxError, message, fn ->
         compile("""
         <Remote.component>
           <:slot>

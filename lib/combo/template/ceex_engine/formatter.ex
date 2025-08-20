@@ -5,7 +5,7 @@ defmodule Combo.Template.CEExEngine.Formatter do
 
   alias Combo.Template.CEExEngine.Formatter.HTMLAlgebra
   alias Combo.Template.CEExEngine.Tokenizer
-  alias Combo.Template.CEExEngine.Tokenizer.ParseError
+  alias Combo.Template.CEExEngine.SyntaxError
 
   defguard is_tag_open(tag_type)
            when tag_type in [:html_tag, :remote_component, :local_component, :slot]
@@ -52,7 +52,7 @@ defmodule Combo.Template.CEExEngine.Formatter do
 
           {:error, line, column, message} ->
             file = Keyword.get(opts, :file, "nofile")
-            raise ParseError, line: line, column: column, file: file, description: message
+            raise SyntaxError, line: line, column: column, file: file, description: message
         end
 
       # If the opening delimiter is a single character, such as ~CE"...", or the formatted code is empty,
