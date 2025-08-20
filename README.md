@@ -8,18 +8,18 @@ Combines the good parts of modern web development.
 
 Combo started as a fork of Phoenix. Its goals includes:
 
-- being a traditional MVC framework.
-- integrating with the modern frontend ecosystem.
+- being a typical MVC framework.
+- integrating with the modern frontend tooling.
 - ...
 
 To archive the goals, it:
 
 - merges closely related dependencies, such as `phoenix_template`, `phoenix_html`, `phoenix_live_reload` etc.
 - merges the HEEx engine-related code from `phoenix_live_view` and completely removes the dependency on `phoenix_live_view`.
-- provides packages for integrating with the modern frontend ecosystem.
+- provides packages for integrating with the modern frontend tooling.
 - ...
 
-Although Combo is forked from Phoenix and will continue to track upstream changes in the future, compatibility between the two is not guaranteed.
+Although Combo is forked from Phoenix and will continue to track upstream changes in the future, full compatibility between the two is not guaranteed.
 
 ## Getting started
 
