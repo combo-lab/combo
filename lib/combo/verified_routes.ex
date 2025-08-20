@@ -24,7 +24,7 @@ defmodule Combo.VerifiedRoutes do
   warning: no route path for Demo.Web.Router matches "/postz/#{post}"
   ```
 
-  Additionally, interpolated ~p values are encoded via the `Combo.Param`
+  Additionally, interpolated `~p` values are encoded via the `Combo.Param`
   protocol. For example, a `%Post{}` struct in your application may derive
   the `Combo.Param` protocol to generate slug-based paths rather than ID
   based ones. This allows you to use `~p"/posts/#{post}"` rather than
@@ -42,7 +42,7 @@ defmodule Combo.VerifiedRoutes do
       ~p"/posts?#{params}"
 
   Like path segments, query strings params are proper URL encoded and may
-  be interpolated directly into the ~p string.
+  be interpolated directly into the `~p` string.
 
   ## What about named routes?
 
@@ -80,18 +80,18 @@ defmodule Combo.VerifiedRoutes do
 
   `use Combo.VerifiedRoutes` supports the following options:
 
-    * `:endpoint` - Optional endpoint for URL generation.
+    * `:endpoint` - The optional endpoint for URL generation.
     * `:router` - The required router to verify `~p` paths against.
-    * `:statics` - Optional list of static directories to treat as verified
-      paths.
-    * `:path_prefixes` - Optional list of path prefixes to be added to every
-      generated path. See "Path prefixes" for more information.
+    * `:statics` - The optional list of static directories to treat as
+      verified paths.
+    * `:path_prefixes` - The optional list of path prefixes to be added
+      to every generated path. See "Path prefixes" for more information.
 
   ### Examples
 
       use Combo.VerifiedRoutes,
-        router: Demo.Web.Router,
         endpoint: Demo.Web.Endpoint,
+        router: Demo.Web.Router,
         statics: ~w(images)
 
   Then, you can define verified routes with `url/_`, `path/_`, `static_url/_`,
@@ -104,8 +104,8 @@ defmodule Combo.VerifiedRoutes do
   or URL is provided by the compile-time information stored in the Endpoint
   and Router passed to `use Combo.VerifiedRoutes`.
 
-  That said, there are some circumstances where `path/2`, `path/3`, `url/2`, and `url/3`
-  are required:
+  That said, there are some circumstances where `path/2`, `path/3`, `url/2`, and
+  `url/3` are required:
 
     * When the runtime values of the `%Plug.Conn{}` or a `%URI{}` dictate the
       formation of the path or URL, which happens under the following scenarios:
@@ -173,8 +173,8 @@ defmodule Combo.VerifiedRoutes do
   For example:
 
       use Combo.VerifiedRoutes,
-        router: Demo.Web.Router,
         endpoint: Demo.Web.Endpoint,
+        router: Demo.Web.Router,
         path_prefixes: [{Demo.Gettext, :get_locale, []}]
 
   The above will prepend `"/#{Demo.Gettext.get_locale()}"` to every path and
@@ -184,8 +184,8 @@ defmodule Combo.VerifiedRoutes do
 
       defmodule Demo.Web.UnlocalizedRoutes do
         use Combo.VerifiedRoutes,
-          router: Demo.Web.Router,
           endpoint: Demo.Web.Endpoint,
+          router: Demo.Web.Router
 
         # Since :path_prefixes was not declared,
         # the code below won't prepend the locale and still be verified
@@ -228,6 +228,7 @@ defmodule Combo.VerifiedRoutes do
       end
 
   '''
+
   @doc false
   defstruct router: nil,
             route: nil,
@@ -278,7 +279,7 @@ defmodule Combo.VerifiedRoutes do
                 "expected path_prefixes to be a list of zero-arity functions, got: #{inspect(other)}"
       end
 
-    Module.put_attribute(mod, :combo_verified_config, %{
+    Module.put_attribute(mod, :combo_verified_routes_config, %{
       statics: statics,
       path_prefixes: path_prefixes
     })
@@ -917,7 +918,7 @@ defmodule Combo.VerifiedRoutes do
   defp to_param(data), do: Combo.Param.to_param(data)
 
   defp build_route(route_ast, sigil_p, env, endpoint_ctx, router) do
-    config = Module.get_attribute(env.module, :combo_verified_config, [])
+    config = Module.get_attribute(env.module, :combo_verified_routes_config, [])
 
     router =
       case Macro.expand(router, env) do
