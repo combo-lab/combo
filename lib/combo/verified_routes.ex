@@ -903,19 +903,15 @@ defmodule Combo.VerifiedRoutes do
 
   @doc false
   def __encode_query__(dict) when is_list(dict) or (is_map(dict) and not is_struct(dict)) do
-    case Plug.Conn.Query.encode(dict, &to_param/1) do
+    case Plug.Conn.Query.encode(dict, &Combo.Param.to_param/1) do
       "" -> ""
       query_str -> query_str
     end
   end
 
-  def __encode_query__(val), do: val |> to_param() |> URI.encode_www_form()
-
-  defp to_param(int) when is_integer(int), do: Integer.to_string(int)
-  defp to_param(bin) when is_binary(bin), do: bin
-  defp to_param(false), do: "false"
-  defp to_param(true), do: "true"
-  defp to_param(data), do: Combo.Param.to_param(data)
+  def __encode_query__(val) do
+    val |> Combo.Param.to_param() |> URI.encode_www_form()
+  end
 
   defp build_route(route_ast, sigil_p, env, endpoint_ctx, router) do
     config = Module.get_attribute(env.module, :combo_verified_routes_config, [])
