@@ -81,7 +81,10 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     quoted = Assigns.traverse(quoted)
 
     quoted =
-      if annotation = caller && has_tags?(tokens) && Annotation.get_body_annotation(caller) do
+      if caller && has_tags?(tokens) && Annotation.enable?() do
+        %{module: mod, function: {fun, _}, file: file, line: line} = caller
+        component_name = "#{inspect(mod)}.#{fun}"
+        annotation = Annotation.build_annotation(component_name, file, line)
         annotate_block(quoted, annotation)
       else
         quoted
@@ -723,7 +726,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     slot_name = String.to_atom(name)
 
     {roots, attrs, attr_info} = split_component_attrs(attrs)
-    clauses = build_component_clauses(open_tag, state)
+    clauses = build_component_clauses(slot_name, meta, state)
 
     inner_block =
       quote line: line do
@@ -1076,11 +1079,14 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     {build_component_attrs(roots, attrs, line), attr_info}
   end
 
-  defp build_component_assigns({_type, _name, attrs, meta} = tag, state) do
+  defp build_component_assigns({_type, _name, attrs, meta}, state) do
     %{line: line} = meta
 
     {roots, attrs, attr_info} = split_component_attrs(attrs)
-    clauses = build_component_clauses(tag, state)
+    slot_name = :inner_block
+
+    # This slot is the default slot, the meta points to the component.
+    clauses = build_component_clauses(slot_name, meta, state)
 
     inner_block =
       quote line: line do
@@ -1161,17 +1167,16 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     end)
   end
 
-  defp build_component_clauses(
-         {_type, _name, _attrs, meta} = tag,
-         state
-       ) do
-    %{caller: caller} = state
+  defp build_component_clauses(slot_name, meta, state) do
     quoted = iob_dump(state)
 
+    %{caller: caller} = state
+
     quoted =
-      if annotation =
-           caller && Map.get(meta, :has_tags?, false) &&
-             Annotation.get_slot_annotation(caller, tag) do
+      if caller && Map.get(meta, :has_tags?, false) && Annotation.enable?() do
+        %{file: file} = caller
+        %{line: line} = meta
+        annotation = Annotation.build_annotation(":#{slot_name}", file, line)
         annotate_block(quoted, annotation)
       else
         quoted
@@ -1285,12 +1290,13 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       description: message <> SyntaxError.code_snippet(state.source, meta, state.indentation)
   end
 
-  defp maybe_annotate_caller(state, t_meta) do
+  defp maybe_annotate_caller(state, meta) do
     %{file: file} = state
-    %{line: line} = t_meta
+    %{line: line} = meta
 
-    if anno = Annotation.get_caller_annotation(file, line) do
-      state |> iob_acc_text(anno)
+    if Annotation.enable?() do
+      annotation = Annotation.build_caller_annotation(file, line)
+      state |> iob_acc_text(annotation)
     else
       state
     end
