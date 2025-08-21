@@ -3,8 +3,8 @@ defmodule Support.Controller do
     quote bind_quoted: [opts: opts] do
       use Combo.Controller, opts: opts
 
-      import Combo.Conn
       import Plug.Conn
+      import Combo.Conn
     end
   end
 end

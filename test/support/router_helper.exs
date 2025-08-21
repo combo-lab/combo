@@ -11,9 +11,9 @@ defmodule Support.RouterHelper do
   defmacro __using__(_) do
     quote do
       import Support.RouterHelper
-      import Combo.Conn
       import Plug.Test
       import Plug.Conn
+      import Combo.Conn
     end
   end
 

@@ -105,8 +105,9 @@ defmodule Combo.CodeReloader do
   ## Plug
 
   @behaviour Plug
-  import Combo.Conn, only: [endpoint_module!: 1]
+
   import Plug.Conn
+  import Combo.Conn, only: [endpoint_module!: 1]
   alias Combo.SafeHTML
 
   @style %{

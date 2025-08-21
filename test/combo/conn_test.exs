@@ -3,9 +3,9 @@
 defmodule Combo.Conn.Test do
   use ExUnit.Case, async: true
 
-  import Plug.Conn
   alias Plug.Conn
   import Plug.Test
+  import Plug.Conn
   import Combo.Conn
 
   defp sent_conn do

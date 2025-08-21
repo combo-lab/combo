@@ -3,8 +3,8 @@ defmodule Support.Router do
     quote do
       use Combo.Router
 
-      import Combo.Conn
       import Plug.Conn
+      import Combo.Conn
     end
   end
 end

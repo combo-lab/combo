@@ -122,9 +122,9 @@ defmodule Combo.LiveReloader do
 
   """
 
-  import Combo.SafeHTML, only: [escape_attrs: 1]
-  import Combo.Conn, only: [endpoint_module!: 1]
   import Plug.Conn
+  import Combo.Conn, only: [endpoint_module!: 1]
+  import Combo.SafeHTML, only: [escape_attrs: 1]
 
   @behaviour Plug
 
