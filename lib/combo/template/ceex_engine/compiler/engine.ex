@@ -127,7 +127,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
     tokens
     |> Enum.map(&preprocess_token(&1, tokens_state))
-    |> Enum.reduce(tokens_state, &handle_token/2)
+    |> then(&reduce_tokens(tokens_state, &1))
     |> validate_unclosed_tags!(context)
     |> iob_dump()
   end
@@ -362,9 +362,11 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     {t_type, t_name, [attr | t_attrs], t_meta}
   end
 
+  defp reduce_tokens(state, []), do: state
+
   # text
 
-  defp handle_token({:text, text, _meta}, state) do
+  defp reduce_tokens(state, [{:text, text, _meta} | tokens]) do
     text = if state.prev_token_slot?, do: String.trim_leading(text), else: text
 
     if text == "" do
@@ -373,25 +375,31 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       state
       |> iob_acc_text(text)
     end
+    |> reduce_tokens(tokens)
   end
 
   # expr
 
-  defp handle_token({:expr, marker, quoted}, state) do
+  defp reduce_tokens(state, [{:expr, marker, quoted} | tokens]) do
     state
     |> iob_acc_expr(marker, quoted)
+    |> reduce_tokens(tokens)
   end
 
-  defp handle_token({:body_expr, source, t_meta}, state) do
+  defp reduce_tokens(state, [{:body_expr, source, t_meta} | tokens]) do
     quoted = to_quoted!(source, t_meta, state)
 
     state
     |> iob_acc_expr(quoted)
+    |> reduce_tokens(tokens)
   end
 
   # HTML tag (self-closing)
 
-  defp handle_token({:html_tag, name, attrs, %{closing: closing} = meta} = tag, state) do
+  defp reduce_tokens(
+         state,
+         [{:html_tag, name, attrs, %{closing: closing} = meta} = tag | tokens]
+       ) do
     suffix = if closing == :void, do: ">", else: "></#{name}>"
 
     if should_wrap?(tag) do
@@ -416,11 +424,15 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       |> acc_attrs(attrs, meta)
       |> iob_acc_text(suffix)
     end
+    |> reduce_tokens(tokens)
   end
 
   # HTML tag
 
-  defp handle_token({:html_tag, name, attrs, meta} = tag, state) do
+  defp reduce_tokens(
+         state,
+         [{:html_tag, name, attrs, meta} = tag | tokens]
+       ) do
     if should_wrap?(tag) do
       state
       |> push_tag(tag)
@@ -435,9 +447,13 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       |> acc_attrs(attrs, meta)
       |> iob_acc_text(">")
     end
+    |> reduce_tokens(tokens)
   end
 
-  defp handle_token({:close, :html_tag, name, _meta} = tag, state) do
+  defp reduce_tokens(
+         state,
+         [{:close, :html_tag, name, _meta} = tag | tokens]
+       ) do
     {open_tag, state} = pop_tag!(state, tag)
 
     if should_wrap?(open_tag) do
@@ -457,13 +473,14 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       state
       |> iob_acc_text("</#{name}>")
     end
+    |> reduce_tokens(tokens)
   end
 
   # remote component (self-closing)
 
-  defp handle_token(
-         {:remote_component, _name, _attrs, %{closing: :self} = meta} = tag,
-         state
+  defp reduce_tokens(
+         state,
+         [{:remote_component, _name, _attrs, %{closing: :self} = meta} = tag | tokens]
        ) do
     mod_asf = decompose_remote_component_tag!(tag, state)
     mod = build_remote_component_module(mod_asf, meta, state)
@@ -498,11 +515,15 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       |> maybe_annotate_caller(meta)
       |> iob_acc_expr(quoted)
     end
+    |> reduce_tokens(tokens)
   end
 
   # remote component
 
-  defp handle_token({:remote_component = type, name, attrs, meta} = tag, state) do
+  defp reduce_tokens(
+         state,
+         [{:remote_component = type, name, attrs, meta} = tag | tokens]
+       ) do
     mod_asf = decompose_remote_component_tag!(tag, state)
     new_meta = Map.put(meta, :mod_asf, mod_asf)
     tag = {type, name, attrs, new_meta}
@@ -511,9 +532,13 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     |> push_tag(tag)
     |> init_slots()
     |> iob_push_ctx()
+    |> reduce_tokens(tokens)
   end
 
-  defp handle_token({:close, :remote_component, _name, _meta} = tag, state) do
+  defp reduce_tokens(
+         state,
+         [{:close, :remote_component, _name, _meta} = tag | tokens]
+       ) do
     {{:remote_component, _name, _attrs, meta} = open_tag, state} = pop_tag!(state, tag)
     %{mod_asf: {_mod_ast, _mod_size, fun} = mod_asf} = meta
 
@@ -551,11 +576,15 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       |> maybe_annotate_caller(meta)
       |> iob_acc_expr(quoted)
     end
+    |> reduce_tokens(tokens)
   end
 
   # local component (self-closing)
 
-  defp handle_token({:local_component, name, _attrs, %{closing: :self} = meta} = tag, state) do
+  defp reduce_tokens(
+         state,
+         [{:local_component, name, _attrs, %{closing: :self} = meta} = tag | tokens]
+       ) do
     fun = String.to_atom(name)
     mod = build_local_component_module(state.caller, fun)
     capture = build_local_component_capture(fun, meta)
@@ -588,18 +617,26 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       |> maybe_annotate_caller(meta)
       |> iob_acc_expr(quoted)
     end
+    |> reduce_tokens(tokens)
   end
 
   # local component
 
-  defp handle_token({:local_component, _name, _attrs, _meta} = tag, state) do
+  defp reduce_tokens(
+         state,
+         [{:local_component, _name, _attrs, _meta} = tag | tokens]
+       ) do
     state
     |> push_tag(tag)
     |> init_slots()
     |> iob_push_ctx()
+    |> reduce_tokens(tokens)
   end
 
-  defp handle_token({:close, :local_component, name, _meta} = tag, state) do
+  defp reduce_tokens(
+         state,
+         [{:close, :local_component, name, _meta} = tag | tokens]
+       ) do
     {{:local_component, _name, _attrs, meta} = open_tag, state} = pop_tag!(state, tag)
 
     fun = String.to_atom(name)
@@ -637,11 +674,15 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       |> maybe_annotate_caller(meta)
       |> iob_acc_expr(quoted)
     end
+    |> reduce_tokens(tokens)
   end
 
   # slot (self-closing)
 
-  defp handle_token({:slot, name, attrs, %{closing: :self} = meta} = tag, state) do
+  defp reduce_tokens(
+         state,
+         [{:slot, name, attrs, %{closing: :self} = meta} = tag | tokens]
+       ) do
     validate_slot!(tag, state)
 
     slot_name = String.to_atom(name)
@@ -653,19 +694,27 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
     state
     |> add_slot(slot_name, assigns, attr_info, meta)
+    |> reduce_tokens(tokens)
   end
 
   # slot
 
-  defp handle_token({:slot, _name, _attrs, _meta} = tag, state) do
+  defp reduce_tokens(
+         state,
+         [{:slot, _name, _attrs, _meta} = tag | tokens]
+       ) do
     validate_slot!(tag, state)
 
     state
     |> push_tag(tag)
     |> iob_push_ctx()
+    |> reduce_tokens(tokens)
   end
 
-  defp handle_token({:close, :slot, _name, _meta} = tag, state) do
+  defp reduce_tokens(
+         state,
+         [{:close, :slot, _name, _meta} = tag | tokens]
+       ) do
     {{:slot, name, attrs, meta} = open_tag, state} = pop_tag!(state, tag)
     %{line: line} = meta
 
@@ -686,6 +735,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     state
     |> iob_pop_ctx()
     |> add_slot(slot_name, assigns, inner, meta)
+    |> reduce_tokens(tokens)
   end
 
   defp validate_unclosed_tags!(%{tags: []} = state, _context) do
