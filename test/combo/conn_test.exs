@@ -38,9 +38,9 @@ defmodule Combo.Conn.Test do
     assert controller_module!(conn) == Hello
   end
 
-  test "controller_action_name!/1" do
+  test "action_name!/1" do
     conn = put_private(%Conn{}, :combo_action, :show)
-    assert controller_action_name!(conn) == :show
+    assert action_name!(conn) == :show
   end
 
   ## Formats

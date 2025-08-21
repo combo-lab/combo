@@ -160,7 +160,7 @@ defmodule Combo.Controller do
 
       def action(conn, _) do
         args = [conn, conn.params, conn.assigns.current_user]
-        apply(__MODULE__, controller_action_name!(conn), args)
+        apply(__MODULE__, action_name!(conn), args)
       end
 
       def index(conn, params, user) do

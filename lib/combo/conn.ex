@@ -52,8 +52,8 @@ defmodule Combo.Conn do
   @doc """
   Gets the action name as an atom, or raises if unavailable.
   """
-  @spec controller_action_name!(Conn.t()) :: atom()
-  def controller_action_name!(conn), do: conn.private.combo_action
+  @spec action_name!(Conn.t()) :: atom()
+  def action_name!(conn), do: conn.private.combo_action
 
   ## Formats
 
@@ -825,7 +825,7 @@ defmodule Combo.Conn do
   end
 
   def render(conn, assigns) when is_assigns(assigns) do
-    render(conn, controller_action_name!(conn), assigns)
+    render(conn, action_name!(conn), assigns)
   end
 
   @doc """
