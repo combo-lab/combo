@@ -81,8 +81,8 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     quoted = Assigns.traverse(quoted)
 
     quoted =
-      if body_annotation = caller && Annotation.get_body_annotation(caller) do
-        annotate_body(quoted, body_annotation)
+      if annotation = caller && has_tags?(tokens) && Annotation.get_body_annotation(caller) do
+        annotate_block(quoted, annotation)
       else
         quoted
       end
@@ -121,8 +121,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       iob_stack: iob_stack,
       # These fields are set with new values. So they are "always" fresh new.
       tags: [],
-      slots: [],
-      prev_token_slot?: false
+      slots: []
     }
 
     tokens
@@ -367,8 +366,6 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
   # text
 
   defp reduce_tokens(state, [{:text, text, _meta} | tokens]) do
-    text = if state.prev_token_slot?, do: String.trim_leading(text), else: text
-
     if text == "" do
       state
     else
@@ -525,11 +522,11 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
          [{:remote_component = type, name, attrs, meta} = tag | tokens]
        ) do
     mod_asf = decompose_remote_component_tag!(tag, state)
-    new_meta = Map.put(meta, :mod_asf, mod_asf)
-    tag = {type, name, attrs, new_meta}
+    new_meta = meta |> Map.put(:mod_asf, mod_asf) |> Map.put(:has_tags?, has_tags?(tokens))
+    new_tag = {type, name, attrs, new_meta}
 
     state
-    |> push_tag(tag)
+    |> push_tag(new_tag)
     |> init_slots()
     |> iob_push_ctx()
     |> reduce_tokens(tokens)
@@ -624,10 +621,13 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
   defp reduce_tokens(
          state,
-         [{:local_component, _name, _attrs, _meta} = tag | tokens]
+         [{:local_component = type, name, attrs, meta} | tokens]
        ) do
+    new_meta = Map.put(meta, :has_tags?, has_tags?(tokens))
+    new_tag = {type, name, attrs, new_meta}
+
     state
-    |> push_tag(tag)
+    |> push_tag(new_tag)
     |> init_slots()
     |> iob_push_ctx()
     |> reduce_tokens(tokens)
@@ -694,19 +694,21 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
     state
     |> add_slot(slot_name, assigns, attr_info, meta)
-    |> reduce_tokens(tokens)
+    |> reduce_tokens(prune_text_after_slot(tokens))
   end
 
   # slot
 
   defp reduce_tokens(
          state,
-         [{:slot, _name, _attrs, _meta} = tag | tokens]
+         [{:slot = type, name, attrs, meta} = tag | tokens]
        ) do
     validate_slot!(tag, state)
+    new_meta = Map.put(meta, :has_tags?, has_tags?(tokens))
+    new_tag = {type, name, attrs, new_meta}
 
     state
-    |> push_tag(tag)
+    |> push_tag(new_tag)
     |> iob_push_ctx()
     |> reduce_tokens(tokens)
   end
@@ -735,7 +737,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     state
     |> iob_pop_ctx()
     |> add_slot(slot_name, assigns, inner, meta)
-    |> reduce_tokens(tokens)
+    |> reduce_tokens(prune_text_after_slot(tokens))
   end
 
   defp validate_unclosed_tags!(%{tags: []} = state, _context) do
@@ -754,7 +756,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
   defp iob_push_ctx(%{iob_stack: [current | _] = all} = state) do
     new = state.iob.reset(current)
-    %{state | iob_stack: [new | all], prev_token_slot?: false}
+    %{state | iob_stack: [new | all]}
   end
 
   defp iob_pop_ctx(%{iob_stack: [_ | rest]} = state) do
@@ -763,17 +765,36 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
   defp iob_acc_text(%{iob_stack: [current | rest]} = state, text) do
     updated = state.iob.acc_text(current, text)
-    %{state | iob_stack: [updated | rest], prev_token_slot?: false}
+    %{state | iob_stack: [updated | rest]}
   end
 
   defp iob_acc_expr(%{iob_stack: [current | rest]} = state, marker \\ "=", expr) do
     updated = state.iob.acc_expr(current, marker, expr)
-    %{state | iob_stack: [updated | rest], prev_token_slot?: false}
+    %{state | iob_stack: [updated | rest]}
   end
 
   defp iob_dump(%{iob_stack: [current | _]} = state) do
     state.iob.dump(current)
   end
+
+  # checking helpers
+
+  defp has_tags?([{:text, _, _} | tokens]), do: has_tags?(tokens)
+  defp has_tags?([{:expr, _, _} | tokens]), do: has_tags?(tokens)
+  defp has_tags?([{:body_expr, _, _} | tokens]), do: has_tags?(tokens)
+
+  # If we find a slot, discard everything in the slot and continue looking
+  defp has_tags?([{:slot, _, _, _} | tokens]),
+    do:
+      tokens
+      |> Enum.drop_while(&(not match?({:close, :slot, _, _}, &1)))
+      |> Enum.drop(1)
+      |> has_tags?()
+
+  # If we find a closing tag, we missed the opening one, so we are at the end
+  defp has_tags?([{:close, _, _, _} | _]), do: false
+  defp has_tags?([_ | _]), do: true
+  defp has_tags?([]), do: false
 
   # wrap helpers
 
@@ -968,7 +989,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
     %{slots: [slots | rest]} = state
     slot = {slot_name, slot_assigns, special_attrs, {meta, slot_info}}
-    %{state | slots: [[slot | slots] | rest], prev_token_slot?: true}
+    %{state | slots: [[slot | slots] | rest]}
   end
 
   defp pop_slots(%{slots: [slots | rest]} = state) do
@@ -1009,6 +1030,14 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       end)
 
     {Map.to_list(acc_assigns), Map.to_list(acc_info), %{state | slots: rest}}
+  end
+
+  defp prune_text_after_slot([{:text, text, meta} | tokens]) do
+    [{:text, String.trim_leading(text), meta} | tokens]
+  end
+
+  defp prune_text_after_slot(tokens) do
+    tokens
   end
 
   defp add_inner_block({roots?, attrs, locs}, ast, tag_meta) do
@@ -1132,33 +1161,45 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     end)
   end
 
-  defp build_component_clauses({_, _, _, %{let: {:quoted, quoted, v_meta}}}, state) do
-    %{line: line} = v_meta
+  defp build_component_clauses(
+         {_type, _name, _attrs, meta} = tag,
+         state
+       ) do
+    %{caller: caller} = state
+    quoted = iob_dump(state)
 
-    case quoted do
+    quoted =
+      if annotation =
+           caller && Map.get(meta, :has_tags?, false) &&
+             Annotation.get_slot_annotation(caller, tag) do
+        annotate_block(quoted, annotation)
+      else
+        quoted
+      end
+
+    case meta[:let] do
       # If we have a var, we can skip the catch-all clause
-      {var, _, ctx} when is_atom(var) and is_atom(ctx) ->
+      {:quoted, {var, _, ctx} = pattern, %{line: line}} when is_atom(var) and is_atom(ctx) ->
         quote line: line do
-          unquote(quoted) -> unquote(iob_dump(state))
+          unquote(pattern) -> unquote(quoted)
         end
 
-      _ ->
+      {:quoted, pattern, %{line: line}} ->
         quote line: line do
-          unquote(quoted) -> unquote(iob_dump(state))
+          unquote(pattern) -> unquote(quoted)
         end ++
           quote line: line, generated: true do
             other ->
               unquote(__MODULE__).__unmatched_let__!(
-                unquote(Macro.to_string(quoted)),
+                unquote(Macro.to_string(pattern)),
                 other
               )
           end
-    end
-  end
 
-  defp build_component_clauses(_, state) do
-    quote do
-      _ -> unquote(iob_dump(state))
+      _ ->
+        quote do
+          _ -> unquote(quoted)
+        end
     end
   end
 
@@ -1255,7 +1296,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     end
   end
 
-  defp annotate_body({:__block__, meta, block}, {anno_begin, anno_end}) do
+  defp annotate_block({:__block__, meta, block}, {anno_begin, anno_end}) do
     {dynamic, [{:safe, binary}]} = Enum.split(block, -1)
 
     binary =

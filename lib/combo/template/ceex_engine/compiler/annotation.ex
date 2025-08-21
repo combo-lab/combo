@@ -21,14 +21,12 @@ defmodule Combo.Template.CEExEngine.Compiler.Annotation do
   In case the slot is an implicit inner block, the tag meta points to
   the component.
   """
-  @spec get_slot_annotation(
-          name :: atom(),
-          tag_meta :: %{line: non_neg_integer(), column: non_neg_integer()},
-          close_tag_meta :: %{line: non_neg_integer(), column: non_neg_integer()},
-          caller :: Macro.Env.t()
-        ) :: {String.t(), String.t()} | nil
-  def get_slot_annotation(name, %{line: line}, _close_meta, %{file: file}) do
+  @spec get_slot_annotation(caller :: Macro.Env.t(), tag :: tuple()) ::
+          {String.t(), String.t()} | nil
+  def get_slot_annotation(%Macro.Env{} = caller, {_type, name, _attrs, meta} = _tag) do
     if Env.get_env(:template, :ceex_debug_annotations, false) do
+      %{file: file} = caller
+      %{line: line} = meta
       annotate_source(":#{name}", file, line)
     end
   end
