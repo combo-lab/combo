@@ -1,4 +1,4 @@
-defmodule Combo.Template.CEExEngine.Compiler.Annotation do
+defmodule Combo.Template.CEExEngine.Compiler.DebugAnnotation do
   @moduledoc false
 
   alias Combo.Env

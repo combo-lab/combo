@@ -7,7 +7,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
   alias Combo.Template.CEExEngine.Compiler.IOBuilder
   alias Combo.Template.CEExEngine.Compiler.Attr
   alias Combo.Template.CEExEngine.Compiler.Assigns
-  alias Combo.Template.CEExEngine.Compiler.Annotation
+  alias Combo.Template.CEExEngine.Compiler.DebugAnnotation
 
   @doc false
   def __reserved_assigns__, do: [:__slot__, :inner_block]
@@ -81,10 +81,10 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     quoted = Assigns.traverse(quoted)
 
     quoted =
-      if caller && has_tags?(tokens) && Annotation.enable?() do
+      if caller && DebugAnnotation.enable?() do
         %{module: mod, function: {fun, _}, file: file, line: line} = caller
         component_name = "#{inspect(mod)}.#{fun}"
-        annotation = Annotation.build_annotation(component_name, file, line)
+        annotation = DebugAnnotation.build_annotation(component_name, file, line)
         annotate_block(quoted, annotation)
       else
         quoted
@@ -525,7 +525,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
          [{:remote_component = type, name, attrs, meta} = tag | tokens]
        ) do
     mod_asf = decompose_remote_component_tag!(tag, state)
-    new_meta = meta |> Map.put(:mod_asf, mod_asf) |> Map.put(:has_tags?, has_tags?(tokens))
+    new_meta = meta |> Map.put(:mod_asf, mod_asf)
     new_tag = {type, name, attrs, new_meta}
 
     state
@@ -624,13 +624,10 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
   defp reduce_tokens(
          state,
-         [{:local_component = type, name, attrs, meta} | tokens]
+         [{:local_component, _name, _attrs, _meta} = tag | tokens]
        ) do
-    new_meta = Map.put(meta, :has_tags?, has_tags?(tokens))
-    new_tag = {type, name, attrs, new_meta}
-
     state
-    |> push_tag(new_tag)
+    |> push_tag(tag)
     |> init_slots()
     |> iob_push_ctx()
     |> reduce_tokens(tokens)
@@ -704,14 +701,12 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
   defp reduce_tokens(
          state,
-         [{:slot = type, name, attrs, meta} = tag | tokens]
+         [{:slot, _name, _attrs, _meta} = tag | tokens]
        ) do
     validate_slot!(tag, state)
-    new_meta = Map.put(meta, :has_tags?, has_tags?(tokens))
-    new_tag = {type, name, attrs, new_meta}
 
     state
-    |> push_tag(new_tag)
+    |> push_tag(tag)
     |> iob_push_ctx()
     |> reduce_tokens(tokens)
   end
@@ -779,25 +774,6 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
   defp iob_dump(%{iob_stack: [current | _]} = state) do
     state.iob.dump(current)
   end
-
-  # checking helpers
-
-  defp has_tags?([{:text, _, _} | tokens]), do: has_tags?(tokens)
-  defp has_tags?([{:expr, _, _} | tokens]), do: has_tags?(tokens)
-  defp has_tags?([{:body_expr, _, _} | tokens]), do: has_tags?(tokens)
-
-  # If we find a slot, discard everything in the slot and continue looking
-  defp has_tags?([{:slot, _, _, _} | tokens]),
-    do:
-      tokens
-      |> Enum.drop_while(&(not match?({:close, :slot, _, _}, &1)))
-      |> Enum.drop(1)
-      |> has_tags?()
-
-  # If we find a closing tag, we missed the opening one, so we are at the end
-  defp has_tags?([{:close, _, _, _} | _]), do: false
-  defp has_tags?([_ | _]), do: true
-  defp has_tags?([]), do: false
 
   # wrap helpers
 
@@ -1173,10 +1149,11 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     %{caller: caller} = state
 
     quoted =
-      if caller && Map.get(meta, :has_tags?, false) && Annotation.enable?() do
+      if caller && DebugAnnotation.enable?() do
         %{file: file} = caller
         %{line: line} = meta
-        annotation = Annotation.build_annotation(":#{slot_name}", file, line)
+        IO.inspect({file, line})
+        annotation = DebugAnnotation.build_annotation(":#{slot_name}", file, line)
         annotate_block(quoted, annotation)
       else
         quoted
@@ -1294,8 +1271,8 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     %{file: file} = state
     %{line: line} = meta
 
-    if Annotation.enable?() do
-      annotation = Annotation.build_caller_annotation(file, line)
+    if DebugAnnotation.enable?() do
+      annotation = DebugAnnotation.build_caller_annotation(file, line)
       state |> iob_acc_text(annotation)
     else
       state
