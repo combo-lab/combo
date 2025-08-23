@@ -60,15 +60,9 @@ defmodule Combo.Template.CEExEngine.DebugAnnotationTest.Components do
   end
 
   defp list(assigns) do
+    # Remove all whitespaces to avoid test noise.
     ~CE"""
-    <%= for item <- Enum.intersperse(assigns[:item] || [], :separator) do %><%=
-      if item == :separator do
-        ", "
-      else
-        render_slot(item)
-      end
-    %><% end %>
-    <%= if assigns[:inner_block] != [] do %>{render_slot(@inner_block)}<% end %>
+    <ul :if={assigns[:item]}><%= for item <- Enum.intersperse(assigns[:item] || [], :separator) do %>{if item == :separator, do: ", ", else: render_slot(item)}<% end %></ul><%= if assigns[:inner_block] != [] do %>{render_slot(@inner_block)}<% end %>
     """noformat
   end
 end

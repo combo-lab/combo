@@ -47,9 +47,8 @@ defmodule Combo.Template.CEExEngine.DebugAnnotationTest do
              """
              <!-- <Combo.Template.CEExEngine.DebugAnnotationTest.Components.default_slot> test/combo/template/ceex_engine/debug_annotation_test/components.exs:21 () -->\
              <!-- @caller test/combo/template/ceex_engine/debug_annotation_test/components.exs:22 () -->\
-             <!-- <Combo.Template.CEExEngine.DebugAnnotationTest.Components.list> test/combo/template/ceex_engine/debug_annotation_test/components.exs:63 () -->
-             <!-- <:inner_block> test/combo/template/ceex_engine/debug_annotation_test/components.exs:22 () -->
-               No items.
+             <!-- <Combo.Template.CEExEngine.DebugAnnotationTest.Components.list> test/combo/template/ceex_engine/debug_annotation_test/components.exs:64 () -->\
+             <!-- <:inner_block> test/combo/template/ceex_engine/debug_annotation_test/components.exs:22 () -->\n  No items.\n\
              <!-- </:inner_block> -->\
              <!-- </Combo.Template.CEExEngine.DebugAnnotationTest.Components.list> -->\
              <!-- </Combo.Template.CEExEngine.DebugAnnotationTest.Components.default_slot> -->\
@@ -61,9 +60,8 @@ defmodule Combo.Template.CEExEngine.DebugAnnotationTest do
              """
              <!-- <Combo.Template.CEExEngine.DebugAnnotationTest.Components.default_slot_with_tags> test/combo/template/ceex_engine/debug_annotation_test/components.exs:29 () -->\
              <!-- @caller test/combo/template/ceex_engine/debug_annotation_test/components.exs:30 () -->\
-             <!-- <Combo.Template.CEExEngine.DebugAnnotationTest.Components.list> test/combo/template/ceex_engine/debug_annotation_test/components.exs:63 () -->
-             <!-- <:inner_block> test/combo/template/ceex_engine/debug_annotation_test/components.exs:30 () -->
-               <p>No items</p>
+             <!-- <Combo.Template.CEExEngine.DebugAnnotationTest.Components.list> test/combo/template/ceex_engine/debug_annotation_test/components.exs:64 () -->\
+             <!-- <:inner_block> test/combo/template/ceex_engine/debug_annotation_test/components.exs:30 () -->\n  <p>No items</p>\n\
              <!-- </:inner_block> -->\
              <!-- </Combo.Template.CEExEngine.DebugAnnotationTest.Components.list> -->\
              <!-- </Combo.Template.CEExEngine.DebugAnnotationTest.Components.default_slot_with_tags> -->\
@@ -74,11 +72,12 @@ defmodule Combo.Template.CEExEngine.DebugAnnotationTest do
     assert render_string("<.named_slot />") == """
            <!-- <Combo.Template.CEExEngine.DebugAnnotationTest.Components.named_slot> test/combo/template/ceex_engine/debug_annotation_test/components.exs:37 () -->\
            <!-- @caller test/combo/template/ceex_engine/debug_annotation_test/components.exs:38 () -->\
-           <!-- <Combo.Template.CEExEngine.DebugAnnotationTest.Components.list> test/combo/template/ceex_engine/debug_annotation_test/components.exs:63 () -->\
+           <!-- <Combo.Template.CEExEngine.DebugAnnotationTest.Components.list> test/combo/template/ceex_engine/debug_annotation_test/components.exs:64 () -->\
+           <ul>\
            <!-- <:item> test/combo/template/ceex_engine/debug_annotation_test/components.exs:39 () -->Coding<!-- </:item> -->, \
-           <!-- <:item> test/combo/template/ceex_engine/debug_annotation_test/components.exs:40 () -->Sleeping<!-- </:item> -->
-           <!-- <:inner_block> test/combo/template/ceex_engine/debug_annotation_test/components.exs:38 () -->
-             \
+           <!-- <:item> test/combo/template/ceex_engine/debug_annotation_test/components.exs:40 () -->Sleeping<!-- </:item> -->\
+           </ul>\
+           <!-- <:inner_block> test/combo/template/ceex_engine/debug_annotation_test/components.exs:38 () -->\n  \
            <!-- </:inner_block> -->\
            <!-- </Combo.Template.CEExEngine.DebugAnnotationTest.Components.list> -->\
            <!-- </Combo.Template.CEExEngine.DebugAnnotationTest.Components.named_slot> -->\
@@ -89,11 +88,12 @@ defmodule Combo.Template.CEExEngine.DebugAnnotationTest do
     assert render_string("<.named_slot_with_tags />") == """
            <!-- <Combo.Template.CEExEngine.DebugAnnotationTest.Components.named_slot_with_tags> test/combo/template/ceex_engine/debug_annotation_test/components.exs:46 () -->\
            <!-- @caller test/combo/template/ceex_engine/debug_annotation_test/components.exs:47 () -->\
-           <!-- <Combo.Template.CEExEngine.DebugAnnotationTest.Components.list> test/combo/template/ceex_engine/debug_annotation_test/components.exs:63 () -->\
+           <!-- <Combo.Template.CEExEngine.DebugAnnotationTest.Components.list> test/combo/template/ceex_engine/debug_annotation_test/components.exs:64 () -->\
+           <ul>\
            <!-- <:item> test/combo/template/ceex_engine/debug_annotation_test/components.exs:48 () --><span>Coding</span><!-- </:item> -->, \
-           <!-- <:item> test/combo/template/ceex_engine/debug_annotation_test/components.exs:49 () --><span>Sleeping</span><!-- </:item> -->
-           <!-- <:inner_block> test/combo/template/ceex_engine/debug_annotation_test/components.exs:47 () -->
-             \
+           <!-- <:item> test/combo/template/ceex_engine/debug_annotation_test/components.exs:49 () --><span>Sleeping</span><!-- </:item> -->\
+           </ul>\
+           <!-- <:inner_block> test/combo/template/ceex_engine/debug_annotation_test/components.exs:47 () -->\n  \
            <!-- </:inner_block> -->\
            <!-- </Combo.Template.CEExEngine.DebugAnnotationTest.Components.list> -->\
            <!-- </Combo.Template.CEExEngine.DebugAnnotationTest.Components.named_slot_with_tags> -->\
@@ -103,12 +103,14 @@ defmodule Combo.Template.CEExEngine.DebugAnnotationTest do
   test "nesting" do
     assert render_string("<Components.nesting />") ==
              """
-             <!-- <Combo.Template.CEExEngine.DebugAnnotationTest.Components.nesting> test/combo/template/ceex_engine/debug_annotation_test/components.exs:55 () --><div>
-               <!-- @caller test/combo/template/ceex_engine/debug_annotation_test/components.exs:57 () -->\
+             <!-- <Combo.Template.CEExEngine.DebugAnnotationTest.Components.nesting> test/combo/template/ceex_engine/debug_annotation_test/components.exs:55 () -->\
+             <div>\n  \
+             <!-- @caller test/combo/template/ceex_engine/debug_annotation_test/components.exs:57 () -->\
              <!-- <Combo.Template.CEExEngine.DebugAnnotationTest.Components.local_with_tags> test/combo/template/ceex_engine/debug_annotation_test/components.exs:17 () -->\
              <div>LOCAL COMPONENT</div>\
-             <!-- </Combo.Template.CEExEngine.DebugAnnotationTest.Components.local_with_tags> -->
-             </div><!-- </Combo.Template.CEExEngine.DebugAnnotationTest.Components.nesting> -->\
+             <!-- </Combo.Template.CEExEngine.DebugAnnotationTest.Components.local_with_tags> -->\n\
+             </div>\
+             <!-- </Combo.Template.CEExEngine.DebugAnnotationTest.Components.nesting> -->\
              """
   end
 end
