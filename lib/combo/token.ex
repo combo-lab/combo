@@ -1,37 +1,38 @@
 defmodule Combo.Token do
   @moduledoc """
-  Conveniences to sign/encrypt data inside tokens
-  for use in Channels, API authentication, and more.
+  Conveniences to sign/encrypt data inside tokens for use in API authentication
+  , Channel authentication, and more.
 
   The data stored in the token is signed to prevent tampering, and is
-  optionally encrypted. This means that, so long as the
-  key (see below) remains secret, you can be assured that the data
-  stored in the token has not been tampered with by a third party.
-  However, unless the token is encrypted, it is not safe to use this
-  token to store private information, such as a user's sensitive
-  identification data, as it can be trivially decoded. If the
-  token is encrypted, its contents will be kept secret from the
-  client, but it is still a best practice to encode as little secret
-  information as possible, to minimize the impact of key leakage.
+  optionally encrypted. This means that, so long as the key (see below) remains
+  secret, you can be assured that the data stored in the token has not been
+  tampered with by a third party.
 
-  ## Example
+  However, unless the token is encrypted, it is not safe to use this token to
+  store private information, such as a user's sensitive identification data,
+  as it can be trivially decoded. If the token is encrypted, its contents will
+  be kept secret from the client, but it is still a best practice to encode as
+  little secret information as possible, to minimize the impact of key leakage.
 
-  When generating a unique token for use in an API or Channel
-  it is advised to use a unique identifier for the user, typically
-  the id from a database. For example:
+  ## Examples
 
+  When generating a unique token for use in an API or Channel it is advised to
+  use a unique identifier for the user, typically the id from a database.
+  For example:
+
+      iex> context = Demo.Web.Endpoint
+      iex> namespace = "user auth"
       iex> user_id = 1
-      iex> token = Combo.Token.sign(MyAppWeb.Endpoint, "user auth", user_id)
-      iex> Combo.Token.verify(MyAppWeb.Endpoint, "user auth", token, max_age: 86400)
+      iex> token = Combo.Token.sign(context, namespace, user_id)
+      iex> Combo.Token.verify(context, namespace, token)
       {:ok, 1}
 
-  In that example we have a user's id, we generate a token and
-  verify it using the secret key base configured in the given
-  `endpoint`. We guarantee the token will only be valid for one day
-  by setting a max age (recommended).
+  In that example we have a user's id, we generate a token and verify it using
+  the secret key base configured in the given `endpoint`. We guarantee the
+  token will only be valid for one day by setting a max age (recommended).
 
-  The first argument to `sign/4`, `verify/4`, `encrypt/4`, and
-  `decrypt/4` can be one of:
+  The first argument to `sign/4`, `verify/4`, `encrypt/4`, and `decrypt/4` is
+  called context, and it can be one of:
 
     * the module name of an endpoint - the secret key base is extracted from
       the endpoint.
@@ -39,19 +40,17 @@ defmodule Combo.Token do
       in the connection.
     * `Combo.Socket` - the secret key base is extracted from the endpoint
       stored in the socket.
-    * a string - representing the secret key base itself. A key base with at
-      least 20 randomly generated characters should be used to provide adequate
-      entropy.
+    * a string - the secret key base itself. A key base with at least 20
+      randomly generated characters should be used to provide adequate entropy.
 
   The second argument is a [cryptographic salt](https://en.wikipedia.org/wiki/Salt_(cryptography))
-  which must be the same in both calls to `sign/4` and `verify/4`, or
-  both calls to `encrypt/4` and `decrypt/4`. For instance, it may be
-  called "user auth" and treated as namespace when generating a token
-  that will be used to authenticate users on channels or on your APIs.
+  which must be the same in both calls to `sign/4` and `verify/4`, or both
+  calls to `encrypt/4` and `decrypt/4`. For instance, it may be called
+  "user auth" and treated as namespace when generating a token that will be
+  used to authenticate users on channels or on your APIs.
 
-  The third argument can be any term (string, int, list, etc.)
-  that you wish to codify into the token. Upon valid verification,
-  this same term will be extracted from the token.
+  The third argument can be any term that you wish to codify into the token.
+  Upon valid verification, this same term will be extracted from the token.
 
   ## Usage
 
@@ -67,19 +66,21 @@ defmodule Combo.Token do
 
       def create(conn, params) do
         user = User.create(params)
-        render(conn, "user.json",
-               %{token: Combo.Token.sign(conn, "user auth", user.id), user: user})
+        render(conn, "user.json", %{
+          token: Combo.Token.sign(conn, "user auth", user.id),
+          user: user
+        })
       end
 
-  Once the token is sent, the client may now send it back to the server
-  as an authentication mechanism. For example, we can use it to authenticate
-  a user on a channel:
+  Once the token is sent, the client may now send it back to the server as an
+  authentication mechanism. For example, we can use it to authenticate a user
+  on a channel:
 
-      defmodule MyApp.UserSocket do
+      defmodule Demo.Web.UserSocket do
         use Combo.Socket
 
         def connect(%{"token" => token}, socket, _connect_info) do
-          case Combo.Token.verify(socket, "user auth", token, max_age: 86400) do
+          case Combo.Token.verify(socket, "user auth", token) do
             {:ok, user_id} ->
               socket = assign(socket, :user, Repo.get!(User, user_id))
               {:ok, socket}
@@ -94,8 +95,8 @@ defmodule Combo.Token do
   In this example, the client JavaScript code will send the token in the
   `connect` command which is then validated by the server.
 
-  `Combo.Token` can also be used for validating APIs, handling
-  password resets, e-mail confirmation and more.
+  `Combo.Token` can also be used for validating APIs, handling password resets,
+  e-mail confirmation and more.
   """
 
   require Logger
@@ -103,17 +104,23 @@ defmodule Combo.Token do
 
   @type context ::
           Plug.Conn.t()
-          | %{required(:endpoint) => atom, optional(atom()) => any()}
-          | atom
-          | binary
+          | %{required(:endpoint) => atom(), optional(atom()) => any()}
+          | atom()
+          | binary()
+
+  @type salt :: binary()
+
+  @type data :: term()
+
+  @type token :: binary()
 
   @type shared_opt ::
-          {:key_iterations, pos_integer}
-          | {:key_length, pos_integer}
+          {:key_iterations, pos_integer()}
+          | {:key_length, pos_integer()}
           | {:key_digest, :sha256 | :sha384 | :sha512}
 
-  @type max_age_opt :: {:max_age, pos_integer | :infinity}
-  @type signed_at_opt :: {:signed_at, pos_integer}
+  @type max_age_opt :: {:max_age, pos_integer() | :infinity}
+  @type signed_at_opt :: {:signed_at, pos_integer()}
 
   @doc """
   Encodes and signs data into a token you can send to clients.
@@ -126,13 +133,14 @@ defmodule Combo.Token do
       when generating the encryption and signing keys. Defaults to 32
     * `:key_digest` - option passed to `Plug.Crypto.KeyGenerator`
       when generating the encryption and signing keys. Defaults to `:sha256`
-    * `:signed_at` - set the timestamp of the token in seconds.
-      Defaults to `System.os_time(:millisecond)`
-    * `:max_age` - the default maximum age of the token. Defaults to
-      86400 seconds (1 day) and it may be overridden on `verify/4`.
+    * `:signed_at` - the timestamp of the token in seconds. Defaults to
+      `System.os_time(:second)`
+    * `:max_age` - the default maximum age of the token in seconds. Defaults to
+      `86400` and it may be overridden on `verify/4`.
 
   """
-  @spec sign(context, binary, term, [shared_opt | max_age_opt | signed_at_opt]) :: binary
+  @spec sign(context(), salt(), data(), [shared_opt() | max_age_opt() | signed_at_opt()]) ::
+          token()
   def sign(context, salt, data, opts \\ []) when is_binary(salt) do
     context
     |> get_key_base()
@@ -152,17 +160,18 @@ defmodule Combo.Token do
       when generating the encryption and signing keys. Defaults to 32
     * `:key_digest` - option passed to `Plug.Crypto.KeyGenerator`
       when generating the encryption and signing keys. Defaults to `:sha256`
-    * `:signed_at` - set the timestamp of the token in seconds.
-      Defaults to `System.os_time(:millisecond)`
-    * `:max_age` - the default maximum age of the token. Defaults to
-      86400 seconds (1 day) and it may be overridden on `decrypt/4`.
+    * `:signed_at` - set the timestamp of the token in seconds. Defaults to
+      `System.os_time(:second)`
+    * `:max_age` - the default maximum age of the token in seconds. Defaults to
+      `86400` and it may be overridden on `decrypt/4`.
 
   """
-  @spec encrypt(context, binary, term, [shared_opt | max_age_opt | signed_at_opt]) :: binary
-  def encrypt(context, secret, data, opts \\ []) when is_binary(secret) do
+  @spec encrypt(context(), salt(), data(), [shared_opt() | max_age_opt() | signed_at_opt()]) ::
+          token()
+  def encrypt(context, salt, data, opts \\ []) when is_binary(salt) do
     context
     |> get_key_base()
-    |> Plug.Crypto.encrypt(secret, data, opts)
+    |> Plug.Crypto.encrypt(salt, data, opts)
   end
 
   @doc """
@@ -171,13 +180,12 @@ defmodule Combo.Token do
   ## Examples
 
   In this scenario we will create a token, sign it, then provide it to a client
-  application. The client will then use this token to authenticate requests for
-  resources from the server. See `Combo.Token` summary for more info about
-  creating tokens.
+  . The client will then use this token to authenticate requests for resources
+  from the server. See `Combo.Token` summary for more info about creating tokens.
 
-      iex> user_id    = 99
-      iex> secret     = "kjoy3o1zeidquwy1398juxzldjlksahdk3"
+      iex> secret     = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
       iex> namespace  = "user auth"
+      iex> user_id    = 99
       iex> token      = Combo.Token.sign(secret, namespace, user_id)
 
   The mechanism for passing the token to the client is typically through a
@@ -187,7 +195,7 @@ defmodule Combo.Token do
   When the server receives a request, it can use `verify/4` to determine if it
   should provide the requested resources to the client:
 
-      iex> Combo.Token.verify(secret, namespace, token, max_age: 86400)
+      iex> Combo.Token.verify(secret, namespace, token)
       {:ok, 99}
 
   In this example, we know the client sent a valid token because `verify/4`
@@ -197,13 +205,13 @@ defmodule Combo.Token do
   However, if the client had sent an expired token, an invalid token, or `nil`,
   `verify/4` would have returned an error instead:
 
-      iex> Combo.Token.verify(secret, namespace, expired, max_age: 86400)
+      iex> Combo.Token.verify(secret, namespace, expired)
       {:error, :expired}
 
-      iex> Combo.Token.verify(secret, namespace, invalid, max_age: 86400)
+      iex> Combo.Token.verify(secret, namespace, invalid)
       {:error, :invalid}
 
-      iex> Combo.Token.verify(secret, namespace, nil, max_age: 86400)
+      iex> Combo.Token.verify(secret, namespace, nil)
       {:error, :missing}
 
   ## Options
@@ -217,9 +225,10 @@ defmodule Combo.Token do
     * `:max_age` - verifies the token only if it has been generated
       "max age" ago in seconds. Defaults to the max age signed in the
       token by `sign/4`.
+
   """
-  @spec verify(context, binary, binary, [shared_opt | max_age_opt]) ::
-          {:ok, term} | {:error, :expired | :invalid | :missing}
+  @spec verify(context(), salt(), token(), [shared_opt() | max_age_opt()]) ::
+          {:ok, data()} | {:error, :expired | :invalid | :missing}
   def verify(context, salt, token, opts \\ []) when is_binary(salt) do
     context
     |> get_key_base()
@@ -242,12 +251,14 @@ defmodule Combo.Token do
     * `:max_age` - verifies the token only if it has been generated
       "max age" ago in seconds. Defaults to the max age signed in the
       token by `encrypt/4`.
+
   """
-  @spec decrypt(context, binary, binary, [shared_opt | max_age_opt]) :: term()
-  def decrypt(context, secret, token, opts \\ []) when is_binary(secret) do
+  @spec decrypt(context(), salt(), token(), [shared_opt() | max_age_opt()]) ::
+          {:ok, data()} | {:error, :expired | :invalid | :missing}
+  def decrypt(context, salt, token, opts \\ []) when is_binary(salt) do
     context
     |> get_key_base()
-    |> Plug.Crypto.decrypt(secret, token, opts)
+    |> Plug.Crypto.decrypt(salt, token, opts)
   end
 
   ## Helpers
@@ -268,11 +279,10 @@ defmodule Combo.Token do
     endpoint.config(:secret_key_base) ||
       raise """
       no :secret_key_base configuration found in #{inspect(endpoint)}.
-      Ensure your environment has the necessary mix configuration. For example:
+      Ensure that it is added into your endpoint configuration. For example:
 
-          config :my_app, MyAppWeb.Endpoint,
-              secret_key_base: ...
-
+          config :demo, Demo.Web.Endpoint,
+            secret_key_base: ...
       """
   end
 end
