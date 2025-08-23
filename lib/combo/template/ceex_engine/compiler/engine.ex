@@ -93,7 +93,6 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     quote do
       require unquote(__MODULE__)
 
-      # _ = unquote(Macro.var(:assigns, nil))
       _ = var!(assigns)
       unquote(quoted)
     end
@@ -1152,7 +1151,6 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       if caller && DebugAnnotation.enable?() do
         %{file: file} = caller
         %{line: line} = meta
-        IO.inspect({file, line})
         annotation = DebugAnnotation.build_annotation(":#{slot_name}", file, line)
         annotate_block(quoted, annotation)
       else
@@ -1396,7 +1394,6 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
         Got:
 
             #{inspect(other)}
-
         """
     end
   end
