@@ -1,8 +1,8 @@
 defmodule Combo.Template.CEExEngine.Tokenizer do
   @moduledoc false
 
-  alias Combo.Template.CEExEngine.TagHandler
   alias Combo.Template.CEExEngine.SyntaxError
+  alias Combo.Template.CEExEngine.TagHandler
 
   @space_chars ~c"\s\t\f"
   @quote_chars ~c"\"'"
@@ -23,7 +23,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
       source: source,
       file: file,
       indentation: indentation,
-      column_offset: indentation + 1,
+      column_base: indentation + 1,
       braces: :enabled,
       context: []
     }
@@ -38,8 +38,8 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   * `location` - The location of text's first char. It's a keyword list with
     `:line` and `:column`, and both of them must be integers.
   * `tokens` - The list of tokens.
-  * `cont` - It can be `{:text, braces}`, `:style`, `:script`, or
-    `{:comment, line, column}`.
+  * `cont` - The continuation which indicates current processing context.
+     It can be `{:text, braces}`, `:style`, `:script`, or `{:comment, line, column}`.
   * `state` - The state which is initiated by `Tokenizer.init/4`
 
   ### Examples
@@ -58,13 +58,21 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   """
   def tokenize(source, location, tokens, cont, state) do
     line = Keyword.get(location, :line, 1)
-    column = Keyword.get(location, :column, state.column_offset)
+    column = Keyword.get(location, :column, state.column_base)
+    buffer = []
 
     case cont do
-      {:text, braces} -> handle_text(source, line, column, [], tokens, %{state | braces: braces})
-      :style -> handle_style(source, line, column, [], tokens, state)
-      :script -> handle_script(source, line, column, [], tokens, state)
-      {:comment, _line, _column} -> handle_comment(source, line, column, [], tokens, state)
+      {:text, braces} ->
+        handle_text(source, line, column, buffer, tokens, %{state | braces: braces})
+
+      :style ->
+        handle_style(source, line, column, buffer, tokens, state)
+
+      :script ->
+        handle_script(source, line, column, buffer, tokens, state)
+
+      {:comment, _line, _column} ->
+        handle_comment(source, line, column, buffer, tokens, state)
     end
   end
 
@@ -76,19 +84,19 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
 
   def finalize(tokens, _file, _cont, _source) do
     tokens
-    |> strip_text_token_fully()
+    |> trim_leading_whitespace_text_tokens()
     |> Enum.reverse()
-    |> strip_text_token_fully()
+    |> trim_leading_whitespace_text_tokens()
   end
 
   ## handle_text
 
   defp handle_text("\r\n" <> rest, line, _column, buffer, tokens, state) do
-    handle_text(rest, line + 1, state.column_offset, ["\r\n" | buffer], tokens, state)
+    handle_text(rest, line + 1, state.column_base, ["\r\n" | buffer], tokens, state)
   end
 
   defp handle_text("\n" <> rest, line, _column, buffer, tokens, state) do
-    handle_text(rest, line + 1, state.column_offset, ["\n" | buffer], tokens, state)
+    handle_text(rest, line + 1, state.column_base, ["\n" | buffer], tokens, state)
   end
 
   defp handle_text("<!doctype" <> rest, line, column, buffer, tokens, state) do
@@ -144,11 +152,11 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   end
 
   defp handle_doctype("\r\n" <> rest, line, _column, buffer, tokens, state) do
-    handle_doctype(rest, line + 1, state.column_offset, ["\r\n" | buffer], tokens, state)
+    handle_doctype(rest, line + 1, state.column_base, ["\r\n" | buffer], tokens, state)
   end
 
   defp handle_doctype("\n" <> rest, line, _column, buffer, tokens, state) do
-    handle_doctype(rest, line + 1, state.column_offset, ["\n" | buffer], tokens, state)
+    handle_doctype(rest, line + 1, state.column_base, ["\n" | buffer], tokens, state)
   end
 
   defp handle_doctype(<<c::utf8, rest::binary>>, line, column, buffer, tokens, state) do
@@ -157,10 +165,46 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
 
   defp handle_doctype(<<>>, line, column, _buffer, _tokens, state) do
     raise_syntax_error!(
-      "unexpected end of string inside tag",
+      "expected closing `>` for doctype",
       %{line: line, column: column},
       state
     )
+  end
+
+  ## handle_comment
+
+  # this wrapper is for preserving the location where the comment starts
+  defp handle_comment(rest, line, column, buffer, tokens, state) do
+    case handle_comment(rest, line, column, buffer, state) do
+      {:text, rest, line, column, buffer} ->
+        state = update_in(state.context, &[:comment_end | &1])
+        handle_text(rest, line, column, buffer, tokens, state)
+
+      {:eoc, line_end, column_end, buffer} ->
+        tokens = tokenize_buffer(buffer, tokens, line_end, column_end, state.context)
+        # use 'column - 4' to point to the opening <!--
+        ok(tokens, {:comment, line, column - 4})
+    end
+  end
+
+  defp handle_comment("\r\n" <> rest, line, _column, buffer, state) do
+    handle_comment(rest, line + 1, state.column_base, ["\r\n" | buffer], state)
+  end
+
+  defp handle_comment("\n" <> rest, line, _column, buffer, state) do
+    handle_comment(rest, line + 1, state.column_base, ["\n" | buffer], state)
+  end
+
+  defp handle_comment("-->" <> rest, line, column, buffer, _state) do
+    {:text, rest, line, column + 3, ["-->" | buffer]}
+  end
+
+  defp handle_comment(<<c::utf8, rest::binary>>, line, column, buffer, state) do
+    handle_comment(rest, line, column + 1, [char_or_bin(c) | buffer], state)
+  end
+
+  defp handle_comment(<<>>, line, column, buffer, _state) do
+    {:eoc, line, column, buffer}
   end
 
   ## handle_style
@@ -175,11 +219,11 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   end
 
   defp handle_style("\r\n" <> rest, line, _column, buffer, tokens, state) do
-    handle_style(rest, line + 1, state.column_offset, ["\r\n" | buffer], tokens, state)
+    handle_style(rest, line + 1, state.column_base, ["\r\n" | buffer], tokens, state)
   end
 
   defp handle_style("\n" <> rest, line, _column, buffer, tokens, state) do
-    handle_style(rest, line + 1, state.column_offset, ["\n" | buffer], tokens, state)
+    handle_style(rest, line + 1, state.column_base, ["\n" | buffer], tokens, state)
   end
 
   defp handle_style(<<c::utf8, rest::binary>>, line, column, buffer, tokens, state) do
@@ -202,11 +246,11 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   end
 
   defp handle_script("\r\n" <> rest, line, _column, buffer, tokens, state) do
-    handle_script(rest, line + 1, state.column_offset, ["\r\n" | buffer], tokens, state)
+    handle_script(rest, line + 1, state.column_base, ["\r\n" | buffer], tokens, state)
   end
 
   defp handle_script("\n" <> rest, line, _column, buffer, tokens, state) do
-    handle_script(rest, line + 1, state.column_offset, ["\n" | buffer], tokens, state)
+    handle_script(rest, line + 1, state.column_base, ["\n" | buffer], tokens, state)
   end
 
   defp handle_script(<<c::utf8, rest::binary>>, line, column, buffer, tokens, state) do
@@ -215,42 +259,6 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
 
   defp handle_script(<<>>, line, column, buffer, tokens, _state) do
     ok(tokenize_buffer(buffer, tokens, line, column, []), :script)
-  end
-
-  ## handle_comment
-
-  # this wrapper is for preserving the location where the comment starts
-  defp handle_comment(rest, line, column, buffer, tokens, state) do
-    case handle_comment(rest, line, column, buffer, state) do
-      {:text, rest, line, column, buffer} ->
-        state = update_in(state.context, &[:comment_end | &1])
-        handle_text(rest, line, column, buffer, tokens, state)
-
-      {:ok, line_end, column_end, buffer} ->
-        tokens = tokenize_buffer(buffer, tokens, line_end, column_end, state.context)
-        # do 'column - 4' to point to the opening <!--
-        ok(tokens, {:comment, line, column - 4})
-    end
-  end
-
-  defp handle_comment("\r\n" <> rest, line, _column, buffer, state) do
-    handle_comment(rest, line + 1, state.column_offset, ["\r\n" | buffer], state)
-  end
-
-  defp handle_comment("\n" <> rest, line, _column, buffer, state) do
-    handle_comment(rest, line + 1, state.column_offset, ["\n" | buffer], state)
-  end
-
-  defp handle_comment("-->" <> rest, line, column, buffer, _state) do
-    {:text, rest, line, column + 3, ["-->" | buffer]}
-  end
-
-  defp handle_comment(<<c::utf8, rest::binary>>, line, column, buffer, state) do
-    handle_comment(rest, line, column + 1, [char_or_bin(c) | buffer], state)
-  end
-
-  defp handle_comment(<<>>, line, column, buffer, _state) do
-    {:ok, line, column, buffer}
   end
 
   ## handle_tag_open
@@ -274,7 +282,6 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
           "expected tag name after <. If you meant to use < as part of a text, use &lt; instead"
 
         meta = %{line: line, column: column}
-
         raise_syntax_error!(message, meta, state)
     end
   end
@@ -338,11 +345,11 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   ## handle_maybe_tag_open_end
 
   defp handle_maybe_tag_open_end("\r\n" <> rest, line, _column, tokens, state) do
-    handle_maybe_tag_open_end(rest, line + 1, state.column_offset, tokens, state)
+    handle_maybe_tag_open_end(rest, line + 1, state.column_base, tokens, state)
   end
 
   defp handle_maybe_tag_open_end("\n" <> rest, line, _column, tokens, state) do
-    handle_maybe_tag_open_end(rest, line + 1, state.column_offset, tokens, state)
+    handle_maybe_tag_open_end(rest, line + 1, state.column_base, tokens, state)
   end
 
   defp handle_maybe_tag_open_end(<<c::utf8, rest::binary>>, line, column, tokens, state)
@@ -477,11 +484,11 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   ## handle_maybe_attr_value
 
   defp handle_maybe_attr_value("\r\n" <> rest, line, _column, state) do
-    handle_maybe_attr_value(rest, line + 1, state.column_offset, state)
+    handle_maybe_attr_value(rest, line + 1, state.column_base, state)
   end
 
   defp handle_maybe_attr_value("\n" <> rest, line, _column, state) do
-    handle_maybe_attr_value(rest, line + 1, state.column_offset, state)
+    handle_maybe_attr_value(rest, line + 1, state.column_base, state)
   end
 
   defp handle_maybe_attr_value(<<c::utf8, rest::binary>>, line, column, state)
@@ -500,11 +507,11 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   ## handle_attr_value_begin
 
   defp handle_attr_value_begin("\r\n" <> rest, line, _column, state) do
-    handle_attr_value_begin(rest, line + 1, state.column_offset, state)
+    handle_attr_value_begin(rest, line + 1, state.column_base, state)
   end
 
   defp handle_attr_value_begin("\n" <> rest, line, _column, state) do
-    handle_attr_value_begin(rest, line + 1, state.column_offset, state)
+    handle_attr_value_begin(rest, line + 1, state.column_base, state)
   end
 
   defp handle_attr_value_begin(<<c::utf8, rest::binary>>, line, column, state)
@@ -536,12 +543,12 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   ## handle_attr_value_quote
 
   defp handle_attr_value_quote("\r\n" <> rest, delim, line, _column, buffer, state) do
-    column = state.column_offset
+    column = state.column_base
     handle_attr_value_quote(rest, delim, line + 1, column, ["\r\n" | buffer], state)
   end
 
   defp handle_attr_value_quote("\n" <> rest, delim, line, _column, buffer, state) do
-    column = state.column_offset
+    column = state.column_base
     handle_attr_value_quote(rest, delim, line + 1, column, ["\n" | buffer], state)
   end
 
@@ -594,11 +601,11 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   ## handle_interpolation
 
   defp handle_interpolation("\r\n" <> rest, line, _column, buffer, braces, state) do
-    handle_interpolation(rest, line + 1, state.column_offset, ["\r\n" | buffer], braces, state)
+    handle_interpolation(rest, line + 1, state.column_base, ["\r\n" | buffer], braces, state)
   end
 
   defp handle_interpolation("\n" <> rest, line, _column, buffer, braces, state) do
-    handle_interpolation(rest, line + 1, state.column_offset, ["\n" | buffer], braces, state)
+    handle_interpolation(rest, line + 1, state.column_base, ["\n" | buffer], braces, state)
   end
 
   defp handle_interpolation("}" <> rest, line, column, buffer, 0, _state) do
@@ -696,10 +703,10 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
     [{type, name, attrs, meta} | rest]
   end
 
-  defp strip_text_token_fully(tokens) do
+  defp trim_leading_whitespace_text_tokens(tokens) do
     with [{:text, text, _} | rest] <- tokens,
-         "" <- String.trim_leading(text) do
-      strip_text_token_fully(rest)
+         "" <- String.trim(text) do
+      trim_leading_whitespace_text_tokens(rest)
     else
       _ -> tokens
     end

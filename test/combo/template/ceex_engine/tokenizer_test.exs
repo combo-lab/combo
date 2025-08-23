@@ -1,23 +1,27 @@
 defmodule Combo.Template.CEExEngine.TokenizerTest do
   use ExUnit.Case, async: true
 
-  alias Combo.Template.CEExEngine.Tokenizer
   alias Combo.Template.CEExEngine.SyntaxError
+  alias Combo.Template.CEExEngine.Tokenizer
 
-  defp tokenizer_state(text), do: Tokenizer.init(text, "nofile", 0)
+  defp tokenizer_state(source), do: Tokenizer.init(source, "nofile", 0)
 
-  defp tokenize(text) do
-    Tokenizer.tokenize(text, [], [], {:text, :enabled}, tokenizer_state(text))
-    |> elem(0)
-    |> Enum.reverse()
+  defp tokenize(source) do
+    state = tokenizer_state(source)
+
+    {tokens, cont} = Tokenizer.tokenize(source, [], [], {:text, :enabled}, state)
+    Enum.reverse(tokens)
+
+    # tokens = Tokenizer.finalize(tokens, "nofile", cont, source)
+    # tokens
   end
 
   describe "text" do
-    test "represented as {:text, value}" do
+    test "is tokenized as {:text, value}" do
       assert tokenize("Hello") == [{:text, "Hello", %{line_end: 1, column_end: 6}}]
     end
 
-    test "with multiple lines" do
+    test "can be declared with multiple lines" do
       tokens =
         tokenize("""
         first
@@ -28,7 +32,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       assert tokens == [{:text, "first\nsecond\nthird\n", %{line_end: 4, column_end: 1}}]
     end
 
-    test "keep line breaks unchanged" do
+    test "keeps line breaks unchanged" do
       assert tokenize("first\nsecond\r\nthird") == [
                {:text, "first\nsecond\r\nthird", %{line_end: 3, column_end: 6}}
              ]
@@ -36,13 +40,13 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
   end
 
   describe "doctype" do
-    test "generated as text" do
+    test "is tokenized as text" do
       assert tokenize("<!doctype html>") == [
                {:text, "<!doctype html>", %{line_end: 1, column_end: 16}}
              ]
     end
 
-    test "multiple lines" do
+    test "can be declared as multiple lines" do
       assert tokenize("<!DOCTYPE\nhtml\n>  <br />") == [
                {:text, "<!DOCTYPE\nhtml\n>  ", %{line_end: 3, column_end: 4}},
                {:html_tag, "br", [],
@@ -50,15 +54,22 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
              ]
     end
 
-    test "incomplete" do
-      assert_raise SyntaxError, ~r/unexpected end of string inside tag/, fn ->
+    test "raises on incomplete tags" do
+      message = """
+      nofile:1:15: expected closing `>` for doctype
+        |
+      1 | <!doctype html
+        |               ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
         tokenize("<!doctype html")
       end
     end
   end
 
   describe "comment" do
-    test "generated as text" do
+    test "is tokenized as text" do
       assert tokenize("Begin<!-- comment -->End") == [
                {:text, "Begin<!-- comment -->End",
                 %{line_end: 1, column_end: 25, context: [:comment_start, :comment_end]}}
@@ -118,9 +129,11 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                {:text, "\n<!--\n<div>\n",
                 %{column_end: 1, context: [:comment_start], line_end: 4}},
                {:text, "</div>\n-->\n", %{column_end: 1, context: [:comment_end], line_end: 3}},
-               {:close, :html_tag, "p", %{column: 1, line: 3, inner_location: {3, 1}, tag_name: "p"}},
+               {:close, :html_tag, "p",
+                %{column: 1, line: 3, inner_location: {3, 1}, tag_name: "p"}},
                {:text, "\n", %{column_end: 1, line_end: 4}},
-               {:html_tag, "div", [], %{column: 1, line: 4, inner_location: {4, 6}, tag_name: "div"}},
+               {:html_tag, "div", [],
+                %{column: 1, line: 4, inner_location: {4, 6}, tag_name: "div"}},
                {:text, "\n  ", %{column_end: 3, line_end: 5}},
                {:html_tag, "p", [], %{column: 3, line: 5, inner_location: {5, 6}, tag_name: "p"}},
                {:text, "Hello", %{column_end: 11, line_end: 5}},
@@ -169,15 +182,31 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                {:text, "-->\n<!--\n<p><%= \"World\"</p>\n",
                 %{column_end: 1, context: [:comment_end, :comment_start], line_end: 4}},
                {:text, "-->\n", %{column_end: 1, context: [:comment_end], line_end: 2}},
-               {:html_tag, "div", [], %{column: 1, line: 2, inner_location: {2, 6}, tag_name: "div"}},
+               {:html_tag, "div", [],
+                %{column: 1, line: 2, inner_location: {2, 6}, tag_name: "div"}},
                {:text, "\n  ", %{column_end: 3, line_end: 3}},
                {:html_tag, "p", [], %{column: 3, line: 3, inner_location: {3, 6}, tag_name: "p"}},
                {:text, "Hi", %{column_end: 8, line_end: 3}},
-               {:close, :html_tag, "p", %{column: 8, line: 3, inner_location: {3, 8}, tag_name: "p"}},
+               {:close, :html_tag, "p",
+                %{column: 8, line: 3, inner_location: {3, 8}, tag_name: "p"}},
                {:text, "\n", %{column_end: 1, line_end: 4}},
-               {:close, :html_tag, "p", %{column: 1, line: 4, inner_location: {4, 1}, tag_name: "p"}},
+               {:close, :html_tag, "p",
+                %{column: 1, line: 4, inner_location: {4, 1}, tag_name: "p"}},
                {:text, "\n", %{column_end: 1, line_end: 5}}
              ]
+    end
+
+    test "raises on incomplete tags" do
+      message = """
+      nofile:1:1: expected closing `-->` for comment
+        |
+      1 | <!-- comment
+        | ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
+        tokenize("<!-- comment")
+      end
     end
   end
 
@@ -509,7 +538,8 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         """)
 
       assert [
-               {:html_tag, "div", [{"title", {:string, "first\n  second\nthird", _meta}, %{}}], %{}},
+               {:html_tag, "div", [{"title", {:string, "first\n  second\nthird", _meta}, %{}}],
+                %{}},
                {:html_tag, "span", [], %{line: 3, column: 8}}
              ] = tokens
     end
@@ -555,7 +585,8 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         """)
 
       assert [
-               {:html_tag, "div", [{"title", {:string, "first\n  second\nthird", _meta}, %{}}], %{}},
+               {:html_tag, "div", [{"title", {:string, "first\n  second\nthird", _meta}, %{}}],
+                %{}},
                {:html_tag, "span", [], %{line: 3, column: 8}}
              ] = tokens
     end
