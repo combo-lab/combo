@@ -1,8 +1,7 @@
 defmodule Combo.TokenTest do
   use ExUnit.Case, async: true
-  alias Combo.Token
 
-  defstruct [:endpoint]
+  alias Combo.Token
 
   defmodule Endpoint do
     def config(:secret_key_base), do: "xxxxxx"
@@ -24,6 +23,12 @@ defmodule Combo.TokenTest do
       assert Token.verify(key, "salt", token) == {:ok, id}
     end
 
+    test "token with context as endpoint" do
+      id = 1
+      token = Token.sign(Endpoint, "salt", id)
+      assert Token.verify(Endpoint, "salt", token) == {:ok, id}
+    end
+
     test "token with context as conn" do
       id = 1
       token = Token.sign(conn(), "salt", id)
@@ -34,18 +39,6 @@ defmodule Combo.TokenTest do
       id = 1
       token = Token.sign(socket(), "salt", id)
       assert Token.verify(socket(), "salt", token) == {:ok, id}
-    end
-
-    test "token with context as endpoint" do
-      id = 1
-      token = Token.sign(Endpoint, "salt", id)
-      assert Token.verify(Endpoint, "salt", token) == {:ok, id}
-    end
-
-    test "token with context which has endpoint field" do
-      id = 1
-      token = Token.sign(%__MODULE__{endpoint: Endpoint}, "salt", id)
-      assert Token.verify(%__MODULE__{endpoint: Endpoint}, "salt", token) == {:ok, id}
     end
 
     test "fails on missing token" do
@@ -128,6 +121,12 @@ defmodule Combo.TokenTest do
       assert Token.decrypt(key, "salt", token) == {:ok, id}
     end
 
+    test "token with context as endpoint" do
+      id = 1
+      token = Token.encrypt(Endpoint, "salt", id)
+      assert Token.decrypt(Endpoint, "salt", token) == {:ok, id}
+    end
+
     test "token with context as conn" do
       id = 1
       token = Token.encrypt(conn(), "salt", id)
@@ -138,18 +137,6 @@ defmodule Combo.TokenTest do
       id = 1
       token = Token.encrypt(socket(), "salt", id)
       assert Token.decrypt(socket(), "salt", token) == {:ok, id}
-    end
-
-    test "token with context as endpoint" do
-      id = 1
-      token = Token.encrypt(Endpoint, "salt", id)
-      assert Token.decrypt(Endpoint, "salt", token) == {:ok, id}
-    end
-
-    test "token with context which has endpoint field" do
-      id = 1
-      token = Token.encrypt(%__MODULE__{endpoint: Endpoint}, "salt", id)
-      assert Token.decrypt(%__MODULE__{endpoint: Endpoint}, "salt", token) == {:ok, id}
     end
 
     test "fails on missing token" do

@@ -34,14 +34,14 @@ defmodule Combo.Token do
   The first argument to `sign/4`, `verify/4`, `encrypt/4`, and `decrypt/4` is
   called context, and it can be one of:
 
-    * the module name of an endpoint - the secret key base is extracted from
-      the endpoint.
-    * `Plug.Conn` - the secret key base is extracted from the endpoint stored
-      in the connection.
-    * `Combo.Socket` - the secret key base is extracted from the endpoint
-      stored in the socket.
     * a string - the secret key base itself. A key base with at least 20
       randomly generated characters should be used to provide adequate entropy.
+    * the module name of an endpoint - the secret key base is extracted from
+      the endpoint.
+    * `%Plug.Conn{}` - the secret key base is extracted from the endpoint stored
+      in the connection.
+    * `%Combo.Socket{}` - the secret key base is extracted from the endpoint
+      stored in the socket.
 
   The second argument is a [cryptographic salt](https://en.wikipedia.org/wiki/Salt_(cryptography))
   which must be the same in both calls to `sign/4` and `verify/4`, or both
@@ -103,10 +103,10 @@ defmodule Combo.Token do
   import Combo.Conn, only: [endpoint_module!: 1]
 
   @type context ::
-          Plug.Conn.t()
-          | %{required(:endpoint) => atom(), optional(atom()) => any()}
-          | atom()
-          | binary()
+          binary()
+          | module()
+          | Plug.Conn.t()
+          | Phoenix.Socket.t()
 
   @type salt :: binary()
 
@@ -261,19 +261,17 @@ defmodule Combo.Token do
     |> Plug.Crypto.decrypt(salt, token, opts)
   end
 
-  ## Helpers
-
-  defp get_key_base(%Plug.Conn{} = conn),
-    do: conn |> endpoint_module!() |> get_endpoint_key_base()
-
-  defp get_key_base(%_{endpoint: endpoint}),
-    do: get_endpoint_key_base(endpoint)
+  defp get_key_base(string) when is_binary(string) and byte_size(string) >= 20,
+    do: string
 
   defp get_key_base(endpoint) when is_atom(endpoint),
     do: get_endpoint_key_base(endpoint)
 
-  defp get_key_base(string) when is_binary(string) and byte_size(string) >= 20,
-    do: string
+  defp get_key_base(%Plug.Conn{} = conn),
+    do: get_endpoint_key_base(endpoint_module!(conn))
+
+  defp get_key_base(%Combo.Socket{} = socket),
+    do: get_endpoint_key_base(socket.endpoint)
 
   defp get_endpoint_key_base(endpoint) do
     endpoint.config(:secret_key_base) ||
