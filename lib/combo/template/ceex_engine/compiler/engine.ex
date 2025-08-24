@@ -75,7 +75,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       cont: cont
     } = state
 
-    tokens = Tokenizer.finalize(tokens, file, cont, source)
+    tokens = Tokenizer.finalize(tokens, cont, file, source)
 
     quoted = handle_tokens(state, "template", tokens)
     quoted = Assigns.traverse(quoted)

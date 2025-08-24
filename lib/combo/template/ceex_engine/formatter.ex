@@ -95,7 +95,7 @@ defmodule Combo.Template.CEExEngine.Formatter do
   defp tokenize(source) do
     {:ok, eex_nodes} = EEx.tokenize(source)
     {tokens, cont} = Enum.reduce(eex_nodes, {[], {:text, :enabled}}, &do_tokenize(&1, &2, source))
-    Tokenizer.finalize(tokens, "nofile", cont, source)
+    Tokenizer.finalize(tokens, cont, "nofile", source)
   end
 
   defp do_tokenize({:text, text, meta}, {tokens, cont}, source) do

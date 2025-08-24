@@ -36,7 +36,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
 
   * `source` - The source code to be tokenized.
   * `location` - The location of text's first char. It's a keyword list with
-    `:line` and `:column`, and both of them must be integers.
+    `:line` and `:column`, and both of them must be positive integers.
   * `tokens` - The list of tokens.
   * `cont` - The continuation which indicates current processing context.
      It can be `{:text, braces}`, `:style`, `:script`, or `{:comment, line, column}`.
@@ -76,17 +76,17 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
     end
   end
 
-  def finalize(_tokens, file, {:comment, line, column}, source) do
+  def finalize(_tokens, {:comment, line, column}, file, source) do
     message = "expected closing `-->` for comment"
     meta = %{line: line, column: column}
     raise_syntax_error!(message, meta, %{source: source, file: file, indentation: 0})
   end
 
-  def finalize(tokens, _file, _cont, _source) do
+  def finalize(tokens, _cont, _file, _source) do
     tokens
-    |> trim_leading_whitespace_text_tokens()
+    |> trim_leading_whitespace_tokens()
     |> Enum.reverse()
-    |> trim_leading_whitespace_text_tokens()
+    |> trim_leading_whitespace_tokens()
   end
 
   ## handle_text
@@ -703,10 +703,10 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
     [{type, name, attrs, meta} | rest]
   end
 
-  defp trim_leading_whitespace_text_tokens(tokens) do
+  defp trim_leading_whitespace_tokens(tokens) do
     with [{:text, text, _} | rest] <- tokens,
          "" <- String.trim(text) do
-      trim_leading_whitespace_text_tokens(rest)
+      trim_leading_whitespace_tokens(rest)
     else
       _ -> tokens
     end
