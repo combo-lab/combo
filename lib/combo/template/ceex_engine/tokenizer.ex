@@ -268,7 +268,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
       {:ok, name, new_column, rest} ->
         meta = %{line: line, column: column - 1, inner_location: nil, tag_name: name}
 
-        case TagHandler.classify_tag(name) do
+        case classify_tag(name) do
           {:error, message} ->
             raise_syntax_error!(message, %{line: line, column: column}, state)
 
@@ -298,7 +298,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
           tag_name: name
         }
 
-        case TagHandler.classify_tag(name) do
+        case classify_tag(name) do
           {:error, message} ->
             raise_syntax_error!(message, meta, state)
 
@@ -688,6 +688,17 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
     attrs = [{attr, value, attr_meta} | attrs]
     [{type, name, attrs, meta} | rest]
   end
+
+  defp classify_tag(<<first, _::binary>> = name) when first in ?A..?Z,
+    do: {:remote_component, name}
+
+  defp classify_tag("."), do: {:error, "a component name is required after ."}
+  defp classify_tag("." <> name), do: {:local_component, name}
+
+  defp classify_tag(":inner_block"), do: {:error, "the slot name :inner_block is reserved"}
+  defp classify_tag(":" <> name), do: {:slot, name}
+
+  defp classify_tag(name), do: {:html_tag, name}
 
   defp normalize_tag([{type, name, attrs, meta} | rest], line, column, self_close?) do
     attrs = Enum.reverse(attrs)
