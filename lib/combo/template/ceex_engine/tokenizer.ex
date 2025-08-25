@@ -263,7 +263,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   ## handle_tag_open
 
   defp handle_tag_open(text, line, column, tokens, state) do
-    case handle_tag_name(text, column, []) do
+    case handle_tag_name(text, column) do
       {:ok, name, new_column, rest} ->
         meta = %{line: line, column: column - 1, inner_location: nil, tag_name: name}
 
@@ -288,7 +288,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   ## handle_tag_close
 
   defp handle_tag_close(text, line, column, tokens, state) do
-    case handle_tag_name(text, column, []) do
+    case handle_tag_name(text, column) do
       {:ok, name, new_column, ">" <> rest} ->
         meta = %{
           line: line,
@@ -325,6 +325,8 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   end
 
   ## handle_tag_name
+
+  defp handle_tag_name(text, column), do: handle_tag_name(text, column, [])
 
   defp handle_tag_name(<<c::utf8, _rest::binary>> = text, column, buffer)
        when c in @stop_chars do
