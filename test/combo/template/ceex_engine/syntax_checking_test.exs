@@ -305,7 +305,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
 
   test "missing --> for comment" do
     message = """
-    test/combo/template/ceex_engine/syntax_checking_test.exs:1:6: expected closing `-->` for comment
+    test/combo/template/ceex_engine/syntax_checking_test.exs:1:6: unexpected end of string inside tag
       |
     1 | Begin<!-- <%= 123 %>
       |      ^\
