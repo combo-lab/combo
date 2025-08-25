@@ -2,7 +2,6 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   @moduledoc false
 
   alias Combo.Template.CEExEngine.SyntaxError
-  alias Combo.Template.CEExEngine.TagHandler
 
   @space_chars ~c"\s\t\f"
   @quote_chars ~c"\"'"
@@ -303,6 +302,12 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
             raise_syntax_error!(message, meta, state)
 
           {type, name} ->
+            meta =
+              cond do
+                type == :html_tag and void_tag?(name) -> Map.put(meta, :closing, :void)
+                true -> meta
+              end
+
             tokens = [{:close, type, name, meta} | tokens]
             handle_text(rest, line, new_column + 1, [], tokens, pop_braces(state))
         end
@@ -700,13 +705,19 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
 
   defp classify_tag(name), do: {:html_tag, name}
 
+  for name <- ~w(area base br col hr img input link meta param command keygen source) do
+    defp void_tag?(unquote(name)), do: true
+  end
+
+  defp void_tag?(_), do: false
+
   defp normalize_tag([{type, name, attrs, meta} | rest], line, column, self_close?) do
     attrs = Enum.reverse(attrs)
     meta = %{meta | inner_location: {line, column}}
 
     meta =
       cond do
-        type == :html_tag and TagHandler.void_tag?(name) -> Map.put(meta, :closing, :void)
+        type == :html_tag and void_tag?(name) -> Map.put(meta, :closing, :void)
         self_close? -> Map.put(meta, :closing, :self)
         true -> meta
       end

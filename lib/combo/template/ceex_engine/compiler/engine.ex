@@ -1,9 +1,8 @@
 defmodule Combo.Template.CEExEngine.Compiler.Engine do
   @moduledoc false
 
-  alias Combo.Template.CEExEngine.Tokenizer
   alias Combo.Template.CEExEngine.SyntaxError
-  alias Combo.Template.CEExEngine.TagHandler
+  alias Combo.Template.CEExEngine.Tokenizer
   alias Combo.Template.CEExEngine.Compiler.IOBuilder
   alias Combo.Template.CEExEngine.Compiler.Attr
   alias Combo.Template.CEExEngine.Compiler.Assigns
@@ -820,7 +819,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
          %{tags: [{t_type, t_name, _attrs, t_meta} | _]} = state,
          {:close, t_type, close_t_name, close_t_meta}
        ) do
-    hint = closing_void_hint(close_t_name)
+    hint = closing_void_hint(close_t_meta)
 
     message = """
     unmatched closing tag. Expected </#{t_name}> for <#{t_name}> \
@@ -832,18 +831,15 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
   defp pop_tag!(state, {:close, _t_type, _t_name, t_meta}) do
     %{tag_name: tag_name} = t_meta
-    hint = closing_void_hint(tag_name)
+    hint = closing_void_hint(t_meta)
     message = "missing opening tag for </#{tag_name}>#{hint}"
     raise_syntax_error!(message, t_meta, state)
   end
 
-  defp closing_void_hint(tag_name) do
-    if TagHandler.void_tag?(tag_name) do
-      " (note <#{tag_name}> is a void tag and cannot have any content)"
-    else
-      ""
-    end
-  end
+  defp closing_void_hint(%{tag_name: tag_name, closing: :void} = _t_meta),
+    do: " (note <#{tag_name}> is a void tag and cannot have any content)"
+
+  defp closing_void_hint(_t_meta), do: ""
 
   # tag helpers
 
