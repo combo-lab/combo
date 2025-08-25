@@ -68,7 +68,14 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       assert fetch_tokens!("<!DOCTYPE\nhtml\n>  <br />") == [
                {:text, "<!DOCTYPE\nhtml\n>  ", %{line_end: 3, column_end: 4}},
                {:html_tag, "br", [],
-                %{column: 4, line: 3, closing: :void, tag_name: "br", inner_location: {3, 10}}}
+                %{
+                  column: 4,
+                  line: 3,
+                  self_closing?: true,
+                  void?: true,
+                  tag_name: "br",
+                  inner_location: {3, 10}
+                }}
              ]
     end
   end
@@ -151,23 +158,64 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         Tokenizer.tokenize(second_part, [], first_tokens, cont, tokenizer_state(second_part))
 
       assert Enum.reverse(tokens) == [
-               {:html_tag, "p", [], %{column: 1, line: 1, inner_location: {1, 4}, tag_name: "p"}},
+               {:html_tag, "p", [],
+                %{
+                  column: 1,
+                  line: 1,
+                  inner_location: {1, 4},
+                  tag_name: "p",
+                  void?: false,
+                  self_closing?: false
+                }},
                {:text, "\n<!--\n<div>\n",
                 %{column_end: 1, context: [:comment_start], line_end: 4}},
                {:text, "</div>\n-->\n", %{column_end: 1, context: [:comment_end], line_end: 3}},
                {:close, :html_tag, "p",
-                %{column: 1, line: 3, inner_location: {3, 1}, tag_name: "p"}},
+                %{
+                  column: 1,
+                  line: 3,
+                  inner_location: {3, 1},
+                  tag_name: "p",
+                  void?: false
+                }},
                {:text, "\n", %{column_end: 1, line_end: 4}},
                {:html_tag, "div", [],
-                %{column: 1, line: 4, inner_location: {4, 6}, tag_name: "div"}},
+                %{
+                  column: 1,
+                  line: 4,
+                  inner_location: {4, 6},
+                  tag_name: "div",
+                  void?: false,
+                  self_closing?: false
+                }},
                {:text, "\n  ", %{column_end: 3, line_end: 5}},
-               {:html_tag, "p", [], %{column: 3, line: 5, inner_location: {5, 6}, tag_name: "p"}},
+               {:html_tag, "p", [],
+                %{
+                  column: 3,
+                  line: 5,
+                  inner_location: {5, 6},
+                  tag_name: "p",
+                  void?: false,
+                  self_closing?: false
+                }},
                {:text, "Hello", %{column_end: 11, line_end: 5}},
                {:close, :html_tag, "p",
-                %{column: 11, line: 5, inner_location: {5, 11}, tag_name: "p"}},
+                %{
+                  column: 11,
+                  line: 5,
+                  inner_location: {5, 11},
+                  tag_name: "p",
+                  void?: false
+                }},
                {:text, "\n", %{column_end: 1, line_end: 6}},
                {:close, :html_tag, "div",
-                %{column: 1, line: 6, inner_location: {6, 1}, tag_name: "div"}},
+                %{
+                  column: 1,
+                  line: 6,
+                  inner_location: {6, 1},
+                  tag_name: "div",
+                  void?: false
+                }},
                {:text, "\n", %{column_end: 1, line_end: 7}}
              ]
     end
@@ -208,22 +256,57 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         Tokenizer.tokenize(third_part, [], second_tokens, cont, tokenizer_state(third_part))
 
       assert Enum.reverse(tokens) == [
-               {:html_tag, "p", [], %{column: 1, line: 1, inner_location: {1, 4}, tag_name: "p"}},
+               {:html_tag, "p", [],
+                %{
+                  column: 1,
+                  line: 1,
+                  inner_location: {1, 4},
+                  tag_name: "p",
+                  void?: false,
+                  self_closing?: false
+                }},
                {:text, "\n<!--\n<%= \"Hello\" %>\n",
                 %{column_end: 1, context: [:comment_start], line_end: 4}},
                {:text, "-->\n<!--\n<p><%= \"World\"</p>\n",
                 %{column_end: 1, context: [:comment_end, :comment_start], line_end: 4}},
                {:text, "-->\n", %{column_end: 1, context: [:comment_end], line_end: 2}},
                {:html_tag, "div", [],
-                %{column: 1, line: 2, inner_location: {2, 6}, tag_name: "div"}},
+                %{
+                  column: 1,
+                  line: 2,
+                  inner_location: {2, 6},
+                  tag_name: "div",
+                  void?: false,
+                  self_closing?: false
+                }},
                {:text, "\n  ", %{column_end: 3, line_end: 3}},
-               {:html_tag, "p", [], %{column: 3, line: 3, inner_location: {3, 6}, tag_name: "p"}},
+               {:html_tag, "p", [],
+                %{
+                  column: 3,
+                  line: 3,
+                  inner_location: {3, 6},
+                  tag_name: "p",
+                  void?: false,
+                  self_closing?: false
+                }},
                {:text, "Hi", %{column_end: 8, line_end: 3}},
                {:close, :html_tag, "p",
-                %{column: 8, line: 3, inner_location: {3, 8}, tag_name: "p"}},
+                %{
+                  column: 8,
+                  line: 3,
+                  inner_location: {3, 8},
+                  tag_name: "p",
+                  void?: false
+                }},
                {:text, "\n", %{column_end: 1, line_end: 4}},
                {:close, :html_tag, "p",
-                %{column: 1, line: 4, inner_location: {4, 1}, tag_name: "p"}},
+                %{
+                  column: 1,
+                  line: 4,
+                  inner_location: {4, 1},
+                  tag_name: "p",
+                  void?: false
+                }},
                {:text, "\n", %{column_end: 1, line_end: 5}}
              ]
     end
@@ -247,7 +330,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
     test "self close" do
       tokens = fetch_tokens!("<div/>")
-      assert [{:html_tag, "div", [], %{closing: :self}}] = tokens
+      assert [{:html_tag, "div", [], %{self_closing?: true}}] = tokens
     end
 
     test "compute line and column" do
@@ -264,14 +347,14 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                {:text, _, %{line_end: 2, column_end: 3}},
                {:html_tag, "span", [], %{line: 2, column: 3}},
                {:text, _, %{line_end: 4, column_end: 1}},
-               {:html_tag, "p", [], %{column: 1, line: 4, closing: :self}},
+               {:html_tag, "p", [], %{column: 1, line: 4, self_closing?: true}},
                {:html_tag, "br", [], %{column: 5, line: 4}}
              ] = tokens
     end
 
     test "raise on missing/incomplete tag name" do
       message = """
-      nofile:2:4: expected tag name after <. If you meant to use < as part of a text, use &lt; instead
+      nofile:2:4: expected tag name after <
         |
       1 | <div>
       2 |   <>
@@ -286,7 +369,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       end
 
       message = """
-      nofile:1:2: expected tag name after <. If you meant to use < as part of a text, use &lt; instead
+      nofile:1:2: expected tag name after <
         |
       1 | <
         |  ^\
@@ -843,11 +926,12 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                {:html_tag, "script",
                 [{"src", {:string, "foo.js", %{delimiter: 34}}, %{column: 9, line: 1}}],
                 %{
+                  tag_name: "script",
                   column: 1,
                   line: 1,
-                  closing: :self,
-                  tag_name: "script",
-                  inner_location: {1, 24}
+                  inner_location: {1, 24},
+                  self_closing?: true,
+                  void?: false
                 }},
                {:text, "\n", %{column_end: 1, line_end: 2}}
              ]
@@ -860,7 +944,14 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
              </script>
              """) == [
                {:html_tag, "script", [],
-                %{column: 1, line: 1, inner_location: {1, 9}, tag_name: "script"}},
+                %{
+                  column: 1,
+                  line: 1,
+                  inner_location: {1, 9},
+                  tag_name: "script",
+                  void?: false,
+                  self_closing?: false
+                }},
                {:text, "\n  a = \"<a>Link</a>\"\n", %{column_end: 1, line_end: 3}},
                {:close, :html_tag, "script", %{column: 1, line: 3, inner_location: {3, 1}}},
                {:text, "\n", %{column_end: 1, line_end: 4}}
@@ -878,9 +969,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 %{
                   column: 1,
                   line: 1,
-                  closing: :self,
+                  self_closing?: true,
                   inner_location: {1, 23},
-                  tag_name: "style"
+                  tag_name: "style",
+                  void?: false
                 }},
                {:text, "\n", %{column_end: 1, line_end: 2}}
              ]
@@ -893,7 +985,14 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
              </style>
              """) == [
                {:html_tag, "style", [],
-                %{column: 1, line: 1, inner_location: {1, 8}, tag_name: "style"}},
+                %{
+                  tag_name: "style",
+                  column: 1,
+                  line: 1,
+                  inner_location: {1, 8},
+                  void?: false,
+                  self_closing?: false
+                }},
                {:text, "\n  a = \"<a>Link</a>\"\n", %{column_end: 1, line_end: 3}},
                {:close, :html_tag, "style", %{column: 1, line: 3, inner_location: {3, 1}}},
                {:text, "\n", %{column_end: 1, line_end: 4}}
@@ -914,11 +1013,12 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                   {"city", {:string, "Kraków", %{delimiter: 34}}, %{line: 1, column: 66}}
                 ],
                 %{
-                  line: 1,
-                  closing: :self,
-                  column: 1,
                   tag_name: ".live_component",
-                  inner_location: {1, 82}
+                  line: 1,
+                  column: 1,
+                  inner_location: {1, 82},
+                  self_closing?: true,
+                  void?: false
                 }},
                {:text, "\n", %{line_end: 2, column_end: 1}}
              ]
@@ -930,10 +1030,23 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
              """) == [
                {:local_component, "link",
                 [{"href", {:string, "/", %{delimiter: 34}}, %{line: 1, column: 8}}],
-                %{line: 1, column: 1, tag_name: ".link", inner_location: {1, 17}}},
+                %{
+                  tag_name: ".link",
+                  line: 1,
+                  column: 1,
+                  inner_location: {1, 17},
+                  void?: false,
+                  self_closing?: false
+                }},
                {:text, "Regular anchor link", %{line_end: 1, column_end: 36}},
                {:close, :local_component, "link",
-                %{line: 1, column: 36, tag_name: ".link", inner_location: {1, 36}}},
+                %{
+                  tag_name: ".link",
+                  line: 1,
+                  column: 36,
+                  inner_location: {1, 36},
+                  void?: false
+                }},
                {:text, "\n", %{line_end: 2, column_end: 1}}
              ]
     end
@@ -952,11 +1065,12 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                    {"flash", {:expr, "@flash", %{column: 52, line: 1}}, %{column: 45, line: 1}}
                  ],
                  %{
-                   closing: :self,
+                   tag_name: "MyAppWeb.CoreComponents.flash",
+                   line: 1,
                    column: 1,
                    inner_location: {1, 62},
-                   line: 1,
-                   tag_name: "MyAppWeb.CoreComponents.flash"
+                   self_closing?: true,
+                   void?: false
                  }
                },
                {:text, "\n", %{column_end: 1, line_end: 2}}
@@ -978,19 +1092,22 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                     %{line: 1, column: 45}}
                  ],
                  %{
+                   tag_name: "MyAppWeb.CoreComponents.modal",
                    line: 1,
                    column: 1,
-                   tag_name: "MyAppWeb.CoreComponents.modal",
-                   inner_location: {1, 81}
+                   inner_location: {1, 81},
+                   void?: false,
+                   self_closing?: false
                  }
                },
                {:text, "\n  This is another modal.\n", %{line_end: 3, column_end: 1}},
                {:close, :remote_component, "MyAppWeb.CoreComponents.modal",
                 %{
+                  tag_name: "MyAppWeb.CoreComponents.modal",
                   line: 3,
                   column: 1,
-                  tag_name: "MyAppWeb.CoreComponents.modal",
-                  inner_location: {3, 1}
+                  inner_location: {3, 1},
+                  void?: false
                 }},
                {:text, "\n", %{line_end: 4, column_end: 1}}
              ]

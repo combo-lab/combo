@@ -290,7 +290,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     end
 
     case t_meta do
-      %{closing: :self} ->
+      %{self_closing?: true} ->
         message =
           "cannot use #{a_name} on a #{humanize_t_type(t_type)} without inner content"
 
@@ -392,21 +392,19 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     |> reduce_tokens(tokens)
   end
 
-  # HTML tag (self-closing)
+  # HTML tag (void)
 
   defp reduce_tokens(
          state,
-         [{:html_tag, name, attrs, %{closing: closing} = meta} = tag | tokens]
+         [{:html_tag, name, attrs, %{void?: true} = meta} = tag | tokens]
        ) do
-    suffix = if closing == :void, do: ">", else: "></#{name}>"
-
     if should_wrap?(tag) do
       state =
         state
         |> iob_push_ctx()
         |> iob_acc_text("<#{name}")
         |> acc_attrs(attrs, meta)
-        |> iob_acc_text(suffix)
+        |> iob_acc_text(">")
 
       quoted =
         state
@@ -420,7 +418,38 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       state
       |> iob_acc_text("<#{name}")
       |> acc_attrs(attrs, meta)
-      |> iob_acc_text(suffix)
+      |> iob_acc_text(">")
+    end
+    |> reduce_tokens(tokens)
+  end
+
+  # HTML tag (self-closing)
+
+  defp reduce_tokens(
+         state,
+         [{:html_tag, name, attrs, %{self_closing?: true} = meta} = tag | tokens]
+       ) do
+    if should_wrap?(tag) do
+      state =
+        state
+        |> iob_push_ctx()
+        |> iob_acc_text("<#{name}")
+        |> acc_attrs(attrs, meta)
+        |> iob_acc_text("></#{name}>")
+
+      quoted =
+        state
+        |> iob_dump()
+        |> wrap(tag)
+
+      state
+      |> iob_pop_ctx()
+      |> iob_acc_expr(quoted)
+    else
+      state
+      |> iob_acc_text("<#{name}")
+      |> acc_attrs(attrs, meta)
+      |> iob_acc_text("></#{name}>")
     end
     |> reduce_tokens(tokens)
   end
@@ -478,7 +507,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
   defp reduce_tokens(
          state,
-         [{:remote_component, _name, _attrs, %{closing: :self} = meta} = tag | tokens]
+         [{:remote_component, _name, _attrs, %{self_closing?: true} = meta} = tag | tokens]
        ) do
     mod_asf = decompose_remote_component_tag!(tag, state)
     mod = build_remote_component_module(mod_asf, meta, state)
@@ -581,7 +610,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
   defp reduce_tokens(
          state,
-         [{:local_component, name, _attrs, %{closing: :self} = meta} = tag | tokens]
+         [{:local_component, name, _attrs, %{self_closing?: true} = meta} = tag | tokens]
        ) do
     fun = String.to_atom(name)
     mod = build_local_component_module(state.caller, fun)
@@ -679,7 +708,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
   defp reduce_tokens(
          state,
-         [{:slot, name, attrs, %{closing: :self} = meta} = tag | tokens]
+         [{:slot, name, attrs, %{self_closing?: true} = meta} = tag | tokens]
        ) do
     validate_slot!(tag, state)
 
@@ -836,7 +865,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     raise_syntax_error!(message, t_meta, state)
   end
 
-  defp closing_void_hint(%{tag_name: tag_name, closing: :void} = _t_meta),
+  defp closing_void_hint(%{tag_name: tag_name, void?: true} = _t_meta),
     do: " (note <#{tag_name}> is a void tag and cannot have any content)"
 
   defp closing_void_hint(_t_meta), do: ""

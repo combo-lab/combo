@@ -262,7 +262,12 @@ defmodule Combo.Template.CEExEngine.Formatter do
     to_tree(tokens, [{:body_expr, value, meta} | buffer], stack, opts)
   end
 
-  defp to_tree([{type, _name, attrs, %{closing: _} = meta} | tokens], buffer, stack, opts)
+  defp to_tree([{type, _name, attrs, %{void?: true} = meta} | tokens], buffer, stack, opts)
+       when is_tag_open(type) do
+    to_tree(tokens, [{:tag_self_close, meta.tag_name, attrs} | buffer], stack, opts)
+  end
+
+  defp to_tree([{type, _name, attrs, %{self_closing?: true} = meta} | tokens], buffer, stack, opts)
        when is_tag_open(type) do
     to_tree(tokens, [{:tag_self_close, meta.tag_name, attrs} | buffer], stack, opts)
   end

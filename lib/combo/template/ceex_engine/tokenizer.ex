@@ -5,7 +5,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
 
   @space_chars ~c"\s\t\f"
   @quote_chars ~c"\"'"
-  @stop_chars ~c">/=\r\n" ++ @quote_chars ++ @space_chars
+  @stop_chars ~c">/=\r\n" ++ @space_chars ++ @quote_chars
 
   @doc """
   Initializes the tokenizer's state.
@@ -50,7 +50,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
       iex> Tokenizer.tokenize(state)
       {[
          {:close, :html_tag, "section", %{column: 16, line: 1}},
-         {:html_tag, "div", [], %{column: 10, line: 1, closing: :self}},
+         {:html_tag, "div", [], %{column: 10, line: 1, self_closing?: true}},
          {:html_tag, "section", [], %{column: 1, line: 1}}
        ], {:text, :enabled}}
 
@@ -265,21 +265,28 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   defp handle_tag_open(text, line, column, tokens, state) do
     case handle_tag_name(text, column) do
       {:ok, name, new_column, rest} ->
-        meta = %{line: line, column: column - 1, inner_location: nil, tag_name: name}
+        meta = %{
+          tag_name: name,
+          line: line,
+          column: column - 1,
+          void?: :pending,
+          inner_location: :pending,
+          self_closing?: :pending
+        }
 
         case classify_tag(name) do
           {:error, message} ->
             raise_syntax_error!(message, %{line: line, column: column}, state)
 
           {type, name} ->
+            void? = type == :html_tag and void_tag?(name)
+            meta = %{meta | void?: void?}
             tokens = [{type, name, [], meta} | tokens]
             handle_maybe_tag_open_end(rest, line, new_column, tokens, state)
         end
 
       :error ->
-        message =
-          "expected tag name after <. If you meant to use < as part of a text, use &lt; instead"
-
+        message = "expected tag name after <"
         meta = %{line: line, column: column}
         raise_syntax_error!(message, meta, state)
     end
@@ -294,7 +301,8 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
           line: line,
           column: column - 2,
           inner_location: {line, column - 2},
-          tag_name: name
+          tag_name: name,
+          void?: :pending
         }
 
         case classify_tag(name) do
@@ -302,12 +310,8 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
             raise_syntax_error!(message, meta, state)
 
           {type, name} ->
-            meta =
-              cond do
-                type == :html_tag and void_tag?(name) -> Map.put(meta, :closing, :void)
-                true -> meta
-              end
-
+            void? = type == :html_tag and void_tag?(name)
+            meta = %{meta | void?: void?}
             tokens = [{:close, type, name, meta} | tokens]
             handle_text(rest, line, new_column + 1, [], tokens, pop_braces(state))
         end
@@ -341,12 +345,13 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
     done_tag_name(<<>>, column, buffer)
   end
 
-  defp done_tag_name(_text, _column, []) do
+  defp done_tag_name(_rest, _column, []) do
     :error
   end
 
-  defp done_tag_name(text, column, buffer) do
-    {:ok, buffer_to_string(buffer), column, text}
+  defp done_tag_name(rest, column, buffer) do
+    name = buffer_to_string(buffer)
+    {:ok, name, column, rest}
   end
 
   ## handle_maybe_tag_open_end
@@ -713,17 +718,9 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
 
   defp void_tag?(_), do: false
 
-  defp normalize_tag([{type, name, attrs, meta} | rest], line, column, self_close?) do
+  defp normalize_tag([{type, name, attrs, meta} | rest], line, column, self_closing?) do
     attrs = Enum.reverse(attrs)
-    meta = %{meta | inner_location: {line, column}}
-
-    meta =
-      cond do
-        type == :html_tag and void_tag?(name) -> Map.put(meta, :closing, :void)
-        self_close? -> Map.put(meta, :closing, :self)
-        true -> meta
-      end
-
+    meta = %{meta | inner_location: {line, column}, self_closing?: self_closing?}
     [{type, name, attrs, meta} | rest]
   end
 
