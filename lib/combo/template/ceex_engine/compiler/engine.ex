@@ -133,7 +133,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
   end
 
   defp preprocess_token({t_type, _t_name, _t_attrs, _t_meta} = token, state)
-       when t_type in [:html_tag, :remote_component, :local_component, :slot] do
+       when t_type in [:htag, :remote_component, :local_component, :slot] do
     rules = [
       &remove_control_attr/3,
       &validate_attr!/3,
@@ -186,7 +186,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
   end
 
   defp validate_supported_attr!(
-         {:html_tag = t_type, t_name, _, _},
+         {:htag = t_type, t_name, _, _},
          {":" <> _ = a_name, _, a_meta},
          state
        ) do
@@ -396,7 +396,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
   defp reduce_tokens(
          state,
-         [{:html_tag, name, attrs, %{void?: true} = meta} = tag | tokens]
+         [{:htag, name, attrs, %{void?: true} = meta} = tag | tokens]
        ) do
     if should_wrap?(tag) do
       state =
@@ -427,7 +427,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
   defp reduce_tokens(
          state,
-         [{:html_tag, name, attrs, %{self_closing?: true} = meta} = tag | tokens]
+         [{:htag, name, attrs, %{self_closing?: true} = meta} = tag | tokens]
        ) do
     if should_wrap?(tag) do
       state =
@@ -458,7 +458,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
   defp reduce_tokens(
          state,
-         [{:html_tag, name, attrs, meta} = tag | tokens]
+         [{:htag, name, attrs, meta} = tag | tokens]
        ) do
     if should_wrap?(tag) do
       state
@@ -479,7 +479,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
   defp reduce_tokens(
          state,
-         [{:close, :html_tag, name, _meta} = tag | tokens]
+         [{:close, :htag, name, _meta} = tag | tokens]
        ) do
     {open_tag, state} = pop_tag!(state, tag)
 
@@ -1322,7 +1322,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     Code.string_to_quoted!(source, line: line, column: column, file: file)
   end
 
-  defp humanize_t_type(:html_tag), do: "tag"
+  defp humanize_t_type(:htag), do: "tag"
   defp humanize_t_type(:remote_component), do: "remote component"
   defp humanize_t_type(:local_component), do: "local component"
   defp humanize_t_type(:slot), do: "slot"

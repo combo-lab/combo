@@ -8,7 +8,7 @@ defmodule Combo.Template.CEExEngine.Formatter do
   alias Combo.Template.CEExEngine.SyntaxError
 
   defguard is_tag_open(tag_type)
-           when tag_type in [:html_tag, :remote_component, :local_component, :slot]
+           when tag_type in [:htag, :remote_component, :local_component, :slot]
 
   # Default line length to be used in case nothing is specified in the `.formatter.exs` options.
   @default_line_length 98
@@ -73,21 +73,21 @@ defmodule Combo.Template.CEExEngine.Formatter do
   # Will be tokenized as:
   #
   # [
-  #   {:html_tag, "section", [], %{column: 1, line: 1}},
+  #   {:htag, "section", [], %{column: 1, line: 1}},
   #   {:text, "\n  ", %{column_end: 3, line_end: 2}},
-  #   {:html_tag, "p", [], %{column: 3, line: 2}},
+  #   {:htag, "p", [], %{column: 3, line: 2}},
   #   {:eex_tag_render, "<%= user.name ></p>\n  <%= if true do %>", %{block?: true, column: 6, line: 1}},
   #   {:text, " ", %{column_end: 2, line_end: 1}},
-  #   {:html_tag, "p", [], %{column: 2, line: 1}},
+  #   {:htag, "p", [], %{column: 2, line: 1}},
   #   {:text, "this", %{column_end: 12, line_end: 1}},
-  #   {:close, :html_tag, "p", %{column: 12, line: 1}},
+  #   {:close, :htag, "p", %{column: 12, line: 1}},
   #   {:eex_tag, "<% else %>", %{block?: false, column: 35, line: 2}},
-  #   {:html_tag, "p", [], %{column: 1, line: 1}},
+  #   {:htag, "p", [], %{column: 1, line: 1}},
   #   {:text, "that", %{column_end: 14, line_end: 1}},
-  #   {:close, :html_tag, "p", %{column: 14, line: 1}},
+  #   {:close, :htag, "p", %{column: 14, line: 1}},
   #   {:eex_tag, "<% end %>", %{block?: false, column: 62, line: 2}},
   #   {:text, "\n", %{column_end: 1, line_end: 2}},
-  #   {:close, :html_tag, "section", %{column: 1, line: 2}}
+  #   {:close, :htag, "section", %{column: 1, line: 2}}
   # ]
   #
   @eex_expr [:start_expr, :expr, :end_expr, :middle_expr]
@@ -125,16 +125,16 @@ defmodule Combo.Template.CEExEngine.Formatter do
   # tokens. For instance, given this input:
   #
   # [
-  #   {:html_tag, "div", [], %{column: 1, line: 1}},
-  #   {:html_tag, "h1", [], %{column: 6, line: 1}},
+  #   {:htag, "div", [], %{column: 1, line: 1}},
+  #   {:htag, "h1", [], %{column: 6, line: 1}},
   #   {:text, "Hello", %{column_end: 15, line_end: 1}},
-  #   {::close, :html_tag, "h1", %{column: 15, line: 1}},
-  #   {::close, :html_tag, "div", %{column: 20, line: 1}},
-  #   {:html_tag, "div", [], %{column: 1, line: 2}},
-  #   {:html_tag, "h1", [], %{column: 6, line: 2}},
+  #   {::close, :htag, "h1", %{column: 15, line: 1}},
+  #   {::close, :htag, "div", %{column: 20, line: 1}},
+  #   {:htag, "div", [], %{column: 1, line: 2}},
+  #   {:htag, "h1", [], %{column: 6, line: 2}},
   #   {:text, "World", %{column_end: 15, line_end: 2}},
-  #   {::close, :html_tag, "h1", %{column: 15, line: 2}},
-  #   {::close, :html_tag, "div", %{column: 20, line: 2}}
+  #   {::close, :htag, "h1", %{column: 15, line: 2}},
+  #   {::close, :htag, "div", %{column: 20, line: 2}}
   # ]
   #
   # The output will be:
@@ -150,21 +150,21 @@ defmodule Combo.Template.CEExEngine.Formatter do
   # ### How does this algorithm work?
   #
   # As this is a recursive algorithm, it starts with an empty buffer and an empty
-  # stack. The buffer will be accumulated until it finds a `{:html_tag, ..., ...}`.
+  # stack. The buffer will be accumulated until it finds a `{:htag, ..., ...}`.
   #
   # As soon as the `tag_open` arrives, a new buffer will be started and we move
   # the previous buffer to the stack along with the `tag_open`:
   #
   #   ```
-  #   defp build([{:html_tag, name, attrs, _meta} | tokens], buffer, stack) do
+  #   defp build([{:htag, name, attrs, _meta} | tokens], buffer, stack) do
   #     build(tokens, [], [{name, attrs, buffer} | stack])
   #   end
   #   ```
   #
-  # Then, we start to populate the buffer again until a `{:close, :html_tag, ...} arrives:
+  # Then, we start to populate the buffer again until a `{:close, :htag, ...} arrives:
   #
   #   ```
-  #   defp build([{:close, :html_tag, name, _meta} | tokens], buffer, [{name, attrs, upper_buffer} | stack]) do
+  #   defp build([{:close, :htag, name, _meta} | tokens], buffer, [{name, attrs, upper_buffer} | stack]) do
   #     build(tokens, [{:tag_block, name, attrs, Enum.reverse(buffer)} | upper_buffer], stack)
   #   end
   #   ```

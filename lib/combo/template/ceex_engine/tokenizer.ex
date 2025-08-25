@@ -49,9 +49,9 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
 
       iex> Tokenizer.tokenize(state)
       {[
-         {:close, :html_tag, "section", %{column: 16, line: 1}},
-         {:html_tag, "div", [], %{column: 10, line: 1, self_closing?: true}},
-         {:html_tag, "section", [], %{column: 1, line: 1}}
+         {:close, :htag, "section", %{column: 16, line: 1}},
+         {:htag, "div", [], %{column: 10, line: 1, self_closing?: true}},
+         {:htag, "section", [], %{column: 1, line: 1}}
        ], {:text, :enabled}}
 
   """
@@ -210,7 +210,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
 
   defp handle_style("</style>" <> rest, line, column, buffer, tokens, state) do
     tokens = [
-      {:close, :html_tag, "style", %{line: line, column: column, inner_location: {line, column}}}
+      {:close, :htag, "style", %{line: line, column: column, inner_location: {line, column}}}
       | tokenize_buffer(buffer, tokens, line, column, [])
     ]
 
@@ -237,7 +237,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
 
   defp handle_script("</script>" <> rest, line, column, buffer, tokens, state) do
     tokens = [
-      {:close, :html_tag, "script", %{line: line, column: column, inner_location: {line, column}}}
+      {:close, :htag, "script", %{line: line, column: column, inner_location: {line, column}}}
       | tokenize_buffer(buffer, tokens, line, column, [])
     ]
 
@@ -279,7 +279,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
             raise_syntax_error!(message, %{line: line, column: column}, state)
 
           {type, name} ->
-            void? = type == :html_tag and void_tag?(name)
+            void? = type == :htag and void_tag?(name)
             meta = %{meta | void?: void?}
             tokens = [{type, name, [], meta} | tokens]
             handle_maybe_tag_open_end(rest, line, new_column, tokens, state)
@@ -310,7 +310,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
             raise_syntax_error!(message, meta, state)
 
           {type, name} ->
-            void? = type == :html_tag and void_tag?(name)
+            void? = type == :htag and void_tag?(name)
             meta = %{meta | void?: void?}
             tokens = [{:close, type, name, meta} | tokens]
             handle_text(rest, line, new_column + 1, [], tokens, pop_braces(state))
@@ -374,10 +374,10 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
 
   defp handle_maybe_tag_open_end(">" <> rest, line, column, tokens, state) do
     case normalize_tag(tokens, line, column + 1, false) do
-      [{:html_tag, "script", _, _} | _] = tokens ->
+      [{:htag, "script", _, _} | _] = tokens ->
         handle_script(rest, line, column + 1, [], tokens, state)
 
-      [{:html_tag, "style", _, _} | _] = tokens ->
+      [{:htag, "style", _, _} | _] = tokens ->
         handle_style(rest, line, column + 1, [], tokens, state)
 
       tokens ->
@@ -447,7 +447,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
     end
   end
 
-  defp script_or_style?([{:html_tag, name, _, _} | _]) when name in ~w(script style), do: true
+  defp script_or_style?([{:htag, name, _, _} | _]) when name in ~w(script style), do: true
   defp script_or_style?(_), do: false
 
   ## handle_root_attribute
@@ -708,7 +708,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   defp classify_tag(":inner_block"), do: {:error, "the slot name :inner_block is reserved"}
   defp classify_tag(":" <> name), do: {:slot, name}
 
-  defp classify_tag(name), do: {:html_tag, name}
+  defp classify_tag(name), do: {:htag, name}
 
   for name <- ~w(area base br col hr img input link meta param command keygen source) do
     defp void_tag?(unquote(name)), do: true

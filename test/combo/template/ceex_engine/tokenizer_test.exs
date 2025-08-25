@@ -67,7 +67,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     test "can be declared as multiple lines" do
       assert fetch_tokens!("<!DOCTYPE\nhtml\n>  <br />") == [
                {:text, "<!DOCTYPE\nhtml\n>  ", %{line_end: 3, column_end: 4}},
-               {:html_tag, "br", [],
+               {:htag, "br", [],
                 %{
                   column: 4,
                   line: 3,
@@ -122,10 +122,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert [
-               {:html_tag, "p", [], %{line: 1, column: 1}},
+               {:htag, "p", [], %{line: 1, column: 1}},
                {:text, "\n<!--\n<div>\n-->\n", %{line_end: 5, column_end: 1}},
-               {:close, :html_tag, "p", %{line: 5, column: 1}},
-               {:html_tag, "br", [], %{line: 5, column: 5}}
+               {:close, :htag, "p", %{line: 5, column: 1}},
+               {:htag, "br", [], %{line: 5, column: 5}}
              ] = fetch_tokens!(code)
     end
 
@@ -158,7 +158,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         Tokenizer.tokenize(second_part, [], first_tokens, cont, tokenizer_state(second_part))
 
       assert Enum.reverse(tokens) == [
-               {:html_tag, "p", [],
+               {:htag, "p", [],
                 %{
                   column: 1,
                   line: 1,
@@ -170,7 +170,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                {:text, "\n<!--\n<div>\n",
                 %{column_end: 1, context: [:comment_start], line_end: 4}},
                {:text, "</div>\n-->\n", %{column_end: 1, context: [:comment_end], line_end: 3}},
-               {:close, :html_tag, "p",
+               {:close, :htag, "p",
                 %{
                   column: 1,
                   line: 3,
@@ -179,7 +179,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                   void?: false
                 }},
                {:text, "\n", %{column_end: 1, line_end: 4}},
-               {:html_tag, "div", [],
+               {:htag, "div", [],
                 %{
                   column: 1,
                   line: 4,
@@ -189,7 +189,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                   self_closing?: false
                 }},
                {:text, "\n  ", %{column_end: 3, line_end: 5}},
-               {:html_tag, "p", [],
+               {:htag, "p", [],
                 %{
                   column: 3,
                   line: 5,
@@ -199,7 +199,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                   self_closing?: false
                 }},
                {:text, "Hello", %{column_end: 11, line_end: 5}},
-               {:close, :html_tag, "p",
+               {:close, :htag, "p",
                 %{
                   column: 11,
                   line: 5,
@@ -208,7 +208,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                   void?: false
                 }},
                {:text, "\n", %{column_end: 1, line_end: 6}},
-               {:close, :html_tag, "div",
+               {:close, :htag, "div",
                 %{
                   column: 1,
                   line: 6,
@@ -256,7 +256,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         Tokenizer.tokenize(third_part, [], second_tokens, cont, tokenizer_state(third_part))
 
       assert Enum.reverse(tokens) == [
-               {:html_tag, "p", [],
+               {:htag, "p", [],
                 %{
                   column: 1,
                   line: 1,
@@ -270,7 +270,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                {:text, "-->\n<!--\n<p><%= \"World\"</p>\n",
                 %{column_end: 1, context: [:comment_end, :comment_start], line_end: 4}},
                {:text, "-->\n", %{column_end: 1, context: [:comment_end], line_end: 2}},
-               {:html_tag, "div", [],
+               {:htag, "div", [],
                 %{
                   column: 1,
                   line: 2,
@@ -280,7 +280,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                   self_closing?: false
                 }},
                {:text, "\n  ", %{column_end: 3, line_end: 3}},
-               {:html_tag, "p", [],
+               {:htag, "p", [],
                 %{
                   column: 3,
                   line: 3,
@@ -290,7 +290,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                   self_closing?: false
                 }},
                {:text, "Hi", %{column_end: 8, line_end: 3}},
-               {:close, :html_tag, "p",
+               {:close, :htag, "p",
                 %{
                   column: 8,
                   line: 3,
@@ -299,7 +299,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                   void?: false
                 }},
                {:text, "\n", %{column_end: 1, line_end: 4}},
-               {:close, :html_tag, "p",
+               {:close, :htag, "p",
                 %{
                   column: 1,
                   line: 4,
@@ -313,24 +313,24 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
   end
 
   describe "opening tag" do
-    test "represented as {:html_tag, name, attrs, meta}" do
+    test "represented as {:htag, name, attrs, meta}" do
       tokens = fetch_tokens!("<div>")
-      assert [{:html_tag, "div", [], %{}}] = tokens
+      assert [{:htag, "div", [], %{}}] = tokens
     end
 
     test "with space after name" do
       tokens = fetch_tokens!("<div >")
-      assert [{:html_tag, "div", [], %{}}] = tokens
+      assert [{:htag, "div", [], %{}}] = tokens
     end
 
     test "with line break after name" do
       tokens = fetch_tokens!("<div\n>")
-      assert [{:html_tag, "div", [], %{}}] = tokens
+      assert [{:htag, "div", [], %{}}] = tokens
     end
 
     test "self close" do
       tokens = fetch_tokens!("<div/>")
-      assert [{:html_tag, "div", [], %{self_closing?: true}}] = tokens
+      assert [{:htag, "div", [], %{self_closing?: true}}] = tokens
     end
 
     test "compute line and column" do
@@ -343,12 +343,12 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         """)
 
       assert [
-               {:html_tag, "div", [], %{line: 1, column: 1}},
+               {:htag, "div", [], %{line: 1, column: 1}},
                {:text, _, %{line_end: 2, column_end: 3}},
-               {:html_tag, "span", [], %{line: 2, column: 3}},
+               {:htag, "span", [], %{line: 2, column: 3}},
                {:text, _, %{line_end: 4, column_end: 1}},
-               {:html_tag, "p", [], %{column: 1, line: 4, self_closing?: true}},
-               {:html_tag, "br", [], %{column: 5, line: 4}}
+               {:htag, "p", [], %{column: 1, line: 4, self_closing?: true}},
+               {:htag, "br", [], %{column: 5, line: 4}}
              ] = tokens
     end
 
@@ -640,9 +640,9 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         """)
 
       assert [
-               {:html_tag, "div", [{"title", {:string, "first\n  second\nthird", _meta}, %{}}],
+               {:htag, "div", [{"title", {:string, "first\n  second\nthird", _meta}, %{}}],
                 %{}},
-               {:html_tag, "span", [], %{line: 3, column: 8}}
+               {:htag, "span", [], %{line: 3, column: 8}}
              ] = tokens
     end
 
@@ -687,9 +687,9 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         """)
 
       assert [
-               {:html_tag, "div", [{"title", {:string, "first\n  second\nthird", _meta}, %{}}],
+               {:htag, "div", [{"title", {:string, "first\n  second\nthird", _meta}, %{}}],
                 %{}},
-               {:html_tag, "span", [], %{line: 3, column: 8}}
+               {:htag, "span", [], %{line: 3, column: 8}}
              ] = tokens
     end
 
@@ -863,9 +863,9 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
   end
 
   describe "closing tag" do
-    test "represented as {:close, :html_tag, name, meta}" do
+    test "represented as {:close, :htag, name, meta}" do
       tokens = fetch_tokens!("</div>")
-      assert [{:close, :html_tag, "div", %{}}] = tokens
+      assert [{:close, :htag, "div", %{}}] = tokens
     end
 
     test "compute line and columns" do
@@ -876,10 +876,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         """)
 
       assert [
-               {:html_tag, "div", [], _meta},
+               {:htag, "div", [], _meta},
                {:text, "\n", %{column_end: 1, line_end: 2}},
-               {:close, :html_tag, "div", %{line: 2, column: 1}},
-               {:html_tag, "br", [], %{line: 2, column: 7}}
+               {:close, :htag, "div", %{line: 2, column: 1}},
+               {:htag, "br", [], %{line: 2, column: 7}}
              ] = tokens
     end
 
@@ -923,7 +923,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       assert fetch_tokens!("""
              <script src="foo.js" />
              """) == [
-               {:html_tag, "script",
+               {:htag, "script",
                 [{"src", {:string, "foo.js", %{delimiter: 34}}, %{column: 9, line: 1}}],
                 %{
                   tag_name: "script",
@@ -943,7 +943,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                a = "<a>Link</a>"
              </script>
              """) == [
-               {:html_tag, "script", [],
+               {:htag, "script", [],
                 %{
                   column: 1,
                   line: 1,
@@ -953,7 +953,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                   self_closing?: false
                 }},
                {:text, "\n  a = \"<a>Link</a>\"\n", %{column_end: 1, line_end: 3}},
-               {:close, :html_tag, "script", %{column: 1, line: 3, inner_location: {3, 1}}},
+               {:close, :htag, "script", %{column: 1, line: 3, inner_location: {3, 1}}},
                {:text, "\n", %{column_end: 1, line_end: 4}}
              ]
     end
@@ -964,7 +964,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       assert fetch_tokens!("""
              <style src="foo.js" />
              """) == [
-               {:html_tag, "style",
+               {:htag, "style",
                 [{"src", {:string, "foo.js", %{delimiter: 34}}, %{column: 8, line: 1}}],
                 %{
                   column: 1,
@@ -984,7 +984,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                a = "<a>Link</a>"
              </style>
              """) == [
-               {:html_tag, "style", [],
+               {:htag, "style", [],
                 %{
                   tag_name: "style",
                   column: 1,
@@ -994,7 +994,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                   self_closing?: false
                 }},
                {:text, "\n  a = \"<a>Link</a>\"\n", %{column_end: 1, line_end: 3}},
-               {:close, :html_tag, "style", %{column: 1, line: 3, inner_location: {3, 1}}},
+               {:close, :htag, "style", %{column: 1, line: 3, inner_location: {3, 1}}},
                {:text, "\n", %{column_end: 1, line_end: 4}}
              ]
     end
@@ -1141,15 +1141,15 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
     assert [
              {:text, "text before\n", %{line_end: 2, column_end: 1}},
-             {:html_tag, "div", [], %{}},
+             {:htag, "div", [], %{}},
              {:text, "\n  text\n", %{line_end: 4, column_end: 1}},
-             {:close, :html_tag, "div", %{line: 4, column: 1}},
+             {:close, :htag, "div", %{line: 4, column: 1}},
              {:text, "\ntext after\n", %{line_end: 6, column_end: 1}}
            ] = tokens
   end
 
   defp tokenize_attrs(code) do
-    [{:html_tag, "div", attrs, %{}}] = fetch_tokens!(code)
+    [{:htag, "div", attrs, %{}}] = fetch_tokens!(code)
     attrs
   end
 end
