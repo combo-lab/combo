@@ -77,7 +77,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   end
 
   def finalize(_tokens, {:comment, line, column}, file, source) do
-    message = "expected closing `-->` for comment"
+    message = "unexpected end of string inside tag"
     meta = %{line: line, column: column}
     raise_syntax_error!(message, meta, %{source: source, file: file, indentation: 0})
   end
