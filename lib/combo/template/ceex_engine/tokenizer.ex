@@ -263,7 +263,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   ## handle_tag_open
 
   defp handle_tag_open(text, line, column, tokens, state) do
-    case handle_tag_name(text, column) do
+    case handle_tag_name(text, column, []) do
       {:ok, name, new_column, rest} ->
         meta = %{
           tag_name: name,
@@ -295,7 +295,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   ## handle_tag_close
 
   defp handle_tag_close(text, line, column, tokens, state) do
-    case handle_tag_name(text, column) do
+    case handle_tag_name(text, column, []) do
       {:ok, name, new_column, ">" <> rest} ->
         meta = %{
           line: line,
@@ -329,8 +329,6 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   end
 
   ## handle_tag_name
-
-  defp handle_tag_name(text, column), do: handle_tag_name(text, column, [])
 
   defp handle_tag_name(<<c::utf8, _rest::binary>> = text, column, buffer)
        when c in @stop_chars do
@@ -399,22 +397,22 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
     is an EEx interpolation inside a tag, which is not supported.
     For instance, instead of
 
-        <div id="<%= @id %>">Content</div>
+        <div id="<%= @id %>">content</div>
 
     do
 
-        <div id={@id}>Content</div>
+        <div id={@id}>content</div>
 
     If @id is nil or false, then no attribute is sent at all.
 
     Inside {...} you can place any Elixir expression. If you want
     to interpolate in the middle of an attribute value, instead of
 
-        <a class="foo bar <%= @class %>">Text</a>
+        <div class="foo bar <%= @class %>">content</div>
 
     you can pass an Elixir string with interpolation:
 
-        <a class={"foo bar #{@class}"}>Text</a>
+        <div class={"foo bar #{@class}"}>content</div>
     """
 
     raise_syntax_error!(message, %{line: line, column: column}, state)
@@ -431,7 +429,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
       {:ok, name, new_column, rest} ->
         attr_meta = %{line: line, column: column}
         {text, line, column, value} = handle_maybe_attr_value(rest, line, new_column, state)
-        tokens = put_attr(tokens, name, attr_meta, value)
+        tokens = put_attr(tokens, name, value, attr_meta)
 
         state =
           if name == "ceex-no-curly-interpolation" and state.braces == :enabled and
@@ -458,7 +456,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
     case handle_interpolation(text, line, column, [], 0, state) do
       {:ok, value, new_line, new_column, rest} ->
         meta = %{line: line, column: column}
-        tokens = put_attr(tokens, :root, meta, {:expr, value, meta})
+        tokens = put_attr(tokens, :root, {:expr, value, meta}, meta)
         handle_maybe_tag_open_end(rest, new_line, new_column, tokens, state)
 
       {:error, message} ->
@@ -696,9 +694,9 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   defp pop_braces(%{braces: 1} = state), do: %{state | braces: :enabled}
   defp pop_braces(%{braces: braces} = state), do: %{state | braces: braces - 1}
 
-  defp put_attr([{type, name, attrs, meta} | rest], attr, attr_meta, value) do
-    attrs = [{attr, value, attr_meta} | attrs]
-    [{type, name, attrs, meta} | rest]
+  defp put_attr([{type, name, attrs, meta} | rest], attr_name, attr_value, attr_meta) do
+    new_attrs = [{attr_name, attr_value, attr_meta} | attrs]
+    [{type, name, new_attrs, meta} | rest]
   end
 
   defp classify_tag(<<first, _::binary>> = name) when first in ?A..?Z,
