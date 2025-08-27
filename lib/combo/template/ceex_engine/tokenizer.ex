@@ -126,8 +126,8 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
     state = put_in(state.context, [])
 
     case handle_interpolation(rest, line, column + 1, [], 0, state) do
-      {:ok, value, new_line, new_column, rest} ->
-        tokens = [{:body_expr, value, %{line: line, column: column}} | tokens]
+      {:ok, expr, new_line, new_column, rest} ->
+        tokens = [{:body_expr, expr, %{line: line, column: column}} | tokens]
         handle_text(rest, new_line, new_column, [], tokens, state)
 
       {:error, message} ->
@@ -267,22 +267,22 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
       {:ok, name, new_column, rest} ->
         meta = %{
           tag_name: name,
+          void?: :pending,
           line: line,
           column: column - 1,
-          void?: :pending,
           inner_location: :pending,
           self_closing?: :pending
         }
 
-        case classify_tag(name) do
-          {:error, message} ->
-            raise_syntax_error!(message, %{line: line, column: column}, state)
-
-          {type, name} ->
+        case classify_tag_name(name) do
+          {:ok, {type, name}} ->
             void? = type == :htag and void_tag?(name)
             meta = %{meta | void?: void?}
             tokens = [{type, name, [], meta} | tokens]
             handle_maybe_tag_open_end(rest, line, new_column, tokens, state)
+
+          {:error, message} ->
+            raise_syntax_error!(message, %{line: line, column: column}, state)
         end
 
       :error ->
@@ -296,36 +296,41 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
 
   defp handle_tag_close(text, line, column, tokens, state) do
     case handle_tag_name(text, column, []) do
-      {:ok, name, new_column, ">" <> rest} ->
+      {:ok, name, new_column, rest} ->
         meta = %{
+          tag_name: name,
+          void?: :pending,
           line: line,
           column: column - 2,
-          inner_location: {line, column - 2},
-          tag_name: name,
-          void?: :pending
+          inner_location: {line, column - 2}
         }
 
-        case classify_tag(name) do
-          {:error, message} ->
-            raise_syntax_error!(message, meta, state)
-
-          {type, name} ->
+        case classify_tag_name(name) do
+          {:ok, {type, name}} ->
             void? = type == :htag and void_tag?(name)
             meta = %{meta | void?: void?}
             tokens = [{:close, type, name, meta} | tokens]
-            handle_text(rest, line, new_column + 1, [], tokens, pop_braces(state))
-        end
+            handle_maybe_tag_close_end(rest, line, new_column, tokens, state)
 
-      {:ok, _, new_column, _} ->
-        message = "expected closing `>`"
-        meta = %{line: line, column: new_column}
-        raise_syntax_error!(message, meta, state)
+          {:error, message} ->
+            raise_syntax_error!(message, meta, state)
+        end
 
       :error ->
         message = "expected tag name after </"
         meta = %{line: line, column: column}
         raise_syntax_error!(message, meta, state)
     end
+  end
+
+  defp handle_maybe_tag_close_end(">" <> rest, line, column, tokens, state) do
+    handle_text(rest, line, column + 1, [], tokens, pop_braces(state))
+  end
+
+  defp handle_maybe_tag_close_end(_, line, column, _tokens, state) do
+    message = "expected closing `>` for tag"
+    meta = %{line: line, column: column}
+    raise_syntax_error!(message, meta, state)
   end
 
   ## handle_tag_name
@@ -391,7 +396,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
 
   defp handle_maybe_tag_open_end(<<>>, line, column, _tokens, state) do
     message = ~S"""
-    expected closing `>` or `/>`
+    expected closing `>` or `/>` for tag
 
     Make sure the tag is properly closed. This may happen if there
     is an EEx interpolation inside a tag, which is not supported.
@@ -422,24 +427,40 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
     handle_attribute(text, line, column, tokens, state)
   end
 
+  ## handle_root_attribute
+
+  defp handle_root_attribute(text, line, column, tokens, state) do
+    case handle_interpolation(text, line, column, [], 0, state) do
+      {:ok, expr, new_line, new_column, rest} ->
+        meta = %{line: line, column: column}
+        tokens = put_attr(tokens, :root, {:expr, expr, meta}, meta)
+        handle_maybe_tag_open_end(rest, new_line, new_column, tokens, state)
+
+      {:error, message} ->
+        # use column - 1 to point to the opening {
+        meta = %{line: line, column: column - 1}
+        raise_syntax_error!(message, meta, state)
+    end
+  end
+
   ## handle_attribute
 
   defp handle_attribute(text, line, column, tokens, state) do
     case handle_attr_name(text, column, []) do
       {:ok, name, new_column, rest} ->
         attr_meta = %{line: line, column: column}
-        {text, line, column, value} = handle_maybe_attr_value(rest, line, new_column, state)
+        {rest, line, column, value} = handle_maybe_attr_value(rest, line, new_column, state)
         tokens = put_attr(tokens, name, value, attr_meta)
 
         state =
           if name == "ceex-no-curly-interpolation" and state.braces == :enabled and
-               not script_or_style?(tokens) do
+               not style_or_script?(tokens) do
             %{state | braces: 0}
           else
             state
           end
 
-        handle_maybe_tag_open_end(text, line, column, tokens, state)
+        handle_maybe_tag_open_end(rest, line, column, tokens, state)
 
       {:error, message, column} ->
         meta = %{line: line, column: column}
@@ -447,30 +468,14 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
     end
   end
 
-  defp script_or_style?([{:htag, name, _, _} | _]) when name in ~w(script style), do: true
-  defp script_or_style?(_), do: false
-
-  ## handle_root_attribute
-
-  defp handle_root_attribute(text, line, column, tokens, state) do
-    case handle_interpolation(text, line, column, [], 0, state) do
-      {:ok, value, new_line, new_column, rest} ->
-        meta = %{line: line, column: column}
-        tokens = put_attr(tokens, :root, {:expr, value, meta}, meta)
-        handle_maybe_tag_open_end(rest, new_line, new_column, tokens, state)
-
-      {:error, message} ->
-        # We do column - 1 to point to the opening {
-        meta = %{line: line, column: column - 1}
-        raise_syntax_error!(message, meta, state)
-    end
-  end
+  defp style_or_script?([{:htag, name, _, _} | _]) when name in ~w(style script), do: true
+  defp style_or_script?(_), do: false
 
   ## handle_attr_name
 
   defp handle_attr_name(<<c::utf8, _rest::binary>>, column, _buffer)
        when c in @quote_chars do
-    {:error, "invalid character in attribute name: #{<<c>>}", column}
+    {:error, "expected valid character in attribute name, got: #{<<c>>}", column}
   end
 
   defp handle_attr_name(<<c::utf8, _rest::binary>>, column, [])
@@ -510,8 +515,8 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
     handle_attr_value_begin(rest, line, column + 1, state)
   end
 
-  defp handle_maybe_attr_value(text, line, column, _state) do
-    {text, line, column, nil}
+  defp handle_maybe_attr_value(rest, line, column, _state) do
+    {rest, line, column, nil}
   end
 
   ## handle_attr_value_begin
@@ -538,13 +543,16 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   end
 
   defp handle_attr_value_begin("{" <> rest, line, column, state) do
-    handle_attr_value_as_expr(rest, line, column + 1, state)
+    handle_attr_value_brace(rest, line, column + 1, state)
   end
 
   defp handle_attr_value_begin(_text, line, column, state) do
-    message =
-      "invalid attribute value after `=`. Expected either a value between quotes " <>
-        "(such as \"value\" or \'value\') or an Elixir expression between curly braces (such as `{expr}`)"
+    message = """
+    expected valid attribute value after `=`
+
+    The attribute value can be a value between quotes (such as "value" or 'value') \
+    or an Elixir expression between curly braces (such as `{expr}`).\
+    """
 
     meta = %{line: line, column: column}
     raise_syntax_error!(message, meta, state)
@@ -552,57 +560,64 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
 
   ## handle_attr_value_quote
 
-  defp handle_attr_value_quote("\r\n" <> rest, delim, line, _column, buffer, state) do
+  defp handle_attr_value_quote("\r\n" <> rest, delimiter, line, _column, buffer, state) do
     column = state.column_base
-    handle_attr_value_quote(rest, delim, line + 1, column, ["\r\n" | buffer], state)
+    handle_attr_value_quote(rest, delimiter, line + 1, column, ["\r\n" | buffer], state)
   end
 
-  defp handle_attr_value_quote("\n" <> rest, delim, line, _column, buffer, state) do
+  defp handle_attr_value_quote("\n" <> rest, delimiter, line, _column, buffer, state) do
     column = state.column_base
-    handle_attr_value_quote(rest, delim, line + 1, column, ["\n" | buffer], state)
+    handle_attr_value_quote(rest, delimiter, line + 1, column, ["\n" | buffer], state)
   end
 
-  defp handle_attr_value_quote(<<delim, rest::binary>>, delim, line, column, buffer, _state) do
+  defp handle_attr_value_quote(
+         <<delimiter, rest::binary>>,
+         delimiter,
+         line,
+         column,
+         buffer,
+         _state
+       ) do
     value = buffer_to_string(buffer)
-    {rest, line, column + 1, {:string, value, %{delimiter: delim}}}
+    {rest, line, column + 1, {:string, value, %{delimiter: delimiter}}}
   end
 
-  defp handle_attr_value_quote(<<c::utf8, rest::binary>>, delim, line, column, buffer, state) do
-    handle_attr_value_quote(rest, delim, line, column + 1, [char_or_bin(c) | buffer], state)
+  defp handle_attr_value_quote(<<c::utf8, rest::binary>>, delimiter, line, column, buffer, state) do
+    handle_attr_value_quote(rest, delimiter, line, column + 1, [char_or_bin(c) | buffer], state)
   end
 
-  defp handle_attr_value_quote(<<>>, delim, line, column, _buffer, state) do
+  defp handle_attr_value_quote(<<>>, delimiter, line, column, _buffer, state) do
     message = """
-    expected closing `#{<<delim>>}` for attribute value
+    expected closing `#{<<delimiter>>}` for attribute value
 
     Make sure the attribute is properly closed. This may also happen if
     there is an EEx interpolation inside a tag, which is not supported.
     Instead of
 
-        <div <%= @some_attributes %>>
+        <div <%= @attrs %>>
         </div>
 
     do
 
-        <div {@some_attributes}>
+        <div {@attrs}>
         </div>
 
-    Where @some_attributes must be a keyword list or a map.
+    Where @attrs must be a keyword list or a map.
     """
 
     meta = %{line: line, column: column}
     raise_syntax_error!(message, meta, state)
   end
 
-  ## handle_attr_value_as_expr
+  ## handle_attr_value_brace
 
-  defp handle_attr_value_as_expr(text, line, column, state) do
+  defp handle_attr_value_brace(text, line, column, state) do
     case handle_interpolation(text, line, column, [], 0, state) do
-      {:ok, value, new_line, new_column, rest} ->
-        {rest, new_line, new_column, {:expr, value, %{line: line, column: column}}}
+      {:ok, expr, new_line, new_column, rest} ->
+        {rest, new_line, new_column, {:expr, expr, %{line: line, column: column}}}
 
       {:error, message} ->
-        # We do column - 1 to point to the opening {
+        # use column - 1 to point to the opening {
         meta = %{line: line, column: column - 1}
         raise_syntax_error!(message, meta, state)
     end
@@ -619,8 +634,8 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   end
 
   defp handle_interpolation("}" <> rest, line, column, buffer, 0, _state) do
-    value = buffer_to_string(buffer)
-    {:ok, value, line, column + 1, rest}
+    expr = buffer_to_string(buffer)
+    {:ok, expr, line, column + 1, rest}
   end
 
   defp handle_interpolation(~S(\}) <> rest, line, column, buffer, braces, state) do
@@ -649,7 +664,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
      expected closing `}` for expression
 
      In case you don't want `{` to begin a new interpolation, \
-     you may write it using `&lbrace;` or using `<%= "{" %>`\
+     you may write it using `&lbrace;` or using `<%= "{" %>`.\
      """}
   end
 
@@ -699,16 +714,46 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
     [{type, name, new_attrs, meta} | rest]
   end
 
-  defp classify_tag(<<first, _::binary>> = name) when first in ?A..?Z,
-    do: {:remote_component, name}
+  defp classify_tag_name(<<first, _::binary>> = name) when first in ?A..?Z do
+    if valid_remote_component_name?(name),
+      do: {:ok, {:remote_component, name}},
+      else: {:error, "expected valid remote component name"}
+  end
 
-  defp classify_tag("."), do: {:error, "a component name is required after ."}
-  defp classify_tag("." <> name), do: {:local_component, name}
+  defp classify_tag_name("."), do: {:error, "expected local component name after ."}
 
-  defp classify_tag(":inner_block"), do: {:error, "the slot name :inner_block is reserved"}
-  defp classify_tag(":" <> name), do: {:slot, name}
+  defp classify_tag_name("." <> name) do
+    if valid_local_component_name?(name),
+      do: {:ok, {:local_component, name}},
+      else: {:error, "expected valid local component name after ."}
+  end
 
-  defp classify_tag(name), do: {:htag, name}
+  defp classify_tag_name(":"), do: {:error, "expected slot name after :"}
+
+  defp classify_tag_name(":inner_block"), do: {:error, "the slot name `:inner_block` is reserved"}
+
+  defp classify_tag_name(":" <> name) do
+    if valid_slot_name?(name),
+      do: {:ok, {:slot, name}},
+      else: {:error, "expected valid slot name after :"}
+  end
+
+  defp classify_tag_name(name), do: {:ok, {:htag, name}}
+
+  @remote_component_name_pattern ~r/^[A-Z][a-zA-Z0-9_]*(\.[A-Z][a-zA-Z0-9_]*)*\.[a-z_][a-zA-Z0-9_]*[!?]?$/
+  defp valid_remote_component_name?(name) do
+    Regex.match?(@remote_component_name_pattern, name)
+  end
+
+  @local_component_name_pattern ~r/^[a-z_][a-zA-Z0-9_]*[!?]?$/
+  defp valid_local_component_name?(name) do
+    Regex.match?(@local_component_name_pattern, name)
+  end
+
+  @slot_name_pattern ~r/^[a-z_][a-zA-Z0-9_]*[!?]?$/
+  defp valid_slot_name?(name) do
+    Regex.match?(@slot_name_pattern, name)
+  end
 
   for name <- ~w(area base br col hr img input link meta param command keygen source) do
     defp void_tag?(unquote(name)), do: true

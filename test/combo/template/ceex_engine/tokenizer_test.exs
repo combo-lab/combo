@@ -21,31 +21,16 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     Enum.reverse(tokens)
   end
 
-  describe "text" do
-    test "is tokenized as {:text, value}" do
-      assert fetch_tokens!("Hello") == [{:text, "Hello", %{line_end: 1, column_end: 6}}]
-    end
-
-    test "can be declared with multiple lines" do
-      tokens =
-        fetch_tokens!("""
-        first
-        second
-        third
-        """)
-
-      assert tokens == [{:text, "first\nsecond\nthird\n", %{line_end: 4, column_end: 1}}]
-    end
-
-    test "keeps line breaks unchanged" do
-      assert fetch_tokens!("first\nsecond\r\nthird") == [
-               {:text, "first\nsecond\r\nthird", %{line_end: 3, column_end: 6}}
-             ]
-    end
+  defp tokenize_attrs(text) do
+    [{_, _, attrs, _}] = fetch_tokens!(text)
+    attrs
   end
 
-  describe "doctype" do
-    test "raises on incomplete tags" do
+  ## Syntax checking
+  # First, test syntax errors separately, then focus on testing valid syntax cases.
+
+  describe "doctype - syntax checking" do
+    test "raises on unclosed tag" do
       message = """
       nofile:1:15: expected closing `>` for doctype
         |
@@ -57,31 +42,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         fetch_tokens!("<!doctype html")
       end
     end
-
-    test "is tokenized as text" do
-      assert fetch_tokens!("<!doctype html>") == [
-               {:text, "<!doctype html>", %{line_end: 1, column_end: 16}}
-             ]
-    end
-
-    test "can be declared as multiple lines" do
-      assert fetch_tokens!("<!DOCTYPE\nhtml\n>  <br />") == [
-               {:text, "<!DOCTYPE\nhtml\n>  ", %{line_end: 3, column_end: 4}},
-               {:htag, "br", [],
-                %{
-                  column: 4,
-                  line: 3,
-                  self_closing?: true,
-                  void?: true,
-                  tag_name: "br",
-                  inner_location: {3, 10}
-                }}
-             ]
-    end
   end
 
-  describe "comment" do
-    test "raises on incomplete tags" do
+  describe "comment - syntax checking" do
+    test "raises on unclosed tag" do
       message = """
       nofile:1:1: unexpected end of string inside tag
         |
@@ -95,7 +59,434 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         finalize(source, tokens, cont)
       end
     end
+  end
 
+  describe "opening tag - syntax checking" do
+    ## handle tag open
+
+    test "raises on missing tag name" do
+      # reached end of input
+      message = """
+      nofile:1:2: expected tag name after <
+        |
+      1 | <
+        |  ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!("<")
+      end
+
+      # ecountered stop chars. note that the / is removed from @stop_chars
+      for char <- ~c"\s\t\f\"'>=\r\n" do
+        message = """
+        nofile:2:4: expected tag name after <
+          |
+        1 | <div>
+        2 |   <#{<<char>> |> String.trim("\n")}
+          |    ^\
+        """
+
+        assert_raise SyntaxError, message, fn ->
+          fetch_tokens!("""
+          <div>
+            <#{<<char>>}\
+          """)
+        end
+      end
+    end
+
+    test "for remote component - raises on invalid tag name" do
+      message = """
+      nofile:1:2: expected valid remote component name
+        |
+      1 | <Invalid.Name>
+        |  ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!("<Invalid.Name>")
+      end
+    end
+
+    test "for local component - raises on missing tag name" do
+      message = """
+      nofile:1:2: expected local component name after .
+        |
+      1 | <./local_component>
+        |  ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!("<./local_component>")
+      end
+    end
+
+    test "for local component - raises on invalid tag name" do
+      message = """
+      nofile:1:2: expected valid local component name after .
+        |
+      1 | <.InvalidName>
+        |  ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!("<.InvalidName>")
+      end
+    end
+
+    test "for slot - raises on missing tag name" do
+      message = """
+      nofile:1:2: expected slot name after :
+        |
+      1 | <:/slot>
+        |  ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!("<:/slot>")
+      end
+    end
+
+    test "for slot - raises on invalid tag name" do
+      message = """
+      nofile:1:2: expected valid slot name after :
+        |
+      1 | <:InvalidName>
+        |  ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!("<:InvalidName>")
+      end
+    end
+
+    test "for slot - raises on reserved tag name" do
+      message = """
+      nofile:1:2: the slot name `:inner_block` is reserved
+        |
+      1 | <:inner_block>
+        |  ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!("<:inner_block>")
+      end
+    end
+
+    ## handle attributes
+
+    test "for attribute name - raises on missing attribute name" do
+      message = """
+      nofile:2:8: expected attribute name
+        |
+      1 | <div>
+      2 |   <div =\"panel\">
+        |        ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!("""
+        <div>
+          <div ="panel">\
+        """)
+      end
+
+      message = """
+      nofile:1:6: expected attribute name
+        |
+      1 | <div = >
+        |      ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!(~S(<div = >))
+      end
+
+      message = """
+      nofile:1:6: expected attribute name
+        |
+      1 | <div / >
+        |      ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!(~S(<div / >))
+      end
+    end
+
+    test "for attribute name - raises on invalid character in attribute name" do
+      message = """
+      nofile:1:5: expected valid character in attribute name, got: '
+        |
+      1 | <div'>
+        |     ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!(~S(<div'>))
+      end
+
+      message = """
+      nofile:1:5: expected valid character in attribute name, got: \"
+        |
+      1 | <div">
+        |     ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!(~S(<div">))
+      end
+
+      message = """
+      nofile:1:10: expected valid character in attribute name, got: '
+        |
+      1 | <div attr'>
+        |          ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!(~S(<div attr'>))
+      end
+
+      message = """
+      nofile:1:20: expected valid character in attribute name, got: \"
+        |
+      1 | <div class={"test"}">
+        |                    ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!(~S(<div class={"test"}">))
+      end
+    end
+
+    test "for attribute name - raises on incomplete attribute" do
+      message = """
+      nofile:1:11: unexpected end of string inside tag
+        |
+      1 | <div class
+        |           ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!("<div class")
+      end
+    end
+
+    test "for attribute value - raises on invalid attribute value" do
+      message = """
+      nofile:2:9: expected valid attribute value after `=`
+
+      The attribute value can be a value between quotes (such as "value" or 'value') \
+      or an Elixir expression between curly braces (such as `{expr}`).
+        |
+      1 | <div
+      2 |   class=>
+        |         ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!("""
+        <div
+          class=>\
+        """)
+      end
+
+      message = """
+      nofile:1:13: expected valid attribute value after `=`
+
+      The attribute value can be a value between quotes (such as "value" or 'value') \
+      or an Elixir expression between curly braces (such as `{expr}`).
+        |
+      1 | <div class= >
+        |             ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!(~S(<div class= >))
+      end
+
+      message = """
+      nofile:1:12: expected valid attribute value after `=`
+
+      The attribute value can be a value between quotes (such as "value" or 'value') \
+      or an Elixir expression between curly braces (such as `{expr}`).
+        |
+      1 | <div class=
+        |            ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!("<div class=")
+      end
+    end
+
+    test "for attribute value - raises on missing closing quotes" do
+      message = ~r"nofile:2:15: expected closing `\"` for attribute value"
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!("""
+        <div
+          class="panel\
+        """)
+      end
+
+      message = ~r"nofile:2:15: expected closing `\'` for attribute value"
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!("""
+        <div
+          class='panel\
+        """)
+      end
+    end
+
+    test "for attribute value - raises on missing closing braces" do
+      message = """
+      nofile:2:9: expected closing `}` for expression
+
+      In case you don't want `{` to begin a new interpolation, you may write it using `&lbrace;` or using `<%= "{" %>`.
+        |
+      1 | <div
+      2 |   class={panel
+        |         ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!("""
+        <div
+          class={panel\
+        """)
+      end
+    end
+
+    ## handle root attributes
+
+    test "for root attributes - raises on missing closing braces" do
+      message = """
+      nofile:2:3: expected closing `}` for expression
+
+      In case you don't want `{` to begin a new interpolation, you may write it using `&lbrace;` or using `<%= "{" %>`.
+        |
+      1 | <div
+      2 |   {@attrs
+        |   ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!("""
+        <div
+          {@attrs\
+        """)
+      end
+    end
+
+    ## handle tag open end
+
+    test "raises on unclosed tag" do
+      message = ~r"nofile:1:5: expected closing `>` or `/>` for tag"
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!("<foo")
+      end
+    end
+  end
+
+  describe "closing tag - syntax checking" do
+    ## handle tag close
+
+    test "raises on missing tag name" do
+      message = """
+      nofile:2:5: expected tag name after </
+        |
+      1 | <div>
+      2 |   </>
+        |     ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!("""
+        <div>
+          </>\
+        """)
+      end
+    end
+
+    ## handle tag close end
+
+    test "raises on unclosed tag" do
+      message = """
+      nofile:2:6: expected closing `>` for tag
+        |
+      1 | <div>
+      2 | </div text
+        |      ^\
+      """
+
+      assert_raise SyntaxError, message, fn ->
+        fetch_tokens!("""
+        <div>
+        </div text\
+        """)
+      end
+    end
+  end
+
+  ## Tokenizing
+
+  describe "text" do
+    test "is tokenized as {:text, value}" do
+      assert fetch_tokens!("Hello") == [
+               {:text, "Hello", %{line_end: 1, column_end: 6}}
+             ]
+    end
+
+    test "can be declared with multiple lines" do
+      assert fetch_tokens!("""
+             first
+             second
+             third
+             """) == [
+               {:text, "first\nsecond\nthird\n", %{line_end: 4, column_end: 1}}
+             ]
+    end
+
+    test "keeps line breaks unchanged" do
+      assert fetch_tokens!("first\nsecond\r\nthird") == [
+               {:text, "first\nsecond\r\nthird", %{line_end: 3, column_end: 6}}
+             ]
+    end
+  end
+
+  describe "doctype" do
+    test "is tokenized as text" do
+      assert fetch_tokens!("<!doctype html>") == [
+               {:text, "<!doctype html>", %{line_end: 1, column_end: 16}}
+             ]
+    end
+
+    test "can be declared as multiple lines" do
+      assert fetch_tokens!("""
+             <!DOCTYPE
+             html
+             >  <br />\
+             """) == [
+               {:text, "<!DOCTYPE\nhtml\n>  ", %{line_end: 3, column_end: 4}},
+               {:htag, "br", [],
+                %{
+                  tag_name: "br",
+                  void?: true,
+                  line: 3,
+                  column: 4,
+                  inner_location: {3, 10},
+                  self_closing?: true
+                }}
+             ]
+    end
+  end
+
+  describe "comment" do
     test "is tokenized as text" do
       assert fetch_tokens!("Begin<!-- comment -->End") == [
                {:text, "Begin<!-- comment -->End",
@@ -106,27 +497,43 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     test "followed by curly" do
       assert fetch_tokens!("<!-- comment -->{hello}text") == [
                {:text, "<!-- comment -->",
-                %{column_end: 17, context: [:comment_start, :comment_end], line_end: 1}},
+                %{line_end: 1, column_end: 17, context: [:comment_start, :comment_end]}},
                {:body_expr, "hello", %{line: 1, column: 17}},
                {:text, "text", %{line_end: 1, column_end: 28}}
              ]
     end
 
     test "multiple lines and wrapped by tags" do
-      code = """
-      <p>
-      <!--
-      <div>
-      -->
-      </p><br>\
-      """
-
-      assert [
-               {:htag, "p", [], %{line: 1, column: 1}},
-               {:text, "\n<!--\n<div>\n-->\n", %{line_end: 5, column_end: 1}},
-               {:close, :htag, "p", %{line: 5, column: 1}},
-               {:htag, "br", [], %{line: 5, column: 5}}
-             ] = fetch_tokens!(code)
+      assert fetch_tokens!("""
+             <p>
+             <!--
+             <div>
+             -->
+             </p><br>\
+             """) == [
+               {:htag, "p", [],
+                %{
+                  tag_name: "p",
+                  void?: false,
+                  line: 1,
+                  column: 1,
+                  inner_location: {1, 4},
+                  self_closing?: false
+                }},
+               {:text, "\n<!--\n<div>\n-->\n",
+                %{line_end: 5, column_end: 1, context: [:comment_start, :comment_end]}},
+               {:close, :htag, "p",
+                %{tag_name: "p", void?: false, line: 5, column: 1, inner_location: {5, 1}}},
+               {:htag, "br", [],
+                %{
+                  tag_name: "br",
+                  void?: true,
+                  line: 5,
+                  column: 5,
+                  inner_location: {5, 9},
+                  self_closing?: false
+                }}
+             ]
     end
 
     test "adds comment_start and comment_end" do
@@ -160,63 +567,63 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       assert Enum.reverse(tokens) == [
                {:htag, "p", [],
                 %{
-                  column: 1,
-                  line: 1,
-                  inner_location: {1, 4},
                   tag_name: "p",
                   void?: false,
+                  line: 1,
+                  column: 1,
+                  inner_location: {1, 4},
                   self_closing?: false
                 }},
                {:text, "\n<!--\n<div>\n",
-                %{column_end: 1, context: [:comment_start], line_end: 4}},
-               {:text, "</div>\n-->\n", %{column_end: 1, context: [:comment_end], line_end: 3}},
+                %{line_end: 4, column_end: 1, context: [:comment_start]}},
+               {:text, "</div>\n-->\n", %{line_end: 3, column_end: 1, context: [:comment_end]}},
                {:close, :htag, "p",
                 %{
-                  column: 1,
-                  line: 3,
-                  inner_location: {3, 1},
                   tag_name: "p",
-                  void?: false
+                  void?: false,
+                  line: 3,
+                  column: 1,
+                  inner_location: {3, 1}
                 }},
-               {:text, "\n", %{column_end: 1, line_end: 4}},
+               {:text, "\n", %{line_end: 4, column_end: 1}},
                {:htag, "div", [],
                 %{
-                  column: 1,
-                  line: 4,
-                  inner_location: {4, 6},
                   tag_name: "div",
                   void?: false,
+                  line: 4,
+                  column: 1,
+                  inner_location: {4, 6},
                   self_closing?: false
                 }},
-               {:text, "\n  ", %{column_end: 3, line_end: 5}},
+               {:text, "\n  ", %{line_end: 5, column_end: 3}},
                {:htag, "p", [],
                 %{
-                  column: 3,
-                  line: 5,
-                  inner_location: {5, 6},
                   tag_name: "p",
                   void?: false,
+                  line: 5,
+                  column: 3,
+                  inner_location: {5, 6},
                   self_closing?: false
                 }},
-               {:text, "Hello", %{column_end: 11, line_end: 5}},
+               {:text, "Hello", %{line_end: 5, column_end: 11}},
                {:close, :htag, "p",
                 %{
-                  column: 11,
-                  line: 5,
-                  inner_location: {5, 11},
                   tag_name: "p",
-                  void?: false
+                  void?: false,
+                  line: 5,
+                  column: 11,
+                  inner_location: {5, 11}
                 }},
-               {:text, "\n", %{column_end: 1, line_end: 6}},
+               {:text, "\n", %{line_end: 6, column_end: 1}},
                {:close, :htag, "div",
                 %{
-                  column: 1,
-                  line: 6,
-                  inner_location: {6, 1},
                   tag_name: "div",
-                  void?: false
+                  void?: false,
+                  line: 6,
+                  column: 1,
+                  inner_location: {6, 1}
                 }},
-               {:text, "\n", %{column_end: 1, line_end: 7}}
+               {:text, "\n", %{line_end: 7, column_end: 1}}
              ]
     end
 
@@ -258,79 +665,127 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       assert Enum.reverse(tokens) == [
                {:htag, "p", [],
                 %{
-                  column: 1,
-                  line: 1,
-                  inner_location: {1, 4},
                   tag_name: "p",
                   void?: false,
+                  line: 1,
+                  column: 1,
+                  inner_location: {1, 4},
                   self_closing?: false
                 }},
                {:text, "\n<!--\n<%= \"Hello\" %>\n",
-                %{column_end: 1, context: [:comment_start], line_end: 4}},
+                %{line_end: 4, column_end: 1, context: [:comment_start]}},
                {:text, "-->\n<!--\n<p><%= \"World\"</p>\n",
-                %{column_end: 1, context: [:comment_end, :comment_start], line_end: 4}},
-               {:text, "-->\n", %{column_end: 1, context: [:comment_end], line_end: 2}},
+                %{line_end: 4, column_end: 1, context: [:comment_end, :comment_start]}},
+               {:text, "-->\n", %{line_end: 2, column_end: 1, context: [:comment_end]}},
                {:htag, "div", [],
                 %{
-                  column: 1,
-                  line: 2,
-                  inner_location: {2, 6},
                   tag_name: "div",
                   void?: false,
+                  line: 2,
+                  column: 1,
+                  inner_location: {2, 6},
                   self_closing?: false
                 }},
-               {:text, "\n  ", %{column_end: 3, line_end: 3}},
+               {:text, "\n  ", %{line_end: 3, column_end: 3}},
                {:htag, "p", [],
                 %{
-                  column: 3,
-                  line: 3,
-                  inner_location: {3, 6},
                   tag_name: "p",
                   void?: false,
+                  line: 3,
+                  column: 3,
+                  inner_location: {3, 6},
                   self_closing?: false
                 }},
-               {:text, "Hi", %{column_end: 8, line_end: 3}},
+               {:text, "Hi", %{line_end: 3, column_end: 8}},
                {:close, :htag, "p",
                 %{
-                  column: 8,
+                  tag_name: "p",
+                  void?: false,
                   line: 3,
-                  inner_location: {3, 8},
-                  tag_name: "p",
-                  void?: false
+                  column: 8,
+                  inner_location: {3, 8}
                 }},
-               {:text, "\n", %{column_end: 1, line_end: 4}},
+               {:text, "\n", %{line_end: 4, column_end: 1}},
                {:close, :htag, "p",
                 %{
-                  column: 1,
-                  line: 4,
-                  inner_location: {4, 1},
                   tag_name: "p",
-                  void?: false
+                  void?: false,
+                  line: 4,
+                  column: 1,
+                  inner_location: {4, 1}
                 }},
-               {:text, "\n", %{column_end: 1, line_end: 5}}
+               {:text, "\n", %{line_end: 5, column_end: 1}}
              ]
     end
   end
 
-  describe "opening tag" do
+  describe "handle opening tag" do
     test "represented as {:htag, name, attrs, meta}" do
-      tokens = fetch_tokens!("<div>")
-      assert [{:htag, "div", [], %{}}] = tokens
+      assert fetch_tokens!("<div>") == [
+               {:htag, "div", [],
+                %{
+                  tag_name: "div",
+                  void?: false,
+                  line: 1,
+                  column: 1,
+                  inner_location: {1, 6},
+                  self_closing?: false
+                }}
+             ]
     end
 
     test "with space after name" do
-      tokens = fetch_tokens!("<div >")
-      assert [{:htag, "div", [], %{}}] = tokens
+      assert fetch_tokens!("<div >") == [
+               {:htag, "div", [],
+                %{
+                  tag_name: "div",
+                  void?: false,
+                  line: 1,
+                  column: 1,
+                  inner_location: {1, 7},
+                  self_closing?: false
+                }}
+             ]
     end
 
     test "with line break after name" do
-      tokens = fetch_tokens!("<div\n>")
-      assert [{:htag, "div", [], %{}}] = tokens
+      assert fetch_tokens!("<div\n>") == [
+               {:htag, "div", [],
+                %{
+                  tag_name: "div",
+                  void?: false,
+                  line: 1,
+                  column: 1,
+                  inner_location: {2, 2},
+                  self_closing?: false
+                }}
+             ]
     end
 
     test "self close" do
-      tokens = fetch_tokens!("<div/>")
-      assert [{:htag, "div", [], %{self_closing?: true}}] = tokens
+      assert fetch_tokens!("<div/>") == [
+               {:htag, "div", [],
+                %{
+                  tag_name: "div",
+                  void?: false,
+                  line: 1,
+                  column: 1,
+                  inner_location: {1, 7},
+                  self_closing?: true
+                }}
+             ]
+
+      assert fetch_tokens!("<div />") == [
+               {:htag, "div", [],
+                %{
+                  tag_name: "div",
+                  void?: false,
+                  line: 1,
+                  column: 1,
+                  inner_location: {1, 8},
+                  self_closing?: true
+                }}
+             ]
     end
 
     test "compute line and column" do
@@ -347,288 +802,87 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                {:text, _, %{line_end: 2, column_end: 3}},
                {:htag, "span", [], %{line: 2, column: 3}},
                {:text, _, %{line_end: 4, column_end: 1}},
-               {:htag, "p", [], %{column: 1, line: 4, self_closing?: true}},
-               {:htag, "br", [], %{column: 5, line: 4}}
+               {:htag, "p", [], %{line: 4, column: 1, self_closing?: true}},
+               {:htag, "br", [], %{line: 4, column: 5}}
              ] = tokens
-    end
-
-    test "raise on missing/incomplete tag name" do
-      message = """
-      nofile:2:4: expected tag name after <
-        |
-      1 | <div>
-      2 |   <>
-        |    ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("""
-        <div>
-          <>\
-        """)
-      end
-
-      message = """
-      nofile:1:2: expected tag name after <
-        |
-      1 | <
-        |  ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("<")
-      end
-
-      message = """
-      nofile:1:2: a component name is required after .
-        |
-      1 | <./typo>
-        |  ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("<./typo>")
-      end
-
-      assert_raise SyntaxError, ~r"nofile:1:5: expected closing `>` or `/>`", fn ->
-        fetch_tokens!("<foo")
-      end
     end
   end
 
-  describe "attributes" do
-    test "represented as a list of {name, tuple | nil, meta}, where tuple is the {type, value}" do
-      attrs = tokenize_attrs(~S(<div class="panel" style={@style} hidden>))
-
-      assert [
-               {"class", {:string, "panel", %{}}, %{column: 6, line: 1}},
-               {"style", {:expr, "@style", %{}}, %{column: 20, line: 1}},
-               {"hidden", nil, %{column: 35, line: 1}}
-             ] = attrs
+  describe "handle attributes" do
+    test "represented as a list of {name, {type, value, v_meta} | nil, meta}" do
+      assert tokenize_attrs(~S(<div class="panel" hidden style={@style}>)) == [
+               {"class", {:string, "panel", %{delimiter: ?"}}, %{line: 1, column: 6}},
+               {"hidden", nil, %{line: 1, column: 20}},
+               {"style", {:expr, "@style", %{line: 1, column: 34}}, %{line: 1, column: 27}}
+             ]
     end
 
-    test "accepts space between the name and `=`" do
-      attrs = tokenize_attrs(~S(<div class ="panel">))
-
-      assert [{"class", {:string, "panel", %{}}, %{}}] = attrs
+    test "accepts spaces between the name and `=`" do
+      assert [{"class", {:string, "panel", %{}}, %{}}] =
+               tokenize_attrs(~S(<div class ="panel">))
     end
 
     test "accepts line breaks between the name and `=`" do
-      attrs = tokenize_attrs("<div class\n=\"panel\">")
+      assert [{"class", {:string, "panel", %{}}, %{}}] =
+               tokenize_attrs("<div class\n=\"panel\">")
 
-      assert [{"class", {:string, "panel", %{}}, %{}}] = attrs
-
-      attrs = tokenize_attrs("<div class\r\n=\"panel\">")
-
-      assert [{"class", {:string, "panel", %{}}, %{}}] = attrs
+      assert [{"class", {:string, "panel", %{}}, %{}}] =
+               tokenize_attrs("<div class\r\n=\"panel\">")
     end
 
-    test "accepts space between `=` and the value" do
-      attrs = tokenize_attrs(~S(<div class= "panel">))
-
-      assert [{"class", {:string, "panel", %{}}, %{}}] = attrs
+    test "accepts spaces between `=` and the value" do
+      assert [{"class", {:string, "panel", %{}}, %{}}] =
+               tokenize_attrs(~S(<div class= "panel">))
     end
 
     test "accepts line breaks between `=` and the value" do
-      attrs = tokenize_attrs("<div class=\n\"panel\">")
+      assert [{"class", {:string, "panel", %{}}, %{}}] =
+               tokenize_attrs("<div class=\n\"panel\">")
 
-      assert [{"class", {:string, "panel", %{}}, %{}}] = attrs
-
-      attrs = tokenize_attrs("<div class=\r\n\"panel\">")
-
-      assert [{"class", {:string, "panel", %{}}, %{}}] = attrs
-    end
-
-    test "raise on incomplete attribute" do
-      message = """
-      nofile:1:11: unexpected end of string inside tag
-        |
-      1 | <div class
-        |           ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("<div class")
-      end
-    end
-
-    test "raise on missing value" do
-      message = """
-      nofile:2:9: invalid attribute value after `=`. Expected either a value between quotes (such as \"value\" or 'value') or an Elixir expression between curly braces (such as `{expr}`)
-        |
-      1 | <div
-      2 |   class=>
-        |         ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("""
-        <div
-          class=>\
-        """)
-      end
-
-      message = """
-      nofile:1:13: invalid attribute value after `=`. Expected either a value between quotes (such as \"value\" or 'value') or an Elixir expression between curly braces (such as `{expr}`)
-        |
-      1 | <div class= >
-        |             ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        fetch_tokens!(~S(<div class= >))
-      end
-
-      message = """
-      nofile:1:12: invalid attribute value after `=`. Expected either a value between quotes (such as \"value\" or 'value') or an Elixir expression between curly braces (such as `{expr}`)
-        |
-      1 | <div class=
-        |            ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("<div class=")
-      end
-    end
-
-    test "raise on missing attribute name" do
-      message = """
-      nofile:2:8: expected attribute name
-        |
-      1 | <div>
-      2 |   <div =\"panel\">
-        |        ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("""
-        <div>
-          <div ="panel">\
-        """)
-      end
-
-      message = """
-      nofile:1:6: expected attribute name
-        |
-      1 | <div = >
-        |      ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        fetch_tokens!(~S(<div = >))
-      end
-
-      message = """
-      nofile:1:6: expected attribute name
-        |
-      1 | <div / >
-        |      ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        fetch_tokens!(~S(<div / >))
-      end
-    end
-
-    test "raise on attribute names with quotes" do
-      message = """
-      nofile:1:5: invalid character in attribute name: '
-        |
-      1 | <div'>
-        |     ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        fetch_tokens!(~S(<div'>))
-      end
-
-      message = """
-      nofile:1:5: invalid character in attribute name: \"
-        |
-      1 | <div">
-        |     ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        fetch_tokens!(~S(<div">))
-      end
-
-      message = """
-      nofile:1:10: invalid character in attribute name: '
-        |
-      1 | <div attr'>
-        |          ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        fetch_tokens!(~S(<div attr'>))
-      end
-
-      message = """
-      nofile:1:20: invalid character in attribute name: \"
-        |
-      1 | <div class={"test"}">
-        |                    ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        fetch_tokens!(~S(<div class={"test"}">))
-      end
+      assert [{"class", {:string, "panel", %{}}, %{}}] =
+               tokenize_attrs("<div class=\r\n\"panel\">")
     end
   end
 
-  describe "boolean attributes" do
+  describe "handle attributes - boolean attributes" do
     test "represented as {name, nil, meta}" do
-      attrs = tokenize_attrs("<div hidden>")
-
-      assert [{"hidden", nil, %{}}] = attrs
+      assert [{"hidden", nil, %{}}] = tokenize_attrs("<div hidden>")
     end
 
     test "multiple attributes" do
-      attrs = tokenize_attrs("<div hidden selected>")
-
-      assert [{"hidden", nil, %{}}, {"selected", nil, %{}}] = attrs
+      assert [{"hidden", nil, %{}}, {"selected", nil, %{}}] =
+               tokenize_attrs("<div hidden selected>")
     end
 
     test "with space after" do
-      attrs = tokenize_attrs("<div hidden >")
-
-      assert [{"hidden", nil, %{}}] = attrs
+      assert [{"hidden", nil, %{}}] = tokenize_attrs("<div hidden >")
     end
 
     test "in self close tag" do
-      attrs = tokenize_attrs("<div hidden/>")
-
-      assert [{"hidden", nil, %{}}] = attrs
+      assert [{"hidden", nil, %{}}] = tokenize_attrs("<div hidden/>")
     end
 
     test "in self close tag with space after" do
-      attrs = tokenize_attrs("<div hidden />")
-
-      assert [{"hidden", nil, %{}}] = attrs
+      assert [{"hidden", nil, %{}}] = tokenize_attrs("<div hidden />")
     end
   end
 
-  describe "attributes as double quoted string" do
+  describe "handle attributes - double quoted attributes" do
     test "value is represented as {:string, value, meta}}" do
-      attrs = tokenize_attrs(~S(<div class="panel">))
-
-      assert [{"class", {:string, "panel", %{delimiter: ?"}}, %{}}] = attrs
+      assert [{"class", {:string, "panel", %{delimiter: ?"}}, %{}}] =
+               tokenize_attrs(~S(<div class="panel">))
     end
 
     test "multiple attributes" do
-      attrs = tokenize_attrs(~S(<div class="panel" style="margin: 0px;">))
-
       assert [
                {"class", {:string, "panel", %{delimiter: ?"}}, %{}},
                {"style", {:string, "margin: 0px;", %{delimiter: ?"}}, %{}}
-             ] = attrs
+             ] = tokenize_attrs(~S(<div class="panel" style="margin: 0px;">))
     end
 
     test "value containing single quotes" do
-      attrs = tokenize_attrs(~S(<div title="i'd love to!">))
-
-      assert [{"title", {:string, "i'd love to!", %{delimiter: ?"}}, %{}}] = attrs
+      assert [{"title", {:string, "i'd love to!", %{delimiter: ?"}}, %{}}] =
+               tokenize_attrs(~S(<div title="i'd love to!">))
     end
 
     test "value containing line breaks" do
@@ -640,42 +894,28 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         """)
 
       assert [
-               {:htag, "div", [{"title", {:string, "first\n  second\nthird", _meta}, %{}}],
-                %{}},
+               {:htag, "div", [{"title", {:string, "first\n  second\nthird", _meta}, %{}}], %{}},
                {:htag, "span", [], %{line: 3, column: 8}}
              ] = tokens
     end
-
-    test "raise on incomplete attribute value (EOF)" do
-      assert_raise SyntaxError, ~r"nofile:2:15: expected closing `\"` for attribute value", fn ->
-        fetch_tokens!("""
-        <div
-          class="panel\
-        """)
-      end
-    end
   end
 
-  describe "attributes as single quoted string" do
+  describe "handle attributes - single quoted attributes" do
     test "value is represented as {:string, value, meta}}" do
-      attrs = tokenize_attrs(~S(<div class='panel'>))
-
-      assert [{"class", {:string, "panel", %{delimiter: ?'}}, %{}}] = attrs
+      assert [{"class", {:string, "panel", %{delimiter: ?'}}, %{}}] =
+               tokenize_attrs(~S(<div class='panel'>))
     end
 
     test "multiple attributes" do
-      attrs = tokenize_attrs(~S(<div class='panel' style='margin: 0px;'>))
-
       assert [
                {"class", {:string, "panel", %{delimiter: ?'}}, %{}},
                {"style", {:string, "margin: 0px;", %{delimiter: ?'}}, %{}}
-             ] = attrs
+             ] = tokenize_attrs(~S(<div class='panel' style='margin: 0px;'>))
     end
 
     test "value containing double quotes" do
-      attrs = tokenize_attrs(~S(<div title='Say "hi!"'>))
-
-      assert [{"title", {:string, ~S(Say "hi!"), %{delimiter: ?'}}, %{}}] = attrs
+      assert [{"title", {:string, ~S(Say "hi!"), %{delimiter: ?'}}, %{}}] =
+               tokenize_attrs(~S(<div title='Say "hi!"'>))
     end
 
     test "value containing line breaks" do
@@ -687,58 +927,38 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         """)
 
       assert [
-               {:htag, "div", [{"title", {:string, "first\n  second\nthird", _meta}, %{}}],
-                %{}},
+               {:htag, "div", [{"title", {:string, "first\n  second\nthird", _meta}, %{}}], %{}},
                {:htag, "span", [], %{line: 3, column: 8}}
              ] = tokens
     end
-
-    test "raise on incomplete attribute value (EOF)" do
-      assert_raise SyntaxError, ~r"nofile:2:15: expected closing `\'` for attribute value", fn ->
-        fetch_tokens!("""
-        <div
-          class='panel\
-        """)
-      end
-    end
   end
 
-  describe "attributes as expressions" do
+  describe "handle attributes - braced attributes" do
     test "value is represented as {:expr, value, meta}" do
-      attrs = tokenize_attrs(~S(<div class={@class}>))
-
-      assert [{"class", {:expr, "@class", %{line: 1, column: 13}}, %{}}] = attrs
+      assert [{"class", {:expr, "@class", %{line: 1, column: 13}}, %{}}] =
+               tokenize_attrs(~S(<div class={@class}>))
     end
 
     test "multiple attributes" do
-      attrs = tokenize_attrs(~S(<div class={@class} style={@style}>))
-
       assert [
                {"class", {:expr, "@class", %{}}, %{}},
                {"style", {:expr, "@style", %{}}, %{}}
-             ] = attrs
+             ] = tokenize_attrs(~S(<div class={@class} style={@style}>))
     end
 
     test "double quoted strings inside expression" do
-      attrs = tokenize_attrs(~S(<div class={"text"}>))
-
-      assert [{"class", {:expr, ~S("text"), %{}}, %{}}] = attrs
+      assert [{"class", {:expr, ~S("text"), %{}}, %{}}] =
+               tokenize_attrs(~S(<div class={"text"}>))
     end
 
     test "value containing curly braces" do
-      attrs = tokenize_attrs(~S(<div class={ [{:active, @active}] }>))
-
-      assert [{"class", {:expr, " [{:active, @active}] ", %{}}, %{}}] = attrs
+      assert [{"class", {:expr, " [{:active, @active}] ", %{}}, %{}}] =
+               tokenize_attrs(~S(<div class={ [{:active, @active}] }>))
     end
 
     test "ignore escaped curly braces inside elixir strings" do
-      attrs = tokenize_attrs(~S(<div class={"\{hi"}>))
-
-      assert [{"class", {:expr, ~S("\{hi"), %{}}, %{}}] = attrs
-
-      attrs = tokenize_attrs(~S(<div class={"hi\}"}>))
-
-      assert [{"class", {:expr, ~S("hi\}"), %{}}, %{}}] = attrs
+      assert [{"class", {:expr, ~S("\{hi"), %{}}, %{}}] = tokenize_attrs(~S(<div class={"\{hi"}>))
+      assert [{"class", {:expr, ~S("hi\}"), %{}}, %{}}] = tokenize_attrs(~S(<div class={"hi\}"}>))
     end
 
     test "compute line and columns" do
@@ -759,56 +979,27 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                {"title", {:expr, _, %{line: 6, column: 10}}, %{}}
              ] = attrs
     end
-
-    test "raise on incomplete attribute expression (EOF)" do
-      message = """
-      nofile:2:9: expected closing `}` for expression
-
-      In case you don't want `{` to begin a new interpolation, you may write it using `&lbrace;` or using `<%= "{" %>`
-        |
-      1 | <div
-      2 |   class={panel
-        |         ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("""
-        <div
-          class={panel\
-        """)
-      end
-    end
   end
 
-  describe "root attributes" do
+  describe "handle root attributes" do
     test "represented as {:root, value, meta}" do
-      attrs = tokenize_attrs("<div {@attrs}>")
-
-      assert [{:root, {:expr, "@attrs", %{}}, %{}}] = attrs
+      assert [{:root, {:expr, "@attrs", %{}}, %{}}] = tokenize_attrs("<div {@attrs}>")
     end
 
     test "with space after" do
-      attrs = tokenize_attrs("<div {@attrs} >")
-
-      assert [{:root, {:expr, "@attrs", %{}}, %{}}] = attrs
+      assert [{:root, {:expr, "@attrs", %{}}, %{}}] = tokenize_attrs("<div {@attrs} >")
     end
 
-    test "with line break after" do
-      attrs = tokenize_attrs("<div {@attrs}\n>")
-
-      assert [{:root, {:expr, "@attrs", %{}}, %{}}] = attrs
+    test "with line break after closing }" do
+      assert [{:root, {:expr, "@attrs", %{}}, %{}}] = tokenize_attrs("<div {@attrs}\n>")
     end
 
     test "in self close tag" do
-      attrs = tokenize_attrs("<div {@attrs}/>")
-
-      assert [{:root, {:expr, "@attrs", %{}}, %{}}] = attrs
+      assert [{:root, {:expr, "@attrs", %{}}, %{}}] = tokenize_attrs("<div {@attrs}/>")
     end
 
-    test "in self close tag with space after" do
-      attrs = tokenize_attrs("<div {@attrs} />")
-
-      assert [{:root, {:expr, "@attrs", %{}}, %{}}] = attrs
+    test "in self close tag with space after closing }" do
+      assert [{:root, {:expr, "@attrs", %{}}, %{}}] = tokenize_attrs("<div {@attrs} />")
     end
 
     test "multiple values among other attributes" do
@@ -841,31 +1032,20 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                {:root, {:expr, "@root3", %{line: 6, column: 4}}, %{line: 6, column: 4}}
              ] = attrs
     end
-
-    test "raise on incomplete expression (EOF)" do
-      message = """
-      nofile:2:3: expected closing `}` for expression
-
-      In case you don't want `{` to begin a new interpolation, you may write it using `&lbrace;` or using `<%= "{" %>`
-        |
-      1 | <div
-      2 |   {@attrs
-        |   ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("""
-        <div
-          {@attrs\
-        """)
-      end
-    end
   end
 
-  describe "closing tag" do
+  describe "handle closing tag" do
     test "represented as {:close, :htag, name, meta}" do
-      tokens = fetch_tokens!("</div>")
-      assert [{:close, :htag, "div", %{}}] = tokens
+      assert fetch_tokens!("</div>") == [
+               {:close, :htag, "div",
+                %{
+                  tag_name: "div",
+                  void?: false,
+                  line: 1,
+                  column: 1,
+                  inner_location: {1, 1}
+                }}
+             ]
     end
 
     test "compute line and columns" do
@@ -877,44 +1057,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
       assert [
                {:htag, "div", [], _meta},
-               {:text, "\n", %{column_end: 1, line_end: 2}},
+               {:text, "\n", %{line_end: 2, column_end: 1}},
                {:close, :htag, "div", %{line: 2, column: 1}},
                {:htag, "br", [], %{line: 2, column: 7}}
              ] = tokens
-    end
-
-    test "raise on missing closing `>`" do
-      message = """
-      nofile:2:6: expected closing `>`
-        |
-      1 | <div>
-      2 | </div text
-        |      ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("""
-        <div>
-        </div text\
-        """)
-      end
-    end
-
-    test "raise on missing tag name" do
-      message = """
-      nofile:2:5: expected tag name after </
-        |
-      1 | <div>
-      2 |   </>
-        |     ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("""
-        <div>
-          </>\
-        """)
-      end
     end
   end
 
@@ -959,43 +1105,49 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
   end
 
-  describe "style" do
+  describe "handle special tag - script" do
     test "self-closing" do
       assert fetch_tokens!("""
-             <style src="foo.js" />
+             <script src="foo.js" />
              """) == [
-               {:htag, "style",
-                [{"src", {:string, "foo.js", %{delimiter: 34}}, %{column: 8, line: 1}}],
+               {:htag, "script",
+                [
+                  {
+                    "src",
+                    {:string, "foo.js", %{delimiter: ?"}},
+                    %{line: 1, column: 9}
+                  }
+                ],
                 %{
-                  column: 1,
+                  tag_name: "script",
+                  void?: false,
                   line: 1,
-                  self_closing?: true,
-                  inner_location: {1, 23},
-                  tag_name: "style",
-                  void?: false
+                  column: 1,
+                  inner_location: {1, 24},
+                  self_closing?: true
                 }},
-               {:text, "\n", %{column_end: 1, line_end: 2}}
+               {:text, "\n", %{line_end: 2, column_end: 1}}
              ]
     end
 
-    test "traverses until </style>" do
+    test "traverses until </script>" do
       assert fetch_tokens!("""
-             <style>
+             <script>
                a = "<a>Link</a>"
-             </style>
+             </script>
              """) == [
-               {:htag, "style", [],
+               {:htag, "script", [],
                 %{
-                  tag_name: "style",
-                  column: 1,
-                  line: 1,
-                  inner_location: {1, 8},
+                  tag_name: "script",
                   void?: false,
+                  line: 1,
+                  column: 1,
+                  inner_location: {1, 9},
                   self_closing?: false
                 }},
-               {:text, "\n  a = \"<a>Link</a>\"\n", %{column_end: 1, line_end: 3}},
-               {:close, :htag, "style", %{column: 1, line: 3, inner_location: {3, 1}}},
-               {:text, "\n", %{column_end: 1, line_end: 4}}
+               {:text, "\n  a = \"<a>Link</a>\"\n", %{line_end: 3, column_end: 1}},
+               {:close, :htag, "script", %{line: 3, column: 1, inner_location: {3, 1}}},
+               {:text, "\n", %{line_end: 4, column_end: 1}}
              ]
     end
   end
@@ -1114,21 +1266,6 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
   end
 
-  describe "reserved component" do
-    test "raise on using reserved slot :inner_block" do
-      message = """
-      nofile:1:2: the slot name :inner_block is reserved
-        |
-      1 | <:inner_block>Inner</:inner_block>
-        |  ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("<:inner_block>Inner</:inner_block>")
-      end
-    end
-  end
-
   test "mixing text and tags" do
     tokens =
       fetch_tokens!("""
@@ -1146,10 +1283,5 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
              {:close, :htag, "div", %{line: 4, column: 1}},
              {:text, "\ntext after\n", %{line_end: 6, column_end: 1}}
            ] = tokens
-  end
-
-  defp tokenize_attrs(code) do
-    [{:htag, "div", attrs, %{}}] = fetch_tokens!(code)
-    attrs
   end
 end
