@@ -98,7 +98,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
     test "for remote component - raises on invalid tag name" do
       message = """
-      nofile:1:2: expected valid remote component name
+      nofile:1:2: expected valid tag name
         |
       1 | <Invalid.Name>
         |  ^\

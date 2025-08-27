@@ -289,7 +289,7 @@ defmodule Combo.HTML.FormatterTest do
 
   test "keep attributes at the same line if it fits 98 characters (default)" do
     input = """
-    <Component foo="..........." bar="..............." baz="............" qux="..................." />
+    <R.c foo="..........." bar="..............." baz="............" qux="..................." />
     """
 
     assert_formatter_doesnt_change(input)
@@ -297,14 +297,14 @@ defmodule Combo.HTML.FormatterTest do
 
   test "keep attributes in separate lines if written as such" do
     input = """
-    <Component
+    <Remote.component
       foo="..."
       bar="..."
       baz="..."
       qux="..."
     >
       Foo
-    </Component>
+    </Remote.component>
     """
 
     assert_formatter_doesnt_change(input)
