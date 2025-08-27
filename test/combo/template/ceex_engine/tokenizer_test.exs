@@ -719,7 +719,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
   end
 
-  describe "handle opening tag" do
+  describe "handle tag - opening tag" do
     test "represented as {:htag, name, attrs, meta}" do
       assert fetch_tokens!("<div>") == [
                {:htag, "div", [],
@@ -762,7 +762,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
              ]
     end
 
-    test "self close" do
+    test "self-closing" do
       assert fetch_tokens!("<div/>") == [
                {:htag, "div", [],
                 %{
@@ -1034,7 +1034,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
   end
 
-  describe "handle closing tag" do
+  describe "handle tag - closing tag" do
     test "represented as {:close, :htag, name, meta}" do
       assert fetch_tokens!("</div>") == [
                {:close, :htag, "div",
@@ -1064,51 +1064,107 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
   end
 
-  describe "script" do
-    test "self-closing" do
+  describe "handle special tag - style" do
+    test "paired tags" do
       assert fetch_tokens!("""
-             <script src="foo.js" />
+             <style>
+               p {
+                 color: #26b72b;
+               }
+             </style><br>
              """) == [
-               {:htag, "script",
-                [{"src", {:string, "foo.js", %{delimiter: 34}}, %{column: 9, line: 1}}],
+               {:htag, "style", [],
                 %{
-                  tag_name: "script",
-                  column: 1,
+                  tag_name: "style",
+                  void?: false,
                   line: 1,
-                  inner_location: {1, 24},
-                  self_closing?: true,
-                  void?: false
+                  column: 1,
+                  inner_location: {1, 8},
+                  self_closing?: false
                 }},
-               {:text, "\n", %{column_end: 1, line_end: 2}}
+               {:text, "\n  p {\n    color: #26b72b;\n  }\n", %{line_end: 5, column_end: 1}},
+               {:close, :htag, "style", %{line: 5, column: 1, inner_location: {5, 1}}},
+               {:htag, "br", [],
+                %{
+                  tag_name: "br",
+                  void?: true,
+                  line: 5,
+                  column: 9,
+                  inner_location: {5, 13},
+                  self_closing?: false
+                }},
+               {:text, "\n", %{line_end: 6, column_end: 1}}
              ]
     end
 
-    test "traverses until </script>" do
+    test "self-closing tag" do
       assert fetch_tokens!("""
-             <script>
-               a = "<a>Link</a>"
-             </script>
+             <style blocking="render" /><br>
              """) == [
-               {:htag, "script", [],
+               {:htag, "style",
+                [
+                  {
+                    "blocking",
+                    {:string, "render", %{delimiter: ?"}},
+                    %{line: 1, column: 8}
+                  }
+                ],
                 %{
-                  column: 1,
-                  line: 1,
-                  inner_location: {1, 9},
-                  tag_name: "script",
+                  tag_name: "style",
                   void?: false,
+                  line: 1,
+                  column: 1,
+                  inner_location: {1, 28},
+                  self_closing?: true
+                }},
+               {:htag, "br", [],
+                %{
+                  tag_name: "br",
+                  void?: true,
+                  line: 1,
+                  column: 28,
+                  inner_location: {1, 32},
                   self_closing?: false
                 }},
-               {:text, "\n  a = \"<a>Link</a>\"\n", %{column_end: 1, line_end: 3}},
-               {:close, :htag, "script", %{column: 1, line: 3, inner_location: {3, 1}}},
-               {:text, "\n", %{column_end: 1, line_end: 4}}
+               {:text, "\n", %{line_end: 2, column_end: 1}}
              ]
     end
   end
 
   describe "handle special tag - script" do
-    test "self-closing" do
+    test "paired tags" do
       assert fetch_tokens!("""
-             <script src="foo.js" />
+             <script>
+               a = "<a>Link</a>"; b = {};
+             </script><br>
+             """) == [
+               {:htag, "script", [],
+                %{
+                  tag_name: "script",
+                  void?: false,
+                  line: 1,
+                  column: 1,
+                  inner_location: {1, 9},
+                  self_closing?: false
+                }},
+               {:text, "\n  a = \"<a>Link</a>\"; b = {};\n", %{line_end: 3, column_end: 1}},
+               {:close, :htag, "script", %{line: 3, column: 1, inner_location: {3, 1}}},
+               {:htag, "br", [],
+                %{
+                  tag_name: "br",
+                  void?: true,
+                  line: 3,
+                  column: 10,
+                  inner_location: {3, 14},
+                  self_closing?: false
+                }},
+               {:text, "\n", %{line_end: 4, column_end: 1}}
+             ]
+    end
+
+    test "self-closing tag" do
+      assert fetch_tokens!("""
+             <script src="foo.js" /><br>
              """) == [
                {:htag, "script",
                 [
@@ -1126,101 +1182,72 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                   inner_location: {1, 24},
                   self_closing?: true
                 }},
-               {:text, "\n", %{line_end: 2, column_end: 1}}
-             ]
-    end
-
-    test "traverses until </script>" do
-      assert fetch_tokens!("""
-             <script>
-               a = "<a>Link</a>"
-             </script>
-             """) == [
-               {:htag, "script", [],
+               {:htag, "br", [],
                 %{
-                  tag_name: "script",
-                  void?: false,
+                  tag_name: "br",
+                  void?: true,
                   line: 1,
-                  column: 1,
-                  inner_location: {1, 9},
+                  column: 24,
+                  inner_location: {1, 28},
                   self_closing?: false
-                }},
-               {:text, "\n  a = \"<a>Link</a>\"\n", %{line_end: 3, column_end: 1}},
-               {:close, :htag, "script", %{line: 3, column: 1, inner_location: {3, 1}}},
-               {:text, "\n", %{line_end: 4, column_end: 1}}
-             ]
-    end
-  end
-
-  describe "local component" do
-    test "self-closing" do
-      assert fetch_tokens!("""
-             <.live_component module={MyApp.WeatherComponent} id="thermostat" city="Kraków" />
-             """) == [
-               {:local_component, "live_component",
-                [
-                  {"module", {:expr, "MyApp.WeatherComponent", %{line: 1, column: 26}},
-                   %{line: 1, column: 18}},
-                  {"id", {:string, "thermostat", %{delimiter: 34}}, %{line: 1, column: 50}},
-                  {"city", {:string, "Kraków", %{delimiter: 34}}, %{line: 1, column: 66}}
-                ],
-                %{
-                  tag_name: ".live_component",
-                  line: 1,
-                  column: 1,
-                  inner_location: {1, 82},
-                  self_closing?: true,
-                  void?: false
-                }},
-               {:text, "\n", %{line_end: 2, column_end: 1}}
-             ]
-    end
-
-    test "traverses until </.link>" do
-      assert fetch_tokens!("""
-             <.link href="/">Regular anchor link</.link>
-             """) == [
-               {:local_component, "link",
-                [{"href", {:string, "/", %{delimiter: 34}}, %{line: 1, column: 8}}],
-                %{
-                  tag_name: ".link",
-                  line: 1,
-                  column: 1,
-                  inner_location: {1, 17},
-                  void?: false,
-                  self_closing?: false
-                }},
-               {:text, "Regular anchor link", %{line_end: 1, column_end: 36}},
-               {:close, :local_component, "link",
-                %{
-                  tag_name: ".link",
-                  line: 1,
-                  column: 36,
-                  inner_location: {1, 36},
-                  void?: false
                 }},
                {:text, "\n", %{line_end: 2, column_end: 1}}
              ]
     end
   end
 
-  describe "remote component" do
-    test "self-closing" do
+  describe "handle remote component" do
+    test "paired tags" do
       assert fetch_tokens!("""
-             <MyAppWeb.CoreComponents.flash kind={:info} flash={@flash} />
+             <Components.modal on_cancel={navigate(~p"/posts")}>
+               This is another modal.
+             </Components.modal>
              """) == [
                {
                  :remote_component,
-                 "MyAppWeb.CoreComponents.flash",
+                 "Components.modal",
                  [
-                   {"kind", {:expr, ":info", %{column: 38, line: 1}}, %{column: 32, line: 1}},
-                   {"flash", {:expr, "@flash", %{column: 52, line: 1}}, %{column: 45, line: 1}}
+                   {"on_cancel", {:expr, "navigate(~p\"/posts\")", %{line: 1, column: 30}},
+                    %{line: 1, column: 19}}
                  ],
                  %{
-                   tag_name: "MyAppWeb.CoreComponents.flash",
+                   tag_name: "Components.modal",
+                   void?: false,
                    line: 1,
                    column: 1,
-                   inner_location: {1, 62},
+                   inner_location: {1, 52},
+                   self_closing?: false
+                 }
+               },
+               {:text, "\n  This is another modal.\n", %{line_end: 3, column_end: 1}},
+               {:close, :remote_component, "Components.modal",
+                %{
+                  tag_name: "Components.modal",
+                  void?: false,
+                  line: 3,
+                  column: 1,
+                  inner_location: {3, 1}
+                }},
+               {:text, "\n", %{line_end: 4, column_end: 1}}
+             ]
+    end
+
+    test "self-closing tag" do
+      assert fetch_tokens!("""
+             <Components.flash kind={:info} flash={@flash} />
+             """) == [
+               {
+                 :remote_component,
+                 "Components.flash",
+                 [
+                   {"kind", {:expr, ":info", %{line: 1, column: 25}}, %{line: 1, column: 19}},
+                   {"flash", {:expr, "@flash", %{column: 39, line: 1}}, %{line: 1, column: 32}}
+                 ],
+                 %{
+                   tag_name: "Components.flash",
+                   line: 1,
+                   column: 1,
+                   inner_location: {1, 49},
                    self_closing?: true,
                    void?: false
                  }
@@ -1228,60 +1255,142 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                {:text, "\n", %{column_end: 1, line_end: 2}}
              ]
     end
+  end
 
-    test "traverses until </MyAppWeb.CoreComponents.modal>" do
+  describe "handle local component" do
+    test "paired tags" do
       assert fetch_tokens!("""
-             <MyAppWeb.CoreComponents.modal id="confirm" on_cancel={JS.navigate(~p"/posts")}>
-               This is another modal.
-             </MyAppWeb.CoreComponents.modal>
+             <.link href="/">Regular anchor link</.link>
              """) == [
-               {
-                 :remote_component,
-                 "MyAppWeb.CoreComponents.modal",
-                 [
-                   {"id", {:string, "confirm", %{delimiter: 34}}, %{line: 1, column: 32}},
-                   {"on_cancel", {:expr, "JS.navigate(~p\"/posts\")", %{line: 1, column: 56}},
-                    %{line: 1, column: 45}}
-                 ],
-                 %{
-                   tag_name: "MyAppWeb.CoreComponents.modal",
-                   line: 1,
-                   column: 1,
-                   inner_location: {1, 81},
-                   void?: false,
-                   self_closing?: false
-                 }
-               },
-               {:text, "\n  This is another modal.\n", %{line_end: 3, column_end: 1}},
-               {:close, :remote_component, "MyAppWeb.CoreComponents.modal",
+               {:local_component, "link",
+                [{"href", {:string, "/", %{delimiter: ?"}}, %{line: 1, column: 8}}],
                 %{
-                  tag_name: "MyAppWeb.CoreComponents.modal",
-                  line: 3,
+                  tag_name: ".link",
+                  void?: false,
+                  line: 1,
                   column: 1,
-                  inner_location: {3, 1},
-                  void?: false
+                  inner_location: {1, 17},
+                  self_closing?: false
                 }},
-               {:text, "\n", %{line_end: 4, column_end: 1}}
+               {:text, "Regular anchor link", %{line_end: 1, column_end: 36}},
+               {:close, :local_component, "link",
+                %{
+                  tag_name: ".link",
+                  void?: false,
+                  line: 1,
+                  column: 36,
+                  inner_location: {1, 36}
+                }},
+               {:text, "\n", %{line_end: 2, column_end: 1}}
+             ]
+    end
+
+    test "self-closing tag" do
+      assert fetch_tokens!("""
+             <.inspect module={ExampleModule} type="recursive" />
+             """) == [
+               {:local_component, "inspect",
+                [
+                  {"module", {:expr, "ExampleModule", %{line: 1, column: 19}},
+                   %{line: 1, column: 11}},
+                  {"type", {:string, "recursive", %{delimiter: ?"}}, %{line: 1, column: 34}}
+                ],
+                %{
+                  tag_name: ".inspect",
+                  void?: false,
+                  line: 1,
+                  column: 1,
+                  inner_location: {1, 53},
+                  self_closing?: true
+                }},
+               {:text, "\n", %{line_end: 2, column_end: 1}}
+             ]
+    end
+  end
+
+  describe "handle slot" do
+    test "paired tags" do
+      assert fetch_tokens!("""
+             <:item to="/">item 1</:item>
+             """) == [
+               {:slot, "item",
+                [
+                  {"to", {:string, "/", %{delimiter: ?"}}, %{line: 1, column: 8}}
+                ],
+                %{
+                  tag_name: ":item",
+                  void?: false,
+                  line: 1,
+                  column: 1,
+                  inner_location: {1, 15},
+                  self_closing?: false
+                }},
+               {:text, "item 1", %{line_end: 1, column_end: 21}},
+               {:close, :slot, "item",
+                %{
+                  tag_name: ":item",
+                  void?: false,
+                  line: 1,
+                  column: 21,
+                  inner_location: {1, 21}
+                }},
+               {:text, "\n", %{line_end: 2, column_end: 1}}
+             ]
+    end
+
+    test "self-closing tag" do
+      assert fetch_tokens!("""
+             <:item to="/" />
+             """) == [
+               {:slot, "item",
+                [
+                  {"to", {:string, "/", %{delimiter: ?"}}, %{line: 1, column: 8}}
+                ],
+                %{
+                  tag_name: ":item",
+                  void?: false,
+                  line: 1,
+                  column: 1,
+                  inner_location: {1, 17},
+                  self_closing?: true
+                }},
+               {:text, "\n", %{line_end: 2, column_end: 1}}
              ]
     end
   end
 
   test "mixing text and tags" do
-    tokens =
-      fetch_tokens!("""
-      text before
-      <div>
-        text
-      </div>
-      text after
-      """)
-
-    assert [
+    assert fetch_tokens!("""
+           text before
+           <div>
+             text
+           </div>
+           text after
+           """) == [
              {:text, "text before\n", %{line_end: 2, column_end: 1}},
-             {:htag, "div", [], %{}},
-             {:text, "\n  text\n", %{line_end: 4, column_end: 1}},
-             {:close, :htag, "div", %{line: 4, column: 1}},
+             {:htag, "div", [],
+              %{
+                tag_name: "div",
+                void?: false,
+                line: 2,
+                column: 1,
+                inner_location: {2, 6},
+                self_closing?: false
+              }},
+             {:text, "\n  text\n",
+              %{
+                line_end: 4,
+                column_end: 1
+              }},
+             {:close, :htag, "div",
+              %{
+                tag_name: "div",
+                void?: false,
+                line: 4,
+                column: 1,
+                inner_location: {4, 1}
+              }},
              {:text, "\ntext after\n", %{line_end: 6, column_end: 1}}
-           ] = tokens
+           ]
   end
 end

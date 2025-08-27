@@ -214,7 +214,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
       | tokenize_buffer(buffer, tokens, line, column, [])
     ]
 
-    handle_text(rest, line, column + 9, [], tokens, state)
+    handle_text(rest, line, column + 8, [], tokens, state)
   end
 
   defp handle_style("\r\n" <> rest, line, _column, buffer, tokens, state) do
