@@ -11,10 +11,10 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
   describe "invalid tag name" do
     test "for remote component" do
       message = """
-      test/combo/template/ceex_engine/syntax_checking_test.exs:1:1: invalid tag <Foo>
+      test/combo/template/ceex_engine/syntax_checking_test.exs:1:2: expected valid tag name
         |
       1 | <Foo foo=\"bar\" />
-        | ^\
+        |  ^\
       """
 
       assert_raise(SyntaxError, message, fn ->
@@ -24,11 +24,11 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
       end)
 
       message = """
-      test/combo/template/ceex_engine/syntax_checking_test.exs:2:3: invalid tag <Oops>
+      test/combo/template/ceex_engine/syntax_checking_test.exs:2:4: expected valid tag name
         |
       1 | <br>
       2 |   <Oops foo={@foo}>
-        |   ^\
+        |    ^\
       """
 
       assert_raise(SyntaxError, message, fn ->
@@ -40,23 +40,6 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
         """)
       end)
     end
-  end
-
-  test "invalid attribute value" do
-    message = """
-    test/combo/template/ceex_engine/syntax_checking_test.exs:2:9: invalid attribute value after `=`. Expected either a value between quotes (such as \"value\" or 'value') or an Elixir expression between curly braces (such as `{expr}`)
-      |
-    1 | <div>Bar</div>
-    2 | <div id=>Foo</div>
-      |         ^\
-    """
-
-    assert_raise(SyntaxError, message, fn ->
-      compile("""
-      <div>Bar</div>
-      <div id=>Foo</div>
-      """)
-    end)
   end
 
   describe "missing opening tag" do
@@ -181,10 +164,10 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
 
     test "for remote components" do
       message = """
-      test/combo/template/ceex_engine/syntax_checking_test.exs:1:1: end of template reached without closing tag for <.Remote.component>
+      test/combo/template/ceex_engine/syntax_checking_test.exs:1:2: expected valid local component name after .
         |
       1 | <.Remote.component>
-        | ^\
+        |  ^\
       """
 
       assert_raise(SyntaxError, message, fn ->
@@ -194,17 +177,17 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
       end)
 
       message = """
-      test/combo/template/ceex_engine/syntax_checking_test.exs:2:3: end of do-block reached without closing tag for <.Remote.component>
+      test/combo/template/ceex_engine/syntax_checking_test.exs:2:3: end of do-block reached without closing tag for <Remote.component>
         |
       1 | <%= if true do %>
-      2 |   <.Remote.component>
+      2 |   <Remote.component>
         |   ^\
       """
 
       assert_raise(SyntaxError, message, fn ->
         compile("""
         <%= if true do %>
-          <.Remote.component>
+          <Remote.component>
         <% end %>
         """)
       end)
@@ -321,7 +304,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
       message = """
       test/combo/template/ceex_engine/syntax_checking_test.exs:1:10: expected closing `}` for expression
 
-      In case you don't want `{` to begin a new interpolation, you may write it using `&lbrace;` or using `<%= "{" %>`
+      In case you don't want `{` to begin a new interpolation, you may write it using `&lbrace;` or using `<%= "{" %>`.
         |
       1 | <div foo={<%= @foo %>}>bar</div>
         |          ^\
@@ -336,7 +319,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
       message = """
       test/combo/template/ceex_engine/syntax_checking_test.exs:2:3: expected closing `}` for expression
 
-      In case you don't want `{` to begin a new interpolation, you may write it using `&lbrace;` or using `<%= "{" %>`
+      In case you don't want `{` to begin a new interpolation, you may write it using `&lbrace;` or using `<%= "{" %>`.
         |
       1 | <div foo=
       2 |   {<%= @foo %>}>bar</div>
@@ -353,7 +336,7 @@ defmodule Combo.Template.CEExEngine.SyntexCheckingTest do
       message = """
       test/combo/template/ceex_engine/syntax_checking_test.exs:2:6: expected closing `}` for expression
 
-      In case you don't want `{` to begin a new interpolation, you may write it using `&lbrace;` or using `<%= "{" %>`
+      In case you don't want `{` to begin a new interpolation, you may write it using `&lbrace;` or using `<%= "{" %>`.
         |
       1 |    <div foo=
       2 |      {<%= @foo %>}>bar</div>

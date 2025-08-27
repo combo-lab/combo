@@ -744,7 +744,12 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   defp classify_tag_name(<<first, _::binary>> = name) when first in ?A..?Z do
     if valid_remote_component_name?(name),
       do: {:ok, {:remote_component, name}},
-      else: {:error, "expected valid remote component name"}
+      # The original intent might have been use HTML tags, but the first letter
+      # was incorrectly capitalized, or it could have been an attempt to call
+      # a remote component, but with the name in wrong format.
+      # Due to this dual possibility, the error message given here is not
+      # "expected valid remote component name".
+      else: {:error, "expected valid tag name"}
   end
 
   defp classify_tag_name("."), do: {:error, "expected local component name after ."}
