@@ -7,17 +7,31 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   @quote_chars ~c"\"'"
   @stop_chars ~c">/=\r\n" ++ @space_chars ++ @quote_chars
 
+  @type source :: binary()
+  @type file :: String.t()
+  @type indentation :: non_neg_integer()
+  @type state :: map()
+
+  @type location :: keyword()
+
+  @type line :: pos_integer()
+  @type column :: pos_integer()
+
+  @type tokens :: list()
+  @type cont :: {:text, :enabled} | :style | :script | {:comment, line(), column()}
+
   @doc """
   Initializes the tokenizer's state.
 
   ### Arguments
 
-  * `source` - The source code to be tokenized.
-  * `file` - Can be either a file or a string "nofile".
-  * `indentation` - An integer that indicates the current indentation.
+    * `source` - the source to be tokenized.
+    * `file` - the path of file. Defaulto to `"nofile"`.
+    * `indentation` - the indentation of source. Default to `0`.
 
   """
-  def init(source, file, indentation) do
+  @spec init(source(), file(), indentation()) :: state()
+  def init(source, file \\ "nofile", indentation \\ 0) do
     %{
       source: source,
       file: file,
@@ -33,13 +47,11 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
 
   ### Arguments
 
-  * `source` - The source code to be tokenized.
-  * `location` - The location of text's first char. It's a keyword list with
-    `:line` and `:column`, and both of them must be positive integers.
-  * `tokens` - The list of tokens.
-  * `cont` - The continuation which indicates current processing context.
-     It can be `{:text, braces}`, `:style`, `:script`, or `{:comment, line, column}`.
-  * `state` - The state which is initiated by `Tokenizer.init/4`
+    * `source` - The source to be tokenized.
+    * `location` - The location of source's first chararcter.
+    * `tokens` - The list of tokens.
+    * `cont` - The continuation which indicates current processing context.
+    * `state` - The state which is initiated by `Tokenizer.init/3`
 
   ### Examples
 
@@ -78,6 +90,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
        ], {:text, :enabled}}
 
   """
+  @spec tokenize(source(), location(), tokens(), cont(), state()) :: {tokens(), cont()}
   def tokenize(source, location, tokens, cont, state) do
     line = Keyword.get(location, :line, 1)
     column = Keyword.get(location, :column, state.column_base)
@@ -98,10 +111,13 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
     end
   end
 
+  @doc """
+  Gets the final tokens.
+  """
+  @spec finalize(tokens(), cont(), file(), source()) :: tokens()
   def finalize(_tokens, {:comment, line, column}, file, source) do
     message = "unexpected end of string inside tag"
-    meta = %{line: line, column: column}
-    raise_syntax_error!(message, meta, %{source: source, file: file, indentation: 0})
+    raise_syntax_error!(message, {line, column}, %{source: source, file: file, indentation: 0})
   end
 
   def finalize(tokens, _cont, _file, _source) do
@@ -154,8 +170,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
         handle_text(rest, new_line, new_column, [], tokens, state)
 
       {:error, message} ->
-        meta = %{line: line, column: column}
-        raise_syntax_error!(message, meta, state)
+        raise_syntax_error!(message, {line, column}, state)
     end
   end
 
@@ -186,11 +201,8 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   end
 
   defp handle_doctype(<<>>, line, column, _buffer, _tokens, state) do
-    raise_syntax_error!(
-      "expected closing `>` for doctype",
-      %{line: line, column: column},
-      state
-    )
+    message = "expected closing `>` for doctype"
+    raise_syntax_error!(message, {line, column}, state)
   end
 
   ## handle_comment
@@ -305,13 +317,12 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
             handle_maybe_tag_open_end(rest, line, new_column, tokens, state)
 
           {:error, message} ->
-            raise_syntax_error!(message, %{line: line, column: column}, state)
+            raise_syntax_error!(message, {line, column}, state)
         end
 
       :error ->
         message = "expected tag name after <"
-        meta = %{line: line, column: column}
-        raise_syntax_error!(message, meta, state)
+        raise_syntax_error!(message, {line, column}, state)
     end
   end
 
@@ -336,13 +347,12 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
             handle_maybe_tag_close_end(rest, line, new_column, tokens, state)
 
           {:error, message} ->
-            raise_syntax_error!(message, meta, state)
+            raise_syntax_error!(message, {line, column - 2}, state)
         end
 
       :error ->
         message = "expected tag name after </"
-        meta = %{line: line, column: column}
-        raise_syntax_error!(message, meta, state)
+        raise_syntax_error!(message, {line, column}, state)
     end
   end
 
@@ -352,8 +362,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
 
   defp handle_maybe_tag_close_end(_, line, column, _tokens, state) do
     message = "expected closing `>` for tag"
-    meta = %{line: line, column: column}
-    raise_syntax_error!(message, meta, state)
+    raise_syntax_error!(message, {line, column}, state)
   end
 
   ## handle_tag_name
@@ -443,7 +452,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
         <div class={"foo bar #{@class}"}>content</div>
     """
 
-    raise_syntax_error!(message, %{line: line, column: column}, state)
+    raise_syntax_error!(message, {line, column}, state)
   end
 
   defp handle_maybe_tag_open_end(text, line, column, tokens, state) do
@@ -461,8 +470,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
 
       {:error, message} ->
         # use column - 1 to point to the opening {
-        meta = %{line: line, column: column - 1}
-        raise_syntax_error!(message, meta, state)
+        raise_syntax_error!(message, {line, column - 1}, state)
     end
   end
 
@@ -486,8 +494,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
         handle_maybe_tag_open_end(rest, line, column, tokens, state)
 
       {:error, message, column} ->
-        meta = %{line: line, column: column}
-        raise_syntax_error!(message, meta, state)
+        raise_syntax_error!(message, {line, column}, state)
     end
   end
 
@@ -577,8 +584,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
     or an Elixir expression between curly braces (such as `{expr}`).\
     """
 
-    meta = %{line: line, column: column}
-    raise_syntax_error!(message, meta, state)
+    raise_syntax_error!(message, {line, column}, state)
   end
 
   ## handle_attr_value_quote
@@ -628,8 +634,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
     Where @attrs must be a keyword list or a map.
     """
 
-    meta = %{line: line, column: column}
-    raise_syntax_error!(message, meta, state)
+    raise_syntax_error!(message, {line, column}, state)
   end
 
   ## handle_attr_value_brace
@@ -641,8 +646,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
 
       {:error, message} ->
         # use column - 1 to point to the opening {
-        meta = %{line: line, column: column - 1}
-        raise_syntax_error!(message, meta, state)
+        raise_syntax_error!(message, {line, column - 1}, state)
     end
   end
 
@@ -799,11 +803,12 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
     end
   end
 
-  defp raise_syntax_error!(message, meta, state) do
+  defp raise_syntax_error!(message, {line, column}, state) do
     raise SyntaxError,
       file: state.file,
-      line: meta.line,
-      column: meta.column,
-      description: message <> SyntaxError.code_snippet(state.source, meta, state.indentation)
+      line: line,
+      column: column,
+      description:
+        message <> SyntaxError.code_snippet(state.source, {line, column}, state.indentation)
   end
 end
