@@ -43,15 +43,38 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
 
   ### Examples
 
-      iex> alias #{__MODULE__}
+      iex> source = "<section><div/></section>"
 
-      iex> state = Tokenizer.init("<section><div/></section>", file, indentation)
+      iex> state = Tokenizer.init(source, "nofile", 0)
 
-      iex> Tokenizer.tokenize(state)
+      iex> Tokenizer.tokenize(source, [], [], {:text, :enabled}, state)
       {[
-         {:close, :htag, "section", %{column: 16, line: 1}},
-         {:htag, "div", [], %{column: 10, line: 1, self_closing?: true}},
-         {:htag, "section", [], %{column: 1, line: 1}}
+         {:close, :htag, "section",
+          %{
+            tag_name: "section",
+            void?: false,
+            line: 1,
+            column: 16,
+            inner_location: {1, 16}
+          }},
+         {:htag, "div", [],
+          %{
+            tag_name: "div",
+            void?: false,
+            line: 1,
+            column: 10,
+            inner_location: {1, 16},
+            self_closing?: true
+          }},
+         {:htag, "section", [],
+          %{
+            tag_name: "section",
+            void?: false,
+            line: 1,
+            column: 1,
+            inner_location: {1, 10},
+            self_closing?: false
+          }}
        ], {:text, :enabled}}
 
   """
