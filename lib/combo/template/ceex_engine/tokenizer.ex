@@ -271,7 +271,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   end
 
   defp handle_doctype(<<>>, line, column, _buffer, _tokens, state) do
-    message = "expected closing `>` for doctype"
+    message = "missing closing `>` for doctype"
     raise_syntax_error!(message, {line, column}, state)
   end
 
@@ -391,7 +391,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
         end
 
       :error ->
-        message = "expected tag name after <"
+        message = "missing tag name after <"
         raise_syntax_error!(message, {line, column}, state)
     end
   end
@@ -421,7 +421,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
         end
 
       :error ->
-        message = "expected tag name after </"
+        message = "missing tag name after </"
         raise_syntax_error!(message, {line, column}, state)
     end
   end
@@ -431,7 +431,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   end
 
   defp handle_maybe_tag_close_end(_, line, column, _tokens, state) do
-    message = "expected closing `>` for tag"
+    message = "missing closing `>` for tag"
     raise_syntax_error!(message, {line, column}, state)
   end
 
@@ -498,7 +498,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
 
   defp handle_maybe_tag_open_end(<<>>, line, column, _tokens, state) do
     message = ~S"""
-    expected closing `>` or `/>` for tag
+    missing closing `>` or `/>` for tag
 
     Make sure the tag is properly closed. This may happen if there
     is an EEx interpolation inside a tag, which is not supported.
@@ -575,12 +575,12 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
 
   defp handle_attr_name(<<c::utf8, _rest::binary>>, column, _buffer)
        when c in @quote_chars do
-    {:error, "expected valid character in attribute name, got: #{<<c>>}", column}
+    {:error, "invalid character in attribute name, got: #{<<c>>}", column}
   end
 
   defp handle_attr_name(<<c::utf8, _rest::binary>>, column, [])
        when c in @stop_chars do
-    {:error, "expected attribute name", column}
+    {:error, "missing attribute name", column}
   end
 
   defp handle_attr_name(<<c::utf8, _rest::binary>> = text, column, buffer)
@@ -648,9 +648,9 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
 
   defp handle_attr_value_begin(_text, line, column, state) do
     message = """
-    expected valid attribute value after `=`
+    invalid attribute value after `=`
 
-    The attribute value can be a value between quotes (such as "value" or 'value') \
+    Expected a value between quotes (such as "value" or 'value') \
     or an Elixir expression between curly braces (such as `{expr}`).\
     """
 
@@ -699,7 +699,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
 
   defp handle_attr_value_quote(<<>>, delimiter, line, column, _buffer, state) do
     message = """
-    expected closing `#{<<delimiter>>}` for attribute value
+    missing closing `#{<<delimiter>>}` for attribute value
 
     Make sure the attribute is properly closed. This may also happen if
     there is an EEx interpolation inside a tag, which is not supported.
@@ -770,7 +770,7 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   defp handle_interpolation(<<>>, _line, _column, _buffer, _braces, _state) do
     {:error,
      """
-     expected closing `}` for expression
+     missing closing `}` for expression
 
      In case you don't want `{` to begin a new interpolation, \
      you may write it using `&lbrace;` or using `<%= "{" %>`.\
@@ -830,26 +830,26 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
       # was incorrectly capitalized, or it could have been an attempt to call
       # a remote component, but with the name in wrong format.
       # Due to this dual possibility, the error message given here is not
-      # "expected valid remote component name".
-      else: {:error, "expected valid tag name"}
+      # "invalid remote component name".
+      else: {:error, "invalid tag name"}
   end
 
-  defp classify_tag_name("."), do: {:error, "expected local component name after ."}
+  defp classify_tag_name("."), do: {:error, "missing local component name after ."}
 
   defp classify_tag_name("." <> name) do
     if valid_local_component_name?(name),
       do: {:ok, {:local_component, name}},
-      else: {:error, "expected valid local component name after ."}
+      else: {:error, "invalid local component name after ."}
   end
 
-  defp classify_tag_name(":"), do: {:error, "expected slot name after :"}
+  defp classify_tag_name(":"), do: {:error, "missing slot name after :"}
 
   defp classify_tag_name(":inner_block"), do: {:error, "the slot name `:inner_block` is reserved"}
 
   defp classify_tag_name(":" <> name) do
     if valid_slot_name?(name),
       do: {:ok, {:slot, name}},
-      else: {:error, "expected valid slot name after :"}
+      else: {:error, "invalid slot name after :"}
   end
 
   defp classify_tag_name(name), do: {:ok, {:htag, name}}

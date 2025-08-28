@@ -20,7 +20,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
   describe "doctype - syntax checking" do
     test "raises on unclosed tag" do
       message = """
-      nofile:1:15: expected closing `>` for doctype
+      nofile:1:15: missing closing `>` for doctype
         |
       1 | <!doctype html
         |               ^\
@@ -55,7 +55,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     test "raises on missing tag name" do
       # reached end of input
       message = """
-      nofile:1:2: expected tag name after <
+      nofile:1:2: missing tag name after <
         |
       1 | <
         |  ^\
@@ -68,7 +68,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       # ecountered stop chars. note that the / is removed from @stop_chars
       for char <- ~c"\s\t\f\"'>=\r\n" do
         message = """
-        nofile:2:4: expected tag name after <
+        nofile:2:4: missing tag name after <
           |
         1 | <div>
         2 |   <#{<<char>> |> String.trim("\n")}
@@ -86,7 +86,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
     test "for remote component - raises on invalid tag name" do
       message = """
-      nofile:1:2: expected valid tag name
+      nofile:1:2: invalid tag name
         |
       1 | <Invalid.Name>
         |  ^\
@@ -99,7 +99,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
     test "for local component - raises on missing tag name" do
       message = """
-      nofile:1:2: expected local component name after .
+      nofile:1:2: missing local component name after .
         |
       1 | <./local_component>
         |  ^\
@@ -112,7 +112,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
     test "for local component - raises on invalid tag name" do
       message = """
-      nofile:1:2: expected valid local component name after .
+      nofile:1:2: invalid local component name after .
         |
       1 | <.InvalidName>
         |  ^\
@@ -125,7 +125,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
     test "for slot - raises on missing tag name" do
       message = """
-      nofile:1:2: expected slot name after :
+      nofile:1:2: missing slot name after :
         |
       1 | <:/slot>
         |  ^\
@@ -138,7 +138,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
     test "for slot - raises on invalid tag name" do
       message = """
-      nofile:1:2: expected valid slot name after :
+      nofile:1:2: invalid slot name after :
         |
       1 | <:InvalidName>
         |  ^\
@@ -166,7 +166,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
     test "for attribute name - raises on missing attribute name" do
       message = """
-      nofile:2:8: expected attribute name
+      nofile:2:8: missing attribute name
         |
       1 | <div>
       2 |   <div =\"panel\">
@@ -181,7 +181,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       end
 
       message = """
-      nofile:1:6: expected attribute name
+      nofile:1:6: missing attribute name
         |
       1 | <div = >
         |      ^\
@@ -192,7 +192,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       end
 
       message = """
-      nofile:1:6: expected attribute name
+      nofile:1:6: missing attribute name
         |
       1 | <div / >
         |      ^\
@@ -205,7 +205,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
     test "for attribute name - raises on invalid character in attribute name" do
       message = """
-      nofile:1:5: expected valid character in attribute name, got: '
+      nofile:1:5: invalid character in attribute name, got: '
         |
       1 | <div'>
         |     ^\
@@ -216,7 +216,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       end
 
       message = """
-      nofile:1:5: expected valid character in attribute name, got: \"
+      nofile:1:5: invalid character in attribute name, got: \"
         |
       1 | <div">
         |     ^\
@@ -227,7 +227,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       end
 
       message = """
-      nofile:1:10: expected valid character in attribute name, got: '
+      nofile:1:10: invalid character in attribute name, got: '
         |
       1 | <div attr'>
         |          ^\
@@ -238,7 +238,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       end
 
       message = """
-      nofile:1:20: expected valid character in attribute name, got: \"
+      nofile:1:20: invalid character in attribute name, got: \"
         |
       1 | <div class={"test"}">
         |                    ^\
@@ -264,9 +264,9 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
     test "for attribute value - raises on invalid attribute value" do
       message = """
-      nofile:2:9: expected valid attribute value after `=`
+      nofile:2:9: invalid attribute value after `=`
 
-      The attribute value can be a value between quotes (such as "value" or 'value') \
+      Expected a value between quotes (such as "value" or 'value') \
       or an Elixir expression between curly braces (such as `{expr}`).
         |
       1 | <div
@@ -282,9 +282,9 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       end
 
       message = """
-      nofile:1:13: expected valid attribute value after `=`
+      nofile:1:13: invalid attribute value after `=`
 
-      The attribute value can be a value between quotes (such as "value" or 'value') \
+      Expected a value between quotes (such as "value" or 'value') \
       or an Elixir expression between curly braces (such as `{expr}`).
         |
       1 | <div class= >
@@ -296,9 +296,9 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       end
 
       message = """
-      nofile:1:12: expected valid attribute value after `=`
+      nofile:1:12: invalid attribute value after `=`
 
-      The attribute value can be a value between quotes (such as "value" or 'value') \
+      Expected a value between quotes (such as "value" or 'value') \
       or an Elixir expression between curly braces (such as `{expr}`).
         |
       1 | <div class=
@@ -311,7 +311,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
 
     test "for attribute value - raises on missing closing quotes" do
-      message = ~r"nofile:2:15: expected closing `\"` for attribute value"
+      message = ~r"nofile:2:15: missing closing `\"` for attribute value"
 
       assert_raise SyntaxError, message, fn ->
         tokens!("""
@@ -320,7 +320,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         """)
       end
 
-      message = ~r"nofile:2:15: expected closing `\'` for attribute value"
+      message = ~r"nofile:2:15: missing closing `\'` for attribute value"
 
       assert_raise SyntaxError, message, fn ->
         tokens!("""
@@ -332,7 +332,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
     test "for attribute value - raises on missing closing braces" do
       message = """
-      nofile:2:9: expected closing `}` for expression
+      nofile:2:9: missing closing `}` for expression
 
       In case you don't want `{` to begin a new interpolation, you may write it using `&lbrace;` or using `<%= "{" %>`.
         |
@@ -353,7 +353,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
     test "for root attributes - raises on missing closing braces" do
       message = """
-      nofile:2:3: expected closing `}` for expression
+      nofile:2:3: missing closing `}` for expression
 
       In case you don't want `{` to begin a new interpolation, you may write it using `&lbrace;` or using `<%= "{" %>`.
         |
@@ -373,7 +373,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     ## handle tag open end
 
     test "raises on unclosed tag" do
-      message = ~r"nofile:1:5: expected closing `>` or `/>` for tag"
+      message = ~r"nofile:1:5: missing closing `>` or `/>` for tag"
 
       assert_raise SyntaxError, message, fn ->
         tokens!("<foo")
@@ -386,7 +386,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
     test "raises on missing tag name" do
       message = """
-      nofile:2:5: expected tag name after </
+      nofile:2:5: missing tag name after </
         |
       1 | <div>
       2 |   </>
@@ -405,7 +405,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
     test "raises on unclosed tag" do
       message = """
-      nofile:2:6: expected closing `>` for tag
+      nofile:2:6: missing closing `>` for tag
         |
       1 | <div>
       2 | </div text

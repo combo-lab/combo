@@ -197,33 +197,21 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     {t_type, t_name, [attr | t_attrs], t_meta}
   end
 
-  defp validate_supported_attr!(
-         {:htag = t_type, t_name, _, _},
-         {":" <> _ = a_name, _, a_meta},
-         state
-       ) do
+  defp validate_supported_attr!({:htag, _, _, t_meta}, {":" <> _ = a_name, _, a_meta}, state) do
     if a_name in [":if", ":for"] do
       :ok
     else
-      message =
-        "unsupported attribute #{a_name} in #{humanize_t_type(t_type)}: #{t_name}"
-
+      message = "unsupported attribute #{a_name} for #{open_tag(t_meta)}"
       raise_syntax_error!(message, a_meta, state)
     end
   end
 
-  defp validate_supported_attr!(
-         {t_type, t_name, _, _},
-         {":" <> _ = a_name, _, a_meta},
-         state
-       )
+  defp validate_supported_attr!({t_type, _, _, t_meta}, {":" <> _ = a_name, _, a_meta}, state)
        when t_type in [:remote_component, :local_component, :slot] do
     if a_name in [":if", ":for", ":let"] do
       :ok
     else
-      message =
-        "unsupported attribute #{a_name} in #{humanize_t_type(t_type)}: #{t_name}"
-
+      message = "unsupported attribute #{a_name} for #{open_tag(t_meta)}"
       raise_syntax_error!(message, a_meta, state)
     end
   end
@@ -239,7 +227,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       {_, _, dup_a_meta} ->
         message = """
         cannot define multiple #{a_name} attributes. \
-        Another #{a_name} has already been defined at line #{dup_a_meta.line}\
+        Another #{a_name} attribute has already been defined at line #{dup_a_meta.line}\
         """
 
         raise_syntax_error!(message, a_meta, state)
@@ -248,20 +236,22 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
   defp validate_unique_attr!(_token, _attr, _state), do: :ok
 
-  defp validate_attr_value!({t_type, t_name, _, _}, {":if" = a_name, a_value, a_meta}, state) do
+  defp validate_attr_value!({_, _, _, _}, {":if" = a_name, a_value, a_meta}, state) do
     case a_value do
       {:expr, _, _} ->
         :ok
 
       _ ->
-        message =
-          "#{a_name} must be an expression between {...} in #{humanize_t_type(t_type)}: #{t_name}"
+        message = """
+        invalid value for #{a_name} attribute. \
+        Expected an expression between {...}\
+        """
 
         raise_syntax_error!(message, a_meta, state)
     end
   end
 
-  defp validate_attr_value!({t_type, t_name, _, _}, {":for" = a_name, a_value, a_meta}, state) do
+  defp validate_attr_value!({_, _, _, _}, {":for" = a_name, a_value, a_meta}, state) do
     case a_value do
       {:expr, source, v_meta} ->
         quoted = to_quoted!(source, v_meta, state)
@@ -271,41 +261,41 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
             :ok
 
           _ ->
-            message =
-              "#{a_name} must be a generator expression (pattern <- enumerable) between {...} in #{humanize_t_type(t_type)}: #{t_name}"
+            message = """
+            invalid value for #{a_name} attribute. \
+            Expected a generator expression (pattern <- enumerable) between {...}\
+            """
 
             raise_syntax_error!(message, a_meta, state)
         end
 
       _ ->
-        message =
-          "#{a_name} must be an expression between {...} in #{humanize_t_type(t_type)}: #{t_name}"
+        message = """
+        invalid value for #{a_name} attribute. \
+        Expected an expression between {...}\
+        """
 
         raise_syntax_error!(message, a_meta, state)
     end
   end
 
-  defp validate_attr_value!(
-         {t_type, t_name, _, t_meta},
-         {":let" = a_name, a_value, a_meta},
-         state
-       ) do
+  defp validate_attr_value!({t_type, _, _, t_meta}, {":let" = a_name, a_value, a_meta}, state) do
     case a_value do
       {:expr, _, _} ->
         :ok
 
       _ ->
-        message =
-          "#{a_name} must be a pattern between {...} in #{humanize_t_type(t_type)}: #{t_name}"
+        message = """
+        invalid value for #{a_name} attribute. \
+        Expected a pattern between {...}\
+        """
 
         raise_syntax_error!(message, a_meta, state)
     end
 
     case t_meta do
       %{self_closing?: true} ->
-        message =
-          "cannot use #{a_name} on a #{humanize_t_type(t_type)} without inner content"
-
+        message = "cannot use #{a_name} on a self-closing #{humanize_t_type(t_type)}"
         raise_syntax_error!(message, a_meta, state)
 
       %{} ->
@@ -521,7 +511,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
          state,
          [{:remote_component, _name, _attrs, %{self_closing?: true} = meta} = tag | tokens]
        ) do
-    mod_asf = decompose_remote_component_tag!(tag, state)
+    mod_asf = decompose_remote_component_tag!(tag)
     mod = build_remote_component_module(mod_asf, meta, state)
     capture = build_remote_component_capture(mod_asf, meta)
 
@@ -563,7 +553,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
          state,
          [{:remote_component = type, name, attrs, meta} = tag | tokens]
        ) do
-    mod_asf = decompose_remote_component_tag!(tag, state)
+    mod_asf = decompose_remote_component_tag!(tag)
     new_meta = meta |> Map.put(:mod_asf, mod_asf)
     new_tag = {type, name, attrs, new_meta}
 
@@ -783,7 +773,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
   defp validate_unclosed_tags!(%{tags: [tag | _]} = state, context) do
     {_t_type, _t_name, _t_attrs, t_meta} = tag
-    message = "end of #{context} reached without closing tag for <#{t_meta.tag_name}>"
+    message = "end of #{context} reached without closing tag for #{open_tag(t_meta)}"
     raise_syntax_error!(message, t_meta, state)
   end
 
@@ -856,31 +846,28 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     {tag, %{state | tags: tags}}
   end
 
-  defp pop_tag!(
-         %{tags: [{t_type, t_name, _attrs, t_meta} | _]} = state,
-         {:close, t_type, close_t_name, close_t_meta}
-       ) do
-    hint = closing_void_hint(close_t_meta)
+  defp pop_tag!(state, {:close, _, _, %{void?: true} = t_meta}) do
+    message = "#{open_tag(t_meta)} is a void element and cannot have a closing tag"
+    raise_syntax_error!(message, t_meta, state)
+  end
 
+  defp pop_tag!(
+         %{tags: [{t_type, _, _, t_meta} | _]} = state,
+         {:close, t_type, _, close_t_meta}
+       ) do
     message = """
-    unmatched closing tag. Expected </#{t_name}> for <#{t_name}> \
-    at line #{t_meta.line}, got: </#{close_t_name}>#{hint}\
+    unmatched closing tag. \
+    Expected #{close_tag(t_meta)} for #{open_tag(t_meta)} at line #{t_meta.line}, \
+    got: #{close_tag(close_t_meta)}\
     """
 
     raise_syntax_error!(message, close_t_meta, state)
   end
 
   defp pop_tag!(state, {:close, _t_type, _t_name, t_meta}) do
-    %{tag_name: tag_name} = t_meta
-    hint = closing_void_hint(t_meta)
-    message = "missing opening tag for </#{tag_name}>#{hint}"
+    message = "missing opening tag for #{close_tag(t_meta)}"
     raise_syntax_error!(message, t_meta, state)
   end
-
-  defp closing_void_hint(%{tag_name: tag_name, void?: true} = _t_meta),
-    do: " (note <#{tag_name}> is a void tag and cannot have any content)"
-
-  defp closing_void_hint(_t_meta), do: ""
 
   # tag helpers
 
@@ -929,8 +916,8 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
   # component helpers
 
-  defp decompose_remote_component_tag!({:remote_component, t_name, _t_attrs, t_meta}, state) do
-    [<<first, _::binary>> = fun_name | rest] = t_name |> String.split(".") |> Enum.reverse()
+  defp decompose_remote_component_tag!({:remote_component, t_name, _t_attrs, t_meta}) do
+    [fun_name | rest] = t_name |> String.split(".") |> Enum.reverse()
     aliases = rest |> Enum.reverse() |> Enum.map(&String.to_atom/1)
     %{line: line, column: column} = t_meta
     mod_ast = {:__aliases__, [line: line, column: column], aliases}
@@ -975,11 +962,13 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     :ok
   end
 
-  defp validate_slot!({:slot, name, _, meta}, state) do
-    message =
-      "invalid slot entry <:#{name}>. A slot entry must be a direct child of a component"
+  defp validate_slot!({:slot, _, _, t_meta}, state) do
+    message = """
+    invalid parent of slot entry #{open_tag(t_meta)}. \
+    Expected a slot entry to be the direct child of a component\
+    """
 
-    raise_syntax_error!(message, meta, state)
+    raise_syntax_error!(message, t_meta, state)
   end
 
   defp init_slots(state) do
@@ -1337,6 +1326,12 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
   defp humanize_t_type(:remote_component), do: "remote component"
   defp humanize_t_type(:local_component), do: "local component"
   defp humanize_t_type(:slot), do: "slot"
+
+  defp open_tag(%{void?: true, self_closing?: true} = t_meta), do: "<#{t_meta.tag_name} />"
+  defp open_tag(%{self_closing?: true} = t_meta), do: "<#{t_meta.tag_name} />"
+  defp open_tag(t_meta), do: "<#{t_meta.tag_name}>"
+
+  defp close_tag(t_meta), do: "</#{t_meta.tag_name}>"
 
   @doc false
   def __unmatched_let__!(pattern, value) do
