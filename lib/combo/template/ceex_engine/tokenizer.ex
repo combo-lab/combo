@@ -891,11 +891,12 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   end
 
   defp raise_syntax_error!(message, {line, column}, state) do
+    %{source: source, file: file, indentation: indentation} = state
+
     raise SyntaxError,
-      file: state.file,
+      file: file,
       line: line,
       column: column,
-      description:
-        message <> SyntaxError.code_snippet(state.source, {line, column}, state.indentation)
+      description: message <> SyntaxError.code_snippet(source, indentation, {line, column})
   end
 end

@@ -183,7 +183,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
          state
        ) do
     validate_supported_attr!(token, attr, state)
-    validate_duplicated_attr!(token, attr, state)
+    validate_unique_attr!(token, attr, state)
     validate_attr_value!(token, attr, state)
 
     {t_type, t_name, [attr | t_attrs], t_meta}
@@ -230,7 +230,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
   defp validate_supported_attr!(_token, _attr, _state), do: :ok
 
-  defp validate_duplicated_attr!({_, _, t_attrs, _}, {a_name, _, a_meta}, state)
+  defp validate_unique_attr!({_, _, t_attrs, _}, {a_name, _, a_meta}, state)
        when a_name in [":if", ":for", ":let"] do
     case List.keyfind(t_attrs, a_name, 0) do
       nil ->
@@ -246,7 +246,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     end
   end
 
-  defp validate_duplicated_attr!(_token, _attr, _state), do: :ok
+  defp validate_unique_attr!(_token, _attr, _state), do: :ok
 
   defp validate_attr_value!({t_type, t_name, _, _}, {":if" = a_name, a_value, a_meta}, state) do
     case a_value do
@@ -1289,15 +1289,16 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
   ## Helpers
 
   defp raise_syntax_error!(message, meta, state) do
+    %{source: source, file: file, indentation: indentation} = state
+
     line = meta.line
     column = meta.column
 
     raise SyntaxError,
-      file: state.file,
+      file: file,
       line: line,
       column: column,
-      description:
-        message <> SyntaxError.code_snippet(state.source, {line, column}, state.indentation)
+      description: message <> SyntaxError.code_snippet(source, indentation, {line, column})
   end
 
   defp maybe_annotate_caller(state, meta) do

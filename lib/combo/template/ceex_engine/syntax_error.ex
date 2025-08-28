@@ -13,7 +13,7 @@ defmodule Combo.Template.CEExEngine.SyntaxError do
   end
 
   @doc false
-  def code_snippet(source, {line, column}, indentation) do
+  def code_snippet(source, indentation, {line, column}) do
     line_start = max(line - 3, 1)
     line_end = line
     digits = line_end |> Integer.to_string() |> byte_size()
@@ -34,11 +34,8 @@ defmodule Combo.Template.CEExEngine.SyntaxError do
         {"#{line_number_padding} | #{indentation}#{expr}", line_number + 1}
     end)
     |> case do
-      {[], _} ->
-        ""
-
-      {snippet, _} ->
-        Enum.join(["\n #{number_padding}|" | snippet], "\n")
+      {[], _} -> ""
+      {snippet, _} -> Enum.join(["\n #{number_padding}|" | snippet], "\n")
     end
   end
 end
