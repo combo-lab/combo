@@ -930,19 +930,13 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
   # component helpers
 
   defp decompose_remote_component_tag!({:remote_component, t_name, _t_attrs, t_meta}, state) do
-    case t_name |> String.split(".") |> Enum.reverse() do
-      [<<first, _::binary>> = fun_name | rest] when first in ?a..?z ->
-        %{line: line, column: column} = t_meta
-        aliases = rest |> Enum.reverse() |> Enum.map(&String.to_atom/1)
-        mod_ast = {:__aliases__, [line: line, column: column], aliases}
-        mod_size = Enum.sum(Enum.map(rest, &byte_size/1)) + length(rest) + 1
-        fun = String.to_atom(fun_name)
-        {mod_ast, mod_size, fun}
-
-      _ ->
-        message = "invalid tag <#{t_name}>"
-        raise_syntax_error!(message, t_meta, state)
-    end
+    [<<first, _::binary>> = fun_name | rest] = t_name |> String.split(".") |> Enum.reverse()
+    aliases = rest |> Enum.reverse() |> Enum.map(&String.to_atom/1)
+    %{line: line, column: column} = t_meta
+    mod_ast = {:__aliases__, [line: line, column: column], aliases}
+    mod_size = Enum.sum(Enum.map(rest, &byte_size/1)) + length(rest) + 1
+    fun = String.to_atom(fun_name)
+    {mod_ast, mod_size, fun}
   end
 
   defp build_remote_component_module({mod_ast, _mod_size, _fun} = _mod_asf, t_meta, state) do
