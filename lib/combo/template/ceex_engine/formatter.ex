@@ -95,14 +95,17 @@ defmodule Combo.Template.CEExEngine.Formatter do
   defp tokenize(source) do
     {:ok, eex_nodes} = EEx.tokenize(source)
     {tokens, cont} = Enum.reduce(eex_nodes, {[], {:text, :enabled}}, &do_tokenize(&1, &2, source))
-    Tokenizer.finalize(tokens, cont, "nofile", source)
+    Tokenizer.finalize(tokens, cont, source)
   end
 
   defp do_tokenize({:text, text, meta}, {tokens, cont}, source) do
     text = List.to_string(text)
-    meta = [line: meta.line, column: meta.column]
-    state = Tokenizer.init(source, "nofile", 0)
-    Tokenizer.tokenize(text, meta, tokens, cont, state)
+
+    Tokenizer.tokenize(text, tokens, source,
+      line: meta.line,
+      column: meta.column,
+      cont: cont
+    )
   end
 
   defp do_tokenize({:comment, text, meta}, {tokens, cont}, _contents) do
@@ -267,7 +270,12 @@ defmodule Combo.Template.CEExEngine.Formatter do
     to_tree(tokens, [{:tag_self_close, meta.tag_name, attrs} | buffer], stack, opts)
   end
 
-  defp to_tree([{type, _name, attrs, %{self_closing?: true} = meta} | tokens], buffer, stack, opts)
+  defp to_tree(
+         [{type, _name, attrs, %{self_closing?: true} = meta} | tokens],
+         buffer,
+         stack,
+         opts
+       )
        when is_tag_open(type) do
     to_tree(tokens, [{:tag_self_close, meta.tag_name, attrs} | buffer], stack, opts)
   end

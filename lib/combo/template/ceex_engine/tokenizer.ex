@@ -7,59 +7,89 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   @quote_chars ~c"\"'"
   @stop_chars ~c">/=\r\n" ++ @space_chars ++ @quote_chars
 
-  @type source :: binary()
-  @type file :: String.t()
-  @type indentation :: non_neg_integer()
-  @type state :: map()
-
-  @type location :: keyword()
-
   @type line :: pos_integer()
   @type column :: pos_integer()
+  @type expr :: String.t()
 
-  @type tokens :: list()
+  @type text :: {:text, String.t(), %{line_end: line(), column_end: column()}}
+
+  @type tag_name :: String.t()
+  @type raw_tag_name :: String.t()
+  @type tag_attr_name :: String.t() | :root
+  @type tag_attr_value ::
+          nil
+          | {:string, String.t(), %{delimiter: char()}}
+          | {:expr, expr(), %{line: line(), column: column()}}
+  @type tag_attr_meta :: %{line: line(), column: column()}
+  @type tag_attr :: {tag_attr_name(), tag_attr_value(), tag_attr_meta()}
+  @type tag_open_meta :: %{
+          tag_name: raw_tag_name(),
+          void?: boolean(),
+          self_closing?: boolean(),
+          line: line(),
+          column: column(),
+          inner_location: {line(), column}
+        }
+  @type tag_close_meta :: %{
+          tag_name: raw_tag_name(),
+          void?: boolean(),
+          line: line(),
+          column: column(),
+          inner_location: {line(), column}
+        }
+  @type tag ::
+          {:htag, tag_name(), [tag_attr()], tag_open_meta()}
+          | {:close, :htag, tag_name(), tag_close_meta()}
+          | {:remote_component, tag_name(), [tag_attr()], tag_open_meta()}
+          | {:close, :remote_component, tag_name(), tag_close_meta()}
+          | {:local_component, tag_name(), [tag_attr()], tag_open_meta()}
+          | {:close, :local_component, tag_name(), tag_close_meta()}
+          | {:slot, tag_name(), [tag_attr()], tag_open_meta()}
+          | {:close, :slot, tag_name(), tag_close_meta()}
+
+  @type body_expr :: {:body_expr, expr(), %{line: line(), column: column()}}
+
+  @type contents :: String.t()
+  @type tokens :: [text() | tag() | body_expr()]
   @type cont :: {:text, :enabled} | :style | :script | {:comment, line(), column()}
+  @type source :: String.t()
+  @type tokenize_opt ::
+          {:file, String.t()}
+          | {:indentation, non_neg_integer()}
+          | {:line, line()}
+          | {:column, column()}
+          | {:cont, cont()}
+  @type tokenize_opts :: [tokenize_opt()]
+  @type finalize_opt :: {:file, String.t()}
+  @type finalize_opts :: [finalize_opt()]
 
   @doc """
-  Initializes the tokenizer's state.
+  Tokenize the given contents according to the given options.
 
   ### Arguments
 
-    * `source` - the source to be tokenized.
-    * `file` - the path of file. Defaulto to `"nofile"`.
-    * `indentation` - the indentation of source. Default to `0`.
-
-  """
-  @spec init(source(), file(), indentation()) :: state()
-  def init(source, file \\ "nofile", indentation \\ 0) do
-    %{
-      source: source,
-      file: file,
-      indentation: indentation,
-      column_base: indentation + 1,
-      braces: :enabled,
-      context: []
-    }
-  end
-
-  @doc """
-  Tokenizes the source.
-
-  ### Arguments
-
-    * `source` - The source to be tokenized.
-    * `location` - The location of source's first chararcter.
-    * `tokens` - The list of tokens.
-    * `cont` - The continuation which indicates current processing context.
-    * `state` - The state which is initiated by `Tokenizer.init/3`
+    * `contents` - the contents to be tokenized.
+    * `tokens` - a list of existing tokens.
+    * `source` - the source which is used to show code snippet.
+    * `opts`:
+      * `:file` - a string as the path of file.
+        Default to `"nofile"`.
+      * `:indentation` - an integer that indicates the indentation.
+        Default to `0`.
+      * `:line` - an integer to start as line.
+        Default to `1`.
+      * `:column` - an integer to start as column.
+        Default to `1`. Note it's the value relative to the current indentation
+        level.
+      * `:cont` - the continuation which indicates current processing context.
 
   ### Examples
 
-      iex> source = "<section><div/></section>"
-
-      iex> state = Tokenizer.init(source, "nofile", 0)
-
-      iex> Tokenizer.tokenize(source, [], [], {:text, :enabled}, state)
+      iex> contents = "<section><div/></section>"
+      iex> tokens = []
+      iex> source = contents
+      iex> opts = []
+      iex> Tokenizer.tokenize(contents, tokens, source, opts)
       {[
          {:close, :htag, "section",
           %{
@@ -73,54 +103,94 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
           %{
             tag_name: "div",
             void?: false,
+            self_closing?: true,
             line: 1,
             column: 10,
-            inner_location: {1, 16},
-            self_closing?: true
+            inner_location: {1, 16}
           }},
          {:htag, "section", [],
           %{
             tag_name: "section",
             void?: false,
+            self_closing?: false,
             line: 1,
             column: 1,
-            inner_location: {1, 10},
-            self_closing?: false
+            inner_location: {1, 10}
           }}
        ], {:text, :enabled}}
 
   """
-  @spec tokenize(source(), location(), tokens(), cont(), state()) :: {tokens(), cont()}
-  def tokenize(source, location, tokens, cont, state) do
-    line = Keyword.get(location, :line, 1)
-    column = Keyword.get(location, :column, state.column_base)
+  @spec tokenize(source()) :: {tokens(), cont()}
+  def tokenize(source) do
+    tokens = []
+    contents = source
+    opts = []
+    tokenize(contents, tokens, source, opts)
+  end
+
+  @spec tokenize(source(), tokenize_opts()) :: {tokens(), cont()}
+  def tokenize(source, opts) do
+    tokens = []
+    contents = source
+    tokenize(contents, tokens, source, opts)
+  end
+
+  @spec tokenize(source(), tokens(), tokenize_opts()) :: {tokens(), cont()}
+  def tokenize(source, tokens, opts) do
+    contents = source
+    tokenize(contents, tokens, source, opts)
+  end
+
+  @spec tokenize(contents(), tokens(), source(), tokenize_opts()) :: {tokens(), cont()}
+  def tokenize(contents, tokens, source, opts) do
+    file = opts[:file] || "nofile"
+    indentation = opts[:indentation] || 0
+    line = opts[:line] || 1
+    column = indentation + (opts[:column] || 1)
+
+    cont = opts[:cont] || {:text, :enabled}
+
     buffer = []
+
+    state = %{
+      source: source,
+      file: file,
+      indentation: indentation,
+      braces: :enabled,
+      context: []
+    }
 
     case cont do
       {:text, braces} ->
-        handle_text(source, line, column, buffer, tokens, %{state | braces: braces})
+        handle_text(contents, line, column, buffer, tokens, %{state | braces: braces})
 
       :style ->
-        handle_style(source, line, column, buffer, tokens, state)
+        handle_style(contents, line, column, buffer, tokens, state)
 
       :script ->
-        handle_script(source, line, column, buffer, tokens, state)
+        handle_script(contents, line, column, buffer, tokens, state)
 
       {:comment, _line, _column} ->
-        handle_comment(source, line, column, buffer, tokens, state)
+        handle_comment(contents, line, column, buffer, tokens, state)
     end
   end
 
   @doc """
   Gets the final tokens.
   """
-  @spec finalize(tokens(), cont(), file(), source()) :: tokens()
-  def finalize(_tokens, {:comment, line, column}, file, source) do
+  @spec finalize(tokens(), cont(), source()) :: tokens()
+  def finalize(tokens, cont, source) do
+    finalize(tokens, cont, source, [])
+  end
+
+  @spec finalize(tokens(), cont(), source(), finalize_opts()) :: tokens()
+  def finalize(_tokens, {:comment, line, column}, source, opts) do
+    file = opts[:file] || "nofile"
     message = "unexpected end of string inside tag"
     raise_syntax_error!(message, {line, column}, %{source: source, file: file, indentation: 0})
   end
 
-  def finalize(tokens, _cont, _file, _source) do
+  def finalize(tokens, _cont, _source, _opts) do
     tokens
     |> trim_leading_whitespace_tokens()
     |> Enum.reverse()
@@ -130,11 +200,11 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   ## handle_text
 
   defp handle_text("\r\n" <> rest, line, _column, buffer, tokens, state) do
-    handle_text(rest, line + 1, state.column_base, ["\r\n" | buffer], tokens, state)
+    handle_text(rest, line + 1, state.indentation + 1, ["\r\n" | buffer], tokens, state)
   end
 
   defp handle_text("\n" <> rest, line, _column, buffer, tokens, state) do
-    handle_text(rest, line + 1, state.column_base, ["\n" | buffer], tokens, state)
+    handle_text(rest, line + 1, state.indentation + 1, ["\n" | buffer], tokens, state)
   end
 
   defp handle_text("<!doctype" <> rest, line, column, buffer, tokens, state) do
@@ -189,11 +259,11 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   end
 
   defp handle_doctype("\r\n" <> rest, line, _column, buffer, tokens, state) do
-    handle_doctype(rest, line + 1, state.column_base, ["\r\n" | buffer], tokens, state)
+    handle_doctype(rest, line + 1, state.indentation + 1, ["\r\n" | buffer], tokens, state)
   end
 
   defp handle_doctype("\n" <> rest, line, _column, buffer, tokens, state) do
-    handle_doctype(rest, line + 1, state.column_base, ["\n" | buffer], tokens, state)
+    handle_doctype(rest, line + 1, state.indentation + 1, ["\n" | buffer], tokens, state)
   end
 
   defp handle_doctype(<<c::utf8, rest::binary>>, line, column, buffer, tokens, state) do
@@ -222,11 +292,11 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   end
 
   defp handle_comment("\r\n" <> rest, line, _column, buffer, state) do
-    handle_comment(rest, line + 1, state.column_base, ["\r\n" | buffer], state)
+    handle_comment(rest, line + 1, state.indentation + 1, ["\r\n" | buffer], state)
   end
 
   defp handle_comment("\n" <> rest, line, _column, buffer, state) do
-    handle_comment(rest, line + 1, state.column_base, ["\n" | buffer], state)
+    handle_comment(rest, line + 1, state.indentation + 1, ["\n" | buffer], state)
   end
 
   defp handle_comment("-->" <> rest, line, column, buffer, _state) do
@@ -253,11 +323,11 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   end
 
   defp handle_style("\r\n" <> rest, line, _column, buffer, tokens, state) do
-    handle_style(rest, line + 1, state.column_base, ["\r\n" | buffer], tokens, state)
+    handle_style(rest, line + 1, state.indentation + 1, ["\r\n" | buffer], tokens, state)
   end
 
   defp handle_style("\n" <> rest, line, _column, buffer, tokens, state) do
-    handle_style(rest, line + 1, state.column_base, ["\n" | buffer], tokens, state)
+    handle_style(rest, line + 1, state.indentation + 1, ["\n" | buffer], tokens, state)
   end
 
   defp handle_style(<<c::utf8, rest::binary>>, line, column, buffer, tokens, state) do
@@ -280,11 +350,11 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   end
 
   defp handle_script("\r\n" <> rest, line, _column, buffer, tokens, state) do
-    handle_script(rest, line + 1, state.column_base, ["\r\n" | buffer], tokens, state)
+    handle_script(rest, line + 1, state.indentation + 1, ["\r\n" | buffer], tokens, state)
   end
 
   defp handle_script("\n" <> rest, line, _column, buffer, tokens, state) do
-    handle_script(rest, line + 1, state.column_base, ["\n" | buffer], tokens, state)
+    handle_script(rest, line + 1, state.indentation + 1, ["\n" | buffer], tokens, state)
   end
 
   defp handle_script(<<c::utf8, rest::binary>>, line, column, buffer, tokens, state) do
@@ -392,11 +462,11 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   ## handle_maybe_tag_open_end
 
   defp handle_maybe_tag_open_end("\r\n" <> rest, line, _column, tokens, state) do
-    handle_maybe_tag_open_end(rest, line + 1, state.column_base, tokens, state)
+    handle_maybe_tag_open_end(rest, line + 1, state.indentation + 1, tokens, state)
   end
 
   defp handle_maybe_tag_open_end("\n" <> rest, line, _column, tokens, state) do
-    handle_maybe_tag_open_end(rest, line + 1, state.column_base, tokens, state)
+    handle_maybe_tag_open_end(rest, line + 1, state.indentation + 1, tokens, state)
   end
 
   defp handle_maybe_tag_open_end(<<c::utf8, rest::binary>>, line, column, tokens, state)
@@ -529,11 +599,11 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   ## handle_maybe_attr_value
 
   defp handle_maybe_attr_value("\r\n" <> rest, line, _column, state) do
-    handle_maybe_attr_value(rest, line + 1, state.column_base, state)
+    handle_maybe_attr_value(rest, line + 1, state.indentation + 1, state)
   end
 
   defp handle_maybe_attr_value("\n" <> rest, line, _column, state) do
-    handle_maybe_attr_value(rest, line + 1, state.column_base, state)
+    handle_maybe_attr_value(rest, line + 1, state.indentation + 1, state)
   end
 
   defp handle_maybe_attr_value(<<c::utf8, rest::binary>>, line, column, state)
@@ -552,11 +622,11 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   ## handle_attr_value_begin
 
   defp handle_attr_value_begin("\r\n" <> rest, line, _column, state) do
-    handle_attr_value_begin(rest, line + 1, state.column_base, state)
+    handle_attr_value_begin(rest, line + 1, state.indentation + 1, state)
   end
 
   defp handle_attr_value_begin("\n" <> rest, line, _column, state) do
-    handle_attr_value_begin(rest, line + 1, state.column_base, state)
+    handle_attr_value_begin(rest, line + 1, state.indentation + 1, state)
   end
 
   defp handle_attr_value_begin(<<c::utf8, rest::binary>>, line, column, state)
@@ -590,13 +660,25 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   ## handle_attr_value_quote
 
   defp handle_attr_value_quote("\r\n" <> rest, delimiter, line, _column, buffer, state) do
-    column = state.column_base
-    handle_attr_value_quote(rest, delimiter, line + 1, column, ["\r\n" | buffer], state)
+    handle_attr_value_quote(
+      rest,
+      delimiter,
+      line + 1,
+      state.indentation + 1,
+      ["\r\n" | buffer],
+      state
+    )
   end
 
   defp handle_attr_value_quote("\n" <> rest, delimiter, line, _column, buffer, state) do
-    column = state.column_base
-    handle_attr_value_quote(rest, delimiter, line + 1, column, ["\n" | buffer], state)
+    handle_attr_value_quote(
+      rest,
+      delimiter,
+      line + 1,
+      state.indentation + 1,
+      ["\n" | buffer],
+      state
+    )
   end
 
   defp handle_attr_value_quote(
@@ -653,11 +735,11 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
   ## handle_interpolation
 
   defp handle_interpolation("\r\n" <> rest, line, _column, buffer, braces, state) do
-    handle_interpolation(rest, line + 1, state.column_base, ["\r\n" | buffer], braces, state)
+    handle_interpolation(rest, line + 1, state.indentation + 1, ["\r\n" | buffer], braces, state)
   end
 
   defp handle_interpolation("\n" <> rest, line, _column, buffer, braces, state) do
-    handle_interpolation(rest, line + 1, state.column_base, ["\n" | buffer], braces, state)
+    handle_interpolation(rest, line + 1, state.indentation + 1, ["\n" | buffer], braces, state)
   end
 
   defp handle_interpolation("}" <> rest, line, column, buffer, 0, _state) do

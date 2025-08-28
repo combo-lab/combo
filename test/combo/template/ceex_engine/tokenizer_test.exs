@@ -4,25 +4,13 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
   alias Combo.Template.CEExEngine.SyntaxError
   alias Combo.Template.CEExEngine.Tokenizer
 
-  defp tokenizer_state(source), do: Tokenizer.init(source, "nofile", 0)
-
-  defp tokenize(source) do
-    state = tokenizer_state(source)
-    Tokenizer.tokenize(source, [], [], {:text, :enabled}, state)
-  end
-
-  defp finalize(source, tokens, cont) do
-    Tokenizer.finalize(tokens, cont, "nofile", source)
-  end
-
-  defp fetch_tokens!(source) do
-    state = tokenizer_state(source)
-    {tokens, _cont} = Tokenizer.tokenize(source, [], [], {:text, :enabled}, state)
+  defp tokens!(contents) do
+    {tokens, _cont} = Tokenizer.tokenize(contents, [], [])
     Enum.reverse(tokens)
   end
 
-  defp tokenize_attrs(text) do
-    [{_, _, attrs, _}] = fetch_tokens!(text)
+  defp attrs!(text) do
+    [{_, _, attrs, _}] = tokens!(text)
     attrs
   end
 
@@ -39,7 +27,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("<!doctype html")
+        tokens!("<!doctype html")
       end
     end
   end
@@ -55,8 +43,8 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
       assert_raise SyntaxError, message, fn ->
         source = "<!-- comment"
-        {tokens, cont} = tokenize(source)
-        finalize(source, tokens, cont)
+        {tokens, cont} = Tokenizer.tokenize(source)
+        Tokenizer.finalize(tokens, cont, source)
       end
     end
   end
@@ -74,7 +62,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("<")
+        tokens!("<")
       end
 
       # ecountered stop chars. note that the / is removed from @stop_chars
@@ -88,7 +76,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
         """
 
         assert_raise SyntaxError, message, fn ->
-          fetch_tokens!("""
+          tokens!("""
           <div>
             <#{<<char>>}\
           """)
@@ -105,7 +93,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("<Invalid.Name>")
+        tokens!("<Invalid.Name>")
       end
     end
 
@@ -118,7 +106,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("<./local_component>")
+        tokens!("<./local_component>")
       end
     end
 
@@ -131,7 +119,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("<.InvalidName>")
+        tokens!("<.InvalidName>")
       end
     end
 
@@ -144,7 +132,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("<:/slot>")
+        tokens!("<:/slot>")
       end
     end
 
@@ -157,7 +145,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("<:InvalidName>")
+        tokens!("<:InvalidName>")
       end
     end
 
@@ -170,7 +158,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("<:inner_block>")
+        tokens!("<:inner_block>")
       end
     end
 
@@ -186,7 +174,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("""
+        tokens!("""
         <div>
           <div ="panel">\
         """)
@@ -200,7 +188,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!(~S(<div = >))
+        tokens!(~S(<div = >))
       end
 
       message = """
@@ -211,7 +199,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!(~S(<div / >))
+        tokens!(~S(<div / >))
       end
     end
 
@@ -224,7 +212,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!(~S(<div'>))
+        tokens!(~S(<div'>))
       end
 
       message = """
@@ -235,7 +223,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!(~S(<div">))
+        tokens!(~S(<div">))
       end
 
       message = """
@@ -246,7 +234,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!(~S(<div attr'>))
+        tokens!(~S(<div attr'>))
       end
 
       message = """
@@ -257,7 +245,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!(~S(<div class={"test"}">))
+        tokens!(~S(<div class={"test"}">))
       end
     end
 
@@ -270,7 +258,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("<div class")
+        tokens!("<div class")
       end
     end
 
@@ -287,7 +275,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("""
+        tokens!("""
         <div
           class=>\
         """)
@@ -304,7 +292,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!(~S(<div class= >))
+        tokens!(~S(<div class= >))
       end
 
       message = """
@@ -318,7 +306,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("<div class=")
+        tokens!("<div class=")
       end
     end
 
@@ -326,7 +314,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       message = ~r"nofile:2:15: expected closing `\"` for attribute value"
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("""
+        tokens!("""
         <div
           class="panel\
         """)
@@ -335,7 +323,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       message = ~r"nofile:2:15: expected closing `\'` for attribute value"
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("""
+        tokens!("""
         <div
           class='panel\
         """)
@@ -354,7 +342,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("""
+        tokens!("""
         <div
           class={panel\
         """)
@@ -375,7 +363,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("""
+        tokens!("""
         <div
           {@attrs\
         """)
@@ -388,7 +376,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       message = ~r"nofile:1:5: expected closing `>` or `/>` for tag"
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("<foo")
+        tokens!("<foo")
       end
     end
   end
@@ -406,7 +394,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("""
+        tokens!("""
         <div>
           </>\
         """)
@@ -425,7 +413,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       """
 
       assert_raise SyntaxError, message, fn ->
-        fetch_tokens!("""
+        tokens!("""
         <div>
         </div text\
         """)
@@ -437,13 +425,13 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
   describe "text" do
     test "is tokenized as {:text, value}" do
-      assert fetch_tokens!("Hello") == [
+      assert tokens!("Hello") == [
                {:text, "Hello", %{line_end: 1, column_end: 6}}
              ]
     end
 
     test "can be declared with multiple lines" do
-      assert fetch_tokens!("""
+      assert tokens!("""
              first
              second
              third
@@ -453,7 +441,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
 
     test "keeps line breaks unchanged" do
-      assert fetch_tokens!("first\nsecond\r\nthird") == [
+      assert tokens!("first\nsecond\r\nthird") == [
                {:text, "first\nsecond\r\nthird", %{line_end: 3, column_end: 6}}
              ]
     end
@@ -461,13 +449,13 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
   describe "doctype" do
     test "is tokenized as text" do
-      assert fetch_tokens!("<!doctype html>") == [
+      assert tokens!("<!doctype html>") == [
                {:text, "<!doctype html>", %{line_end: 1, column_end: 16}}
              ]
     end
 
     test "can be declared as multiple lines" do
-      assert fetch_tokens!("""
+      assert tokens!("""
              <!DOCTYPE
              html
              >  <br />\
@@ -488,14 +476,14 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
   describe "comment" do
     test "is tokenized as text" do
-      assert fetch_tokens!("Begin<!-- comment -->End") == [
+      assert tokens!("Begin<!-- comment -->End") == [
                {:text, "Begin<!-- comment -->End",
                 %{line_end: 1, column_end: 25, context: [:comment_start, :comment_end]}}
              ]
     end
 
     test "followed by curly" do
-      assert fetch_tokens!("<!-- comment -->{hello}text") == [
+      assert tokens!("<!-- comment -->{hello}text") == [
                {:text, "<!-- comment -->",
                 %{line_end: 1, column_end: 17, context: [:comment_start, :comment_end]}},
                {:body_expr, "hello", %{line: 1, column: 17}},
@@ -504,7 +492,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
 
     test "multiple lines and wrapped by tags" do
-      assert fetch_tokens!("""
+      assert tokens!("""
              <p>
              <!--
              <div>
@@ -543,14 +531,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       <div>
       """
 
-      {first_tokens, cont} =
-        Tokenizer.tokenize(
-          first_part,
-          [],
-          [],
-          {:text, :enabled},
-          tokenizer_state(first_part)
-        )
+      {first_tokens, cont} = Tokenizer.tokenize(first_part, [], [])
 
       second_part = """
       </div>
@@ -561,8 +542,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       </div>
       """
 
-      {tokens, {:text, :enabled}} =
-        Tokenizer.tokenize(second_part, [], first_tokens, cont, tokenizer_state(second_part))
+      {tokens, {:text, :enabled}} = Tokenizer.tokenize(second_part, first_tokens, cont: cont)
 
       assert Enum.reverse(tokens) == [
                {:htag, "p", [],
@@ -634,14 +614,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       <%= "Hello" %>
       """
 
-      {first_tokens, cont} =
-        Tokenizer.tokenize(
-          first_part,
-          [],
-          [],
-          {:text, :enabled},
-          tokenizer_state(first_part)
-        )
+      {first_tokens, cont} = Tokenizer.tokenize(first_part, [], [])
 
       second_part = """
       -->
@@ -649,8 +622,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       <p><%= "World"</p>
       """
 
-      {second_tokens, cont} =
-        Tokenizer.tokenize(second_part, [], first_tokens, cont, tokenizer_state(second_part))
+      {second_tokens, cont} = Tokenizer.tokenize(second_part, first_tokens, cont: cont)
 
       third_part = """
       -->
@@ -659,8 +631,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       </p>
       """
 
-      {tokens, {:text, :enabled}} =
-        Tokenizer.tokenize(third_part, [], second_tokens, cont, tokenizer_state(third_part))
+      {tokens, {:text, :enabled}} = Tokenizer.tokenize(third_part, second_tokens, cont: cont)
 
       assert Enum.reverse(tokens) == [
                {:htag, "p", [],
@@ -721,7 +692,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
   describe "handle tag - opening tag" do
     test "represented as {:htag, name, attrs, meta}" do
-      assert fetch_tokens!("<div>") == [
+      assert tokens!("<div>") == [
                {:htag, "div", [],
                 %{
                   tag_name: "div",
@@ -735,7 +706,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
 
     test "with space after name" do
-      assert fetch_tokens!("<div >") == [
+      assert tokens!("<div >") == [
                {:htag, "div", [],
                 %{
                   tag_name: "div",
@@ -749,7 +720,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
 
     test "with line break after name" do
-      assert fetch_tokens!("<div\n>") == [
+      assert tokens!("<div\n>") == [
                {:htag, "div", [],
                 %{
                   tag_name: "div",
@@ -763,7 +734,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
 
     test "self-closing" do
-      assert fetch_tokens!("<div/>") == [
+      assert tokens!("<div/>") == [
                {:htag, "div", [],
                 %{
                   tag_name: "div",
@@ -775,7 +746,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 }}
              ]
 
-      assert fetch_tokens!("<div />") == [
+      assert tokens!("<div />") == [
                {:htag, "div", [],
                 %{
                   tag_name: "div",
@@ -790,7 +761,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
     test "compute line and column" do
       tokens =
-        fetch_tokens!("""
+        tokens!("""
         <div>
           <span>
 
@@ -810,7 +781,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
   describe "handle attributes" do
     test "represented as a list of {name, {type, value, v_meta} | nil, meta}" do
-      assert tokenize_attrs(~S(<div class="panel" hidden style={@style}>)) == [
+      assert attrs!(~S(<div class="panel" hidden style={@style}>)) == [
                {"class", {:string, "panel", %{delimiter: ?"}}, %{line: 1, column: 6}},
                {"hidden", nil, %{line: 1, column: 20}},
                {"style", {:expr, "@style", %{line: 1, column: 34}}, %{line: 1, column: 27}}
@@ -819,75 +790,75 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
     test "accepts spaces between the name and `=`" do
       assert [{"class", {:string, "panel", %{}}, %{}}] =
-               tokenize_attrs(~S(<div class ="panel">))
+               attrs!(~S(<div class ="panel">))
     end
 
     test "accepts line breaks between the name and `=`" do
       assert [{"class", {:string, "panel", %{}}, %{}}] =
-               tokenize_attrs("<div class\n=\"panel\">")
+               attrs!("<div class\n=\"panel\">")
 
       assert [{"class", {:string, "panel", %{}}, %{}}] =
-               tokenize_attrs("<div class\r\n=\"panel\">")
+               attrs!("<div class\r\n=\"panel\">")
     end
 
     test "accepts spaces between `=` and the value" do
       assert [{"class", {:string, "panel", %{}}, %{}}] =
-               tokenize_attrs(~S(<div class= "panel">))
+               attrs!(~S(<div class= "panel">))
     end
 
     test "accepts line breaks between `=` and the value" do
       assert [{"class", {:string, "panel", %{}}, %{}}] =
-               tokenize_attrs("<div class=\n\"panel\">")
+               attrs!("<div class=\n\"panel\">")
 
       assert [{"class", {:string, "panel", %{}}, %{}}] =
-               tokenize_attrs("<div class=\r\n\"panel\">")
+               attrs!("<div class=\r\n\"panel\">")
     end
   end
 
   describe "handle attributes - boolean attributes" do
     test "represented as {name, nil, meta}" do
-      assert [{"hidden", nil, %{}}] = tokenize_attrs("<div hidden>")
+      assert [{"hidden", nil, %{}}] = attrs!("<div hidden>")
     end
 
     test "multiple attributes" do
       assert [{"hidden", nil, %{}}, {"selected", nil, %{}}] =
-               tokenize_attrs("<div hidden selected>")
+               attrs!("<div hidden selected>")
     end
 
     test "with space after" do
-      assert [{"hidden", nil, %{}}] = tokenize_attrs("<div hidden >")
+      assert [{"hidden", nil, %{}}] = attrs!("<div hidden >")
     end
 
     test "in self close tag" do
-      assert [{"hidden", nil, %{}}] = tokenize_attrs("<div hidden/>")
+      assert [{"hidden", nil, %{}}] = attrs!("<div hidden/>")
     end
 
     test "in self close tag with space after" do
-      assert [{"hidden", nil, %{}}] = tokenize_attrs("<div hidden />")
+      assert [{"hidden", nil, %{}}] = attrs!("<div hidden />")
     end
   end
 
   describe "handle attributes - double quoted attributes" do
     test "value is represented as {:string, value, meta}}" do
       assert [{"class", {:string, "panel", %{delimiter: ?"}}, %{}}] =
-               tokenize_attrs(~S(<div class="panel">))
+               attrs!(~S(<div class="panel">))
     end
 
     test "multiple attributes" do
       assert [
                {"class", {:string, "panel", %{delimiter: ?"}}, %{}},
                {"style", {:string, "margin: 0px;", %{delimiter: ?"}}, %{}}
-             ] = tokenize_attrs(~S(<div class="panel" style="margin: 0px;">))
+             ] = attrs!(~S(<div class="panel" style="margin: 0px;">))
     end
 
     test "value containing single quotes" do
       assert [{"title", {:string, "i'd love to!", %{delimiter: ?"}}, %{}}] =
-               tokenize_attrs(~S(<div title="i'd love to!">))
+               attrs!(~S(<div title="i'd love to!">))
     end
 
     test "value containing line breaks" do
       tokens =
-        fetch_tokens!("""
+        tokens!("""
         <div title="first
           second
         third"><span>\
@@ -903,24 +874,24 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
   describe "handle attributes - single quoted attributes" do
     test "value is represented as {:string, value, meta}}" do
       assert [{"class", {:string, "panel", %{delimiter: ?'}}, %{}}] =
-               tokenize_attrs(~S(<div class='panel'>))
+               attrs!(~S(<div class='panel'>))
     end
 
     test "multiple attributes" do
       assert [
                {"class", {:string, "panel", %{delimiter: ?'}}, %{}},
                {"style", {:string, "margin: 0px;", %{delimiter: ?'}}, %{}}
-             ] = tokenize_attrs(~S(<div class='panel' style='margin: 0px;'>))
+             ] = attrs!(~S(<div class='panel' style='margin: 0px;'>))
     end
 
     test "value containing double quotes" do
       assert [{"title", {:string, ~S(Say "hi!"), %{delimiter: ?'}}, %{}}] =
-               tokenize_attrs(~S(<div title='Say "hi!"'>))
+               attrs!(~S(<div title='Say "hi!"'>))
     end
 
     test "value containing line breaks" do
       tokens =
-        fetch_tokens!("""
+        tokens!("""
         <div title='first
           second
         third'><span>\
@@ -936,34 +907,34 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
   describe "handle attributes - braced attributes" do
     test "value is represented as {:expr, value, meta}" do
       assert [{"class", {:expr, "@class", %{line: 1, column: 13}}, %{}}] =
-               tokenize_attrs(~S(<div class={@class}>))
+               attrs!(~S(<div class={@class}>))
     end
 
     test "multiple attributes" do
       assert [
                {"class", {:expr, "@class", %{}}, %{}},
                {"style", {:expr, "@style", %{}}, %{}}
-             ] = tokenize_attrs(~S(<div class={@class} style={@style}>))
+             ] = attrs!(~S(<div class={@class} style={@style}>))
     end
 
     test "double quoted strings inside expression" do
       assert [{"class", {:expr, ~S("text"), %{}}, %{}}] =
-               tokenize_attrs(~S(<div class={"text"}>))
+               attrs!(~S(<div class={"text"}>))
     end
 
     test "value containing curly braces" do
       assert [{"class", {:expr, " [{:active, @active}] ", %{}}, %{}}] =
-               tokenize_attrs(~S(<div class={ [{:active, @active}] }>))
+               attrs!(~S(<div class={ [{:active, @active}] }>))
     end
 
     test "ignore escaped curly braces inside elixir strings" do
-      assert [{"class", {:expr, ~S("\{hi"), %{}}, %{}}] = tokenize_attrs(~S(<div class={"\{hi"}>))
-      assert [{"class", {:expr, ~S("hi\}"), %{}}, %{}}] = tokenize_attrs(~S(<div class={"hi\}"}>))
+      assert [{"class", {:expr, ~S("\{hi"), %{}}, %{}}] = attrs!(~S(<div class={"\{hi"}>))
+      assert [{"class", {:expr, ~S("hi\}"), %{}}, %{}}] = attrs!(~S(<div class={"hi\}"}>))
     end
 
     test "compute line and columns" do
       attrs =
-        tokenize_attrs("""
+        attrs!("""
         <div
           class={@class}
             style={
@@ -983,27 +954,27 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
   describe "handle root attributes" do
     test "represented as {:root, value, meta}" do
-      assert [{:root, {:expr, "@attrs", %{}}, %{}}] = tokenize_attrs("<div {@attrs}>")
+      assert [{:root, {:expr, "@attrs", %{}}, %{}}] = attrs!("<div {@attrs}>")
     end
 
     test "with space after" do
-      assert [{:root, {:expr, "@attrs", %{}}, %{}}] = tokenize_attrs("<div {@attrs} >")
+      assert [{:root, {:expr, "@attrs", %{}}, %{}}] = attrs!("<div {@attrs} >")
     end
 
     test "with line break after closing }" do
-      assert [{:root, {:expr, "@attrs", %{}}, %{}}] = tokenize_attrs("<div {@attrs}\n>")
+      assert [{:root, {:expr, "@attrs", %{}}, %{}}] = attrs!("<div {@attrs}\n>")
     end
 
     test "in self close tag" do
-      assert [{:root, {:expr, "@attrs", %{}}, %{}}] = tokenize_attrs("<div {@attrs}/>")
+      assert [{:root, {:expr, "@attrs", %{}}, %{}}] = attrs!("<div {@attrs}/>")
     end
 
     test "in self close tag with space after closing }" do
-      assert [{:root, {:expr, "@attrs", %{}}, %{}}] = tokenize_attrs("<div {@attrs} />")
+      assert [{:root, {:expr, "@attrs", %{}}, %{}}] = attrs!("<div {@attrs} />")
     end
 
     test "multiple values among other attributes" do
-      attrs = tokenize_attrs("<div class={@class} {@attrs1} hidden {@attrs2}/>")
+      attrs = attrs!("<div class={@class} {@attrs1} hidden {@attrs2}/>")
 
       assert [
                {"class", {:expr, "@class", %{}}, %{}},
@@ -1015,7 +986,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
     test "compute line and columns" do
       attrs =
-        tokenize_attrs("""
+        attrs!("""
         <div
           {@root1}
             {
@@ -1036,7 +1007,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
   describe "handle tag - closing tag" do
     test "represented as {:close, :htag, name, meta}" do
-      assert fetch_tokens!("</div>") == [
+      assert tokens!("</div>") == [
                {:close, :htag, "div",
                 %{
                   tag_name: "div",
@@ -1050,7 +1021,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
     test "compute line and columns" do
       tokens =
-        fetch_tokens!("""
+        tokens!("""
         <div>
         </div><br>\
         """)
@@ -1066,7 +1037,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
   describe "handle special tag - style" do
     test "paired tags" do
-      assert fetch_tokens!("""
+      assert tokens!("""
              <style>
                p {
                  color: #26b72b;
@@ -1098,7 +1069,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
 
     test "self-closing tag" do
-      assert fetch_tokens!("""
+      assert tokens!("""
              <style blocking="render" /><br>
              """) == [
                {:htag, "style",
@@ -1133,7 +1104,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
   describe "handle special tag - script" do
     test "paired tags" do
-      assert fetch_tokens!("""
+      assert tokens!("""
              <script>
                a = "<a>Link</a>"; b = {};
              </script><br>
@@ -1163,7 +1134,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
 
     test "self-closing tag" do
-      assert fetch_tokens!("""
+      assert tokens!("""
              <script src="foo.js" /><br>
              """) == [
                {:htag, "script",
@@ -1198,7 +1169,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
   describe "handle remote component" do
     test "paired tags" do
-      assert fetch_tokens!("""
+      assert tokens!("""
              <Components.modal on_cancel={navigate(~p"/posts")}>
                This is another modal.
              </Components.modal>
@@ -1233,7 +1204,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
 
     test "self-closing tag" do
-      assert fetch_tokens!("""
+      assert tokens!("""
              <Components.flash kind={:info} flash={@flash} />
              """) == [
                {
@@ -1259,7 +1230,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
   describe "handle local component" do
     test "paired tags" do
-      assert fetch_tokens!("""
+      assert tokens!("""
              <.link href="/">Regular anchor link</.link>
              """) == [
                {:local_component, "link",
@@ -1286,7 +1257,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
 
     test "self-closing tag" do
-      assert fetch_tokens!("""
+      assert tokens!("""
              <.inspect module={ExampleModule} type="recursive" />
              """) == [
                {:local_component, "inspect",
@@ -1310,7 +1281,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
 
   describe "handle slot" do
     test "paired tags" do
-      assert fetch_tokens!("""
+      assert tokens!("""
              <:item to="/">item 1</:item>
              """) == [
                {:slot, "item",
@@ -1339,7 +1310,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
 
     test "self-closing tag" do
-      assert fetch_tokens!("""
+      assert tokens!("""
              <:item to="/" />
              """) == [
                {:slot, "item",
@@ -1360,7 +1331,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
   end
 
   test "mixing text and tags" do
-    assert fetch_tokens!("""
+    assert tokens!("""
            text before
            <div>
              text

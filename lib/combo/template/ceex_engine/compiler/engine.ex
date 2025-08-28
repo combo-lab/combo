@@ -41,8 +41,20 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       cont: cont
     } = state
 
-    tokenizer_state = Tokenizer.init(source, file, indentation)
-    {tokens, cont} = Tokenizer.tokenize(text, meta, tokens, cont, tokenizer_state)
+    line = Keyword.fetch!(meta, :line)
+    # Before passing the column to tokenizer, transform the absolute column into
+    # the one relative to the current indentation level.
+    column = Keyword.fetch!(meta, :column) - indentation
+
+    {tokens, cont} =
+      Tokenizer.tokenize(text, tokens, source,
+        file: file,
+        indentation: indentation,
+        line: line,
+        column: column,
+        cont: cont
+      )
+
     %{state | tokens: tokens, cont: cont}
   end
 
@@ -74,7 +86,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       cont: cont
     } = state
 
-    tokens = Tokenizer.finalize(tokens, cont, file, source)
+    tokens = Tokenizer.finalize(tokens, cont, source, file: file)
 
     quoted = handle_tokens(state, "template", tokens)
     quoted = Assigns.traverse(quoted)
@@ -1283,11 +1295,15 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
   ## Helpers
 
   defp raise_syntax_error!(message, meta, state) do
+    line = meta.line
+    column = meta.column
+
     raise SyntaxError,
       file: state.file,
-      line: meta.line,
-      column: meta.column,
-      description: message <> SyntaxError.code_snippet(state.source, meta, state.indentation)
+      line: line,
+      column: column,
+      description:
+        message <> SyntaxError.code_snippet(state.source, {line, column}, state.indentation)
   end
 
   defp maybe_annotate_caller(state, meta) do
