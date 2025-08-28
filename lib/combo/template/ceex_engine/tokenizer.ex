@@ -373,10 +373,10 @@ defmodule Combo.Template.CEExEngine.Tokenizer do
         meta = %{
           tag_name: name,
           void?: :pending,
+          self_closing?: :pending,
           line: line,
           column: column - 1,
-          inner_location: :pending,
-          self_closing?: :pending
+          inner_location: :pending
         }
 
         case classify_tag_name(name) do

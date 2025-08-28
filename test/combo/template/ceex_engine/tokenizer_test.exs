@@ -465,10 +465,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 %{
                   tag_name: "br",
                   void?: true,
+                  self_closing?: true,
                   line: 3,
                   column: 4,
-                  inner_location: {3, 10},
-                  self_closing?: true
+                  inner_location: {3, 10}
                 }}
              ]
     end
@@ -503,10 +503,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 %{
                   tag_name: "p",
                   void?: false,
+                  self_closing?: false,
                   line: 1,
                   column: 1,
-                  inner_location: {1, 4},
-                  self_closing?: false
+                  inner_location: {1, 4}
                 }},
                {:text, "\n<!--\n<div>\n-->\n",
                 %{line_end: 5, column_end: 1, context: [:comment_start, :comment_end]}},
@@ -516,10 +516,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 %{
                   tag_name: "br",
                   void?: true,
+                  self_closing?: false,
                   line: 5,
                   column: 5,
-                  inner_location: {5, 9},
-                  self_closing?: false
+                  inner_location: {5, 9}
                 }}
              ]
     end
@@ -549,10 +549,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 %{
                   tag_name: "p",
                   void?: false,
+                  self_closing?: false,
                   line: 1,
                   column: 1,
-                  inner_location: {1, 4},
-                  self_closing?: false
+                  inner_location: {1, 4}
                 }},
                {:text, "\n<!--\n<div>\n",
                 %{line_end: 4, column_end: 1, context: [:comment_start]}},
@@ -570,20 +570,20 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 %{
                   tag_name: "div",
                   void?: false,
+                  self_closing?: false,
                   line: 4,
                   column: 1,
-                  inner_location: {4, 6},
-                  self_closing?: false
+                  inner_location: {4, 6}
                 }},
                {:text, "\n  ", %{line_end: 5, column_end: 3}},
                {:htag, "p", [],
                 %{
                   tag_name: "p",
                   void?: false,
+                  self_closing?: false,
                   line: 5,
                   column: 3,
-                  inner_location: {5, 6},
-                  self_closing?: false
+                  inner_location: {5, 6}
                 }},
                {:text, "Hello", %{line_end: 5, column_end: 11}},
                {:close, :htag, "p",
@@ -638,10 +638,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 %{
                   tag_name: "p",
                   void?: false,
+                  self_closing?: false,
                   line: 1,
                   column: 1,
-                  inner_location: {1, 4},
-                  self_closing?: false
+                  inner_location: {1, 4}
                 }},
                {:text, "\n<!--\n<%= \"Hello\" %>\n",
                 %{line_end: 4, column_end: 1, context: [:comment_start]}},
@@ -652,20 +652,20 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 %{
                   tag_name: "div",
                   void?: false,
+                  self_closing?: false,
                   line: 2,
                   column: 1,
-                  inner_location: {2, 6},
-                  self_closing?: false
+                  inner_location: {2, 6}
                 }},
                {:text, "\n  ", %{line_end: 3, column_end: 3}},
                {:htag, "p", [],
                 %{
                   tag_name: "p",
                   void?: false,
+                  self_closing?: false,
                   line: 3,
                   column: 3,
-                  inner_location: {3, 6},
-                  self_closing?: false
+                  inner_location: {3, 6}
                 }},
                {:text, "Hi", %{line_end: 3, column_end: 8}},
                {:close, :htag, "p",
@@ -697,10 +697,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 %{
                   tag_name: "div",
                   void?: false,
+                  self_closing?: false,
                   line: 1,
                   column: 1,
-                  inner_location: {1, 6},
-                  self_closing?: false
+                  inner_location: {1, 6}
                 }}
              ]
     end
@@ -711,10 +711,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 %{
                   tag_name: "div",
                   void?: false,
+                  self_closing?: false,
                   line: 1,
                   column: 1,
-                  inner_location: {1, 7},
-                  self_closing?: false
+                  inner_location: {1, 7}
                 }}
              ]
     end
@@ -725,10 +725,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 %{
                   tag_name: "div",
                   void?: false,
+                  self_closing?: false,
                   line: 1,
                   column: 1,
-                  inner_location: {2, 2},
-                  self_closing?: false
+                  inner_location: {2, 2}
                 }}
              ]
     end
@@ -739,10 +739,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 %{
                   tag_name: "div",
                   void?: false,
+                  self_closing?: true,
                   line: 1,
                   column: 1,
-                  inner_location: {1, 7},
-                  self_closing?: true
+                  inner_location: {1, 7}
                 }}
              ]
 
@@ -751,10 +751,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 %{
                   tag_name: "div",
                   void?: false,
+                  self_closing?: true,
                   line: 1,
                   column: 1,
-                  inner_location: {1, 8},
-                  self_closing?: true
+                  inner_location: {1, 8}
                 }}
              ]
     end
@@ -773,7 +773,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                {:text, _, %{line_end: 2, column_end: 3}},
                {:htag, "span", [], %{line: 2, column: 3}},
                {:text, _, %{line_end: 4, column_end: 1}},
-               {:htag, "p", [], %{line: 4, column: 1, self_closing?: true}},
+               {:htag, "p", [], %{self_closing?: true, line: 4, column: 1}},
                {:htag, "br", [], %{line: 4, column: 5}}
              ] = tokens
     end
@@ -1048,10 +1048,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 %{
                   tag_name: "style",
                   void?: false,
+                  self_closing?: false,
                   line: 1,
                   column: 1,
-                  inner_location: {1, 8},
-                  self_closing?: false
+                  inner_location: {1, 8}
                 }},
                {:text, "\n  p {\n    color: #26b72b;\n  }\n", %{line_end: 5, column_end: 1}},
                {:close, :htag, "style", %{line: 5, column: 1, inner_location: {5, 1}}},
@@ -1059,10 +1059,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 %{
                   tag_name: "br",
                   void?: true,
+                  self_closing?: false,
                   line: 5,
                   column: 9,
-                  inner_location: {5, 13},
-                  self_closing?: false
+                  inner_location: {5, 13}
                 }},
                {:text, "\n", %{line_end: 6, column_end: 1}}
              ]
@@ -1083,19 +1083,19 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 %{
                   tag_name: "style",
                   void?: false,
+                  self_closing?: true,
                   line: 1,
                   column: 1,
-                  inner_location: {1, 28},
-                  self_closing?: true
+                  inner_location: {1, 28}
                 }},
                {:htag, "br", [],
                 %{
                   tag_name: "br",
                   void?: true,
+                  self_closing?: false,
                   line: 1,
                   column: 28,
-                  inner_location: {1, 32},
-                  self_closing?: false
+                  inner_location: {1, 32}
                 }},
                {:text, "\n", %{line_end: 2, column_end: 1}}
              ]
@@ -1113,10 +1113,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 %{
                   tag_name: "script",
                   void?: false,
+                  self_closing?: false,
                   line: 1,
                   column: 1,
-                  inner_location: {1, 9},
-                  self_closing?: false
+                  inner_location: {1, 9}
                 }},
                {:text, "\n  a = \"<a>Link</a>\"; b = {};\n", %{line_end: 3, column_end: 1}},
                {:close, :htag, "script", %{line: 3, column: 1, inner_location: {3, 1}}},
@@ -1124,10 +1124,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 %{
                   tag_name: "br",
                   void?: true,
+                  self_closing?: false,
                   line: 3,
                   column: 10,
-                  inner_location: {3, 14},
-                  self_closing?: false
+                  inner_location: {3, 14}
                 }},
                {:text, "\n", %{line_end: 4, column_end: 1}}
              ]
@@ -1148,19 +1148,19 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 %{
                   tag_name: "script",
                   void?: false,
+                  self_closing?: true,
                   line: 1,
                   column: 1,
-                  inner_location: {1, 24},
-                  self_closing?: true
+                  inner_location: {1, 24}
                 }},
                {:htag, "br", [],
                 %{
                   tag_name: "br",
                   void?: true,
+                  self_closing?: false,
                   line: 1,
                   column: 24,
-                  inner_location: {1, 28},
-                  self_closing?: false
+                  inner_location: {1, 28}
                 }},
                {:text, "\n", %{line_end: 2, column_end: 1}}
              ]
@@ -1184,10 +1184,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                  %{
                    tag_name: "Components.modal",
                    void?: false,
+                   self_closing?: false,
                    line: 1,
                    column: 1,
-                   inner_location: {1, 52},
-                   self_closing?: false
+                   inner_location: {1, 52}
                  }
                },
                {:text, "\n  This is another modal.\n", %{line_end: 3, column_end: 1}},
@@ -1216,11 +1216,11 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                  ],
                  %{
                    tag_name: "Components.flash",
+                   void?: false,
+                   self_closing?: true,
                    line: 1,
                    column: 1,
-                   inner_location: {1, 49},
-                   self_closing?: true,
-                   void?: false
+                   inner_location: {1, 49}
                  }
                },
                {:text, "\n", %{column_end: 1, line_end: 2}}
@@ -1238,10 +1238,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 %{
                   tag_name: ".link",
                   void?: false,
+                  self_closing?: false,
                   line: 1,
                   column: 1,
-                  inner_location: {1, 17},
-                  self_closing?: false
+                  inner_location: {1, 17}
                 }},
                {:text, "Regular anchor link", %{line_end: 1, column_end: 36}},
                {:close, :local_component, "link",
@@ -1269,10 +1269,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 %{
                   tag_name: ".inspect",
                   void?: false,
+                  self_closing?: true,
                   line: 1,
                   column: 1,
-                  inner_location: {1, 53},
-                  self_closing?: true
+                  inner_location: {1, 53}
                 }},
                {:text, "\n", %{line_end: 2, column_end: 1}}
              ]
@@ -1291,10 +1291,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 %{
                   tag_name: ":item",
                   void?: false,
+                  self_closing?: false,
                   line: 1,
                   column: 1,
-                  inner_location: {1, 15},
-                  self_closing?: false
+                  inner_location: {1, 15}
                 }},
                {:text, "item 1", %{line_end: 1, column_end: 21}},
                {:close, :slot, "item",
@@ -1320,10 +1320,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                 %{
                   tag_name: ":item",
                   void?: false,
+                  self_closing?: true,
                   line: 1,
                   column: 1,
-                  inner_location: {1, 17},
-                  self_closing?: true
+                  inner_location: {1, 17}
                 }},
                {:text, "\n", %{line_end: 2, column_end: 1}}
              ]
@@ -1343,10 +1343,10 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
               %{
                 tag_name: "div",
                 void?: false,
+                self_closing?: false,
                 line: 2,
                 column: 1,
-                inner_location: {2, 6},
-                self_closing?: false
+                inner_location: {2, 6}
               }},
              {:text, "\n  text\n",
               %{
