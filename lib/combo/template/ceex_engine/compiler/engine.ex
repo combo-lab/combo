@@ -22,10 +22,10 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       file: Keyword.get(opts, :file, "nofile"),
       indentation: Keyword.get(opts, :indentation, 0),
       caller: Keyword.fetch!(opts, :caller),
-      # token scanning
+      # tokenizing
       tokens: [],
       cont: {:text, :enabled},
-      # token parsing
+      # output building
       iob: iob,
       iob_stack: [iob.init()]
     }
@@ -109,7 +109,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     end
   end
 
-  ## Token parsing
+  ## Token handling
 
   defp handle_tokens(state, context, tokens) do
     %{
@@ -121,7 +121,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       iob_stack: iob_stack
     } = state
 
-    # Before parsing, a fresh new state of tokens is created.
+    # Before handling, a fresh new state of tokens is created.
     tokens_state = %{
       # These fields are static, so they are "always" fresh new.
       source: source,
