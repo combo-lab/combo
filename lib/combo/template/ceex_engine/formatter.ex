@@ -3,14 +3,15 @@ defmodule Combo.Template.CEExEngine.Formatter do
 
   require Logger
 
-  alias Combo.Template.CEExEngine.Formatter.HTMLAlgebra
-  alias Combo.Template.CEExEngine.Tokenizer
   alias Combo.Template.CEExEngine.SyntaxError
+  alias Combo.Template.CEExEngine.Tokenizer
+  alias Combo.Template.CEExEngine.Formatter.HTMLAlgebra
 
   defguard is_tag_open(tag_type)
            when tag_type in [:htag, :remote_component, :local_component, :slot]
 
-  # Default line length to be used in case nothing is specified in the `.formatter.exs` options.
+  # Default line length to be used in case nothing is specified in the
+  # `.formatter.exs` options.
   @default_line_length 98
 
   @behaviour Mix.Tasks.Format
@@ -68,27 +69,36 @@ defmodule Combo.Template.CEExEngine.Formatter do
 
   # The following content:
   #
-  # "<section>\n  <p><%= user.name ></p>\n  <%= if true do %> <p>this</p><% else %><p>that</p><% end %>\n</section>\n"
+  # ```elixir
+  # """
+  # <section>
+  #   <p><%= user.name ></p>
+  #   <%= if true do %> <p>this</p><% else %><p>that</p><% end %>
+  # </section>
+  # """
+  # ```
   #
-  # Will be tokenized as:
+  # will be tokenized as:
   #
+  # ```elixir
   # [
-  #   {:htag, "section", [], %{column: 1, line: 1}},
-  #   {:text, "\n  ", %{column_end: 3, line_end: 2}},
-  #   {:htag, "p", [], %{column: 3, line: 2}},
-  #   {:eex_tag_render, "<%= user.name ></p>\n  <%= if true do %>", %{block?: true, column: 6, line: 1}},
-  #   {:text, " ", %{column_end: 2, line_end: 1}},
-  #   {:htag, "p", [], %{column: 2, line: 1}},
-  #   {:text, "this", %{column_end: 12, line_end: 1}},
-  #   {:close, :htag, "p", %{column: 12, line: 1}},
-  #   {:eex_tag, "<% else %>", %{block?: false, column: 35, line: 2}},
-  #   {:htag, "p", [], %{column: 1, line: 1}},
-  #   {:text, "that", %{column_end: 14, line_end: 1}},
-  #   {:close, :htag, "p", %{column: 14, line: 1}},
-  #   {:eex_tag, "<% end %>", %{block?: false, column: 62, line: 2}},
-  #   {:text, "\n", %{column_end: 1, line_end: 2}},
-  #   {:close, :htag, "section", %{column: 1, line: 2}}
+  #   {:htag, "section", [], %{line: 1, column: 1}},
+  #   {:text, "\n  ", %{line_end: 2, column_end: 3}},
+  #   {:htag, "p", [], %{line: 2, column: 3}},
+  #   {:eex_tag_render, "<%= user.name ></p>\n  <%= if true do %>", %{block?: true, line: 1, column: 6}},
+  #   {:text, " ", %{line_end: 1, column_end: 2}},
+  #   {:htag, "p", [], %{line: 1, column: 2}},
+  #   {:text, "this", %{line_end: 1, column_end: 12}},
+  #   {:close, :htag, "p", %{line: 1, column: 12}},
+  #   {:eex_tag, "<% else %>", %{block?: false, line: 2, column: 35}},
+  #   {:htag, "p", [], %{line: 1, column: 1}},
+  #   {:text, "that", %{line_end: 1, column_end: 14}},
+  #   {:close, :htag, "p", %{line: 1, column: 14}},
+  #   {:eex_tag, "<% end %>", %{block?: false, line: 2, column: 62}},
+  #   {:text, "\n", %{line_end: 2, column_end: 1}},
+  #   {:close, :htag, "section", %{line: 2, column: 1}}
   # ]
+  # ```
   #
   @eex_expr [:start_expr, :expr, :end_expr, :middle_expr]
 
@@ -108,17 +118,17 @@ defmodule Combo.Template.CEExEngine.Formatter do
     )
   end
 
-  defp do_tokenize({:comment, text, meta}, {tokens, cont}, _contents) do
+  defp do_tokenize({:comment, text, meta}, {tokens, cont}, _source) do
     {[{:eex_comment, List.to_string(text), meta} | tokens], cont}
   end
 
-  defp do_tokenize({type, opt, expr, %{column: column, line: line}}, {tokens, cont}, _contents)
+  defp do_tokenize({type, opt, expr, %{column: column, line: line}}, {tokens, cont}, _source)
        when type in @eex_expr do
     meta = %{opt: opt, line: line, column: column}
     {[{:eex, type, expr |> List.to_string() |> String.trim(), meta} | tokens], cont}
   end
 
-  defp do_tokenize(_node, acc, _contents) do
+  defp do_tokenize(_node, acc, _source) do
     acc
   end
 
@@ -127,25 +137,29 @@ defmodule Combo.Template.CEExEngine.Formatter do
   # This is a recursive algorithm that will build an HTML tree from a flat list of
   # tokens. For instance, given this input:
   #
+  # ```elixir
   # [
-  #   {:htag, "div", [], %{column: 1, line: 1}},
-  #   {:htag, "h1", [], %{column: 6, line: 1}},
-  #   {:text, "Hello", %{column_end: 15, line_end: 1}},
-  #   {::close, :htag, "h1", %{column: 15, line: 1}},
-  #   {::close, :htag, "div", %{column: 20, line: 1}},
-  #   {:htag, "div", [], %{column: 1, line: 2}},
-  #   {:htag, "h1", [], %{column: 6, line: 2}},
-  #   {:text, "World", %{column_end: 15, line_end: 2}},
-  #   {::close, :htag, "h1", %{column: 15, line: 2}},
-  #   {::close, :htag, "div", %{column: 20, line: 2}}
+  #   {:htag, "div", [], %{line: 1, column: 1}},
+  #   {:htag, "h1", [], %{line: 1, column: 6}},
+  #   {:text, "Hello", %{line_end: 1, column_end: 15}},
+  #   {::close, :htag, "h1", %{line: 1, column: 15}},
+  #   {::close, :htag, "div", %{line: 1, column: 20}},
+  #   {:htag, "div", [], %{line: 2, column: 1}},
+  #   {:htag, "h1", [], %{line: 2, column: 6}},
+  #   {:text, "World", %{line_end: 2, column_end: 15}},
+  #   {::close, :htag, "h1", %{line: 2, column: 15}},
+  #   {::close, :htag, "div", %{line: 2, column: 20}}
   # ]
+  # ```
   #
   # The output will be:
   #
+  # ```elixir
   # [
   #   {:tag_block, "div", [], [{:tag_block, "h1", [], [text: "Hello"]}]},
   #   {:tag_block, "div", [], [{:tag_block, "h1", [], [text: "World"]}]}
   # ]
+  # ```
   #
   # Note that a `tag_block` has been created so that its fourth argument is a list of
   # its nested content.
@@ -158,19 +172,19 @@ defmodule Combo.Template.CEExEngine.Formatter do
   # As soon as the `tag_open` arrives, a new buffer will be started and we move
   # the previous buffer to the stack along with the `tag_open`:
   #
-  #   ```
-  #   defp build([{:htag, name, attrs, _meta} | tokens], buffer, stack) do
-  #     build(tokens, [], [{name, attrs, buffer} | stack])
-  #   end
-  #   ```
+  # ```elixir
+  # defp build([{:htag, name, attrs, _meta} | tokens], buffer, stack) do
+  #   build(tokens, [], [{name, attrs, buffer} | stack])
+  # end
+  # ```
   #
   # Then, we start to populate the buffer again until a `{:close, :htag, ...} arrives:
   #
-  #   ```
-  #   defp build([{:close, :htag, name, _meta} | tokens], buffer, [{name, attrs, upper_buffer} | stack]) do
-  #     build(tokens, [{:tag_block, name, attrs, Enum.reverse(buffer)} | upper_buffer], stack)
-  #   end
-  #   ```
+  # ```elixir
+  # defp build([{:close, :htag, name, _meta} | tokens], buffer, [{name, attrs, upper_buffer} | stack]) do
+  #   build(tokens, [{:tag_block, name, attrs, Enum.reverse(buffer)} | upper_buffer], stack)
+  # end
+  # ```
   #
   # In the snippet above, we build the `tag_block` with the accumulated buffer,
   # putting the buffer accumulated before the tag open (upper_buffer) on top.
@@ -183,15 +197,15 @@ defmodule Combo.Template.CEExEngine.Formatter do
   #
   # ```elixir
   # [
-  #   {:eex, :start_expr, "if true do", %{column: 0, line: 0, opt: '='}},
-  #   {:text, "\n  ", %{column_end: 3, line_end: 2}},
-  #   {:eex, :expr, "\"Hello\"", %{column: 3, line: 1, opt: '='}},
-  #   {:text, "\n", %{column_end: 1, line_end: 2}},
-  #   {:eex, :middle_expr, "else", %{column: 1, line: 2, opt: []}},
-  #   {:text, "\n  ", %{column_end: 3, line_end: 2}},
-  #   {:eex, :expr, "\"World\"", %{column: 3, line: 3, opt: '='}},
-  #   {:text, "\n", %{column_end: 1, line_end: 2}},
-  #   {:eex, :end_expr, "end", %{column: 1, line: 4, opt: []}}
+  #   {:eex, :start_expr, "if true do", %{line: 0, column: 0, opt: '='}},
+  #   {:text, "\n  ", %{line_end: 2, column_end: 3}},
+  #   {:eex, :expr, "\"Hello\"", %{line: 1, column: 3, opt: '='}},
+  #   {:text, "\n", %{line_end: 2, column_end: 1}},
+  #   {:eex, :middle_expr, "else", %{line: 2, column: 1, opt: []}},
+  #   {:text, "\n  ", %{line_end: 2, column_end: 3}},
+  #   {:eex, :expr, "\"World\"", %{line: 3, column: 3, opt: '='}},
+  #   {:text, "\n", %{line_end: 2, column_end: 1}},
+  #   {:eex, :end_expr, "end", %{line: 4, column: 1, opt: []}}
   # ]
   # ```
   #
@@ -201,8 +215,8 @@ defmodule Combo.Template.CEExEngine.Formatter do
   # [
   #   {:eex_block, "if true do",
   #    [
-  #      {[{:eex, "\"Hello\"", %{column: 3, line: 1, opt: '='}}], "else"},
-  #      {[{:eex, "\"World\"", %{column: 3, line: 3, opt: '='}}], "end"}
+  #      {[{:eex, "\"Hello\"", %{line: 1, column: 3, opt: '='}}], "else"},
+  #      {[{:eex, "\"World\"", %{line: 3, column: 3, opt: '='}}], "end"}
   #    ]}
   # ]
   # ```
