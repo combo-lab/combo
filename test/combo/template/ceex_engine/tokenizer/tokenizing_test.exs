@@ -1,7 +1,6 @@
-defmodule Combo.Template.CEExEngine.TokenizerTest do
+defmodule Combo.Template.CEExEngine.Tokenizer.TokenizingTest do
   use ExUnit.Case, async: true
 
-  alias Combo.Template.CEExEngine.SyntaxError
   alias Combo.Template.CEExEngine.Tokenizer
 
   defp tokens!(contents) do
@@ -14,417 +13,8 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     attrs
   end
 
-  ## Syntax checking
-  # First, test syntax errors separately, then focus on testing valid syntax cases.
-
-  describe "doctype - syntax checking" do
-    test "raises on unclosed tag" do
-      message = """
-      nofile:1:15: missing closing `>` for doctype
-        |
-      1 | <!doctype html
-        |               ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!("<!doctype html")
-      end
-    end
-  end
-
-  describe "comment - syntax checking" do
-    test "raises on unclosed tag" do
-      message = """
-      nofile:1:1: unexpected end of string inside tag
-        |
-      1 | <!-- comment
-        | ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        source = "<!-- comment"
-        {tokens, cont} = Tokenizer.tokenize(source)
-        Tokenizer.finalize(tokens, cont, source)
-      end
-    end
-  end
-
-  describe "opening tag - syntax checking" do
-    ## handle tag open
-
-    test "raises on missing tag name" do
-      # reached end of input
-      message = """
-      nofile:1:2: missing tag name after <
-        |
-      1 | <
-        |  ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!("<")
-      end
-
-      # ecountered stop chars. note that the / is removed from @stop_chars
-      for char <- ~c"\s\t\f\"'>=\r\n" do
-        message = """
-        nofile:2:4: missing tag name after <
-          |
-        1 | <div>
-        2 |   <#{<<char>> |> String.trim("\n")}
-          |    ^\
-        """
-
-        assert_raise SyntaxError, message, fn ->
-          tokens!("""
-          <div>
-            <#{<<char>>}\
-          """)
-        end
-      end
-    end
-
-    test "for remote component - raises on invalid tag name" do
-      message = """
-      nofile:1:2: invalid tag name
-        |
-      1 | <Invalid.Name>
-        |  ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!("<Invalid.Name>")
-      end
-    end
-
-    test "for local component - raises on missing tag name" do
-      message = """
-      nofile:1:2: missing local component name after .
-        |
-      1 | <./local_component>
-        |  ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!("<./local_component>")
-      end
-    end
-
-    test "for local component - raises on invalid tag name" do
-      message = """
-      nofile:1:2: invalid local component name after .
-        |
-      1 | <.InvalidName>
-        |  ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!("<.InvalidName>")
-      end
-    end
-
-    test "for slot - raises on missing tag name" do
-      message = """
-      nofile:1:2: missing slot name after :
-        |
-      1 | <:/slot>
-        |  ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!("<:/slot>")
-      end
-    end
-
-    test "for slot - raises on invalid tag name" do
-      message = """
-      nofile:1:2: invalid slot name after :
-        |
-      1 | <:InvalidName>
-        |  ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!("<:InvalidName>")
-      end
-    end
-
-    test "for slot - raises on reserved tag name" do
-      message = """
-      nofile:1:2: the slot name `:inner_block` is reserved
-        |
-      1 | <:inner_block>
-        |  ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!("<:inner_block>")
-      end
-    end
-
-    ## handle attributes
-
-    test "for attribute name - raises on missing attribute name" do
-      message = """
-      nofile:2:8: missing attribute name
-        |
-      1 | <div>
-      2 |   <div =\"panel\">
-        |        ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!("""
-        <div>
-          <div ="panel">\
-        """)
-      end
-
-      message = """
-      nofile:1:6: missing attribute name
-        |
-      1 | <div = >
-        |      ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!(~S(<div = >))
-      end
-
-      message = """
-      nofile:1:6: missing attribute name
-        |
-      1 | <div / >
-        |      ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!(~S(<div / >))
-      end
-    end
-
-    test "for attribute name - raises on invalid character in attribute name" do
-      message = """
-      nofile:1:5: invalid character in attribute name, got: '
-        |
-      1 | <div'>
-        |     ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!(~S(<div'>))
-      end
-
-      message = """
-      nofile:1:5: invalid character in attribute name, got: \"
-        |
-      1 | <div">
-        |     ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!(~S(<div">))
-      end
-
-      message = """
-      nofile:1:10: invalid character in attribute name, got: '
-        |
-      1 | <div attr'>
-        |          ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!(~S(<div attr'>))
-      end
-
-      message = """
-      nofile:1:20: invalid character in attribute name, got: \"
-        |
-      1 | <div class={"test"}">
-        |                    ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!(~S(<div class={"test"}">))
-      end
-    end
-
-    test "for attribute name - raises on incomplete attribute" do
-      message = """
-      nofile:1:11: unexpected end of string inside tag
-        |
-      1 | <div class
-        |           ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!("<div class")
-      end
-    end
-
-    test "for attribute value - raises on invalid attribute value" do
-      message = """
-      nofile:2:9: invalid attribute value after `=`
-
-      Expected a value between quotes (such as "value" or 'value') \
-      or an Elixir expression between curly braces (such as `{expr}`).
-        |
-      1 | <div
-      2 |   class=>
-        |         ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!("""
-        <div
-          class=>\
-        """)
-      end
-
-      message = """
-      nofile:1:13: invalid attribute value after `=`
-
-      Expected a value between quotes (such as "value" or 'value') \
-      or an Elixir expression between curly braces (such as `{expr}`).
-        |
-      1 | <div class= >
-        |             ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!(~S(<div class= >))
-      end
-
-      message = """
-      nofile:1:12: invalid attribute value after `=`
-
-      Expected a value between quotes (such as "value" or 'value') \
-      or an Elixir expression between curly braces (such as `{expr}`).
-        |
-      1 | <div class=
-        |            ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!("<div class=")
-      end
-    end
-
-    test "for attribute value - raises on missing closing quotes" do
-      message = ~r"nofile:2:15: missing closing `\"` for attribute value"
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!("""
-        <div
-          class="panel\
-        """)
-      end
-
-      message = ~r"nofile:2:15: missing closing `\'` for attribute value"
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!("""
-        <div
-          class='panel\
-        """)
-      end
-    end
-
-    test "for attribute value - raises on missing closing braces" do
-      message = """
-      nofile:2:9: missing closing `}` for expression
-
-      In case you don't want `{` to begin a new interpolation, you may write it using `&lbrace;` or using `<%= "{" %>`.
-        |
-      1 | <div
-      2 |   class={panel
-        |         ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!("""
-        <div
-          class={panel\
-        """)
-      end
-    end
-
-    ## handle root attributes
-
-    test "for root attributes - raises on missing closing braces" do
-      message = """
-      nofile:2:3: missing closing `}` for expression
-
-      In case you don't want `{` to begin a new interpolation, you may write it using `&lbrace;` or using `<%= "{" %>`.
-        |
-      1 | <div
-      2 |   {@attrs
-        |   ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!("""
-        <div
-          {@attrs\
-        """)
-      end
-    end
-
-    ## handle tag open end
-
-    test "raises on unclosed tag" do
-      message = ~r"nofile:1:5: missing closing `>` or `/>` for tag"
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!("<foo")
-      end
-    end
-  end
-
-  describe "closing tag - syntax checking" do
-    ## handle tag close
-
-    test "raises on missing tag name" do
-      message = """
-      nofile:2:5: missing tag name after </
-        |
-      1 | <div>
-      2 |   </>
-        |     ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!("""
-        <div>
-          </>\
-        """)
-      end
-    end
-
-    ## handle tag close end
-
-    test "raises on unclosed tag" do
-      message = """
-      nofile:2:6: missing closing `>` for tag
-        |
-      1 | <div>
-      2 | </div text
-        |      ^\
-      """
-
-      assert_raise SyntaxError, message, fn ->
-        tokens!("""
-        <div>
-        </div text\
-        """)
-      end
-    end
-  end
-
-  ## Tokenizing
-
   describe "text" do
-    test "is tokenized as {:text, value}" do
+    test "is represented as {:text, value, meta}" do
       assert tokens!("Hello") == [
                {:text, "Hello", %{line_end: 1, column_end: 6}}
              ]
@@ -448,13 +38,13 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
   end
 
   describe "doctype" do
-    test "is tokenized as text" do
+    test "is handled as text" do
       assert tokens!("<!doctype html>") == [
                {:text, "<!doctype html>", %{line_end: 1, column_end: 16}}
              ]
     end
 
-    test "can be declared as multiple lines" do
+    test "can be declared with multiple lines" do
       assert tokens!("""
              <!DOCTYPE
              html
@@ -474,15 +64,15 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
   end
 
-  describe "comment" do
-    test "is tokenized as text" do
+  describe "comments" do
+    test "are handled as text" do
       assert tokens!("Begin<!-- comment -->End") == [
                {:text, "Begin<!-- comment -->End",
                 %{line_end: 1, column_end: 25, context: [:comment_start, :comment_end]}}
              ]
     end
 
-    test "followed by curly" do
+    test "can be followed by curly interpolation" do
       assert tokens!("<!-- comment -->{hello}text") == [
                {:text, "<!-- comment -->",
                 %{line_end: 1, column_end: 17, context: [:comment_start, :comment_end]}},
@@ -491,7 +81,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
              ]
     end
 
-    test "multiple lines and wrapped by tags" do
+    test "can be declared with multiple lines and wrapped by tags" do
       assert tokens!("""
              <p>
              <!--
@@ -524,7 +114,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
              ]
     end
 
-    test "adds comment_start and comment_end" do
+    test "add comment_start and comment_end contexts" do
       first_part = """
       <p>
       <!--
@@ -607,7 +197,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
              ]
     end
 
-    test "two comments in a row" do
+    test "allow multiple comments" do
       first_part = """
       <p>
       <!--
@@ -690,8 +280,8 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
   end
 
-  describe "handle tag - opening tag" do
-    test "represented as {:htag, name, attrs, meta}" do
+  describe "opening tags" do
+    test "are represented as {:htag, name, attrs, meta}" do
       assert tokens!("<div>") == [
                {:htag, "div", [],
                 %{
@@ -705,7 +295,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
              ]
     end
 
-    test "with space after name" do
+    test "accept space after name" do
       assert tokens!("<div >") == [
                {:htag, "div", [],
                 %{
@@ -719,7 +309,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
              ]
     end
 
-    test "with line break after name" do
+    test "accept line break after name" do
       assert tokens!("<div\n>") == [
                {:htag, "div", [],
                 %{
@@ -733,7 +323,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
              ]
     end
 
-    test "self-closing" do
+    test "can be self-closed" do
       assert tokens!("<div/>") == [
                {:htag, "div", [],
                 %{
@@ -759,7 +349,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
              ]
     end
 
-    test "compute line and column" do
+    test "compute lines and columns" do
       tokens =
         tokens!("""
         <div>
@@ -779,8 +369,8 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
   end
 
-  describe "handle attributes" do
-    test "represented as a list of {name, {type, value, v_meta} | nil, meta}" do
+  describe "attributes" do
+    test "are represented as a list of {name, {type, value, v_meta} | nil, meta}" do
       assert attrs!(~S(<div class="panel" hidden style={@style}>)) == [
                {"class", {:string, "panel", %{delimiter: ?"}}, %{line: 1, column: 6}},
                {"hidden", nil, %{line: 1, column: 20}},
@@ -788,12 +378,12 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
              ]
     end
 
-    test "accepts spaces between the name and `=`" do
+    test "accept spaces between the name and `=`" do
       assert [{"class", {:string, "panel", %{}}, %{}}] =
                attrs!(~S(<div class ="panel">))
     end
 
-    test "accepts line breaks between the name and `=`" do
+    test "accept line breaks between the name and `=`" do
       assert [{"class", {:string, "panel", %{}}, %{}}] =
                attrs!("<div class\n=\"panel\">")
 
@@ -801,12 +391,12 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
                attrs!("<div class\r\n=\"panel\">")
     end
 
-    test "accepts spaces between `=` and the value" do
+    test "accept spaces between `=` and the value" do
       assert [{"class", {:string, "panel", %{}}, %{}}] =
                attrs!(~S(<div class= "panel">))
     end
 
-    test "accepts line breaks between `=` and the value" do
+    test "accept line breaks between `=` and the value" do
       assert [{"class", {:string, "panel", %{}}, %{}}] =
                attrs!("<div class=\n\"panel\">")
 
@@ -815,48 +405,48 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
   end
 
-  describe "handle attributes - boolean attributes" do
-    test "represented as {name, nil, meta}" do
+  describe "attributes - boolean attributes" do
+    test "is represented as {name, nil, meta}" do
       assert [{"hidden", nil, %{}}] = attrs!("<div hidden>")
     end
 
-    test "multiple attributes" do
+    test "can be used multiple times" do
       assert [{"hidden", nil, %{}}, {"selected", nil, %{}}] =
                attrs!("<div hidden selected>")
     end
 
-    test "with space after" do
+    test "accept space after name" do
       assert [{"hidden", nil, %{}}] = attrs!("<div hidden >")
     end
 
-    test "in self close tag" do
+    test "in self-closing tag" do
       assert [{"hidden", nil, %{}}] = attrs!("<div hidden/>")
     end
 
-    test "in self close tag with space after" do
+    test "accept space after name in self-closing tag" do
       assert [{"hidden", nil, %{}}] = attrs!("<div hidden />")
     end
   end
 
-  describe "handle attributes - double quoted attributes" do
-    test "value is represented as {:string, value, meta}}" do
+  describe "attributes - double quoted attributes" do
+    test "are represented as {:string, value, meta}}" do
       assert [{"class", {:string, "panel", %{delimiter: ?"}}, %{}}] =
                attrs!(~S(<div class="panel">))
     end
 
-    test "multiple attributes" do
+    test "allow multiple attributes" do
       assert [
                {"class", {:string, "panel", %{delimiter: ?"}}, %{}},
                {"style", {:string, "margin: 0px;", %{delimiter: ?"}}, %{}}
              ] = attrs!(~S(<div class="panel" style="margin: 0px;">))
     end
 
-    test "value containing single quotes" do
+    test "allow single quotes" do
       assert [{"title", {:string, "i'd love to!", %{delimiter: ?"}}, %{}}] =
                attrs!(~S(<div title="i'd love to!">))
     end
 
-    test "value containing line breaks" do
+    test "allow line breaks" do
       tokens =
         tokens!("""
         <div title="first
@@ -871,25 +461,25 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
   end
 
-  describe "handle attributes - single quoted attributes" do
-    test "value is represented as {:string, value, meta}}" do
+  describe "attributes - single quoted attributes" do
+    test "are represented as {:string, value, meta}}" do
       assert [{"class", {:string, "panel", %{delimiter: ?'}}, %{}}] =
                attrs!(~S(<div class='panel'>))
     end
 
-    test "multiple attributes" do
+    test "allow multiple attributes" do
       assert [
                {"class", {:string, "panel", %{delimiter: ?'}}, %{}},
                {"style", {:string, "margin: 0px;", %{delimiter: ?'}}, %{}}
              ] = attrs!(~S(<div class='panel' style='margin: 0px;'>))
     end
 
-    test "value containing double quotes" do
+    test "allow double quotes" do
       assert [{"title", {:string, ~S(Say "hi!"), %{delimiter: ?'}}, %{}}] =
                attrs!(~S(<div title='Say "hi!"'>))
     end
 
-    test "value containing line breaks" do
+    test "allow line breaks" do
       tokens =
         tokens!("""
         <div title='first
@@ -904,25 +494,25 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
   end
 
-  describe "handle attributes - braced attributes" do
-    test "value is represented as {:expr, value, meta}" do
+  describe "attributes - braced attributes" do
+    test "are represented as {:expr, value, meta}" do
       assert [{"class", {:expr, "@class", %{line: 1, column: 13}}, %{}}] =
                attrs!(~S(<div class={@class}>))
     end
 
-    test "multiple attributes" do
+    test "allow multiple attributes" do
       assert [
                {"class", {:expr, "@class", %{}}, %{}},
                {"style", {:expr, "@style", %{}}, %{}}
              ] = attrs!(~S(<div class={@class} style={@style}>))
     end
 
-    test "double quoted strings inside expression" do
+    test "allow double quoted strings inside expression" do
       assert [{"class", {:expr, ~S("text"), %{}}, %{}}] =
                attrs!(~S(<div class={"text"}>))
     end
 
-    test "value containing curly braces" do
+    test "allow curly braces" do
       assert [{"class", {:expr, " [{:active, @active}] ", %{}}, %{}}] =
                attrs!(~S(<div class={ [{:active, @active}] }>))
     end
@@ -932,7 +522,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
       assert [{"class", {:expr, ~S("hi\}"), %{}}, %{}}] = attrs!(~S(<div class={"hi\}"}>))
     end
 
-    test "compute line and columns" do
+    test "compute lines and columns" do
       attrs =
         attrs!("""
         <div
@@ -952,28 +542,28 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
   end
 
-  describe "handle root attributes" do
-    test "represented as {:root, value, meta}" do
+  describe "root attributes" do
+    test "are represented as {:root, value, meta}" do
       assert [{:root, {:expr, "@attrs", %{}}, %{}}] = attrs!("<div {@attrs}>")
     end
 
-    test "with space after" do
+    test "allow space after closing }" do
       assert [{:root, {:expr, "@attrs", %{}}, %{}}] = attrs!("<div {@attrs} >")
     end
 
-    test "with line break after closing }" do
+    test "allow line breaks after closing }" do
       assert [{:root, {:expr, "@attrs", %{}}, %{}}] = attrs!("<div {@attrs}\n>")
     end
 
-    test "in self close tag" do
+    test "in self-closing tag" do
       assert [{:root, {:expr, "@attrs", %{}}, %{}}] = attrs!("<div {@attrs}/>")
     end
 
-    test "in self close tag with space after closing }" do
+    test "allow space after closing } in self-closing tag" do
       assert [{:root, {:expr, "@attrs", %{}}, %{}}] = attrs!("<div {@attrs} />")
     end
 
-    test "multiple values among other attributes" do
+    test "allow multiple usage" do
       attrs = attrs!("<div class={@class} {@attrs1} hidden {@attrs2}/>")
 
       assert [
@@ -984,7 +574,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
              ] = attrs
     end
 
-    test "compute line and columns" do
+    test "compute lines and columns" do
       attrs =
         attrs!("""
         <div
@@ -1005,8 +595,8 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
   end
 
-  describe "handle tag - closing tag" do
-    test "represented as {:close, :htag, name, meta}" do
+  describe "closing tags" do
+    test "are represented as {:close, :htag, name, meta}" do
       assert tokens!("</div>") == [
                {:close, :htag, "div",
                 %{
@@ -1019,7 +609,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
              ]
     end
 
-    test "compute line and columns" do
+    test "compute lines and columns" do
       tokens =
         tokens!("""
         <div>
@@ -1035,8 +625,8 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
   end
 
-  describe "handle special tag - style" do
-    test "paired tags" do
+  describe "special tag - style" do
+    test "as paired tags" do
       assert tokens!("""
              <style>
                p {
@@ -1068,7 +658,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
              ]
     end
 
-    test "self-closing tag" do
+    test "as self-closing tag" do
       assert tokens!("""
              <style blocking="render" /><br>
              """) == [
@@ -1102,8 +692,8 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
   end
 
-  describe "handle special tag - script" do
-    test "paired tags" do
+  describe "special tag - script" do
+    test "as paired tags" do
       assert tokens!("""
              <script>
                a = "<a>Link</a>"; b = {};
@@ -1133,7 +723,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
              ]
     end
 
-    test "self-closing tag" do
+    test "as self-closing tag" do
       assert tokens!("""
              <script src="foo.js" /><br>
              """) == [
@@ -1167,8 +757,8 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
   end
 
-  describe "handle remote component" do
-    test "paired tags" do
+  describe "remote component" do
+    test "as paired tags" do
       assert tokens!("""
              <Components.modal on_cancel={navigate(~p"/posts")}>
                This is another modal.
@@ -1203,7 +793,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
              ]
     end
 
-    test "self-closing tag" do
+    test "as self-closing tag" do
       assert tokens!("""
              <Components.flash kind={:info} flash={@flash} />
              """) == [
@@ -1228,8 +818,8 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
   end
 
-  describe "handle local component" do
-    test "paired tags" do
+  describe "local component" do
+    test "as paired tags" do
       assert tokens!("""
              <.link href="/">Regular anchor link</.link>
              """) == [
@@ -1256,7 +846,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
              ]
     end
 
-    test "self-closing tag" do
+    test "as self-closing tag" do
       assert tokens!("""
              <.inspect module={ExampleModule} type="recursive" />
              """) == [
@@ -1279,8 +869,8 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
     end
   end
 
-  describe "handle slot" do
-    test "paired tags" do
+  describe "slot" do
+    test "as paired tags" do
       assert tokens!("""
              <:item to="/">item 1</:item>
              """) == [
@@ -1309,7 +899,7 @@ defmodule Combo.Template.CEExEngine.TokenizerTest do
              ]
     end
 
-    test "self-closing tag" do
+    test "as self-closing tag" do
       assert tokens!("""
              <:item to="/" />
              """) == [
