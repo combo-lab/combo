@@ -1,7 +1,6 @@
 defmodule Combo.Token do
   @moduledoc """
-  Conveniences to sign/encrypt data inside tokens for use in API authentication
-  , Channel authentication, and more.
+  Sign/verify or encrypt/decrypt data inside tokens.
 
   The data stored in the token is signed to prevent tampering, and is
   optionally encrypted. This means that, so long as the key (see below) remains
@@ -128,13 +127,13 @@ defmodule Combo.Token do
   ## Options
 
     * `:key_iterations` - option passed to `Plug.Crypto.KeyGenerator`
-      when generating the encryption and signing keys. Defaults to 1000
+      when generating the encryption and signing keys. Defaults to `1000`.
     * `:key_length` - option passed to `Plug.Crypto.KeyGenerator`
-      when generating the encryption and signing keys. Defaults to 32
+      when generating the encryption and signing keys. Defaults to `32`.
     * `:key_digest` - option passed to `Plug.Crypto.KeyGenerator`
       when generating the encryption and signing keys. Defaults to `:sha256`
     * `:signed_at` - the timestamp of the token in seconds. Defaults to
-      `System.os_time(:second)`
+      `System.os_time(:second)`.
     * `:max_age` - the default maximum age of the token in seconds. Defaults to
       `86400` and it may be overridden on `verify/4`.
 
@@ -155,13 +154,13 @@ defmodule Combo.Token do
   ## Options
 
     * `:key_iterations` - option passed to `Plug.Crypto.KeyGenerator`
-      when generating the encryption and signing keys. Defaults to 1000
+      when generating the encryption and signing keys. Defaults to `1000`.
     * `:key_length` - option passed to `Plug.Crypto.KeyGenerator`
-      when generating the encryption and signing keys. Defaults to 32
+      when generating the encryption and signing keys. Defaults to `32`.
     * `:key_digest` - option passed to `Plug.Crypto.KeyGenerator`
       when generating the encryption and signing keys. Defaults to `:sha256`
     * `:signed_at` - set the timestamp of the token in seconds. Defaults to
-      `System.os_time(:second)`
+      `System.os_time(:second)`.
     * `:max_age` - the default maximum age of the token in seconds. Defaults to
       `86400` and it may be overridden on `decrypt/4`.
 
@@ -217,11 +216,11 @@ defmodule Combo.Token do
   ## Options
 
     * `:key_iterations` - option passed to `Plug.Crypto.KeyGenerator`
-      when generating the encryption and signing keys. Defaults to 1000
+      when generating the encryption and signing keys. Defaults to `1000`.
     * `:key_length` - option passed to `Plug.Crypto.KeyGenerator`
-      when generating the encryption and signing keys. Defaults to 32
+      when generating the encryption and signing keys. Defaults to `32`.
     * `:key_digest` - option passed to `Plug.Crypto.KeyGenerator`
-      when generating the encryption and signing keys. Defaults to `:sha256`
+      when generating the encryption and signing keys. Defaults to `:sha256`.
     * `:max_age` - verifies the token only if it has been generated
       "max age" ago in seconds. Defaults to the max age signed in the
       token by `sign/4`.
@@ -243,11 +242,11 @@ defmodule Combo.Token do
   ## Options
 
     * `:key_iterations` - option passed to `Plug.Crypto.KeyGenerator`
-      when generating the encryption and signing keys. Defaults to 1000
+      when generating the encryption and signing keys. Defaults to `1000`.
     * `:key_length` - option passed to `Plug.Crypto.KeyGenerator`
-      when generating the encryption and signing keys. Defaults to 32
+      when generating the encryption and signing keys. Defaults to `32`.
     * `:key_digest` - option passed to `Plug.Crypto.KeyGenerator`
-      when generating the encryption and signing keys. Defaults to `:sha256`
+      when generating the encryption and signing keys. Defaults to `:sha256`.
     * `:max_age` - verifies the token only if it has been generated
       "max age" ago in seconds. Defaults to the max age signed in the
       token by `encrypt/4`.
