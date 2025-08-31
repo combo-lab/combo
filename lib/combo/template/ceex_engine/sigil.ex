@@ -8,10 +8,13 @@ defmodule Combo.Template.CEExEngine.Sigil do
   @doc """
   The `~CE` sigil for creating inline templates.
   """
-  defmacro sigil_CE({:<<>>, meta, [expr]}, modifiers)
-           when modifiers == [] or modifiers == ~c"noformat" do
+  defmacro sigil_CE({:<<>>, meta, [expr]}, modifiers) do
+    if not (modifiers == [] or modifiers == ~c"noformat") do
+      raise ArgumentError, "~CE expected modifier to be empty or noformat, got: #{modifiers}"
+    end
+
     if not Macro.Env.has_var?(__CALLER__, {:assigns, nil}) do
-      raise "~CE requires a variable named \"assigns\" to exist and be set to a map"
+      raise RuntimeError, "~CE requires a variable named \"assigns\" to exist and be set to a map"
     end
 
     opts = [

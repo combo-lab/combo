@@ -11,11 +11,11 @@ defmodule Combo.Template.CEExEngine do
   ## Features
 
     * syntax checking
-    * protection on XSS
     * `assigns` enhancement:
       - `@` syntax
-      - declarative API
-    * declarative component system
+      - declarative assigns
+    * component system
+    * protection on XSS
     * code formatter
 
   ## Modules
@@ -24,8 +24,8 @@ defmodule Combo.Template.CEExEngine do
 
   And, other additional features are implemented by following modules:
 
-    * `Combo.Template.CEExEngine.Sigil`
     * `Combo.Template.CEExEngine.Slot`
+    * `Combo.Template.CEExEngine.Sigil`
     * `Combo.Template.CEExEngine.Assigns`
     * `Combo.Template.CEExEngine.DeclarativeAssigns`
 
@@ -38,8 +38,8 @@ defmodule Combo.Template.CEExEngine do
   """
   defmacro __using__(opts \\ []) do
     quote bind_quoted: [opts: opts] do
-      import Combo.Template.CEExEngine.Sigil
       import Combo.Template.CEExEngine.Slot
+      import Combo.Template.CEExEngine.Sigil
       import Combo.Template.CEExEngine.Assigns
       use Combo.Template.CEExEngine.DeclarativeAssigns, opts
     end

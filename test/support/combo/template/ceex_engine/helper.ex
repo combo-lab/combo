@@ -3,6 +3,17 @@ defmodule ComboTest.Template.CEExEngine.Helper do
   alias Combo.Template.CEExEngine.Compiler
 
   @doc """
+  Prints the generated code.
+  """
+  def puts_compiled(source) do
+    opts = [caller: __ENV__, file: __ENV__.file]
+
+    Compiler.compile_string(source, opts)
+    |> Macro.to_string()
+    |> IO.puts()
+  end
+
+  @doc """
   At compile-time, compiles the source into template.
   """
   defmacro compile_string(source) do

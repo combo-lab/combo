@@ -4,8 +4,8 @@ defmodule Combo.Template.CEExEngine.Compiler.EngineTest do
   alias Combo.Template.CEExEngine.SyntaxError
   alias Combo.Template.CEExEngine.Compiler.Engine
 
-  defp compile(source) do
-    opts = [
+  defp compile(source, opts \\ []) do
+    default_opts = [
       engine: Engine,
       caller: __ENV__,
       file: __ENV__.file,
@@ -14,6 +14,7 @@ defmodule Combo.Template.CEExEngine.Compiler.EngineTest do
       source: source
     ]
 
+    opts = Keyword.merge(default_opts, opts)
     EEx.compile_string(source, opts)
   end
 
@@ -876,6 +877,67 @@ defmodule Combo.Template.CEExEngine.Compiler.EngineTest do
         <div>{<%= @foo %>}</div>
         """)
       end
+    end
+  end
+
+  describe "raises syntax error for bad expression" do
+    test "in attribute value" do
+      exception =
+        assert_raise Elixir.SyntaxError, fn ->
+          opts = [line: 10, indentation: 8]
+
+          compile(
+            """
+            text
+            <%= "interpolation" %>
+            <div class={[,]} />
+            """,
+            opts
+          )
+        end
+
+      message = Exception.message(exception)
+      assert message =~ "test/combo/template/ceex_engine/compiler/engine_test.exs:12:22:"
+      assert message =~ "syntax error before: ','"
+    end
+
+    test "in root attribute" do
+      exception =
+        assert_raise Elixir.SyntaxError, fn ->
+          opts = [line: 10, indentation: 8]
+
+          compile(
+            """
+            text
+            <%= "interpolation" %>
+            <div {[,]}/>
+            """,
+            opts
+          )
+        end
+
+      message = Exception.message(exception)
+      assert message =~ "test/combo/template/ceex_engine/compiler/engine_test.exs:12:16:"
+      assert message =~ "syntax error before: ','"
+    end
+
+    test "in body" do
+      exception =
+        assert_raise Elixir.SyntaxError, fn ->
+          opts = [line: 10, indentation: 8]
+
+          compile(
+            """
+            text
+            {[,]}
+            """,
+            opts
+          )
+        end
+
+      message = Exception.message(exception)
+      assert message =~ "test/combo/template/ceex_engine/compiler/engine_test.exs:11:10:"
+      assert message =~ "syntax error before: ','"
     end
   end
 end
