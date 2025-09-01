@@ -38,8 +38,8 @@ defmodule Combo.Template.CEExEngine do
   """
   defmacro __using__(opts \\ []) do
     quote bind_quoted: [opts: opts] do
-      import Combo.Template.CEExEngine.Slot
       import Combo.Template.CEExEngine.Sigil
+      import Combo.Template.CEExEngine.Slot
       import Combo.Template.CEExEngine.Assigns
       use Combo.Template.CEExEngine.DeclarativeAssigns, opts
     end

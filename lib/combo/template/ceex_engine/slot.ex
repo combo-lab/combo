@@ -6,7 +6,7 @@ defmodule Combo.Template.CEExEngine.Slot do
   import Combo.Template.CEExEngine.Sigil
 
   @doc ~S'''
-  Renders a slot entry with the given optional `arg`.
+  Renders a slot with the given optional `arg`.
 
   ```ceex
   {render_slot(@inner_block, @form)}
@@ -14,13 +14,12 @@ defmodule Combo.Template.CEExEngine.Slot do
 
   If the slot has no entries, `nil` is returned.
 
-  If multiple slot entries are defined for the same slot, `render_slot/2` will
-  render all entries, merging their contents.
+  If the slot has multiple entries, `render_slot/2` will render all entries,
+  concatenating their rendered contents.
 
   In case you want to use the entries' attributes, you need to iterate over
-  the list to access each slot individually.
-
-  For example, imagine a table component:
+  the list to access each slot individually. For example, imagine a table
+  component:
 
   ```ceex
   <.table rows={@users}>
@@ -34,9 +33,9 @@ defmodule Combo.Template.CEExEngine.Slot do
   </.table>
   ```
 
-  At the top level, we pass the rows as an assign and we define a `:col` slot
-  for each column we want in the table. Each column also has a `label`, which
-  we are going to use in the table header.
+  We pass the rows as an assign and we define a `:col` slot entry for each column
+  we want in the table. Each column also has a `label`, which we are going to use
+  in the table header.
 
   Inside the component, you can render the table with headers, rows, and columns:
 

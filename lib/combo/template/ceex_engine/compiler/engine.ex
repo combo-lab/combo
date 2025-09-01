@@ -750,11 +750,10 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     slot_name = String.to_atom(name)
 
     {roots, attrs, attr_info} = split_component_attrs(attrs)
-    clauses = build_component_clauses(slot_name, meta, state)
 
     inner_block =
       quote line: line do
-        unquote(__MODULE__).build_inner_block(unquote(slot_name), do: unquote(clauses))
+        unquote(build_inner_block(slot_name, meta, state))
       end
 
     attrs = [{:__slot__, slot_name}, {:inner_block, inner_block} | attrs]
@@ -1080,12 +1079,10 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     {roots, attrs, attr_info} = split_component_attrs(attrs)
     slot_name = :inner_block
 
-    # This slot is the default slot, the meta points to the component.
-    clauses = build_component_clauses(slot_name, meta, state)
-
     inner_block =
       quote line: line do
-        unquote(__MODULE__).build_inner_block(:inner_block, do: unquote(clauses))
+        # This slot is the default slot, the meta points to the component.
+        unquote(build_inner_block(slot_name, meta, state))
       end
 
     inner_block_assigns =
@@ -1149,20 +1146,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
   defp line_column(%{line: line, column: column}), do: {line, column}
 
-  defp build_component_attrs(roots, attrs, line) do
-    entries =
-      case {roots, attrs} do
-        {[], []} -> [{:%{}, [], []}]
-        {_, []} -> roots
-        {_, _} -> roots ++ [{:%{}, [], attrs}]
-      end
-
-    Enum.reduce(entries, fn expr, acc ->
-      quote line: line, do: Map.merge(unquote(acc), unquote(expr))
-    end)
-  end
-
-  defp build_component_clauses(slot_name, meta, state) do
+  defp build_inner_block(slot_name, meta, state) do
     quoted = iob_dump(state)
 
     %{caller: caller} = state
@@ -1177,30 +1161,64 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
         quoted
       end
 
-    case meta[:let] do
-      # If we have a var, we can skip the catch-all clause
-      {:quoted, {var, _, ctx} = pattern, %{line: line}} when is_atom(var) and is_atom(ctx) ->
-        quote line: line do
-          unquote(pattern) -> unquote(quoted)
-        end
-
-      {:quoted, pattern, %{line: line}} ->
-        quote line: line do
-          unquote(pattern) -> unquote(quoted)
-        end ++
-          quote line: line, generated: true do
-            other ->
-              unquote(__MODULE__).__unmatched_let__!(
-                unquote(Macro.to_string(pattern)),
-                other
-              )
+    do_block =
+      case meta[:let] do
+        # If it's a var, the clause for catching unmatched let can be skipped.
+        {:quoted, {var, _, ctx} = pattern, %{line: line}} when is_atom(var) and is_atom(ctx) ->
+          quote line: line do
+            unquote(pattern) -> unquote(quoted)
           end
+
+        {:quoted, pattern, %{line: line}} ->
+          quote line: line do
+            unquote(pattern) -> unquote(quoted)
+          end ++
+            quote line: line, generated: true do
+              other ->
+                unquote(__MODULE__).__unmatched_let__!(
+                  unquote(Macro.to_string(pattern)),
+                  other
+                )
+            end
+
+        _ ->
+          quote do
+            _ -> unquote(quoted)
+          end
+      end
+
+    case do_block do
+      [{:->, meta, _} | _] ->
+        inner_fun = {:fn, meta, do_block}
+
+        quote do
+          fn arg ->
+            _ = var!(assigns)
+            unquote(inner_fun).(arg)
+          end
+        end
 
       _ ->
         quote do
-          _ -> unquote(quoted)
+          fn arg ->
+            _ = var!(assigns)
+            unquote(do_block)
+          end
         end
     end
+  end
+
+  defp build_component_attrs(roots, attrs, line) do
+    entries =
+      case {roots, attrs} do
+        {[], []} -> [{:%{}, [], []}]
+        {_, []} -> roots
+        {_, _} -> roots ++ [{:%{}, [], attrs}]
+      end
+
+    Enum.reduce(entries, fn expr, acc ->
+      quote line: line, do: Map.merge(unquote(acc), unquote(expr))
+    end)
   end
 
   defp store_component_call(mod, fun, attr_info, slot_info, line, %{caller: caller} = state) do
@@ -1348,39 +1366,6 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       |> Enum.drop(2)
 
     reraise(message, stacktrace)
-  end
-
-  @doc """
-  Define a inner block, generally used by slots.
-
-  This macro is mostly used by custom HTML engines that provide
-  a `slot` implementation and rarely called directly. The
-  `name` must be the assign name the slot/block will be stored
-  under.
-
-  If you're using CEEx templates, you should use its higher
-  level `<:slot>` notation instead.
-  """
-  defmacro build_inner_block(_name, do: do_block) do
-    case do_block do
-      [{:->, meta, _} | _] ->
-        inner_fun = {:fn, meta, do_block}
-
-        quote do
-          fn arg ->
-            _ = var!(assigns)
-            unquote(inner_fun).(arg)
-          end
-        end
-
-      _ ->
-        quote do
-          fn arg ->
-            _ = var!(assigns)
-            unquote(do_block)
-          end
-        end
-    end
   end
 
   @doc """
