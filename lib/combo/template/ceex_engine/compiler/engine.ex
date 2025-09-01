@@ -1161,9 +1161,9 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
         quoted
       end
 
-    do_block =
+    clauses =
       case meta[:let] do
-        # If it's a var, the clause for catching unmatched let can be skipped.
+        # If it's a var, skip the clause for catching unmatched let
         {:quoted, {var, _, ctx} = pattern, %{line: line}} when is_atom(var) and is_atom(ctx) ->
           quote line: line do
             unquote(pattern) -> unquote(quoted)
@@ -1187,25 +1187,8 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
           end
       end
 
-    case do_block do
-      [{:->, meta, _} | _] ->
-        inner_fun = {:fn, meta, do_block}
-
-        quote do
-          fn arg ->
-            _ = var!(assigns)
-            unquote(inner_fun).(arg)
-          end
-        end
-
-      _ ->
-        quote do
-          fn arg ->
-            _ = var!(assigns)
-            unquote(do_block)
-          end
-        end
-    end
+    [{:->, meta, _} | _] = clauses
+    {:fn, meta, clauses}
   end
 
   defp build_component_attrs(roots, attrs, line) do
