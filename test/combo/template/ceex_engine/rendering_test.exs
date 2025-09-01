@@ -654,7 +654,7 @@ defmodule Combo.Template.CEExEngine.RenderingTest do
     end
 
     test "raises on slots without inner block" do
-      message = ~r"attempted to render slot <:sample> but the slot has no inner content"
+      message = ~r"attempted to render slot :sample but the slot has no inner content"
 
       assert_raise(RuntimeError, message, fn ->
         render_string("""

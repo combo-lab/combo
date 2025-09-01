@@ -53,23 +53,19 @@ defmodule Combo.Template.CEExEngine.Slot do
       end
 
   '''
-  defmacro render_slot(slot, arg \\ nil) do
-    quote do
-      unquote(__MODULE__).__render_slot__(
-        unquote(slot),
-        unquote(arg)
-      )
-    end
-  end
+  def render_slot(entry_or_entries, arg \\ nil)
 
-  @doc false
-  def __render_slot__([], _), do: nil
-
-  def __render_slot__([entry], arg) do
+  def render_slot(entry, arg) when is_map(entry) do
     call_inner_block!(entry, arg)
   end
 
-  def __render_slot__(entries, arg) when is_list(entries) do
+  def render_slot([] = _entries, _), do: nil
+
+  def render_slot([entry] = _entries, arg) do
+    call_inner_block!(entry, arg)
+  end
+
+  def render_slot(entries, arg) when is_list(entries) do
     assigns = %{entries: entries, arg: arg}
 
     ~CE"""
@@ -77,13 +73,11 @@ defmodule Combo.Template.CEExEngine.Slot do
     """noformat
   end
 
-  def __render_slot__(entry, arg) when is_map(entry) do
-    entry.inner_block.(arg)
-  end
-
   defp call_inner_block!(entry, arg) do
     if !entry.inner_block do
-      message = "attempted to render slot <:#{entry.__slot__}> but the slot has no inner content"
+      message =
+        "attempted to render slot #{inspect(entry.__slot__)} but the slot has no inner content"
+
       raise RuntimeError, message
     end
 
