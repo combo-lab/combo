@@ -76,7 +76,7 @@ defmodule Combo.Template.CEExEngine.Slot do
   defp call_inner_block!(entry, arg) do
     if !entry.inner_block do
       message =
-        "attempted to render slot #{inspect(entry.__slot__)} but the slot has no inner content"
+        "attempted to render slot #{inspect(entry.__slot__)} but the slot has no inner block"
 
       raise RuntimeError, message
     end

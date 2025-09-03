@@ -1,4 +1,4 @@
-defmodule Combo.Template.CEExEngine.Tokenizer.TokenizingTest do
+defmodule Combo.Template.CEExEngine.TokenizerTest do
   use ExUnit.Case, async: true
 
   alias Combo.Template.CEExEngine.Tokenizer
