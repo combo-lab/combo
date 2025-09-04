@@ -574,14 +574,14 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
     {doc, opts} = Keyword.pop(opts, :doc, nil)
 
     if not (is_binary(doc) or is_nil(doc) or doc == false) do
-      compile_error!(line, file, ":doc must be a string or false, got: #{inspect(doc)}")
+      compile_error!(file, line, ":doc must be a string or false, got: #{inspect(doc)}")
     end
 
     {required, opts} = Keyword.pop(opts, :required, false)
     {validate_attrs, opts} = Keyword.pop(opts, :validate_attrs, true)
 
     if not is_boolean(required) do
-      compile_error!(line, file, ":required must be a boolean, got: #{inspect(required)}")
+      compile_error!(file, line, ":required must be a boolean, got: #{inspect(required)}")
     end
 
     Module.put_attribute(module, :__slot__, name)
@@ -614,23 +614,22 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
     slots = Module.get_attribute(module, :__slots__) || []
 
     if Enum.find(slots, &(&1.name == slot.name)) do
-      compile_error!(line, file, """
+      compile_error!(file, line, """
       a duplicate slot with name #{inspect(slot.name)} already exists\
       """)
     end
 
     if slot.name == :inner_block and slot.attrs != [] do
-      compile_error!(line, file, """
+      compile_error!(file, line, """
       cannot define attributes in a slot with name #{inspect(slot.name)}
       """)
     end
 
     if slot.opts != [] do
-      compile_error!(
-        line,
-        file,
-        "invalid options #{inspect(slot.opts)} for slot #{inspect(slot.name)}. The supported options are: [:required, :doc, :validate_attrs]"
-      )
+      compile_error!(file, line, """
+      invalid options #{inspect(slot.opts)} for slot #{inspect(slot.name)}. \
+      The supported options are: [:required, :doc, :validate_attrs]
+      """)
     end
   end
 
@@ -640,45 +639,45 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
     slot = Module.get_attribute(module, :__slot__)
 
     if name == :inner_block do
-      compile_error!(line, file, """
+      compile_error!(file, line, """
       cannot define attribute called :inner_block. Maybe you wanted to use `slot` instead?\
       """)
     end
 
     if type == :global && slot do
-      compile_error!(line, file, "cannot define :global slot attributes")
+      compile_error!(file, line, "cannot define :global slot attributes")
     end
 
     if type == :global and Keyword.has_key?(opts, :required) do
-      compile_error!(line, file, "global attributes do not support the :required option")
+      compile_error!(file, line, "global attributes do not support the :required option")
     end
 
     if type == :global and Keyword.has_key?(opts, :values) do
-      compile_error!(line, file, "global attributes do not support the :values option")
+      compile_error!(file, line, "global attributes do not support the :values option")
     end
 
     if type == :global and Keyword.has_key?(opts, :examples) do
-      compile_error!(line, file, "global attributes do not support the :examples option")
+      compile_error!(file, line, "global attributes do not support the :examples option")
     end
 
     if type != :global and Keyword.has_key?(opts, :include) do
-      compile_error!(line, file, ":include is only supported for :global attributes")
+      compile_error!(file, line, ":include is only supported for :global attributes")
     end
 
     {doc, opts} = Keyword.pop(opts, :doc, nil)
 
     if not (is_binary(doc) or is_nil(doc) or doc == false) do
-      compile_error!(line, file, ":doc must be a string or false, got: #{inspect(doc)}")
+      compile_error!(file, line, ":doc must be a string or false, got: #{inspect(doc)}")
     end
 
     {required, opts} = Keyword.pop(opts, :required, false)
 
     if not is_boolean(required) do
-      compile_error!(line, file, ":required must be a boolean, got: #{inspect(required)}")
+      compile_error!(file, line, ":required must be a boolean, got: #{inspect(required)}")
     end
 
     if required and Keyword.has_key?(opts, :default) do
-      compile_error!(line, file, "only one of :required or :default must be given")
+      compile_error!(file, line, "only one of :required or :default must be given")
     end
 
     key = if slot, do: :__slot_attrs__, else: :__attrs__
@@ -686,7 +685,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
     validate_attr_opts!(slot, name, opts, line, file)
 
     if Keyword.has_key?(opts, :values) and Keyword.has_key?(opts, :examples) do
-      compile_error!(line, file, "only one of :values or :examples must be given")
+      compile_error!(file, line, "only one of :values or :examples must be given")
     end
 
     if Keyword.has_key?(opts, :values) do
@@ -724,12 +723,12 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
 
     cond do
       Enum.find(attrs, fn attr -> attr.name == name end) ->
-        compile_error!(line, file, """
+        compile_error!(file, line, """
         a duplicate attribute with name #{attr_slot(name, slot)} already exists\
         """)
 
       existing = type == :global && Enum.find(attrs, fn attr -> attr.type == :global end) ->
-        compile_error!(line, file, """
+        compile_error!(file, line, """
         cannot define :global attribute #{inspect(name)} because one \
         is already defined as #{attr_slot(existing.name, slot)}. \
         Only a single :global attribute may be defined\
@@ -761,7 +760,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
   end
 
   defp bad_type!(slot, name, type, line, file) do
-    compile_error!(line, file, """
+    compile_error!(file, line, """
     invalid type #{inspect(type)} for attr #{attr_slot(name, slot)}. \
     The following types are supported:
 
@@ -786,7 +785,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
 
       {default, values} ->
         if default not in values do
-          compile_error!(line, file, """
+          compile_error!(file, line, """
           expected the default value for attr #{attr_slot(name, slot)} to be one of #{inspect(values)}, \
           got: #{inspect(default)}
           """)
@@ -795,7 +794,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
   end
 
   defp bad_default!(slot, name, type, default, line, file) do
-    compile_error!(line, file, """
+    compile_error!(file, line, """
     expected the default value for attr #{attr_slot(name, slot)} to be #{type_with_article(type)}, \
     got: #{inspect(default)}
     """)
@@ -803,7 +802,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
 
   defp validate_attr_values!(slot, name, type, values, line, file) do
     if not is_enumerable(values) or Enum.empty?(values) do
-      compile_error!(line, file, """
+      compile_error!(file, line, """
       :values must be a non-empty enumerable, got: #{inspect(values)}
       """)
     end
@@ -818,7 +817,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
   end
 
   defp bad_value!(slot, name, type, value, line, file) do
-    compile_error!(line, file, """
+    compile_error!(file, line, """
     expected the values for attr #{attr_slot(name, slot)} to be #{type_with_article(type)}, \
     got: #{inspect(value)}
     """)
@@ -826,7 +825,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
 
   defp validate_attr_examples!(slot, name, type, examples, line, file) do
     if not is_list(examples) or Enum.empty?(examples) do
-      compile_error!(line, file, """
+      compile_error!(file, line, """
       :examples must be a non-empty list, got: #{inspect(examples)}
       """)
     end
@@ -837,7 +836,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
   end
 
   defp bad_example!(slot, name, type, example, line, file) do
-    compile_error!(line, file, """
+    compile_error!(file, line, """
     expected the examples for attr #{attr_slot(name, slot)} to be #{type_with_article(type)}, \
     got: #{inspect(example)}
     """)
@@ -856,7 +855,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
 
   defp validate_attr_opts!(slot, name, opts, line, file) do
     for {key, _} <- opts, message = invalid_attr_message(key, slot) do
-      compile_error!(line, file, """
+      compile_error!(file, line, """
       invalid option #{inspect(key)} for attr #{attr_slot(name, slot)}. #{message}\
       """)
     end
@@ -1050,7 +1049,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
 
         for %{name: slot_name, line: line} <- slots,
             Enum.find(attrs, &(&1.name == slot_name)) do
-          compile_error!(line, env.file, """
+          compile_error!(env.file, line, """
           cannot define a slot with name #{inspect(slot_name)}, as an attribute with that name already exists\
           """)
         end
@@ -1352,13 +1351,13 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
 
   defp validate_misplaced_attrs!(attrs, file, message_fun) do
     with [%{line: first_attr_line} | _] <- attrs do
-      compile_error!(first_attr_line, file, message_fun.())
+      compile_error!(file, first_attr_line, message_fun.())
     end
   end
 
   defp validate_misplaced_slots!(slots, file, message_fun) do
     with [%{line: first_slot_line} | _] <- slots do
-      compile_error!(first_slot_line, file, message_fun.())
+      compile_error!(file, first_slot_line, message_fun.())
     end
   end
 
@@ -1377,13 +1376,13 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
       {:v1, _, meta, _} = Module.get_definition(env.module, {name, 1})
 
       with [%{line: first_attr_line} | _] <- attrs do
-        compile_error!(first_attr_line, env.file, """
+        compile_error!(env.file, first_attr_line, """
         attributes must be defined before the first function clause at line #{meta[:line]}
         """)
       end
 
       with [%{line: first_slot_line} | _] <- slots do
-        compile_error!(first_slot_line, env.file, """
+        compile_error!(env.file, first_slot_line, """
         slots must be defined before the first function clause at line #{meta[:line]}
         """)
       end
@@ -1595,13 +1594,13 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
     IO.warn(message, file: file, line: line)
   end
 
-  defp compile_error!(line, file, msg) do
+  defp compile_error!(file, line, msg) do
     raise CompileError, file: file, line: line, description: msg
   end
 
   defp ensure_used!(module, file, line) do
     if !Module.get_attribute(module, :__attrs__) do
-      compile_error!(line, file, """
+      compile_error!(file, line, """
       you must `use Combo.Template.CEExEngine.DeclarativeAssigns` to declare attributes. \
       It is currently only imported.\
       """)
