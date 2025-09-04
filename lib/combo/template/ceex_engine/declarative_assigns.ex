@@ -9,23 +9,19 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
   @doc """
   The macro for setting up declarative assigns.
 
-  It will do following things:
+  It will:
 
-  * overriding `def/2` and `defp/2`.
-
-  * importing `attr/3`, `slot/2` and `slot/3`.
-
-  * configuring `:global_prefixes`.
+    * overriding `def/2` and `defp/2`.
+    * importing `attr/3`, `slot/2` and `slot/3`.
+    * configuring `:global_prefixes`.
 
   ## Examples
 
-  ```elixir
-  use Combo.Template.CEExEngine.DeclarativeAssigns
-  ```
+      use Combo.Template.CEExEngine.DeclarativeAssigns
 
-  ```elixir
-  use Combo.Template.CEExEngine.DeclarativeAssigns, global_prefixes: ~w(x-)
-  ```
+  Or,
+
+      use Combo.Template.CEExEngine.DeclarativeAssigns, global_prefixes: ~w(x-)
 
   """
   defmacro __using__(opts \\ []) do
@@ -55,13 +51,11 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
 
   An attribute is declared by its name, type, and options.
 
-  * `name` - an atom defining the name of the attribute. Note that attributes
-     cannot define the same name as any other attributes or slots declared
-     or the same component.
-
-  * `type` - an atom defining the type of the attribute.
-
-  * `opts` - a keyword list of options. Defaults to `[]`.
+    * `name` - an atom defining the name of the attribute. Note that attributes
+       cannot define the same name as any other attributes or slots declared
+       or the same component.
+    * `type` - an atom defining the type of the attribute.
+    * `opts` - a keyword list of options. Defaults to `[]`.
 
   ### Types
 
@@ -82,26 +76,24 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
   | A struct module | any module that defines a struct with `defstruct/1`                  |
   | `:global`       | any common HTML attributes, plus those defined by `:global_prefixes` |
 
-  Note only `:any` and `:atom` expect the value to be set to `nil`.
-
   ### Options
 
-  * `:required` - marks an attribute as required. If a caller does not pass
-    the given attribute, a compile-time warning is issued.
+    * `:required` - marks an attribute as required. If a caller does not pass
+      the given attribute, a compile-time warning is issued.
 
-  * `:default` - the default value if the attribute if not set. If this
-    option is not set and the attribute is not given, accessing the attribute
-    will fail unless a value is explicitly set with
-    `Combo.Template.CEExEngine.Assigns.assign_new/3`.
+    * `:default` - the default value if the attribute if not set. If this
+      option is not set and the attribute is not given, accessing the attribute
+      will fail unless a value is explicitly set with
+      `Combo.Template.CEExEngine.Assigns.assign_new/3`.
 
-  * `:examples` - a non-exhaustive list of values accepted by the attribute,
-    used for documentation purposes.
+    * `:examples` - a non-exhaustive list of values accepted by the attribute,
+      used for documentation purposes.
 
-  * `:values` - an exhaustive list of values accepted by the attributes. If
-    a caller passes a literal not contained in this list, a compile warning
-    is issued.
+    * `:values` - an exhaustive list of values accepted by the attributes. If
+      a caller passes a literal not contained in this list, a compile warning
+      is issued.
 
-  * `:doc` - documentation for the attribute.
+    * `:doc` - documentation for the attribute.
 
   ## Compile-Time validations
 
@@ -110,16 +102,13 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
   When attributes are defined, CEExEngine will warn at compile-time on the
   caller if:
 
-  * A required attribute of a component is missing.
-
-  * An unknown attribute is given.
-
-  * A literal attribute (such as `value="string"` or `value`, but not `value={expr}`)
-    is given, but the type does not match. The following types currently
-    support literal validation: `:string`, `:atom`, `:boolean`, `:integer`,
-    `:float`, `:map` and `:list`.
-
-  * A literal attribute is given, but it is not a member of the `:values` list.
+    * A required attribute of a component is missing.
+    * An unknown attribute is given.
+    * A literal attribute (such as `value="string"` or `value`, but not
+      `value={expr}`) is given, but the type does not match. The following
+      types currently support literal validation: `:string`, `:atom`,
+      `:boolean`, `:integer`, `:float`, `:map` and `:list`.
+    * A literal attribute is given, but it is not a member of the `:values` list.
 
   CEExEngine does not perform any validation at runtime. This means the type
   information is mostly used for documentation and reflection purposes.
@@ -127,17 +116,14 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
   On the side of the component itself, defining attributes enhances the
   development experience:
 
-  * The default value of all attributes will be added to the `assigns` map
-    upfront.
-
-  * Attribute documentation is generated for the component.
-
-  * Required struct types are annotated and emit compilation warnings. For
-    example, if you specify `attr :user, User, required: true` and then you
-    write `@user.non_valid_field` in your template, a warning will be emitted.
-
-  * Calls made to the component are tracked for reflection and validation
-    purposes.
+    * The default value of all attributes will be added to the `assigns` map
+      upfront.
+    * Attribute documentation is generated for the component.
+    * Required struct types are annotated and emit compilation warnings. For
+      example, if you specify `attr :user, User, required: true` and then you
+      write `@user.non_valid_field` in your template, a warning will be emitted.
+    * Calls made to the component are tracked for reflection and validation
+      purposes.
 
   ## Documentation generation
 
@@ -145,19 +131,17 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
   docs injected into the function's documentation, depending on the value of
   the `@doc` module attribute:
 
-  * if `@doc` is a string, the attribute docs are injected into that string.
-    The optional placeholder `[INSERT LVATTRDOCS]` can be used to specify
-    where in the string the docs are injected. Otherwise, the docs are
-    appended to the end of the `@doc` string.
-
-  * if `@doc` is unspecified, the attribute docs are used as the default
-    `@doc` string.
-
-  * if `@doc` is `false`, the attribute docs are omitted entirely.
+    * if `@doc` is a string, the attribute docs are injected into that string.
+      The optional placeholder `[INSERT LVATTRDOCS]` can be used to specify
+      where in the string the docs are injected. Otherwise, the docs are
+      appended to the end of the `@doc` string.
+    * if `@doc` is unspecified, the attribute docs are used as the default
+      `@doc` string.
+    * if `@doc` is `false`, the attribute docs are omitted entirely.
 
   The injected attribute docs are formatted as a markdown list:
 
-  * `name` (`:type`) (required) - attr docs. Defaults to `:default`.
+    * `name` (`:type`) (required) - attr docs. Defaults to `:default`.
 
   By default, all attributes will have their types and docs injected into the
   function `@doc` string. To hide a specific attribute, you can set the value
@@ -165,19 +149,18 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
 
   ## Examples
 
-  ```elixir
-  attr :name, :string, required: true
-  attr :age, :integer, required: true
+      attr :name, :string, required: true
+      attr :age, :integer, required: true
 
-  def celebrate(assigns) do
-    ~CE"""
-    <p>
-      Happy birthday {@name}!
-      You are {@age} years old.
-    </p>
-    """
-  end
-  ```
+      def celebrate(assigns) do
+        ~CE"""
+        <p>
+          Happy birthday {@name}!
+          You are {@age} years old.
+        </p>
+        """
+      end
+
   '''
   @doc type: :macro
   defmacro attr(name, type, opts \\ []) do
@@ -201,26 +184,22 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
 
   ## Arguments
 
-  * `name` - an atom defining the name of the slot. Note that slots cannot
-    define the same name as any other slots or attributes declared for the
-    same component.
-
-  * `opts` - a keyword list of options. Defaults to `[]`.
-
-  * `block` - a code block containing calls to `attr/3`. Defaults to `nil`.
+    * `name` - an atom defining the name of the slot. Note that slots cannot
+      define the same name as any other slots or attributes declared for the
+      same component.
+    * `opts` - a keyword list of options. Defaults to `[]`.
+    * `block` - a code block containing calls to `attr/3`. Defaults to `nil`.
 
   ### Options
 
-  * `:required` - marks a slot as required. If a caller does not pass a value
-    for a required slot, a compilation warning is emitted. Otherwise, an
-    omitted slot will default to `[]`.
-
-  * `:validate_attrs` - when set to `false`, no warning is emitted when a
-    caller passes attributes to a slot defined without a do block. If not set,
-    defaults to `true`.
-
-  * `:doc` - documentation for the slot. Any slot attributes declared will
-    have their documentation listed alongside the slot.
+    * `:required` - marks a slot as required. If a caller does not pass a value
+      for a required slot, a compilation warning is emitted. Otherwise, an
+      omitted slot will default to `[]`.
+    * `:validate_attrs` - when set to `false`, no warning is emitted when a
+      caller passes attributes to a slot defined without a do block.
+      Defaults to `true`.
+    * `:doc` - documentation for the slot. Any slot attributes declared will
+      have their documentation listed alongside the slot.
 
   ### Slot attributes
 
@@ -234,8 +213,8 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
   The default slot can be declared by passing `:inner_block` as the `name` of
   the slot.
 
-  Note that the `:inner_block` slot declaration cannot accept a block. Passing
-  one will result in a compilation error.
+  Note that the `:inner_block` slot declaration cannot accept a block, because
+  it doesn't support slot attributes. Passing one will result in a compilation error.
 
   ## Compile-Time validations
 
@@ -244,18 +223,15 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
   When slots are defined, CEExEngine will warn at compilation time on the
   caller if:
 
-  * A required slot of a component is missing.
-
-  * An unknown slot is given.
-
-  * An unknown slot attribute is given.
+    * A required slot of a component is missing.
+    * An unknown slot is given.
+    * An unknown slot attribute is given.
 
   On the side of the component itself, defining slots enhances the development
   experience:
 
-  * Slot documentation is generated for the component.
-
-  * Calls made to the component are tracked for reflection and validation purposes.
+    * Slot documentation is generated for the component.
+    * Calls made to the component are tracked for reflection and validation purposes.
 
   ## Documentation generation
 
@@ -263,16 +239,15 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
   function's documentation, depending on the value of the `@doc` module
   attribute:
 
-  * if `@doc` is a string, the slot docs are injected into that string. The
-    optional placeholder `[INSERT LVATTRDOCS]` can be used to specify where
-    in the string the docs are injected.
+    * if `@doc` is a string, the slot docs are injected into that string. The
+      optional placeholder `[INSERT LVATTRDOCS]` can be used to specify where
+      in the string the docs are injected.
 
   Otherwise, the docs are appended to the end of the `@doc` string.
 
-  * if `@doc` is unspecified, the slot docs are used as the default `@doc`
-    string.
-
-  * if `@doc` is `false`, the slot docs are omitted entirely.
+    * if `@doc` is unspecified, the slot docs are used as the default `@doc`
+      string.
+    * if `@doc` is `false`, the slot docs are omitted entirely.
 
   The injected slot docs are formatted as a markdown list:
 
