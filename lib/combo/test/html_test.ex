@@ -59,9 +59,9 @@ defmodule Combo.HTMLTest do
     |> SafeHTML.safe_to_string()
   end
 
-  defp render_string(mod, func, assigns) do
-    apply(mod, func, [assigns]) |> rendered_to_string()
-  end
+  # defp render_string(mod, func, assigns) do
+  #   apply(mod, func, [assigns]) |> rendered_to_string()
+  # end
 
   # defp render_html(mod, func, assigns) do
   #   apply(mod, func, [assigns]) |> t2h()
