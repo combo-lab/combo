@@ -81,16 +81,16 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
     apply(mod, func, [assigns]) |> t2h()
   end
 
-  test "__global__?" do
+  test "__global_attr__?" do
     alias Combo.Template.CEExEngine.DeclarativeAssigns
 
-    assert DeclarativeAssigns.__global__?("id")
-    refute DeclarativeAssigns.__global__?("idnope")
-    refute DeclarativeAssigns.__global__?("not-global")
+    assert DeclarativeAssigns.__global_attr__?("id")
+    refute DeclarativeAssigns.__global_attr__?("idnope")
+    refute DeclarativeAssigns.__global_attr__?("not-global")
 
     # prefixes
-    assert DeclarativeAssigns.__global__?("aria-whatever")
-    assert DeclarativeAssigns.__global__?("data-whatever")
+    assert DeclarativeAssigns.__global_attr__?("aria-whatever")
+    assert DeclarativeAssigns.__global_attr__?("data-whatever")
   end
 
   defmodule RemoteFunctionComponentWithAttrs do

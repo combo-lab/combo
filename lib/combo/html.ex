@@ -453,7 +453,7 @@ defmodule Combo.HTML do
     * `aria-`
 
   To add extra global prefixes, let's say adding the `x-` prefix used by
-  [Alpine.js](https://alpinejs.dev/), we can pass the `:global_prefixes` option
+  [Alpine.js](https://alpinejs.dev/), we can pass the `:global_attr_prefixes` option
   to `use Combo.HTML`:
 
       use Combo.HTML, global_prefixes: ~w(x-)

@@ -12,7 +12,7 @@ defmodule Combo.HTML.VerificationTest do
     warnings =
       capture_io(:stderr, fn ->
         defmodule TypeAttrs do
-          use Combo.HTML, global_prefixes: ~w(myprefix-)
+          use Combo.HTML, global_attr_prefixes: ~w(myprefix-)
 
           attr :any, :any
           attr :string, :string

@@ -13,7 +13,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
 
     * overriding `def/2` and `defp/2`.
     * importing `attr/3`, `slot/2` and `slot/3`.
-    * configuring `:global_prefixes`.
+    * configuring `:global_attr_prefixes`.
 
   ## Examples
 
@@ -21,10 +21,22 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
 
   Or,
 
-      use Combo.Template.CEExEngine.DeclarativeAssigns, global_prefixes: ~w(x-)
+      use Combo.Template.CEExEngine.DeclarativeAssigns, global_attr_prefixes: ~w(x-)
 
   """
   defmacro __using__(opts \\ []) do
+    module_setup =
+      quote bind_quoted: [module: __MODULE__] do
+        Module.register_attribute(__MODULE__, :__attrs__, accumulate: true)
+        Module.register_attribute(__MODULE__, :__slots__, accumulate: true)
+        Module.register_attribute(__MODULE__, :__slot__, accumulate: false)
+        Module.register_attribute(__MODULE__, :__slot_attrs__, accumulate: true)
+        Module.register_attribute(__MODULE__, :__components_calls__, accumulate: true)
+        Module.put_attribute(__MODULE__, :__components__, %{})
+        Module.put_attribute(__MODULE__, :on_definition, module)
+        Module.put_attribute(__MODULE__, :before_compile, module)
+      end
+
     imports =
       quote do
         import Kernel, except: [def: 2, defp: 2]
@@ -33,15 +45,12 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
           only: [def: 2, defp: 2, attr: 2, attr: 3, slot: 1, slot: 2, slot: 3]
       end
 
-    globals =
+    global_attr_fns =
       quote bind_quoted: [module: __MODULE__, opts: opts] do
-        for {prefix_match, value} <- module.__setup__(__MODULE__, opts) do
-          @doc false
-          def __global__?(unquote(prefix_match)), do: unquote(value)
-        end
+        module.__setup_global_attr_fns__(__MODULE__, opts)
       end
 
-    [imports, globals]
+    [module_setup, imports, global_attr_fns]
   end
 
   @doc ~S'''
@@ -74,7 +83,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
   | `:fun`          | any function                                                         |
   | `{:fun, arity}` | any function of arity                                                |
   | A struct module | any module that defines a struct with `defstruct/1`                  |
-  | `:global`       | any common HTML attributes, plus those defined by `:global_prefixes` |
+  | `:global`       | any common HTML attributes, plus those defined by `:global_attr_prefixes` |
 
   ### Options
 
@@ -173,8 +182,8 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
         unquote(name),
         unquote(type),
         unquote(opts),
-        __ENV__.line,
-        __ENV__.file
+        __ENV__.file,
+        __ENV__.line
       )
     end
   end
@@ -292,8 +301,8 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
         __MODULE__,
         unquote(name),
         unquote(opts),
-        __ENV__.line,
         __ENV__.file,
+        __ENV__.line,
         fn -> unquote(block) end
       )
     end
@@ -311,21 +320,21 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
         __MODULE__,
         unquote(name),
         unquote(opts),
-        __ENV__.line,
         __ENV__.file,
+        __ENV__.line,
         fn -> unquote(block) end
       )
     end
   end
 
-  ## Global
+  ## Global attributes
 
-  @global_prefixes ~w(
+  @global_attr_prefixes ~w(
     data-
     aria-
   )
 
-  @globals ~w(
+  @global_attrs ~w(
     accesskey
     alt
     autocapitalize
@@ -431,25 +440,66 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
   )
 
   @doc false
-  def __global__?(module, name, global_attr) when is_atom(module) and is_binary(name) do
-    includes = Keyword.get(global_attr.opts, :include, [])
+  @valid_opts [:global_attr_prefixes]
+  def __setup_global_attr_fns__(module, opts) do
+    {prefixes, invalid_opts} = Keyword.pop(opts, :global_attr_prefixes, [])
 
-    if function_exported?(module, :__global__?, 1) do
-      module.__global__?(name) or __global__?(name) or name in includes
-    else
-      __global__?(name) or name in includes
+    if invalid_opts != [] do
+      raise ArgumentError, """
+      invalid options passed to #{inspect(__MODULE__)}.
+
+      The following options are supported: #{inspect(@valid_opts)}, got: #{inspect(invalid_opts)}
+      """
+    end
+
+    prefix_matches =
+      for prefix <- prefixes do
+        if not String.ends_with?(prefix, "-") do
+          raise ArgumentError, """
+          global attr prefixes for #{inspect(module)} must end with a dash, got: #{inspect(prefix)}\
+          """
+        end
+
+        quote(do: {unquote(prefix) <> _, true})
+      end
+
+    prefix_matches =
+      if prefix_matches == [] do
+        []
+      else
+        prefix_matches ++ [quote(do: {_, false})]
+      end
+
+    quote bind_quoted: [prefix_matches: prefix_matches] do
+      for {prefix_match, value} <- prefix_matches do
+        @doc false
+        def __global_attr__?(unquote(prefix_match)), do: unquote(value)
+      end
     end
   end
 
-  for prefix <- @global_prefixes do
-    def __global__?(unquote(prefix) <> _), do: true
+  @doc false
+  def __global_attr__?(module, name, global_attr) when is_atom(module) and is_binary(name) do
+    includes = Keyword.get(global_attr.opts, :include, [])
+
+    if function_exported?(module, :__global_attr__?, 1) do
+      module.__global_attr__?(name) or __global_attr__?(name) or name in includes
+    else
+      __global_attr__?(name) or name in includes
+    end
   end
 
-  for name <- @globals do
-    def __global__?(unquote(name)), do: true
+  for prefix <- @global_attr_prefixes do
+    def __global_attr__?(unquote(prefix) <> _), do: true
   end
 
-  def __global__?(_), do: false
+  for name <- @global_attrs do
+    def __global_attr__?(unquote(name)), do: true
+  end
+
+  def __global_attr__?(_), do: false
+
+  ## def / defp
 
   @doc false
   defmacro def(expr, body) do
@@ -499,50 +549,28 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
     quote(do: unquote(__MODULE__).__pattern__!(unquote(kind), unquote(arg)))
   end
 
-  ## Attrs/slots
-
   @doc false
-  @valid_opts [:global_prefixes]
-  def __setup__(module, opts) do
-    {prefixes, invalid_opts} = Keyword.pop(opts, :global_prefixes, [])
+  defmacro __pattern__!(kind, arg) do
+    {name, 1} = __CALLER__.function
+    {_slots, attrs} = register_component!(kind, __CALLER__, name, true)
 
-    prefix_matches =
-      for prefix <- prefixes do
-        if not String.ends_with?(prefix, "-") do
-          raise ArgumentError,
-                "global prefixes for #{inspect(module)} must end with a dash, got: #{inspect(prefix)}"
-        end
-
-        quote(do: {unquote(prefix) <> _, true})
+    fields =
+      for %{name: name, required: true, type: {:struct, struct}} <- attrs do
+        {name, quote(do: %unquote(struct){})}
       end
 
-    if invalid_opts != [] do
-      raise ArgumentError, """
-      invalid options passed to #{inspect(__MODULE__)}.
-
-      The following options are supported: #{inspect(@valid_opts)}, got: #{inspect(invalid_opts)}
-      """
-    end
-
-    Module.register_attribute(module, :__attrs__, accumulate: true)
-    Module.register_attribute(module, :__slot_attrs__, accumulate: true)
-    Module.register_attribute(module, :__slots__, accumulate: true)
-    Module.register_attribute(module, :__slot__, accumulate: false)
-    Module.register_attribute(module, :__components_calls__, accumulate: true)
-    Module.put_attribute(module, :__components__, %{})
-    Module.put_attribute(module, :on_definition, __MODULE__)
-    Module.put_attribute(module, :before_compile, __MODULE__)
-
-    if prefix_matches == [] do
-      []
+    if fields == [] do
+      arg
     else
-      prefix_matches ++ [quote(do: {_, false})]
+      quote(do: %{unquote_splicing(fields)} = unquote(arg))
     end
   end
 
+  ## attr / slot
+
   @doc false
-  def __slot__!(module, name, opts, line, file, block_fun) do
-    ensure_used!(module, line, file)
+  def __slot__!(module, name, opts, file, line, block_fun) do
+    ensure_used!(module, file, line)
     {doc, opts} = Keyword.pop(opts, :doc, nil)
 
     if not (is_binary(doc) or is_nil(doc) or doc == false) do
@@ -558,7 +586,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
 
     Module.put_attribute(module, :__slot__, name)
 
-    slot_attrs =
+    attrs =
       try do
         block_fun.()
         module |> Module.get_attribute(:__slot_attrs__) |> Enum.reverse()
@@ -573,7 +601,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
       opts: opts,
       doc: doc,
       line: line,
-      attrs: slot_attrs,
+      attrs: attrs,
       validate_attrs: validate_attrs
     }
 
@@ -607,16 +635,14 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
   end
 
   @doc false
-  def __attr__!(module, name, type, opts, line, file) when is_atom(name) and is_list(opts) do
-    ensure_used!(module, line, file)
+  def __attr__!(module, name, type, opts, file, line) when is_atom(name) and is_list(opts) do
+    ensure_used!(module, file, line)
     slot = Module.get_attribute(module, :__slot__)
 
     if name == :inner_block do
-      compile_error!(
-        line,
-        file,
-        "cannot define attribute called :inner_block. Maybe you wanted to use `slot` instead?"
-      )
+      compile_error!(line, file, """
+      cannot define attribute called :inner_block. Maybe you wanted to use `slot` instead?\
+      """)
     end
 
     if type == :global && slot do
@@ -857,26 +883,6 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
 
   defp invalid_attr_message(_key, _slot),
     do: "The supported options inside slots are: [:required]"
-
-  defp compile_error!(line, file, msg) do
-    raise CompileError, line: line, file: file, description: msg
-  end
-
-  defmacro __pattern__!(kind, arg) do
-    {name, 1} = __CALLER__.function
-    {_slots, attrs} = register_component!(kind, __CALLER__, name, true)
-
-    fields =
-      for %{name: name, required: true, type: {:struct, struct}} <- attrs do
-        {name, quote(do: %unquote(struct){})}
-      end
-
-    if fields == [] do
-      arg
-    else
-      quote(do: %{unquote_splicing(fields)} = unquote(arg))
-    end
-  end
 
   @doc false
   def __on_definition__(env, kind, name, args, _guards, body) do
@@ -1451,7 +1457,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
       end)
 
     for {name, {line, _column, _type_value}} <- attrs,
-        !(global_attr && __global__?(caller_module, Atom.to_string(name), global_attr)) do
+        !(global_attr && __global_attr__?(caller_module, Atom.to_string(name), global_attr)) do
       message = "undefined attribute \"#{name}\" for component #{component_fa(call)}"
       warn(message, call.file, line)
     end
@@ -1589,13 +1595,16 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
     IO.warn(message, file: file, line: line)
   end
 
-  defp ensure_used!(module, line, file) do
+  defp compile_error!(line, file, msg) do
+    raise CompileError, file: file, line: line, description: msg
+  end
+
+  defp ensure_used!(module, file, line) do
     if !Module.get_attribute(module, :__attrs__) do
-      compile_error!(
-        line,
-        file,
-        "you must `use Combo.Template.CEExEngine.DeclarativeAssigns` to declare attributes. It is currently only imported."
-      )
+      compile_error!(line, file, """
+      you must `use Combo.Template.CEExEngine.DeclarativeAssigns` to declare attributes. \
+      It is currently only imported.\
+      """)
     end
   end
 end
