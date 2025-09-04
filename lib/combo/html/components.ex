@@ -7,7 +7,7 @@ defmodule Combo.HTML.Components do
   @doc """
   Renders a link.
 
-  [INSERT LVATTRDOCS]
+  [INSERT ASSIGNS_DOCS]
 
   ## Examples
 
@@ -409,7 +409,7 @@ defmodule Combo.HTML.Components do
   a non-host specific token with `Plug.CSRFProtection.get_csrf_token/0` and
   pass it to the form generator via the `:csrf_token` option.
 
-  [INSERT LVATTRDOCS]
+  [INSERT ASSIGNS_DOCS]
   '''
   @doc type: :component
   attr :for, :any, required: true, doc: "An existing form or the form source data."
@@ -545,7 +545,7 @@ defmodule Combo.HTML.Components do
   @doc """
   Renders nested form inputs for associations or embeds.
 
-  [INSERT LVATTRDOCS]
+  [INSERT ASSIGNS_DOCS]
 
   ## Examples
 
@@ -878,7 +878,7 @@ defmodule Combo.HTML.Components do
 
   Raises an `ArgumentError` if the tag name is found to be unsafe HTML.
 
-  [INSERT LVATTRDOCS]
+  [INSERT ASSIGNS_DOCS]
 
   ## Examples
 

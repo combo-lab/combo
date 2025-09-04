@@ -141,7 +141,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
   the `@doc` module attribute:
 
     * if `@doc` is a string, the attribute docs are injected into that string.
-      The optional placeholder `[INSERT LVATTRDOCS]` can be used to specify
+      The optional placeholder `[INSERT ASSIGNS_DOCS]` can be used to specify
       where in the string the docs are injected. Otherwise, the docs are
       appended to the end of the `@doc` string.
     * if `@doc` is unspecified, the attribute docs are used as the default
@@ -249,7 +249,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
   attribute:
 
     * if `@doc` is a string, the slot docs are injected into that string. The
-      optional placeholder `[INSERT LVATTRDOCS]` can be used to specify where
+      optional placeholder `[INSERT ASSIGNS_DOCS]` can be used to specify where
       in the string the docs are injected.
 
   Otherwise, the docs are appended to the end of the `@doc` string.
@@ -1098,7 +1098,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
   end
 
   defp build_component_doc(doc \\ "", slots, attrs) do
-    [left | right] = String.split(doc, "[INSERT LVATTRDOCS]")
+    [left | right] = String.split(doc, "[INSERT ASSIGNS_DOCS]")
 
     IO.iodata_to_binary([
       build_left_doc(left),

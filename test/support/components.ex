@@ -108,7 +108,7 @@ defmodule Combo.Test.Support.FunctionComponentWithAttrs do
 
   @doc """
   fun docs
-  [INSERT LVATTRDOCS]
+  [INSERT ASSIGNS_DOCS]
   fun docs
   """
   def fun_doc_injection(assigns), do: ~CE[]
