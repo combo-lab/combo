@@ -70,19 +70,19 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
 
   The following types are supported:
 
-  | Name            | Description                                                          |
-  |-----------------|----------------------------------------------------------------------|
-  | `:any`          | any term (including `nil`)                                           |
-  | `:string`       | any binary string                                                    |
-  | `:atom`         | any atom (including `true`, `false`, and `nil`)                      |
-  | `:boolean`      | any boolean                                                          |
-  | `:integer`      | any integer                                                          |
-  | `:float`        | any float                                                            |
-  | `:list`         | any list of any arbitrary types                                      |
-  | `:map`          | any map of any arbitrary types                                       |
-  | `:fun`          | any function                                                         |
-  | `{:fun, arity}` | any function of arity                                                |
-  | A struct module | any module that defines a struct with `defstruct/1`                  |
+  | Name            | Description                                                               |
+  |-----------------|---------------------------------------------------------------------------|
+  | `:any`          | any term (including `nil`)                                                |
+  | `:string`       | any binary string                                                         |
+  | `:atom`         | any atom (including `true`, `false`, and `nil`)                           |
+  | `:boolean`      | any boolean                                                               |
+  | `:integer`      | any integer                                                               |
+  | `:float`        | any float                                                                 |
+  | `:list`         | any list of any arbitrary types                                           |
+  | `:map`          | any map of any arbitrary types                                            |
+  | `:fun`          | any function                                                              |
+  | `{:fun, arity}` | any function of arity                                                     |
+  | A struct module | any module that defines a struct with `defstruct/1`                       |
   | `:global`       | any common HTML attributes, plus those defined by `:global_attr_prefixes` |
 
   ### Options
