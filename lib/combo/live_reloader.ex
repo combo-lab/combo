@@ -197,7 +197,9 @@ defmodule Combo.LiveReloader do
       end
 
     if config do
-      inject_live_reloader(conn, endpoint, config)
+      conn
+      |> put_private(:combo_live_reloader, true)
+      |> inject_live_reloader(endpoint, config)
     else
       conn
     end
