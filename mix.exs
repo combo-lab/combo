@@ -40,7 +40,10 @@ defmodule Combo.MixProject do
 
   def cli do
     [
-      preferred_envs: [docs: :docs]
+      preferred_envs: [
+        docs: :docs,
+        publish: :publish
+      ]
     ]
   end
 
@@ -73,15 +76,15 @@ defmodule Combo.MixProject do
       {:jason, "~> 1.0", optional: true},
 
       # Docs dependencies (some for cross references)
-      {:ex_doc, "~> 0.38", only: :docs},
-      {:ecto, "~> 3.0", only: :docs},
-      {:ecto_sql, "~> 3.10", only: :docs},
-      {:gettext, "~> 0.26", only: :docs},
-      {:telemetry_poller, "~> 1.0", only: :docs},
-      {:telemetry_metrics, "~> 1.0", only: :docs},
-      {:makeup_elixir, "~> 1.0.1", only: :docs},
-      {:makeup_ceex, "~> 0.1.0", only: :docs},
-      {:makeup_syntect, "~> 0.1.0", only: :docs},
+      {:ex_doc, "~> 0.38", only: [:docs, :publish]},
+      {:ecto, "~> 3.0", only: [:docs, :publish]},
+      {:ecto_sql, "~> 3.10", only: [:docs, :publish]},
+      {:gettext, "~> 0.26", only: [:docs, :publish]},
+      {:telemetry_poller, "~> 1.0", only: [:docs, :publish]},
+      {:telemetry_metrics, "~> 1.0", only: [:docs, :publish]},
+      {:makeup_elixir, "~> 1.0.1", only: [:docs, :publish]},
+      {:makeup_ceex, "~> 0.1.0", only: [:docs, :publish]},
+      {:makeup_syntect, "~> 0.1.0", only: [:docs, :publish]},
 
       # Test dependencies
       {:mint, "~> 1.4", only: :test},
