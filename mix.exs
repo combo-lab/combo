@@ -96,7 +96,12 @@ defmodule Combo.MixProject do
       licenses: ["MIT"],
       links: %{"GitHub" => @scm_url},
       files: ~w(
-          assets/js lib priv CHANGELOG.md LICENSE.md mix.exs package.json README.md .formatter.exs
+          lib mix.exs
+          priv package.json
+          .formatter.exs
+          README.md
+          CHANGELOG.md
+          LICENSE.txt
         )
     ]
   end
