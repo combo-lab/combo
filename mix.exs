@@ -65,12 +65,12 @@ defmodule Combo.MixProject do
       {:phoenix_pubsub, "~> 2.1"},
       {:websock_adapter, "~> 0.5.3"},
       {:file_system, "~> 1.0"},
+      {:lazy_html, "~> 0.1.0"},
 
       # Optional deps
       {:plug_cowboy, "~> 2.7", optional: true},
       {:bandit, "~> 1.0", optional: true},
       {:jason, "~> 1.0", optional: true},
-      {:lazy_html, "~> 0.1.0", optional: true},
 
       # Docs dependencies (some for cross references)
       {:ex_doc, "~> 0.38", only: :docs},
