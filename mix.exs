@@ -2,7 +2,7 @@ defmodule Combo.MixProject do
   use Mix.Project
 
   @version "0.1.0"
-  @elixir_requirement "~> 1.15"
+  @elixir_requirement "~> 1.18"
   @scm_url "https://github.com/combo-team/combo"
 
   def project do
