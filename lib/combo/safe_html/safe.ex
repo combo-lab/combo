@@ -105,3 +105,11 @@ end
 defimpl Combo.SafeHTML.Safe, for: URI do
   def to_iodata(data), do: Escape.escape_html(URI.to_string(data))
 end
+
+if Code.ensure_loaded?(Decimal) do
+  defimpl Combo.SafeHTML.Safe, for: Decimal do
+    def to_iodata(t) do
+      @for.to_string(t, :normal)
+    end
+  end
+end

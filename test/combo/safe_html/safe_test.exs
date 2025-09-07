@@ -91,6 +91,13 @@ defmodule Combo.SafeHTML.SafeTest do
              "http://www.example.org/foo?secret=&lt;a&amp;b&gt;"
   end
 
+  if Code.ensure_loaded?(Decimal) do
+    test "impl for Decimal" do
+      decimal = Decimal.new("3.1415926")
+      assert Safe.to_iodata(decimal) == "3.1415926"
+    end
+  end
+
   test "equivalences" do
     # Since some code may compare Safe.to_iodata("") with Safe.to_iodata(nil),
     # we make sure they have equivalent representations.
