@@ -8,6 +8,9 @@ defmodule Combo.LiveReloader.Socket do
 
   channel "combo:live_reload", Channel
 
+  @impl true
   def connect(_params, socket), do: {:ok, socket}
+
+  @impl true
   def id(_socket), do: nil
 end
