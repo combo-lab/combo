@@ -5,29 +5,35 @@ defmodule Combo.HTML.Components do
   alias Combo.SafeHTML
 
   @doc """
-  Renders a link.
+  Renders an anchor element.
 
   [INSERT ASSIGNS_DOCS]
 
   ## Examples
 
   ```ceex
-  <.link href={~p"/"} class="underline">home</.link>
+  <.a href={~p"/"}>home</.a>
   ```
 
   ```ceex
-  <.link href={URI.parse("https://elixir-lang.org")}>Elixir</.link>
+  <.a href={URI.parse("https://elixir-lang.org")}>Elixir</.a>
   ```
 
   ```ceex
-  <.link href="/the_world" method="delete" data-confirm="Really?">delete</.link>
+  <.a href="/the_world" method="delete" data-confirm="Really?">delete</.a>
   ```
+
+  ### Data attributes
+
+  The following data attributes are supported:
+
+    * `data-confirm` - shows a confirmation prompt before navigating to the
+      destination.
 
   ## JavaScript dependency
 
-  In order to support links where `:method` is not `"get"` or use the above
-  data attributes, `Combo.HTML` relies on JavaScript. You can load in your
-  build tool like:
+  In order to support anchors where `:method` is not `"get"` or use the
+  `data-confirm` attribute, JavaScript dependency must be loaded:
 
   ```javascript
   import html from `combo/html`
@@ -38,36 +44,28 @@ defmodule Combo.HTML.Components do
   To customize the default behaviour of the JavaScript dependency, check
   out the doc of `combo/html`.
 
-  ### Data attributes
-
-  The following data attributes are supported:
-
-    * `data-confirm` - shows a confirmation prompt before submitting the
-      form when `:method` is not `"get"`.
-
   ## CSRF Protection
 
   By default, CSRF tokens are generated through `Plug.CSRFProtection`.
   """
   @doc type: :component
-  attr :href, :any,
-    doc: """
-    The new location to navigate to.
-    """
-
   attr :method, :string,
     default: "get",
     doc: """
-    The HTTP method to use with the link.
+    The HTTP method to use for navigating.
 
-    In case the method is not `get`, the link is generated inside the form which sets the proper
-    information. In order to submit the form, JavaScript must be enabled in the browser.
+    In case the method is not `get`, JavaScript dependency must be loaded.
+    """
+
+  attr :href, :any,
+    doc: """
+    The destination to navigate to.
     """
 
   attr :csrf_token, :any,
     default: true,
     doc: """
-    A boolean or custom token to use for links with an HTTP method other than `get`.
+    A boolean or custom token to use for anchors with an HTTP method other than `get`.
     """
 
   attr :rest, :global,
@@ -82,8 +80,8 @@ defmodule Combo.HTML.Components do
     The content rendered inside of the `a` tag.
     """
 
-  def link(%{href: href} = assigns) when href != "#" and not is_nil(href) do
-    href = valid_destination!(href, "<.link>")
+  def a(%{href: href} = assigns) when href != "#" and not is_nil(href) do
+    href = valid_destination!(href, "<.a>")
     assigns = assign(assigns, :href, href)
 
     ~CE"""
@@ -98,15 +96,11 @@ defmodule Combo.HTML.Components do
     """
   end
 
-  def link(%{} = assigns) do
+  def a(%{} = assigns) do
     ~CE"""
     <a href="#" {@rest}>{render_slot(@inner_block)}</a>
     """
   end
-
-  defp csrf_token(true, href), do: Plug.CSRFProtection.get_csrf_token_for(href)
-  defp csrf_token(false, _href), do: nil
-  defp csrf_token(csrf, _href) when is_binary(csrf), do: csrf
 
   defp valid_destination!(%URI{} = uri, context) do
     valid_destination!(URI.to_string(uri), context)
@@ -159,32 +153,79 @@ defmodule Combo.HTML.Components do
     end
   end
 
+  defp csrf_token(true, href), do: Plug.CSRFProtection.get_csrf_token_for(href)
+  defp csrf_token(false, _href), do: nil
+  defp csrf_token(csrf, _href) when is_binary(csrf), do: csrf
+
   @doc """
-  Converts a given data structure to a `Combo.HTML.Form`.
+  Transforms various data structures to a `%Combo.HTML.Form{}` struct for use
+  with the `form/1` component.
 
-  This is commonly used to convert a map or an Ecto changeset into a form to
-  be given to the `form/1` component.
+  The various data structures must implement `Combo.HTML.FormData` protocol.
 
-  ## Creating a form from params
+  > Combo implements `Combo.HTML.FormData` protocol for maps.
+  >
+  > And, `combo_ecto` implements `Combo.HTML.FormData` protocol for
+  > `%Ecto.Changeset{}` structs.
 
-  To create a form based on the params of controller's action, you could do:
+  ## Options
+
+    * `:as` - the `name` prefix to be used in form inputs
+    * `:id` - the `id` prefix to be used in form inputs
+    * `:errors` - the keyword list of errors (used by maps exclusively)
+    * `:action` - the action that was taken against the form. This value can be
+      used to distinguish between different operations such as the user typing
+      into a form for validation, or submitting a form for a database insert.
+      For example: `to_form(changeset, action: :validate)`,
+      or `to_form(changeset, action: :save)`. The provided action is passed
+      to the underlying `Combo.HTML.FormData` implementation options.
+
+  ### Overriding options
+
+  If an existing `%Combo.HTML.Form{}` is passed, the given options will override
+  its existing values if given. Then the remaining options are merged with the
+  existing form options.
+
+      to_form(form, as: "new-name")
+
+  ### About `:errors` option
+
+  The `:errors` option is used by maps exclusively.
+
+  `:errors` is a keyword of tuples in the shape of `{error_message, options_list}`.
+  Here is an example:
+
+      to_form(%{"search" => nil}, errors: [search: {"Can't be blank", []}])
+
+  ### About showing errors
+
+  Errors in a form are only displayed if the changeset's `action` field is set
+  (and it is not set to `:ignore`) and can be filtered by whether the fields
+  have been used on the client or not.
+  Refer to [a note on :errors for more information](#form/1-a-note-on-errors).
+
+  ## Examples
+
+  ### Building a form from the params of controller's action
+
+  To build it, you could do:
 
       def edit(conn, params) do
         form = to_form(params)
         # ...
       end
 
-  When you pass a map to `to_form/1`, it assumes said map contains the form
-  parameters, which are expected to have string keys.
+  Above code passes a map to `to_form/2`, and it assumes given map contains
+  the form parameters, which are expected to have string keys.
 
-  You can also specify a name to nest the parameters:
+  You can also use the nested params:
 
       def edit(conn, %{"user" => user_params}) do
         form = to_form(user_params)
         # ...
       end
 
-  ## Creating a form from changesets
+  ### Building a form from Ecto changesets
 
   When using changesets, the underlying data, form parameters, and errors
   are retrieved from it. The `:as` option is automatically computed too.
@@ -198,7 +239,7 @@ defmodule Combo.HTML.Components do
         end
       end
 
-  And then you create a changeset that you pass to `to_form`:
+  And then you create a changeset that you pass to `to_form/2`:
 
       %Demo.Users.User{}
       |> Ecto.Changeset.change()
@@ -207,43 +248,15 @@ defmodule Combo.HTML.Components do
   In this case, once the form is submitted, the parameters will be available
   under `%{"user" => user_params}`.
 
-  ## Using the created form
+  ### Using the built form
 
   The form can be passed to the `<.form>` component:
 
   ```ceex
-  <.form :let={f} for={@form} id="todo-form">
+  <.form for={@form} :let={f} id="todo-form">
     <.input field={f[:name]} type="text" />
   </.form>
   ```
-
-  ## Options
-
-    * `:as` - the `name` prefix to be used in form inputs
-    * `:id` - the `id` prefix to be used in form inputs
-    * `:errors` - keyword list of errors (used by maps exclusively)
-    * `:action` - The action that was taken against the form. This value can be
-      used to distinguish between different operations such as the user typing
-      into a form for validation, or submitting a form for a database insert.
-      For example: `to_form(changeset, action: :validate)`,
-      or `to_form(changeset, action: :save)`. The provided action is passed
-      to the underlying `Combo.HTML.FormData` implementation options.
-
-  The underlying data may accept additional options when converted to forms.
-  For example, a map accepts `:errors` to list errors, but such option is not
-  accepted by changesets. `:errors` is a keyword of tuples in the shape of
-  `{error_message, options_list}`. Here is an example:
-
-      to_form(%{"search" => nil}, errors: [search: {"Can't be blank", []}])
-
-  If an existing `Combo.HTML.Form` struct is given, the options above will
-  override its existing values if given. Then the remaining options are merged
-  with the existing form options.
-
-  Errors in a form are only displayed if the changeset's `action` field is set
-  (and it is not set to `:ignore`) and can be filtered by whether the fields
-  have been used on the client or not.
-  Refer to [a note on :errors for more information](#form/1-a-note-on-errors).
   """
   def to_form(data_or_params, options \\ [])
 
@@ -290,7 +303,7 @@ defmodule Combo.HTML.Components do
 
       Or, if you prefer, use to_form to create a form in your template:
 
-          assign(socket, form: to_form(%{}, as: #{inspect(data)}))
+          assign(:form, to_form(%{}, as: #{inspect(data)}))
 
       and then use it in your templates (no :let required):
 
@@ -302,22 +315,14 @@ defmodule Combo.HTML.Components do
   end
 
   @doc ~S'''
-  Renders a form.
+  Renders a form element.
 
-  This function receives a `Combo.HTML.Form` struct, generally created with
-  `to_form/2`, and generates the relevant form tags.
+  [INSERT ASSIGNS_DOCS]
 
   ## Examples
 
-  This component is typically called with as `for={@form}`, where `@form` is
-  the result of the `to_form/1` function.
-
-  `to_form/1` expects either a map or an [`Ecto.Changeset`](https://hexdocs.pm/ecto/Ecto.Changeset.html)
-  as the source of data and normalizes it into `Combo.HTML.Form` structure.
-
-  For example, you may use the parameters received in a controller's action
-  to create an Ecto changeset and use `to_form/1` to convert it to a form.
-  Then, in your templates, you pass the `@form` as argument to `:for`:
+  This component is typically called with `for={@form}`, where `@form` is built
+  using the `to_form/2` function. For example:
 
   ```ceex
   <.form for={@form} action={~p"/path"}>
@@ -325,41 +330,17 @@ defmodule Combo.HTML.Components do
   </.form>
   ```
 
-  The `.input` component is generally defined as part of your own application
-  and adds all styling necessary:
+  ### Using the `:let` attribute
+
+  The form passed to `for` attribute can be captured using `:let` attribute:
 
   ```ceex
-  def input(assigns) do
-    ~CE"""
-    <input type="text" name={@field.name} id={@field.id} value={@field.value} class="..." />
-    """
-  end
-  ```
-
-  A form accepts multiple options. For example, if you are doing file uploads
-  and you want to capture submissions, you might write instead:
-
-  ```ceex
-  <.form for={@form} multipart action={~p"/path"}>
-    ...
-    <input type="submit" value="Save" />
+  <.form for={@form} :let={f} action={~p"/path"}>
+    <.input field={f[:email]} />
   </.form>
   ```
 
-  ### Using the `for` attribute
-
-  The `for` attribute can also be a map or an Ecto.Changeset. In such cases,
-  a form will be created on the fly, and you can capture it using `:let`:
-
-  ```ceex
-  <.form :let={form} for={@changeset} action={~p"/path"}>
-  ```
-
-  However, such approach is discouraged for one reason. Ecto
-  changesets are meant to be single use. By never storing the changeset
-  in the assign, you will be less tempted to use it across operations
-
-  ### A note on `:errors`
+  ## A note on `:errors`
 
   Even if `changeset.errors` is non-empty, errors will not be displayed in a
   form if [the changeset
@@ -382,18 +363,7 @@ defmodule Combo.HTML.Components do
   set it to `:validate` or anything else to avoid giving the impression that a
   database operation has actually been attempted.
 
-  ## Examples
-
-  ```ceex
-  <.form :let={f} for={@changeset} action={~p"/path"}>
-    <.input field={f[:body]} />
-  </.form>
-  ```
-
-  In the example above, we passed a changeset to `for` and captured the value
-  using `:let={f}`.
-
-  ### CSRF protection
+  ## CSRF protection
 
   CSRF protection is a mechanism to ensure that the user who rendered
   the form is the one actually submitting it. This module generates a
@@ -408,11 +378,11 @@ defmodule Combo.HTML.Components do
   party applications. If this behaviour is problematic, you can generate
   a non-host specific token with `Plug.CSRFProtection.get_csrf_token/0` and
   pass it to the form generator via the `:csrf_token` option.
-
-  [INSERT ASSIGNS_DOCS]
   '''
   @doc type: :component
-  attr :for, :any, required: true, doc: "An existing form or the form source data."
+  attr :for, :any,
+    required: true,
+    doc: "A `%Combo.HTML.Form{}` or the form source data."
 
   attr :action, :string,
     doc: """
@@ -539,6 +509,230 @@ defmodule Combo.HTML.Components do
       method when method in ~w(get post) -> {method, nil}
       _ -> {"post", method}
     end
+  end
+
+  @doc """
+  Renders an input element.
+
+  A `%Combo.HTML.FormField{}` can be passed as `:field` attr, which is used
+  to retrieve the `:id`, `:name`, and `:value` attrs automatically. Otherwise,
+  all these attrs may be passed explicitly.
+
+  Unsupported types, such as `"radio"` and `"submit"`, are best written
+  directly as plain HTML.
+
+  See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
+  for more information.
+
+  [INSERT ASSIGNS_DOCS]
+
+  ## Examples
+
+  ```ceex
+  <.input field={@form[:email]} type="email" />
+  ```
+
+  ```ceex
+  <.input id="email" name="email" value="admin@example.com" />
+  ```
+  """
+  @doc type: :component
+  attr :id, :any
+  attr :name, :any
+  attr :value, :any
+  attr :field, Combo.HTML.FormField, doc: "a form field struct retrieved from the form"
+
+  attr :type, :string,
+    default: "text",
+    values: ~w(button checkbox color date datetime-local email file hidden image month number
+               password radio range reset search tel text time url week)
+
+  attr :rest, :global,
+    include: ~w(accept autocomplete capture cols disabled form list max maxlength min minlength
+                multiple pattern placeholder readonly required rows size step)
+
+  def input(%{field: %Combo.HTML.FormField{} = field} = assigns) do
+    assigns
+    |> assign(:field, nil)
+    |> assign_new(:id, fn -> field.id end)
+    |> assign_new(:name, fn -> field.name end)
+    |> assign_new(:value, fn -> field.value end)
+    |> build_input()
+  end
+
+  def input(assigns) do
+    assigns
+    |> assign_new(:id, fn -> nil end)
+    |> assign_new(:name, fn -> nil end)
+    |> assign_new(:value, fn -> nil end)
+    |> build_input()
+  end
+
+  defp build_input(%{type: "checkbox"} = assigns) do
+    assigns =
+      assigns
+      |> assign_new(:checked, fn ->
+        Combo.HTML.Form.normalize_value("checkbox", assigns[:value])
+      end)
+
+    ~CE"""
+    <input name={@name} type="hidden" value="false" disabled={@rest[:disabled]} />
+    <input
+      id={@id}
+      name={@name}
+      type={@type}
+      value="true"
+      checked={@checked}
+      {@rest}
+    />
+    """
+  end
+
+  defp build_input(assigns) do
+    ~CE"""
+    <input
+      id={@id}
+      name={@name}
+      type={@type}
+      value={Combo.HTML.Form.normalize_value(@type, @value)}
+      {@rest}
+    />
+    """
+  end
+
+  @doc """
+  Renders a textarea element.
+
+  A `%Combo.HTML.FormField{}` can be passed as `:field` attr, which is used
+  to retrieve the `:id`, `:name`, and `:value` attrs automatically. Otherwise,
+  all these attrs may be passed explicitly.
+
+  See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea
+  for more information.
+
+  ## Examples
+
+  ```ceex
+  <.textarea field={@form[:content]} />
+  ```
+
+  ```ceex
+  <.textarea id="content" name="content" value="Lorem ipsum..." />
+  ```
+  """
+  @doc type: :component
+  attr :id, :any
+  attr :name, :any
+  attr :value, :any
+  attr :field, Combo.HTML.FormField, doc: "a form field struct retrieved from the form"
+
+  attr :rest, :global,
+    include: ~w(autocapitalize autocomplete autocorrect autofocus cols dirname disabled form
+                maxlength minlength placeholder readonly required rows spellcheck wrap)
+
+  def textarea(%{field: %Combo.HTML.FormField{} = field} = assigns) do
+    assigns
+    |> assign(:field, nil)
+    |> assign_new(:id, fn -> field.id end)
+    |> assign_new(:name, fn -> field.name end)
+    |> assign_new(:value, fn -> field.value end)
+    |> build_textarea()
+  end
+
+  def textarea(assigns) do
+    assigns
+    |> assign_new(:id, fn -> nil end)
+    |> assign_new(:name, fn -> nil end)
+    |> assign_new(:value, fn -> nil end)
+    |> build_textarea()
+  end
+
+  defp build_textarea(assigns) do
+    ~CE"""
+    <textarea
+      id={@id}
+      name={@name}
+      {@rest}
+    >{Combo.HTML.Form.normalize_value("textarea", @value)}</textarea>
+    """
+  end
+
+  @doc """
+  Renders a select element.
+
+  A `%Combo.HTML.FormField{}` can be passed as `:field` attr, which is used
+  to retrieve the `:id`, `:name`, and `:value` attrs automatically. Otherwise,
+  all these attrs may be passed explicitly.
+
+  See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select
+  for more information.
+
+  ## Examples
+
+  ```ceex
+  <.select
+    field={@form[:pet]}
+    prompt="Choose a pet"
+    options={[Cat: "cat", Dog: "dog", Fish: "fish"]}
+  />
+  ```
+
+  ```ceex
+  <.select
+    field={@form[:pet]}
+    prompt="Choose a pet"
+    options={[Cat: "cat", Dog: "dog", Fish: "fish"]}
+    multiple
+  />
+  ```
+
+  """
+  @doc type: :component
+  attr :id, :any
+  attr :name, :any
+  attr :value, :any
+  attr :field, Combo.HTML.FormField, doc: "a form field struct retrieved from the form"
+
+  attr :prompt, :string, default: nil, doc: "the prompt"
+
+  attr :options, :list,
+    doc: "the options, which will be passed to Combo.HTML.Form.options_for_select/2"
+
+  attr :multiple, :boolean,
+    default: false,
+    doc: "the flag indicates that multiple options can be selected"
+
+  attr :rest, :global, include: ~w(autocomplete autofocus disabled form required size)
+
+  def select(%{field: %Combo.HTML.FormField{} = field} = assigns) do
+    assigns
+    |> assign(:field, nil)
+    |> assign_new(:id, fn -> field.id end)
+    |> assign_new(:name, fn -> if assigns.multiple, do: field.name <> "[]", else: field.name end)
+    |> assign_new(:value, fn -> field.value end)
+    |> build_select()
+  end
+
+  def select(assigns) do
+    assigns
+    |> assign_new(:id, fn -> nil end)
+    |> assign_new(:name, fn -> nil end)
+    |> assign_new(:value, fn -> nil end)
+    |> build_select()
+  end
+
+  defp build_select(assigns) do
+    ~CE"""
+    <select
+      id={@id}
+      name={@name}
+      multiple={@multiple}
+      {@rest}
+    >
+      <option :if={@prompt} value="">{@prompt}</option>
+      {Combo.HTML.Form.options_for_select(@options, @value)}
+    </select>
+    """
   end
 
   # TODO: fix the docs
@@ -883,18 +1077,14 @@ defmodule Combo.HTML.Components do
   ## Examples
 
   ```ceex
-  <.dynamic_tag tag_name="input" name="my-input" type="text"/>
-  ```
-
-  ```html
-  <input name="my-input" type="text"/>
+  <.dynamic_tag tag_name="input" name="my-input" type="text" />
+  # outputs:
+  <input name="my-input" type="text" />
   ```
 
   ```ceex
   <.dynamic_tag tag_name="p">content</.dynamic_tag>
-  ```
-
-  ```html
+  # outputs:
   <p>content</p>
   ```
   """
