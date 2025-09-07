@@ -1,10 +1,11 @@
 /**
- * Combo Channels JavaScript client
+ * JavaScript client for Combo.Socket
  *
  * ## Socket Connection
  *
- * A single connection is established to the server and
- * channels are multiplexed over the connection.
+ * A single connection is established to the server and channels are multiplexed
+ * over the connection.
+ *
  * Connect to the server using the `Socket` class:
  *
  * ```javascript
@@ -192,10 +193,10 @@
  * @module socket
  */
 
+import Socket from './socket'
 import Channel from './channel'
 import LongPoll from './longpoll'
 import Presence from './presence'
 import Serializer from './serializer'
-import Socket from './socket'
 
-export { Channel, LongPoll, Presence, Serializer, Socket }
+export { Socket, Channel, LongPoll, Presence, Serializer }

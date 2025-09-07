@@ -4,52 +4,55 @@ defmodule Combo.Socket do
 
   `Combo.Socket` is used as a module for establishing a connection
   between client and server. Once the connection is established,
-  the initial state is stored in the `Combo.Socket` struct.
+  the initial state is stored in the `%Combo.Socket{}` struct.
 
   The same socket can be used to receive events from different transports.
-  Combo supports `websocket` and `longpoll` options when invoking
+  Combo supports `:websocket` and `:longpoll` options when invoking
   `Combo.Endpoint.socket/3` in your endpoint. `websocket` is set by default
   and `longpoll` can also be configured explicitly.
 
-      socket "/socket", MyAppWeb.Socket, websocket: true, longpoll: false
+      socket "/socket", Demo.Web.UserSocket,
+        websocket: true,
+        longpoll: false
 
-  The command above means incoming socket connections can be made via
-  a WebSocket connection. Incoming and outgoing events are routed to
-  channels by topic:
+  The code above means incoming socket connections can be made via a WebSocket
+  connection.
 
-      channel "room:lobby", MyAppWeb.LobbyChannel
+  Incoming and outgoing events are routed to channels by topic:
+
+      channel "room:lobby", Demo.Web.LobbyChannel
 
   See `Combo.Channel` for more information on channels.
 
-  ## Socket Behaviour
+  ## Socket behaviour
 
-  Socket handlers are mounted in Endpoints and must define two callbacks:
+  Socket handlers are mounted in endpoints and must define two callbacks:
 
-    * `connect/3` - receives the socket params, connection info if any, and
-      authenticates the connection. Must return a `Combo.Socket` struct,
-      often with custom assigns
+    * `connect/3` - receives the params, socket, connection info if any and
+      returns a new socket. It's often used for authenticates the connection,
+      and put new assigns.
 
     * `id/1` - receives the socket returned by `connect/3` and returns the
       id of this connection as a string. The `id` is used to identify socket
       connections, often to a particular user, allowing us to force disconnections.
-      For sockets requiring no authentication, `nil` can be returned
+      For sockets requiring no authentication, `nil` can be returned.
 
   ## Examples
 
-      defmodule MyAppWeb.UserSocket do
+      defmodule Demo.Web.UserSocket do
         use Combo.Socket
 
-        channel "room:*", MyAppWeb.RoomChannel
+        channel "room:*", Demo.Web.RoomChannel
 
         def connect(params, socket, _connect_info) do
           {:ok, assign(socket, :user_id, params["user_id"])}
         end
 
-        def id(socket), do: "users_socket:#{socket.assigns.user_id}"
+        def id(socket), do: "user_socket:#{socket.assigns.user_id}"
       end
 
       # Disconnect all user's socket connections and their multiplexed channels
-      MyAppWeb.Endpoint.broadcast("users_socket:" <> user.id, "disconnect", %{})
+      Demo.Web.Endpoint.broadcast("user_socket:" <> user.id, "disconnect", %{})
 
   ## Socket fields
 
@@ -57,8 +60,8 @@ defmodule Combo.Socket do
     * `:assigns` - The map of socket assigns, default: `%{}`
     * `:channel` - The current channel module
     * `:channel_pid` - The channel pid
-    * `:endpoint` - The endpoint module where this socket originated, for example: `MyAppWeb.Endpoint`
-    * `:handler` - The socket module where this socket originated, for example: `MyAppWeb.UserSocket`
+    * `:endpoint` - The endpoint module where this socket originated, for example: `Demo.Web.Endpoint`
+    * `:handler` - The socket module where this socket originated, for example: `Demo.Web.UserSocket`
     * `:joined` - If the socket has effectively joined the channel
     * `:join_ref` - The ref sent by the client when joining
     * `:ref` - The latest ref sent by the client
@@ -239,7 +242,7 @@ defmodule Combo.Socket do
   Would allow you to broadcast a `"disconnect"` event and terminate
   all active sockets and channels for a given user:
 
-      MyAppWeb.Endpoint.broadcast("users_socket:" <> user.id, "disconnect", %{})
+      Demo.Web.Endpoint.broadcast("users_socket:" <> user.id, "disconnect", %{})
 
   Returning `nil` makes this socket anonymous.
   """
@@ -364,7 +367,7 @@ defmodule Combo.Socket do
 
     * `topic_pattern` - The string pattern, for example `"room:*"`, `"users:*"`,
       or `"system"`
-    * `module` - The channel module handler, for example `MyAppWeb.RoomChannel`
+    * `module` - The channel module handler, for example `Demo.Web.RoomChannel`
     * `opts` - The optional list of options, see below
 
   ## Options
@@ -373,7 +376,7 @@ defmodule Combo.Socket do
 
   ## Examples
 
-      channel "topic1:*", MyChannel
+      channel "topic1:*", Demo.Web.RoomChannel
 
   ## Topic Patterns
 
