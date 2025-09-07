@@ -21,7 +21,7 @@ defmodule Combo.Debug do
   are not listed.
 
   Each process corresponds to one connection that can have multiple channels.
-  See `Combo.Debug.channels/1`.
+  See `Combo.Debug.list_channels/1`.
 
   ## Examples
 

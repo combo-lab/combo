@@ -127,9 +127,15 @@ defmodule Combo.SafeHTML do
   @spec escape_attrs(keyword() | map()) :: iodata()
   defdelegate escape_attrs(keyword_or_map), to: Escape
 
+  @doc """
+  Escapes a term as the key of an attribute.
+  """
   @spec escape_attr_key(term()) :: iodata()
   defdelegate escape_attr_key(term), to: Escape, as: :escape_key
 
+  @doc """
+  Escapes a term as the value of an attribute.
+  """
   @spec escape_attr_value(term()) :: iodata()
   defdelegate escape_attr_value(term), to: Escape, as: :escape_value
 end
