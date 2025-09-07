@@ -1,179 +1,181 @@
-defmodule Combo.Endpoint.Cowboy2Adapter do
-  @moduledoc """
-  The Cowboy2 adapter for `Combo.Endpoint`.
+if Code.ensure_loaded?(Plug.Cowboy) do
+  defmodule Combo.Endpoint.Cowboy2Adapter do
+    @moduledoc """
+    The Cowboy2 adapter for `Combo.Endpoint`.
 
-  To use this adapter, plug_cowboy should be installed as a dependency:
+    To use this adapter, plug_cowboy should be installed as a dependency:
 
-      {:plug_cowboy, "~> 2.7"}
+        {:plug_cowboy, "~> 2.7"}
 
-  Once plug_cowboy is installed, set the `:adapter` option to your endpoint
-  configuration. For example:
+    Once plug_cowboy is installed, set the `:adapter` option to your endpoint
+    configuration. For example:
 
-      config :demo, Demo.Web.Endpoint,
-        adapter: Combo.Endpoint.Cowboy2Adapter
+        config :demo, Demo.Web.Endpoint,
+          adapter: Combo.Endpoint.Cowboy2Adapter
 
-  ## Endpoint configuration
+    ## Endpoint configuration
 
-  This adapter uses the following endpoint configuration:
+    This adapter uses the following endpoint configuration:
 
-    * `:http` - the configuration for the HTTP server. It accepts all options
-      as defined by [`Plug.Cowboy`](https://hexdocs.pm/plug_cowboy/). Defaults
-      to `false`.
+      * `:http` - the configuration for the HTTP server. It accepts all options
+        as defined by [`Plug.Cowboy`](https://hexdocs.pm/plug_cowboy/). Defaults
+        to `false`.
 
-    * `:https` - the configuration for the HTTPS server. It accepts all options
-      as defined by [`Plug.Cowboy`](https://hexdocs.pm/plug_cowboy/). Defaults
-      to `false`.
+      * `:https` - the configuration for the HTTPS server. It accepts all options
+        as defined by [`Plug.Cowboy`](https://hexdocs.pm/plug_cowboy/). Defaults
+        to `false`.
 
-    * `:drainer` - a drainer process that triggers when your application is
-      shutting down to wait for any on-going request to finish. It accepts all
-      options as defined by [`Plug.Cowboy.Drainer`](https://hexdocs.pm/plug_cowboy/Plug.Cowboy.Drainer.html).
-      Defaults to `[]`, which will start a drainer process for each configured endpoint,
-      but can be disabled by setting it to `false`.
+      * `:drainer` - a drainer process that triggers when your application is
+        shutting down to wait for any on-going request to finish. It accepts all
+        options as defined by [`Plug.Cowboy.Drainer`](https://hexdocs.pm/plug_cowboy/Plug.Cowboy.Drainer.html).
+        Defaults to `[]`, which will start a drainer process for each configured endpoint,
+        but can be disabled by setting it to `false`.
 
-  ## Custom dispatch options
+    ## Custom dispatch options
 
-  You can provide custom dispatch options in order to use Cowboy with
-  with custom handlers. For example, to handle raw WebSockets
-  [as shown in Cowboy's docs](https://github.com/ninenines/cowboy/tree/master/examples)).
+    You can provide custom dispatch options in order to use Cowboy with
+    with custom handlers. For example, to handle raw WebSockets
+    [as shown in Cowboy's docs](https://github.com/ninenines/cowboy/tree/master/examples)).
 
-  The options are passed to both `:http` and `:https` keys in the endpoint
-  configuration. However, once you pass your custom dispatch options, you will
-  need to manually wire the endpoint by adding the following rule:
+    The options are passed to both `:http` and `:https` keys in the endpoint
+    configuration. However, once you pass your custom dispatch options, you will
+    need to manually wire the endpoint by adding the following rule:
 
-      {:_, Plug.Cowboy.Handler, {Demo.Web.Endpoint, []}}
+        {:_, Plug.Cowboy.Handler, {Demo.Web.Endpoint, []}}
 
-  For example:
+    For example:
 
-      config :demo, Demo.Web.Endpoint,
-        http: [dispatch: [
-                {:_, [
-                    {"/foo", Demo.Web.CustomHandler, []},
-                    {:_, Plug.Cowboy.Handler, {Demo.Web.Endpoint, []}}
-                  ]}]]
+        config :demo, Demo.Web.Endpoint,
+          http: [dispatch: [
+                  {:_, [
+                      {"/foo", Demo.Web.CustomHandler, []},
+                      {:_, Plug.Cowboy.Handler, {Demo.Web.Endpoint, []}}
+                    ]}]]
 
-  It is also important to specify your handlers first, otherwise Combo will
-  intercept the requests before they get to your handler.
-  """
+    It is also important to specify your handlers first, otherwise Combo will
+    intercept the requests before they get to your handler.
+    """
 
-  require Logger
-  alias Combo.Helpers.KeywordHelper
+    require Logger
+    alias Combo.Helpers.KeywordHelper
 
-  @behaviour Combo.Endpoint.Adapter
+    @behaviour Combo.Endpoint.Adapter
 
-  @impl true
-  def child_specs(endpoint, config) do
-    otp_app = Keyword.fetch!(config, :otp_app)
+    @impl true
+    def child_specs(endpoint, config) do
+      otp_app = Keyword.fetch!(config, :otp_app)
 
-    refs_and_specs =
-      for {scheme, port} <- [http: 4000, https: 4040], opts = config[scheme] do
-        port = :proplists.get_value(:port, opts, port)
+      refs_and_specs =
+        for {scheme, port} <- [http: 4000, https: 4040], opts = config[scheme] do
+          port = :proplists.get_value(:port, opts, port)
 
-        unless port do
-          Logger.error(":port for #{scheme} config is nil, cannot start server")
-          raise "aborting due to nil port"
+          unless port do
+            Logger.error(":port for #{scheme} config is nil, cannot start server")
+            raise "aborting due to nil port"
+          end
+
+          # Ranch options are read from the top, so we keep the user opts first.
+          opts =
+            (:proplists.delete(:port, opts) ++ [port: port_to_integer(port), otp_app: otp_app])
+            |> put_process_limit_opts(config[:process_limit])
+
+          child_spec(scheme, endpoint, opts, config[:code_reloader])
         end
 
-        # Ranch options are read from the top, so we keep the user opts first.
-        opts =
-          (:proplists.delete(:port, opts) ++ [port: port_to_integer(port), otp_app: otp_app])
-          |> put_process_limit_opts(config[:process_limit])
+      {refs, child_specs} = Enum.unzip(refs_and_specs)
 
-        child_spec(scheme, endpoint, opts, config[:code_reloader])
-      end
-
-    {refs, child_specs} = Enum.unzip(refs_and_specs)
-
-    if drainer = refs != [] && Keyword.get(config, :drainer, []) do
-      child_specs ++ [{Plug.Cowboy.Drainer, Keyword.put_new(drainer, :refs, refs)}]
-    else
-      child_specs
-    end
-  end
-
-  @impl true
-  def server_info(endpoint, scheme) do
-    address =
-      endpoint
-      |> make_ref(scheme)
-      |> :ranch.get_addr()
-
-    {:ok, address}
-  rescue
-    e -> {:error, Exception.message(e)}
-  end
-
-  defp put_process_limit_opts(opts, :infinity), do: opts
-
-  defp put_process_limit_opts(opts, limit) do
-    keys = [:transport_options, :num_acceptors]
-
-    if KeywordHelper.has_key?(opts, keys),
-      do: opts,
-      else: KeywordHelper.put(opts, keys, limit)
-  end
-
-  defp child_spec(scheme, endpoint, config, code_reloader?) do
-    if scheme == :https do
-      Application.ensure_all_started(:ssl)
-    end
-
-    ref = make_ref(endpoint, scheme)
-
-    plug =
-      if code_reloader? do
-        {Combo.Endpoint.SyncCodeReloadPlug, {endpoint, []}}
+      if drainer = refs != [] && Keyword.get(config, :drainer, []) do
+        child_specs ++ [{Plug.Cowboy.Drainer, Keyword.put_new(drainer, :refs, refs)}]
       else
-        {endpoint, []}
+        child_specs
+      end
+    end
+
+    @impl true
+    def server_info(endpoint, scheme) do
+      address =
+        endpoint
+        |> make_ref(scheme)
+        |> :ranch.get_addr()
+
+      {:ok, address}
+    rescue
+      e -> {:error, Exception.message(e)}
+    end
+
+    defp put_process_limit_opts(opts, :infinity), do: opts
+
+    defp put_process_limit_opts(opts, limit) do
+      keys = [:transport_options, :num_acceptors]
+
+      if KeywordHelper.has_key?(opts, keys),
+        do: opts,
+        else: KeywordHelper.put(opts, keys, limit)
+    end
+
+    defp child_spec(scheme, endpoint, config, code_reloader?) do
+      if scheme == :https do
+        Application.ensure_all_started(:ssl)
       end
 
-    spec = Plug.Cowboy.child_spec(ref: ref, scheme: scheme, plug: plug, options: config)
-    spec = update_in(spec.start, &{__MODULE__, :start_link, [scheme, endpoint, &1]})
-    {ref, spec}
-  end
+      ref = make_ref(endpoint, scheme)
 
-  @doc false
-  def start_link(scheme, endpoint, {m, f, [ref | _] = a}) do
-    # ref is used by Ranch to identify its listeners, defaulting
-    # to plug.HTTP and plug.HTTPS and overridable by users.
-    case apply(m, f, a) do
-      {:ok, pid} ->
-        Logger.info(info(scheme, endpoint, ref))
-        {:ok, pid}
+      plug =
+        if code_reloader? do
+          {Combo.Endpoint.SyncCodeReloadPlug, {endpoint, []}}
+        else
+          {endpoint, []}
+        end
 
-      {:error, {:shutdown, {_, _, {:listen_error, _, :eaddrinuse}}}} = error ->
-        Logger.error([info(scheme, endpoint, ref), " failed, port already in use"])
-        error
-
-      {:error, {:shutdown, {_, _, {{_, {:error, :eaddrinuse}}, _}}}} = error ->
-        Logger.error([info(scheme, endpoint, ref), " failed, port already in use"])
-        error
-
-      {:error, _} = error ->
-        error
+      spec = Plug.Cowboy.child_spec(ref: ref, scheme: scheme, plug: plug, options: config)
+      spec = update_in(spec.start, &{__MODULE__, :start_link, [scheme, endpoint, &1]})
+      {ref, spec}
     end
-  end
 
-  defp info(scheme, endpoint, ref) do
-    server = "cowboy #{Application.spec(:cowboy)[:vsn]}"
-    "Running #{inspect(endpoint)} with #{server} at #{bound_address(scheme, ref)}"
-  end
+    @doc false
+    def start_link(scheme, endpoint, {m, f, [ref | _] = a}) do
+      # ref is used by Ranch to identify its listeners, defaulting
+      # to plug.HTTP and plug.HTTPS and overridable by users.
+      case apply(m, f, a) do
+        {:ok, pid} ->
+          Logger.info(info(scheme, endpoint, ref))
+          {:ok, pid}
 
-  defp bound_address(scheme, ref) do
-    case :ranch.get_addr(ref) do
-      {:local, unix_path} ->
-        "#{unix_path} (#{scheme}+unix)"
+        {:error, {:shutdown, {_, _, {:listen_error, _, :eaddrinuse}}}} = error ->
+          Logger.error([info(scheme, endpoint, ref), " failed, port already in use"])
+          error
 
-      {addr, port} ->
-        "#{:inet.ntoa(addr)}:#{port} (#{scheme})"
+        {:error, {:shutdown, {_, _, {{_, {:error, :eaddrinuse}}, _}}}} = error ->
+          Logger.error([info(scheme, endpoint, ref), " failed, port already in use"])
+          error
+
+        {:error, _} = error ->
+          error
+      end
     end
-  rescue
-    _ -> scheme
-  end
 
-  defp port_to_integer(port) when is_binary(port), do: String.to_integer(port)
-  defp port_to_integer(port) when is_integer(port), do: port
+    defp info(scheme, endpoint, ref) do
+      server = "cowboy #{Application.spec(:cowboy)[:vsn]}"
+      "Running #{inspect(endpoint)} with #{server} at #{bound_address(scheme, ref)}"
+    end
 
-  defp make_ref(endpoint, scheme) do
-    Module.concat(endpoint, scheme |> Atom.to_string() |> String.upcase())
+    defp bound_address(scheme, ref) do
+      case :ranch.get_addr(ref) do
+        {:local, unix_path} ->
+          "#{unix_path} (#{scheme}+unix)"
+
+        {addr, port} ->
+          "#{:inet.ntoa(addr)}:#{port} (#{scheme})"
+      end
+    rescue
+      _ -> scheme
+    end
+
+    defp port_to_integer(port) when is_binary(port), do: String.to_integer(port)
+    defp port_to_integer(port) when is_integer(port), do: port
+
+    defp make_ref(endpoint, scheme) do
+      Module.concat(endpoint, scheme |> Atom.to_string() |> String.upcase())
+    end
   end
 end
