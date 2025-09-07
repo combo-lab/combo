@@ -375,7 +375,7 @@ defmodule Combo.Endpoint do
 
   See `Phoenix.PubSub.subscribe/3` for options.
   """
-  @callback subscribe(topic, opts :: Keyword.t()) :: :ok | {:error, term()}
+  @callback subscribe(topic, opts :: keyword()) :: :ok | {:error, term()}
 
   @doc """
   Unsubscribes the caller from the given topic.

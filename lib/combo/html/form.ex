@@ -77,8 +77,8 @@ defmodule Combo.HTML.Form do
           data: %{field => term},
           action: atom(),
           params: %{binary => term},
-          hidden: Keyword.t(),
-          options: Keyword.t(),
+          hidden: keyword(),
+          options: keyword(),
           errors: [{field, term}],
           impl: module,
           id: String.t(),
@@ -227,7 +227,7 @@ defmodule Combo.HTML.Form do
   Returns the HTML validations that would apply to
   the given field.
   """
-  @spec input_validations(t, field) :: Keyword.t()
+  @spec input_validations(t, field) :: keyword()
   def input_validations(%{source: source, impl: impl} = form, field)
       when is_atom(field) or is_binary(field) do
     impl.input_validations(source, form, field)

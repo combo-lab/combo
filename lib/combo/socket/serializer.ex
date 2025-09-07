@@ -25,5 +25,5 @@ defmodule Combo.Socket.Serializer do
   @doc """
   Decodes iodata into `Combo.Socket.Message` struct.
   """
-  @callback decode!(iodata, options :: Keyword.t()) :: Combo.Socket.Message.t()
+  @callback decode!(iodata, options :: keyword()) :: Combo.Socket.Message.t()
 end

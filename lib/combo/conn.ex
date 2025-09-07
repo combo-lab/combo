@@ -806,7 +806,7 @@ defmodule Combo.Conn do
   ## Responses - by rendering templates
 
   @type template :: atom() | String.t()
-  @type assigns :: Keyword.t() | map()
+  @type assigns :: keyword() | map()
 
   defguard is_template(template) when is_atom(template) or is_binary(template)
   defguard is_assigns(assigns) when is_list(assigns) or is_map(assigns)
@@ -1131,7 +1131,7 @@ defmodule Combo.Conn do
       plug :allow_jsonp, callback: "cb"
 
   """
-  @spec allow_jsonp(Conn.t(), Keyword.t()) :: Conn.t()
+  @spec allow_jsonp(Conn.t(), keyword()) :: Conn.t()
   def allow_jsonp(conn, opts \\ []) do
     callback = Keyword.get(opts, :callback, "callback")
 

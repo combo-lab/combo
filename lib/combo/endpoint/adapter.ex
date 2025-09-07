@@ -2,7 +2,7 @@ defmodule Combo.Endpoint.Adapter do
   @moduledoc false
 
   @type endpoint :: module()
-  @type config :: Keyword.t()
+  @type config :: keyword()
   @type scheme :: :http | :https
 
   @doc """

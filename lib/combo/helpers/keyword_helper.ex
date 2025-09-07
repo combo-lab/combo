@@ -4,7 +4,7 @@ defmodule Combo.Helpers.KeywordHelper do
   @type keys :: [atom(), ...]
   @type value :: term()
 
-  @spec has_key?(Keyword.t(), keys()) :: boolean()
+  @spec has_key?(keyword(), keys()) :: boolean()
   def has_key?(kw, [_ | _] = keys) when is_list(kw) and is_list(keys) do
     deep_has_key?(kw, keys)
   end
@@ -27,7 +27,7 @@ defmodule Combo.Helpers.KeywordHelper do
     end
   end
 
-  @spec get(Keyword.t(), keys(), default :: value()) :: value()
+  @spec get(keyword(), keys(), default :: value()) :: value()
   def get(kw, keys, default \\ nil) when is_list(keys) do
     if value = get_in(kw, keys) do
       value
@@ -41,7 +41,7 @@ defmodule Combo.Helpers.KeywordHelper do
     end
   end
 
-  @spec put(Keyword.t(), keys(), value()) :: Keyword.t()
+  @spec put(keyword(), keys(), value()) :: keyword()
   def put(kw, keys, value) when is_list(keys) do
     built_kw = build_kw(Enum.reverse(keys), value)
 
@@ -53,7 +53,7 @@ defmodule Combo.Helpers.KeywordHelper do
   defp build_kw([], value), do: value
   defp build_kw([key | rest_key], value), do: build_kw(rest_key, [{key, value}])
 
-  @spec merge(Keyword.t(), Keyword.t()) :: Keyword.t()
+  @spec merge(keyword(), keyword()) :: keyword()
   def merge(kw1, kw2) when is_list(kw1) and is_list(kw2) do
     Keyword.merge(kw1, kw2, fn _k, v1, v2 ->
       Keyword.merge(v1, v2, &deep_merge/3)

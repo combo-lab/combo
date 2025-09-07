@@ -10,7 +10,7 @@ defmodule Combo.Logger do
     * `[:combo, :endpoint, :init]` - dispatched by `Combo.Endpoint` after your
       Endpoint supervision tree successfully starts:
       * Measurement: `%{system_time: system_time}`
-      * Metadata: `%{pid: pid(), config: Keyword.t(), module: module(), otp_app: atom()}`
+      * Metadata: `%{pid: pid(), config: keyword(), module: module(), otp_app: atom()}`
       * Disable logging: This event is not logged
 
     * `[:combo, :endpoint, :start]` - dispatched by `Plug.Telemetry` in your

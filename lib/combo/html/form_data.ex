@@ -26,7 +26,7 @@ defprotocol Combo.HTML.FormData do
       be prefixed by the given ID
 
   """
-  @spec to_form(t, Keyword.t()) :: Combo.HTML.Form.t()
+  @spec to_form(t, keyword()) :: Combo.HTML.Form.t()
   def to_form(data, options)
 
   @doc """
@@ -59,7 +59,7 @@ defprotocol Combo.HTML.FormData do
     * `:action` - The user defined action being taken by the form, such
       as `:validate`, `:save`, etc.
   """
-  @spec to_form(t, Combo.HTML.Form.t(), Combo.HTML.Form.field(), Keyword.t()) ::
+  @spec to_form(t, Combo.HTML.Form.t(), Combo.HTML.Form.field(), keyword()) ::
           [Combo.HTML.Form.t()]
   def to_form(data, form, field, options)
 
@@ -73,7 +73,7 @@ defprotocol Combo.HTML.FormData do
   Returns the HTML5 validations that would apply to
   the given field.
   """
-  @spec input_validations(t, Combo.HTML.Form.t(), Combo.HTML.Form.field()) :: Keyword.t()
+  @spec input_validations(t, Combo.HTML.Form.t(), Combo.HTML.Form.field()) :: keyword()
   def input_validations(data, form, field)
 end
 
