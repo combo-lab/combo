@@ -4,6 +4,4 @@ config :logger, :console,
   colors: [enabled: false],
   format: "\n$time $metadata[$level] $message\n"
 
-config :combo, json_module: Jason
-
 config :combo, :template, ceex_whitespace_trimming: false

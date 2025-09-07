@@ -46,11 +46,11 @@ defmodule Combo do
   To customize the JSON module, including the following in your
   `config/config.exs`:
 
-      config :combo, :json_module, JSON
+      config :combo, :json_module, Jason
 
   """
   def json_module do
-    Application.get_env(:combo, :json_module, Jason)
+    Application.get_env(:combo, :json_module, JSON)
   end
 
   @doc """

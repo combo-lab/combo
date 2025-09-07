@@ -1265,7 +1265,7 @@ defmodule Combo.HTML.FormatterTest do
 
     assert_formatter_doesnt_change("""
     <script type="text/props">
-        <%= raw(Jason.encode!(%{whatEndpoint: Routes.api_search_options_path(@conn, :role_search_options)},
+        <%= raw(JSON.encode!(%{whatEndpoint: Routes.api_search_options_path(@conn, :role_search_options)},
       escape: :html_safe)) %>
     </script>
     """)
