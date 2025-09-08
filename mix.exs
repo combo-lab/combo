@@ -34,6 +34,9 @@ defmodule Combo.MixProject do
       test_ignore_filters: [
         &String.starts_with?(&1, "test/fixtures/"),
         &String.starts_with?(&1, "test/support/")
+      ],
+      dialyzer: [
+        plt_add_apps: [:mix, :iex, :ex_unit]
       ]
     ]
   end
@@ -85,6 +88,10 @@ defmodule Combo.MixProject do
       {:makeup_elixir, "~> 1.0.1", only: [:docs, :publish]},
       {:makeup_ceex, "~> 0.1.0", only: [:docs, :publish]},
       {:makeup_syntect, "~> 0.1.0", only: [:docs, :publish]},
+
+      # code quality
+      {:ex_check, "~> 0.16.0", only: [:dev], runtime: false},
+      {:dialyxir, ">= 0.0.0", only: [:dev], runtime: false},
 
       # Test dependencies
       {:mint, "~> 1.4", only: :test},
