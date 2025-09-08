@@ -152,6 +152,8 @@ defmodule Combo.ChannelTest do
 
   """
 
+  # TODO: fix the dialyzer warnings
+
   alias Combo.Socket
   alias Combo.Socket.{Broadcast, Message, Reply}
   alias Combo.Channel.Server
@@ -160,6 +162,7 @@ defmodule Combo.ChannelTest do
     @behaviour Combo.Socket.Serializer
     @moduledoc false
 
+    @impl true
     def fastlane!(%Broadcast{} = msg) do
       %Message{
         topic: msg.topic,
@@ -168,8 +171,11 @@ defmodule Combo.ChannelTest do
       }
     end
 
+    @impl true
     def encode!(%Reply{} = reply), do: reply
     def encode!(%Message{} = msg), do: msg
+
+    @impl true
     def decode!(message, _opts), do: message
   end
 
