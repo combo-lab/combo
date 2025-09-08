@@ -57,20 +57,20 @@ defmodule Combo.Router.Route do
   `Combo.Router.Route` struct.
   """
   @spec build(
-          non_neg_integer,
-          :match | :forward,
-          atom,
-          String.t(),
-          String.t() | nil,
-          atom,
-          atom,
-          atom | nil,
-          list(atom),
-          map,
-          map,
-          map,
-          boolean
-        ) :: t
+          line :: non_neg_integer(),
+          kind :: :match | :forward,
+          verb :: atom(),
+          path :: String.t(),
+          hosts :: [String.t()],
+          plug :: atom(),
+          plug_opts :: atom(),
+          helper :: atom() | nil,
+          pipe_through :: [atom()],
+          private :: map(),
+          assigns :: map(),
+          metadata :: map(),
+          warn_on_verify? :: boolean()
+        ) :: t()
   def build(
         line,
         kind,
