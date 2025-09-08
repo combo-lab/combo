@@ -1300,7 +1300,8 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
     end
   end
 
-  defp build_attr_values_or_examples(%{opts: opts} = attr) do
+  defp build_attr_values_or_examples(attr) do
+    %{opts: opts} = attr
     space_before = if attr[:doc] || opts[:default], do: ?\s, else: []
 
     cond do
@@ -1313,10 +1314,6 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
       true ->
         []
     end
-  end
-
-  defp build_attr_values_or_examples(_attr) do
-    []
   end
 
   defp build_literals_list([literal], _condition) do
@@ -1345,8 +1342,8 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
     [" - "]
   end
 
-  defp build_right_doc("") do
-    []
+  defp build_right_doc([]) do
+    [?\n]
   end
 
   defp build_right_doc(right) do
