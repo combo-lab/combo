@@ -759,6 +759,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
     bad_type!(slot, name, type, line, file)
   end
 
+  @dialyzer {:no_return, bad_type!: 5}
   defp bad_type!(slot, name, type, line, file) do
     compile_error!(file, line, """
     invalid type #{inspect(type)} for attr #{attr_slot(name, slot)}. \
@@ -793,6 +794,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
     end
   end
 
+  @dialyzer {:no_return, bad_default!: 6}
   defp bad_default!(slot, name, type, default, line, file) do
     compile_error!(file, line, """
     expected the default value for attr #{attr_slot(name, slot)} to be #{type_with_article(type)}, \
@@ -816,6 +818,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
     Enumerable.impl_for(values) != nil
   end
 
+  @dialyzer {:no_return, bad_value!: 6}
   defp bad_value!(slot, name, type, value, line, file) do
     compile_error!(file, line, """
     expected the values for attr #{attr_slot(name, slot)} to be #{type_with_article(type)}, \
@@ -835,6 +838,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
         do: bad_example!(slot, name, type, example, line, file)
   end
 
+  @dialyzer {:no_return, bad_example!: 6}
   defp bad_example!(slot, name, type, example, line, file) do
     compile_error!(file, line, """
     expected the examples for attr #{attr_slot(name, slot)} to be #{type_with_article(type)}, \
