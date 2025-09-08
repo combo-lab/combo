@@ -161,9 +161,6 @@ if Code.ensure_loaded?(Plug.Cowboy) do
 
     defp bound_address(scheme, ref) do
       case :ranch.get_addr(ref) do
-        {:local, unix_path} ->
-          "#{unix_path} (#{scheme}+unix)"
-
         {addr, port} ->
           "#{:inet.ntoa(addr)}:#{port} (#{scheme})"
       end
