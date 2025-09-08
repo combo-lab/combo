@@ -25,7 +25,7 @@ defmodule Combo.SafeHTML do
   ## Examples
 
       iex> to_iodata("<hello>")
-      [[[] | "&lt;"], "hello" | "&gt;"]
+      [[[], "&lt;"], "hello", "&gt;"]
 
       iex> to_iodata(~c"<hello>")
       ["&lt;", 104, 101, 108, 108, 111, "&gt;"]
@@ -46,7 +46,7 @@ defmodule Combo.SafeHTML do
   ## Examples
 
       iex> to_safe("<hello>")
-      {:safe, [[[] | "&lt;"], "hello" | "&gt;"]}
+      {:safe, [[[], "&lt;"], "hello", "&gt;"]}
 
       iex> to_safe(~c"<hello>")
       {:safe, ["&lt;", 104, 101, 108, 108, 111, "&gt;"]}
@@ -88,7 +88,7 @@ defmodule Combo.SafeHTML do
       "hello"
 
       iex> escape("<hello>")
-      [[[] | "&lt;"], "hello" | "&gt;"]
+      [[[], "&lt;"], "hello", "&gt;"]
 
   """
   @spec escape(String.t()) :: String.t()

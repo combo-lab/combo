@@ -7,8 +7,8 @@ defmodule Combo.SafeHTMLTest do
   describe "escape/1" do
     test "escapes entities" do
       assert escape("foo") == "foo"
-      assert escape("<foo>") == [[[] | "&lt;"], "foo" | "&gt;"]
-      assert escape("\" & \'") == [[[[] | "&quot;"], " " | "&amp;"], " " | "&#39;"]
+      assert escape("<foo>") == [[[], "&lt;"], "foo", "&gt;"]
+      assert escape("\" & \'") == [[[[], "&quot;"], " ", "&amp;"], " ", "&#39;"]
     end
   end
 

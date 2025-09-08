@@ -5,12 +5,12 @@ defmodule Combo.SafeHTML.SafeTest do
 
   test "impl for atoms" do
     assert Safe.to_iodata(nil) == ""
-    assert Safe.to_iodata(:"<foo>") == [[[] | "&lt;"], "foo" | "&gt;"]
+    assert Safe.to_iodata(:"<foo>") == [[[], "&lt;"], "foo", "&gt;"]
   end
 
   test "impl for bitstrings" do
     assert Safe.to_iodata("") == ""
-    assert Safe.to_iodata("<foo>") == [[[] | "&lt;"], "foo" | "&gt;"]
+    assert Safe.to_iodata("<foo>") == [[[], "&lt;"], "foo", "&gt;"]
   end
 
   test "impl for integer" do

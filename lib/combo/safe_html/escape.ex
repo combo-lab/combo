@@ -18,7 +18,7 @@ defmodule Combo.SafeHTML.Escape do
 
   for {match, insert} <- escapes do
     defp escape_html(<<unquote(match), rest::bits>>, skip, original, acc) do
-      escape_html(rest, skip + 1, original, [acc | unquote(insert)])
+      escape_html(rest, skip + 1, original, [acc, unquote(insert)])
     end
   end
 
@@ -33,7 +33,7 @@ defmodule Combo.SafeHTML.Escape do
   for {match, insert} <- escapes do
     defp escape_html(<<unquote(match), rest::bits>>, skip, original, acc, len) do
       part = binary_part(original, skip, len)
-      escape_html(rest, skip + len + 1, original, [acc, part | unquote(insert)])
+      escape_html(rest, skip + len + 1, original, [acc, part, unquote(insert)])
     end
   end
 
@@ -46,7 +46,7 @@ defmodule Combo.SafeHTML.Escape do
   end
 
   defp escape_html(<<>>, skip, original, acc, len) do
-    [acc | binary_part(original, skip, len)]
+    [acc, binary_part(original, skip, len)]
   end
 
   @doc false
