@@ -38,7 +38,7 @@ defmodule Combo.HTMLTest.DOM do
     |> LazyHTML.from_tree()
   end
 
-  @spec to_tree(LazyHTML.t()) :: String.t()
+  @spec to_html(LazyHTML.t()) :: String.t()
   def to_html(lazy) when is_struct(lazy, LazyHTML) do
     LazyHTML.to_html(lazy, skip_whitespace_nodes: true)
   end

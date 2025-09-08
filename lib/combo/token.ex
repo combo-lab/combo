@@ -105,7 +105,7 @@ defmodule Combo.Token do
           binary()
           | module()
           | Plug.Conn.t()
-          | Phoenix.Socket.t()
+          | Combo.Socket.t()
 
   @type salt :: binary()
 

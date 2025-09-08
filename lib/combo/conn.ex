@@ -268,7 +268,7 @@ defmodule Combo.Conn do
   @doc """
   Gets the request format, such as "json", "html".
   """
-  @spec get_format(Conn.t()) :: String.t()
+  @spec get_format(Conn.t()) :: String.t() | nil
   def get_format(conn) do
     conn.private[:combo_format]
   end

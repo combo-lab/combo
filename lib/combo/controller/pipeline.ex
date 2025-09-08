@@ -140,6 +140,7 @@ defmodule Combo.Controller.Pipeline do
   end
 
   @doc false
+  @dialyzer {:no_return, __catch__: 5}
   def __catch__(
         %Plug.Conn{},
         :function_clause,
