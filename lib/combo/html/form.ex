@@ -161,7 +161,7 @@ defmodule Combo.HTML.Form do
 
   Useful for radio buttons and inputs like multiselect checkboxes.
   """
-  @spec input_id(t | atom, field, Combo.HTML.Safe.t()) :: String.t()
+  @spec input_id(t() | atom(), field(), Combo.SafeHTML.Safe.t()) :: String.t()
   def input_id(name, field, value) do
     {:safe, value} = SafeHTML.to_safe(value)
     value_id = value |> IO.iodata_to_binary() |> String.replace(~r/\W/u, "_")

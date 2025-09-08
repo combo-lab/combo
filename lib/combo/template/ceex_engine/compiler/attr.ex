@@ -70,8 +70,8 @@ defmodule Combo.Template.CEExEngine.Compiler.Attr do
     do: [quoted_escape_binary_value(quoted, meta) | acc]
 
   @doc false
-  @spec escape_attrs(keyword() | map()) :: iodata()
-  def escape_attrs(keyword_or_map), do: SafeHTML.escape_attrs(keyword_or_map)
+  @spec escape_attrs([{term(), term()}] | map()) :: iodata()
+  def escape_attrs(list_or_map), do: SafeHTML.escape_attrs(list_or_map)
 
   defp quoted_escape_attrs(attrs, meta) do
     quote line: meta[:line] do
