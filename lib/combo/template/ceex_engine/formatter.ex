@@ -59,7 +59,7 @@ defmodule Combo.Template.CEExEngine.Formatter do
       # If the opening delimiter is a single character, such as ~CE"...", or the formatted code is empty,
       # do not add trailing newline.
       newline =
-        if match?(<<_>>, opts[:opening_delimiter]) or formatted == [] or formatted == "",
+        if match?(<<_>>, opts[:opening_delimiter]) or formatted == [],
           do: [],
           else: ?\n
 
