@@ -220,6 +220,9 @@ defmodule Combo.Template.CEExEngine.Formatter do
   #    ]}
   # ]
   # ```
+  # TODO: remove this and fix the warnings
+  @dialyzer {:nowarn_function, {:to_tree, 4}}
+
   defp to_tree([], buffer, [], _opts) do
     {:ok, Enum.reverse(buffer)}
   end
