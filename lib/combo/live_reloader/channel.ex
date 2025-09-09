@@ -51,7 +51,7 @@ defmodule Combo.LiveReloader.Channel do
 
     for {type, paths} <- grouped_file_events do
       for path <- paths do
-        Logger.debug("Live reload: #{Path.relative_to_cwd(path)}")
+        Logger.debug("Combo.LiveReloader detected changes of #{Path.relative_to_cwd(path)}")
       end
 
       push(socket, "reload", %{type: type})
