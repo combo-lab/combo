@@ -3,7 +3,7 @@ defmodule Combo.MixProject do
 
   @version "0.2.1"
   @elixir_requirement "~> 1.18"
-  @scm_url "https://github.com/combo-team/combo"
+  @scm_url "https://github.com/combo-lab/combo"
 
   def project do
     [

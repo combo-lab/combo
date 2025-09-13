@@ -136,7 +136,7 @@ in order to craft an excellent pull request:
    cd combo
 
    # Assign the original repo to a remote called "upstream"
-   git remote add upstream https://github.com/combo-team/combo
+   git remote add upstream https://github.com/combo-lab/combo
    ```
 
 2. If you cloned a while ago, get the latest changes from upstream, and update your fork:

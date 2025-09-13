@@ -2,7 +2,7 @@
 
 A web framework, that combines the good parts of modern web development.
 
-[![Build Status](https://github.com/combo-team/combo/workflows/CI/badge.svg)](https://github.com/combo-team/combo/actions/workflows/ci.yml) [![Hex.pm](https://img.shields.io/hexpm/v/combo.svg)](https://hex.pm/packages/combo)
+[![Build Status](https://github.com/combo-lab/combo/workflows/CI/badge.svg)](https://github.com/combo-lab/combo/actions/workflows/ci.yml) [![Hex.pm](https://img.shields.io/hexpm/v/combo.svg)](https://hex.pm/packages/combo)
 
 ## About
 
