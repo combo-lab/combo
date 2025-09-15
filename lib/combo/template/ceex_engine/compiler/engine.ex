@@ -1173,7 +1173,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
           quote line: line do
             unquote(pattern) -> unquote(quoted)
           end ++
-            quote line: line, generated: true do
+            quote generated: true do
               other ->
                 unquote(__MODULE__).__unmatched_let__!(
                   unquote(Macro.to_string(pattern)),
