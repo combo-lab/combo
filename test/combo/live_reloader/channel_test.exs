@@ -65,7 +65,7 @@ defmodule Combo.LiveReloader.ChannelTest do
         assert_push "reload", %{type: "js"}
       end)
 
-    assert content =~ "[debug] Live reload: priv/static/example.js"
+    assert content =~ "[debug] Combo.LiveReloader detected changes of priv/static/example.js"
   end
 
   test "does not send a notification when a file comes from _build", %{socket: socket} do
