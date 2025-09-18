@@ -1127,6 +1127,36 @@ defmodule Combo.HTML.Components do
   end
 
   @doc """
+  Renders a flash message.
+
+  ## Examples
+
+  ```ceex
+  <.flash kind={:info} flash={@flash} :let={{_kind, msg}} />
+    <p>{msg}</p>
+  </.flash>
+  ```
+  """
+  attr :id, :string, doc: "the optional id"
+  attr :flash, :map, required: true, doc: "the flash assign"
+  attr :kind, :atom, required: true, doc: "the kind of flash message"
+  attr :rest, :global, doc: "additional HTML attributes"
+  slot :inner_block, required: true
+
+  def flash(assigns) do
+    assigns =
+      assigns
+      |> assign_new(:id, fn -> "flash-#{assigns.kind}" end)
+      |> assign(:msg, Combo.Flash.get(assigns.flash, assigns.kind))
+
+    ~CE"""
+    <div :if={@msg} id={@id} {@rest}>
+      {render_slot(@inner_block, {@kind, @msg})}
+    </div>
+    """
+  end
+
+  @doc """
   Intersperses separator slot between an enumerable.
 
   It is useful when you need to add a separator between items such as when
