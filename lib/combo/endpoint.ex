@@ -267,7 +267,7 @@ defmodule Combo.Endpoint do
 
   @type topic :: String.t()
   @type event :: String.t()
-  @type msg :: map | {:binary, binary}
+  @type msg :: map() | {:binary, binary()}
 
   require Logger
 
@@ -282,12 +282,12 @@ defmodule Combo.Endpoint do
   @callback start_link(opts :: keyword()) :: Supervisor.on_start()
 
   @doc """
-  Access the endpoint configuration given by key.
+  Gets the endpoint configuration given by key.
   """
   @callback config(key :: atom(), default :: term()) :: term()
 
   @doc """
-  Reload the endpoint configuration on application upgrades.
+  Reloads the endpoint configuration on application upgrades.
   """
   @callback config_change(changed :: term(), removed :: term()) :: term()
 
