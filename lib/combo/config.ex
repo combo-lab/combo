@@ -1,8 +1,4 @@
 defmodule Combo.Config do
-  # Handles configuration.
-  #
-  # This module is private and should not be accessed directly. The endpoint
-  # configuration can be accessed at runtime using the `config/2` function.
   @moduledoc false
 
   require Logger
@@ -17,20 +13,23 @@ defmodule Combo.Config do
   end
 
   @doc """
-  Puts a given key-value pair in config.
+  Puts a given key-value pair into config.
   """
+  @spec put(module(), any(), any()) :: :ok
   def put(module, key, value) do
-    :ets.insert(module, {key, value})
+    pid = :ets.lookup_element(module, :__config__, 2)
+    GenServer.call(pid, {:put, key, value})
   end
 
   @doc """
-  Adds permanent configuration.
+  Puts a given key-value pair into config, as permanent.
 
   Permanent configuration is not deleted on hot code reload.
   """
-  def permanent(module, key, value) do
+  @spec put_permanent(module(), any(), any()) :: :ok
+  def put_permanent(module, key, value) do
     pid = :ets.lookup_element(module, :__config__, 2)
-    GenServer.call(pid, {:permanent, key, value})
+    GenServer.call(pid, {:put_permanent, key, value})
   end
 
   @doc """
@@ -146,9 +145,15 @@ defmodule Combo.Config do
   end
 
   @impl true
-  def handle_call({:permanent, key, value}, _from, {module, permanent}) do
+  def handle_call({:put, key, value}, _from, {module, permanent_keys}) do
     :ets.insert(module, {key, value})
-    {:reply, :ok, {module, [key | permanent]}}
+    {:reply, :ok, {module, permanent_keys}}
+  end
+
+  @impl true
+  def handle_call({:put_permanent, key, value}, _from, {module, permanent_keys}) do
+    :ets.insert(module, {key, value})
+    {:reply, :ok, {module, [key | permanent_keys]}}
   end
 
   @impl true
