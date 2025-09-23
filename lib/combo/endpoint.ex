@@ -18,26 +18,26 @@ defmodule Combo.Endpoint do
 
   An endpoint is a module defined with the help of `Combo.Endpoint`.
 
-      defmodule Demo.Web.Endpoint do
-        use Combo.Endpoint, otp_app: :your_app
+      defmodule MyApp.Web.Endpoint do
+        use Combo.Endpoint, otp_app: :my_app
 
         # plug ...
         # plug ...
 
-        plug Demo.Web.Router
+        plug MyApp.Web.Router
       end
 
   Endpoints can be added to the supervision tree as following:
 
       children = [
-        Demo.Web.Endpoint
+        MyApp.Web.Endpoint
       ]
 
   ## Endpoint configuration
 
   Endpoints are configured in your application environment. For example:
 
-      config :demo, Demo.Web.Endpoint,
+      config :my_app, MyApp.Web.Endpoint,
         secret_key_base: "kjoy3o1zeidquwy1398juxzldjlksahdk3"
 
   Endpoint configuration is split into two categories:
@@ -108,7 +108,7 @@ defmodule Combo.Endpoint do
   Typically, if you need to configure them with system environment variables,
   you set them in `config/runtime.exs`. These options may also be set when
   starting the endpoint in your supervision tree, such as
-  `{Demo.Web.Endpoint, opts}`.
+  `{MyApp.Web.Endpoint, opts}`.
 
     * `:adapter` - which web server adapter to use for serving web requests.
       See the "Adapter configuration" section below.
@@ -205,8 +205,8 @@ defmodule Combo.Endpoint do
             url: "ws://localhost:4000",
             patterns: [
               ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$",
-              ~r"lib/demo/web/.*(ex)$",
-              ~r"lib/demo/web/templates/.*(eex)$"
+              ~r"lib/my_app/web/.*(ex)$",
+              ~r"lib/my_app/web/templates/.*(eex)$"
             ]
           ]
 
@@ -222,7 +222,7 @@ defmodule Combo.Endpoint do
       per format to handle error rendering. For example:
 
           [
-            formats: [html: Demo.Web.ErrorHTML, json: Demo.Web.ErrorJSON],
+            formats: [html: MyApp.Web.ErrorHTML, json: MyApp.Web.ErrorJSON],
             layout: false,
             log: :debug
           ]
@@ -861,7 +861,7 @@ defmodule Combo.Endpoint do
       Defaults to `false`.
 
     * `:drainer` - a keyword list or an MFA function returning a keyword list.
-      For example, `{Demo.Web.Socket, :drainer_configuration, []}` configuring
+      For example, `{MyApp.Web.Socket, :drainer_configuration, []}` configuring
       how to drain sockets on application shutdown. The goal is to notify all
       channels clients to reconnect. The supported options are:
 
@@ -902,9 +902,9 @@ defmodule Combo.Endpoint do
 
   ## Examples
 
-      socket "/ws", Demo.Web.UserSocket
+      socket "/ws", MyApp.Web.UserSocket
 
-      socket "/ws/admin", Demo.Web.AdminUserSocket,
+      socket "/ws/admin", MyApp.Web.AdminUserSocket,
         longpoll: true,
         websocket: [compress: true]
 
@@ -913,7 +913,7 @@ defmodule Combo.Endpoint do
   It is possible to include variables in the path, these will be available in
   the `params` that are passed to the socket.
 
-      socket "/ws/:user_id", Demo.Web.UserSocket,
+      socket "/ws/:user_id", MyApp.Web.UserSocket,
         websocket: [path: "/project/:project_id"]
 
   ## Common configuration
@@ -936,7 +936,7 @@ defmodule Combo.Endpoint do
       Defaults to `:check_origin` setting at endpoint configuration.
 
       If `true`, the header is checked against `:host` in
-      `Demo.Web.Endpoint.config(:url)[:host]`.
+      `MyApp.Web.Endpoint.config(:url)[:host]`.
 
       If `false` and you do not validate the session in your socket, your app
       is vulnerable to Cross-Site WebSocket Hijacking (CSWSH) attacks. Only use
@@ -958,7 +958,7 @@ defmodule Combo.Endpoint do
 
       Or a function provided as an MFA:
 
-          check_origin: {Demo.Web.Auth, :check_origin?, []}
+          check_origin: {MyApp.Web.Auth, :check_origin?, []}
 
       The MFA is invoked with the request `%URI{}` as the first argument,
       followed by arguments in the MFA, and must return a boolean.
@@ -1004,7 +1004,7 @@ defmodule Combo.Endpoint do
       option.
 
       Additionally, `session_config` may be an MFA, such as
-      `{Demo.Web.Auth, :get_session_config, []}`, to allow loading config in
+      `{MyApp.Web.Auth, :get_session_config, []}`, to allow loading config in
       runtime.
 
   Arbitrary keywords may also appear following the above valid keys, which
@@ -1012,14 +1012,14 @@ defmodule Combo.Endpoint do
 
   For example:
 
-      socket "/socket", Demo.Web.UserSocket,
+      socket "/socket", MyApp.Web.UserSocket,
         websocket: [
           connect_info: [:peer_data, :trace_context_headers, :x_headers, :uri, session: [store: :cookie]]
         ]
 
   With arbitrary keywords:
 
-      socket "/socket", Demo.Web.UserSocket,
+      socket "/socket", MyApp.Web.UserSocket,
         websocket: [
           connect_info: [:uri, custom_value: "abcdef"]
         ]
@@ -1072,12 +1072,12 @@ defmodule Combo.Endpoint do
       the error handler must be an MFA tuple that receives a `Plug.Conn`, the
       error reason, and returns a `Plug.Conn` with a response. For example:
 
-          socket "/socket", Demo.Web.Socket,
+          socket "/socket", MyApp.Web.Socket,
             websocket: [
-              error_handler: {Demo.Web.Socket, :handle_error, []}
+              error_handler: {MyApp.Web.Socket, :handle_error, []}
             ]
 
-      and a `{:error, :rate_limit}` return may be handled on `Demo.Web.Socket` as:
+      and a `{:error, :rate_limit}` return may be handled on `MyApp.Web.Socket` as:
 
           def handle_error(conn, :rate_limit),
             do: Plug.Conn.send_resp(conn, 429, "Too many requests")
@@ -1112,7 +1112,7 @@ defmodule Combo.Endpoint do
 
   ## Examples
 
-      iex> Combo.Endpoint.server?(:demo, Demo.Web.Endpoint)
+      iex> Combo.Endpoint.server?(:my_app, MyApp.Web.Endpoint)
       true
 
   """
