@@ -13,6 +13,17 @@ defmodule Combo.Config do
   end
 
   @doc """
+  Gets a value by given key.
+  """
+  @spec get(module(), any(), any()) :: any()
+  def get(module, key, default) do
+    case :ets.lookup(module, key) do
+      [{^key, val}] -> val
+      [] -> default
+    end
+  end
+
+  @doc """
   Puts a given key-value pair into config.
   """
   @spec put(module(), any(), any()) :: :ok

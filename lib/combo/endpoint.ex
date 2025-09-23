@@ -538,10 +538,7 @@ defmodule Combo.Endpoint do
       Returns `default` if the key does not exist.
       """
       def config(key, default \\ nil) do
-        case :ets.lookup(__MODULE__, key) do
-          [{^key, val}] -> val
-          [] -> default
-        end
+        Combo.Config.get(__MODULE__, key, default)
       end
 
       @doc """
