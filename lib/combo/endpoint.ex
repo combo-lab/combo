@@ -59,9 +59,9 @@ defmodule Combo.Endpoint do
   The configuration below may be set on `config/dev.exs`, `config/prod.exs`
   and so on, but has no effect on `config/runtime.exs`.
 
-    * `:code_reloader` - the configuration of `Combo.CodeReloader`.
-
     * `:live_reloader` - the configuration of `Combo.LiveReloader`.
+
+    * `:code_reloader` - the configuration of `Combo.CodeReloader`.
 
     * `:process_limit` - limits the number of processes. It can be a
       `pos_integer()` or `:infinity`. Default to `:infinity`.
@@ -207,6 +207,7 @@ defmodule Combo.Endpoint do
           ]
 
     * `:log_access_url` - log the access url once the server boots.
+      Default to `true`
 
   Note that you can also store your own configurations in the `Combo.Endpoint`.
 
