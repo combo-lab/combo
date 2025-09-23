@@ -61,6 +61,8 @@ defmodule Combo.Endpoint do
 
     * `:code_reloader` - the configuration of `Combo.CodeReloader`.
 
+    * `:live_reloader` - the configuration of `Combo.LiveReloader`.
+
     * `:process_limit` - limits the number of processes. It can be a
       `pos_integer()` or `:infinity`. Default to `:infinity`.
       This configuration will be used for settings:
@@ -158,8 +160,6 @@ defmodule Combo.Endpoint do
     * `:static_url` - a keyword list for generating URLs for static files.
       It will fallback to `:url` option if not set. Accepts the same value
       as `:url` option.
-
-    * `:live_reloader` - the configuration of `Combo.LiveReloader`.
 
     * `:watchers` - a set of watchers to run alongside the server. It expects
       a list of tuples containing the executable and its arguments.
@@ -282,12 +282,12 @@ defmodule Combo.Endpoint do
   @callback start_link(opts :: keyword()) :: Supervisor.on_start()
 
   @doc """
-  Gets the endpoint configuration given by key.
+  Returns the endpoint configuration for `key`.
   """
   @callback config(key :: atom(), default :: term()) :: term()
 
   @doc """
-  Reloads the endpoint configuration on application upgrades.
+  Reloads the configuration on the application environment changes.
   """
   @callback config_change(changed :: term(), removed :: term()) :: term()
 
@@ -478,6 +478,7 @@ defmodule Combo.Endpoint do
   defp plug() do
     quote location: :keep do
       use Plug.Builder, init_mode: Combo.plug_init_mode()
+
       import Combo.Endpoint
 
       Module.register_attribute(__MODULE__, :combo_sockets, accumulate: true)
@@ -543,7 +544,7 @@ defmodule Combo.Endpoint do
       end
 
       @doc """
-      Reloads the configuration given the application environment changes.
+      Reloads the configuration on the application environment changes.
       """
       def config_change(changed, removed) do
         Combo.Endpoint.Supervisor.config_change(__MODULE__, changed, removed)
