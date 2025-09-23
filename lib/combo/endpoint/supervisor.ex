@@ -6,51 +6,89 @@ defmodule Combo.Endpoint.Supervisor do
   require Logger
   use Supervisor
 
+  @default_config [
+    ## Compile-time config
+
+    live_reloader: false,
+    code_reloader: false,
+    process_limit: :infinity,
+    debug_errors: false,
+    render_errors: [layout: false],
+
+    ## Runtime config
+
+    url: [host: "localhost", path: "/"],
+    static_url: nil,
+    adapter: Combo.Endpoint.BanditAdapter,
+    http: false,
+    https: false,
+    check_origin: true,
+    secret_key_base: nil,
+    cache_static_manifest: nil,
+    cache_static_manifest_skip_vsn: false,
+    watchers: [],
+    log_access_url: true
+  ]
+
+  @unsafe_config_keys [:secret_key_base]
+
   @doc """
   Starts the endpoint supervision tree.
   """
-  def start_link(otp_app, mod, opts \\ []) do
-    with {:ok, pid} = ok <- Supervisor.start_link(__MODULE__, {otp_app, mod, opts}, name: mod) do
-      # We don't use the defaults in the checks below
-      conf = Keyword.merge(Application.get_env(otp_app, mod, []), opts)
-      log_access_url(mod, conf)
+  def start_link(otp_app, module, opts \\ []) do
+    with {:ok, pid} = ok <-
+           Supervisor.start_link(__MODULE__, {otp_app, module, opts}, name: module) do
+      config = Combo.Config.get_all(module)
+      safe_config = safe_config(config)
+
+      log_access_url(module, safe_config)
 
       measurements = %{system_time: System.system_time()}
-      metadata = %{pid: pid, config: conf, module: mod, otp_app: otp_app}
+      metadata = %{otp_app: otp_app, module: module, config: safe_config, pid: pid}
       :telemetry.execute([:combo, :endpoint, :init], measurements, metadata)
 
       ok
     end
   end
 
-  @doc false
-  def init({otp_app, mod, opts}) do
-    default_conf = Combo.Config.merge(defaults(otp_app), opts)
-    secret_conf = Combo.Config.from_env(otp_app, mod, default_conf)
+  # remove secrets from the config to allow safe passing it everywhere.
+  defp safe_config(config) do
+    Keyword.drop(config, @unsafe_config_keys)
+  end
 
-    extra_conf = [
-      endpoint_id: :crypto.strong_rand_bytes(16) |> Base.encode64(padding: false),
-      pubsub_server: secret_conf[:pubsub_server]
+  @doc false
+  def init({otp_app, module, opts}) do
+    from_opts = opts
+    from_env = Combo.Config.from_env(otp_app, module)
+
+    extra = [
+      endpoint_id: :crypto.strong_rand_bytes(16) |> Base.encode64(padding: false)
     ]
 
-    secret_conf = extra_conf ++ secret_conf
-    default_conf = extra_conf ++ default_conf
+    config =
+      [otp_app: otp_app]
+      |> Combo.Config.merge(@default_config)
+      |> Combo.Config.merge(from_opts)
+      |> Combo.Config.merge(from_env)
+      |> Combo.Config.merge(extra)
 
-    # Drop all secrets from secret_conf before passing it around
-    conf = Keyword.drop(secret_conf, [:secret_key_base])
-    server? = server?(conf)
+    safe_config = safe_config(config)
 
-    if server? and conf[:code_reloader] do
+    permanent_keys = Keyword.keys(config) -- Keyword.keys(from_env)
+
+    server? = server?(safe_config)
+
+    if server? and safe_config[:code_reloader] do
       Combo.CodeReloader.Server.check_symlinks()
     end
 
     children =
-      config_children(mod, secret_conf, default_conf) ++
-        warmup_children(mod) ++
-        socket_children(mod, conf, :child_spec) ++
-        server_children(mod, conf, server?) ++
-        socket_children(mod, conf, :drainer_spec) ++
-        watcher_children(mod, conf, server?)
+      config_children(module, config, permanent_keys) ++
+        warmup_children(module) ++
+        socket_children(module, safe_config, :child_spec) ++
+        server_children(module, safe_config, server?) ++
+        socket_children(module, safe_config, :drainer_spec) ++
+        watcher_children(module, safe_config, server?)
 
     Supervisor.init(children, strategy: :one_for_one)
   end
@@ -141,33 +179,6 @@ defmodule Combo.Endpoint.Supervisor do
 
   defp mix_combo_serve? do
     Application.get_env(:combo, :serve_endpoints, false)
-  end
-
-  defp defaults(otp_app) do
-    [
-      otp_app: otp_app,
-
-      ## Compile-time config
-
-      live_reloader: false,
-      code_reloader: false,
-      process_limit: :infinity,
-      debug_errors: false,
-      render_errors: [layout: false],
-
-      ## Runtime config
-
-      url: [host: "localhost", path: "/"],
-      static_url: nil,
-      adapter: Combo.Endpoint.BanditAdapter,
-      http: false,
-      https: false,
-      check_origin: true,
-      secret_key_base: nil,
-      cache_static_manifest: nil,
-      cache_static_manifest_skip_vsn: false,
-      watchers: []
-    ]
   end
 
   @doc """
@@ -338,8 +349,8 @@ defmodule Combo.Endpoint.Supervisor do
     end
   end
 
-  defp log_access_url(endpoint, conf) do
-    if Keyword.get(conf, :log_access_url, true) && server?(conf) do
+  defp log_access_url(endpoint, config) do
+    if Keyword.fetch!(config, :log_access_url) && server?(config) do
       Logger.info("Access #{inspect(endpoint)} at #{endpoint.url()}")
     end
   end

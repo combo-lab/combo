@@ -3,19 +3,19 @@ defmodule Combo.ConfigTest do
   import Combo.Config
 
   @defaults [static: [at: "/"]]
+  @permanent_keys Keyword.keys(@defaults)
   @config [parsers: false, custom: true, otp_app: :combo_config]
   @all @config ++ @defaults
 
   test "reads configuration from env", meta do
     Application.put_env(:config_app, meta.test, @config)
-    config = from_env(:config_app, meta.test, [static: true])
+    config = from_env(:config_app, meta.test)
     assert config[:parsers] == false
     assert config[:custom]  == true
-    assert config[:static]  == true
   end
 
   test "starts an ets table as part of the module", meta do
-    {:ok, _pid} = start_link({meta.test, @all, @defaults, []})
+    {:ok, _pid} = start_link({meta.test, @all, @permanent_keys, []})
     assert :ets.info(meta.test, :name) == meta.test
     assert :ets.lookup(meta.test, :parsers) == [parsers: false]
     assert :ets.lookup(meta.test, :static)  == [static: [at: "/"]]
@@ -29,7 +29,7 @@ defmodule Combo.ConfigTest do
   end
 
   test "can change configuration", meta do
-    {:ok, pid} = start_link({meta.test, @all, @defaults, []})
+    {:ok, pid} = start_link({meta.test, @all, @permanent_keys, []})
     ref = Process.monitor(pid)
 
     # Nothing changed
@@ -52,7 +52,7 @@ defmodule Combo.ConfigTest do
   end
 
   test "can cache", meta do
-    {:ok, _pid} = start_link({meta.test, @all, @defaults, []})
+    {:ok, _pid} = start_link({meta.test, @all, @permanent_keys, []})
 
     assert cache(meta.test, :__hello__, fn _ -> {:nocache, 1} end) == 1
     assert cache(meta.test, :__hello__, fn _ -> {:cache, 2} end) == 2

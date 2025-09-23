@@ -7,8 +7,7 @@ defmodule Combo.Config do
   @doc """
   Starts a configuration handler.
   """
-  def start_link({module, config, defaults, opts}) do
-    permanent_keys = Keyword.keys(defaults)
+  def start_link({module, config, permanent_keys, opts}) do
     GenServer.start_link(__MODULE__, {module, config, permanent_keys}, opts)
   end
 
@@ -121,13 +120,7 @@ defmodule Combo.Config do
 
   Useful to read a particular value at compilation time.
   """
-  def from_env(otp_app, module, defaults) do
-    config = fetch_config(otp_app, module)
-
-    merge(defaults, config)
-  end
-
-  defp fetch_config(otp_app, module) do
+  def from_env(otp_app, module) do
     case Application.fetch_env(otp_app, module) do
       {:ok, conf} ->
         conf
@@ -171,7 +164,8 @@ defmodule Combo.Config do
       |> Enum.filter(fn
         {:__pid__, _} -> false
         {{:socket, _}, _} -> false
-        _ -> true
+        {_, :cache, _} -> false
+        {_, _} -> true
       end)
 
     {:reply, config, {module, permanent_keys}}
