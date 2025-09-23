@@ -175,8 +175,12 @@ defmodule Combo.Config do
   defp update(module, config, permanent_keys) do
     old_keys = :ets.select(module, [{{:"$1", :_}, [], [:"$1"]}])
     new_keys = Enum.map(config, &elem(&1, 0))
-    Enum.each((old_keys -- new_keys) -- permanent_keys, &:ets.delete(module, &1))
+
     :ets.insert(module, config)
+
+    old_useless_keys = (old_keys -- new_keys) -- permanent_keys
+    Enum.each(old_useless_keys, &:ets.delete(module, &1))
+
     clear_cache(module)
   end
 end
