@@ -26,20 +26,7 @@ defmodule Combo.Endpoint.Supervisor do
   @doc false
   def init({otp_app, mod, opts}) do
     default_conf = Combo.Config.merge(defaults(otp_app), opts)
-    env_conf = Combo.Config.from_env(otp_app, mod, default_conf)
-
-    secret_conf =
-      cond do
-        is_nil(Application.get_env(otp_app, mod)) ->
-          Logger.warning(
-            "no configuration found for otp_app #{inspect(otp_app)} and module #{inspect(mod)}"
-          )
-
-          env_conf
-
-        true ->
-          env_conf
-      end
+    secret_conf = Combo.Config.from_env(otp_app, mod, default_conf)
 
     extra_conf = [
       endpoint_id: :crypto.strong_rand_bytes(16) |> Base.encode64(padding: false),

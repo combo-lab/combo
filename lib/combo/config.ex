@@ -98,8 +98,15 @@ defmodule Combo.Config do
 
   defp fetch_config(otp_app, module) do
     case Application.fetch_env(otp_app, module) do
-      {:ok, conf} -> conf
-      :error -> []
+      {:ok, conf} ->
+        conf
+
+      :error ->
+        Logger.warning(
+          "no configuration found for otp_app #{inspect(otp_app)} and module #{inspect(module)}"
+        )
+
+        []
     end
   end
 
