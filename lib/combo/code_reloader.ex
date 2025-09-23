@@ -38,11 +38,13 @@ defmodule Combo.CodeReloader do
 
   For example:
 
-      config :demo, Demo.Web.Endpoint, code_reloader: true
+      config :my_app, MyApp.Web.Endpoint,
+        code_reloader: true
 
-      config :demo, Demo.Web.Endpoint, code_reloader: false
+      config :my_app, MyApp.Web.Endpoint,
+        code_reloader: false
 
-      config :demo, Demo.Web.Endpoint,
+      config :my_app, MyApp.Web.Endpoint,
         code_reloader: [
           reloadable_apps: [:ui, :backend],
           reloadable_compilers: [:gettext, :elixir]
@@ -62,6 +64,17 @@ defmodule Combo.CodeReloader do
 
   The `:reloadable_compilers` option must be a subset of the `:compilers`
   specified in `project/0` in your `mix.exs`.
+
+  ## Notes
+
+  Keep in mind code reloading is based on the file-system, therefore it is not
+  possible to run two instances of the same app at the same time with code
+  reloading in development, as they will race each other and only one will
+  effectively recompile the files.
+
+  In such cases, tweak your configuration so code reloading is enabled in only
+  one of the apps or set the `MIX_BUILD_PATH` system environment variable to give
+  them distinct build directories.
   """
 
   ## Server delegation

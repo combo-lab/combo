@@ -40,7 +40,8 @@ defmodule Combo.LiveReloader do
       config :demo, Demo.Web.Endpoint,
         live_reloader: [
           patterns: [
-            ~r"lib/demo/web/(?:router|controllers|layouts|components)(?:/.*)?\.(ex|ceex)$",
+            ~r"lib/demo/web/router\.ex",
+            ~r"lib/demo/web/(controllers|layouts|components)/.*\.(ex|ceex)$",
             ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$"
           ]
         ]

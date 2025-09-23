@@ -59,17 +59,7 @@ defmodule Combo.Endpoint do
   The configuration below may be set on `config/dev.exs`, `config/prod.exs`
   and so on, but has no effect on `config/runtime.exs`.
 
-    * `:code_reloader` - when `true`, enables code reloading functionality.
-      For the list of code reloader configuration options see
-      `Combo.CodeReloader.reload/1`. Keep in mind code reloading is based on
-      the file-system, therefore it is not possible to run two instances of the
-      same app at the same time with code reloading in development, as they
-      will race each other and only one will effectively recompile the files.
-      In such cases, tweak your configuration so code reloading is enabled in
-      only one of the apps or set the `MIX_BUILD_PATH` system environment
-      variable to give them distinct build directories.
-
-    * `:live_reloader` - the configuration of `Combo.LiveReloader`.
+    * `:code_reloader` - the configuration of `Combo.CodeReloader`.
 
     * `:process_limit` - limits the number of processes. It can be a
       `pos_integer()` or `:infinity`. Default to `:infinity`.
@@ -169,6 +159,8 @@ defmodule Combo.Endpoint do
       It will fallback to `:url` option if not set. Accepts the same value
       as `:url` option.
 
+    * `:live_reloader` - the configuration of `Combo.LiveReloader`.
+
     * `:watchers` - a set of watchers to run alongside the server. It expects
       a list of tuples containing the executable and its arguments.
       Only when the server is enabled, or `mix combo.serve` runs, watchers
@@ -196,19 +188,6 @@ defmodule Combo.Endpoint do
           [another: {Mod, :fun, [arg1, arg2]}]
 
       When `false`, watchers can be disabled.
-
-    * `:live_reload` - configuration for the live reload option.
-      Configuration requires a `:patterns` option which should be a list of
-      file patterns to watch. When these files change, it will trigger a reload.
-
-          live_reload: [
-            url: "ws://localhost:4000",
-            patterns: [
-              ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$",
-              ~r"lib/my_app/web/.*(ex)$",
-              ~r"lib/my_app/web/templates/.*(eex)$"
-            ]
-          ]
 
     * `:pubsub_server` - the name of the pubsub server to use in channels and
       via the Endpoint broadcast functions. The pubsub server is typically
