@@ -13,6 +13,15 @@ defmodule Combo.Config do
   end
 
   @doc """
+  Returns all key-value pairs.
+  """
+  @spec get_all(module()) :: keyword()
+  def get_all(module) do
+    pid = :ets.lookup_element(module, :__pid__, 2)
+    GenServer.call(pid, :get_all)
+  end
+
+  @doc """
   Gets a value by given key.
   """
   @spec get(module(), any(), any()) :: any()
@@ -153,6 +162,19 @@ defmodule Combo.Config do
     update(module, config, [])
     :ets.insert(module, {:__pid__, self()})
     {:ok, {module, [:__pid__ | permanent_keys]}}
+  end
+
+  @impl true
+  def handle_call(:get_all, _from, {module, permanent_keys}) do
+    config =
+      :ets.tab2list(module)
+      |> Enum.filter(fn
+        {:__pid__, _} -> false
+        {{:socket, _}, _} -> false
+        _ -> true
+      end)
+
+    {:reply, config, {module, permanent_keys}}
   end
 
   @impl true
