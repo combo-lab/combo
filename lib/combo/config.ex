@@ -85,6 +85,18 @@ defmodule Combo.Config do
   end
 
   @doc """
+  Changes the configuration for the given module.
+
+  It receives a keyword list with changed config and another with removed ones.
+  The changed config are updated while the removed ones stop the configuration
+  server, effectively removing the table.
+  """
+  def config_change(module, changed, removed) do
+    pid = :ets.lookup_element(module, :__pid__, 2)
+    GenServer.call(pid, {:config_change, changed, removed})
+  end
+
+  @doc """
   Reads the configuration for module from the given OTP app.
 
   Useful to read a particular value at compilation time.
@@ -122,18 +134,6 @@ defmodule Combo.Config do
     else
       v2
     end
-  end
-
-  @doc """
-  Changes the configuration for the given module.
-
-  It receives a keyword list with changed config and another with removed ones.
-  The changed config are updated while the removed ones stop the configuration
-  server, effectively removing the table.
-  """
-  def config_change(module, changed, removed) do
-    pid = :ets.lookup_element(module, :__pid__, 2)
-    GenServer.call(pid, {:config_change, changed, removed})
   end
 
   @impl true
