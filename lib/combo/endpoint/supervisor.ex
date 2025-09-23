@@ -327,10 +327,11 @@ defmodule Combo.Endpoint.Supervisor do
       if File.exists?(outer) do
         outer |> File.read!() |> Combo.json_module().decode!()
       else
-        raise ArgumentError,
-              "could not find static manifest at #{inspect(outer)}. " <>
-                "Run \"mix phx.digest\" after building your static files " <>
-                "or remove the \"cache_static_manifest\" configuration from your config files."
+        raise ArgumentError, """
+        could not find static manifest at #{inspect(outer)}. \
+        Run "mix combo.digest" after building your static files or \
+        remove the :cache_static_manifest configuration from your config files.
+        """
       end
     else
       nil
