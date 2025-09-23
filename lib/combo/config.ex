@@ -8,8 +8,8 @@ defmodule Combo.Config do
   Starts a configuration handler.
   """
   def start_link({module, config, defaults, opts}) do
-    permanent = Keyword.keys(defaults)
-    GenServer.start_link(__MODULE__, {module, config, permanent}, opts)
+    permanent_keys = Keyword.keys(defaults)
+    GenServer.start_link(__MODULE__, {module, config, permanent_keys}, opts)
   end
 
   @doc """
@@ -137,11 +137,11 @@ defmodule Combo.Config do
   end
 
   @impl true
-  def init({module, config, permanent}) do
+  def init({module, config, permanent_keys}) do
     :ets.new(module, [:named_table, :public, read_concurrency: true])
     update(module, config, [])
     :ets.insert(module, {:__pid__, self()})
-    {:ok, {module, [:__pid__ | permanent]}}
+    {:ok, {module, [:__pid__ | permanent_keys]}}
   end
 
   @impl true
@@ -157,25 +157,25 @@ defmodule Combo.Config do
   end
 
   @impl true
-  def handle_call({:config_change, changed, removed}, _from, {module, permanent}) do
+  def handle_call({:config_change, changed, removed}, _from, {module, permanent_keys}) do
     cond do
       changed = changed[module] ->
-        update(module, changed, permanent)
-        {:reply, :ok, {module, permanent}}
+        update(module, changed, permanent_keys)
+        {:reply, :ok, {module, permanent_keys}}
 
       module in removed ->
-        {:stop, :normal, :ok, {module, permanent}}
+        {:stop, :normal, :ok, {module, permanent_keys}}
 
       true ->
         clear_cache(module)
-        {:reply, :ok, {module, permanent}}
+        {:reply, :ok, {module, permanent_keys}}
     end
   end
 
-  defp update(module, config, permanent) do
+  defp update(module, config, permanent_keys) do
     old_keys = :ets.select(module, [{{:"$1", :_}, [], [:"$1"]}])
     new_keys = Enum.map(config, &elem(&1, 0))
-    Enum.each((old_keys -- new_keys) -- permanent, &:ets.delete(module, &1))
+    Enum.each((old_keys -- new_keys) -- permanent_keys, &:ets.delete(module, &1))
     :ets.insert(module, config)
     clear_cache(module)
   end
