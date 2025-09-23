@@ -17,7 +17,7 @@ defmodule Combo.Config do
   """
   @spec put(module(), any(), any()) :: :ok
   def put(module, key, value) do
-    pid = :ets.lookup_element(module, :__config__, 2)
+    pid = :ets.lookup_element(module, :__pid__, 2)
     GenServer.call(pid, {:put, key, value})
   end
 
@@ -28,7 +28,7 @@ defmodule Combo.Config do
   """
   @spec put_permanent(module(), any(), any()) :: :ok
   def put_permanent(module, key, value) do
-    pid = :ets.lookup_element(module, :__config__, 2)
+    pid = :ets.lookup_element(module, :__pid__, 2)
     GenServer.call(pid, {:put_permanent, key, value})
   end
 
@@ -132,7 +132,7 @@ defmodule Combo.Config do
   server, effectively removing the table.
   """
   def config_change(module, changed, removed) do
-    pid = :ets.lookup_element(module, :__config__, 2)
+    pid = :ets.lookup_element(module, :__pid__, 2)
     GenServer.call(pid, {:config_change, changed, removed})
   end
 
@@ -140,8 +140,8 @@ defmodule Combo.Config do
   def init({module, config, permanent}) do
     :ets.new(module, [:named_table, :public, read_concurrency: true])
     update(module, config, [])
-    :ets.insert(module, {:__config__, self()})
-    {:ok, {module, [:__config__ | permanent]}}
+    :ets.insert(module, {:__pid__, self()})
+    {:ok, {module, [:__pid__ | permanent]}}
   end
 
   @impl true
