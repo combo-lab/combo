@@ -435,7 +435,7 @@ defmodule Combo.Endpoint do
     end
   end
 
-  defp pubsub() do
+  defp pubsub do
     quote do
       def subscribe(topic, opts \\ []) when is_binary(topic) do
         Phoenix.PubSub.subscribe(pubsub_server!(), topic, opts)
@@ -476,7 +476,7 @@ defmodule Combo.Endpoint do
     end
   end
 
-  defp plug() do
+  defp plug do
     quote location: :keep do
       use Plug.Builder, init_mode: Combo.plug_init_mode()
 
@@ -509,7 +509,7 @@ defmodule Combo.Endpoint do
     end
   end
 
-  defp server() do
+  defp server do
     quote location: :keep, unquote: false do
       @doc """
       Returns the child specification to start the endpoint
@@ -548,7 +548,7 @@ defmodule Combo.Endpoint do
         Combo.Endpoint.Supervisor.config_change(__MODULE__, changed, removed)
       end
 
-      defp persistent!() do
+      defp persistent! do
         :persistent_term.get({Combo.Endpoint, __MODULE__}, nil) ||
           raise "could not find persistent term for endpoint #{inspect(__MODULE__)}. Make sure your endpoint is started and note you cannot access endpoint functions at compile-time"
       end
