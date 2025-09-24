@@ -93,6 +93,15 @@ defmodule Combo.Endpoint.Supervisor do
     Supervisor.init(children, strategy: :one_for_one)
   end
 
+  defp config_children(mod, conf, default_conf) do
+    args = {mod, conf, default_conf, name: Module.concat(mod, "Config")}
+    [{Combo.Config, args}]
+  end
+
+  defp warmup_children(mod) do
+    [%{id: :warmup, start: {__MODULE__, :warmup, [mod]}}]
+  end
+
   defp socket_children(endpoint, conf, fun) do
     for {_, socket, opts} <- Enum.uniq_by(endpoint.__sockets__(), &elem(&1, 1)),
         _ = check_origin_or_csrf_checked!(conf, opts),
@@ -125,15 +134,6 @@ defmodule Combo.Endpoint.Supervisor do
                 "transport #{inspect(transport)}"
       end
     end
-  end
-
-  defp config_children(mod, conf, default_conf) do
-    args = {mod, conf, default_conf, name: Module.concat(mod, "Config")}
-    [{Combo.Config, args}]
-  end
-
-  defp warmup_children(mod) do
-    [%{id: :warmup, start: {__MODULE__, :warmup, [mod]}}]
   end
 
   defp server_children(mod, config, server?) do
