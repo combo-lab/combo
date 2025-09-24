@@ -68,7 +68,6 @@ defmodule Combo.Cache do
   def init(module) do
     table_name = build_table_name(module)
     :ets.new(table_name, [:named_table, :public, read_concurrency: true])
-    :ets.insert(table_name, {:__pid__, self()})
     {:ok, table_name}
   end
 
