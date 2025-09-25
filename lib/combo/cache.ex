@@ -42,12 +42,6 @@ defmodule Combo.Cache do
     end
   end
 
-  @spec dump(module()) :: [{key(), value()}]
-  def dump(module) do
-    table_name = build_table_name(module)
-    :ets.tab2list(table_name)
-  end
-
   @spec put(module(), key(), value()) :: :ok
   def put(module, key, value) do
     table_name = build_table_name(module)
@@ -62,6 +56,26 @@ defmodule Combo.Cache do
     table_name = build_table_name(module)
     true = :ets.insert(table_name, kvs)
     :ok
+  end
+
+  @spec dump(module()) :: [{key(), value()}]
+  def dump(module) do
+    table_name = build_table_name(module)
+    :ets.tab2list(table_name)
+  end
+
+  @spec get_keys(module()) :: [key()]
+  def get_keys(module), do: get_keys(module, :"$1")
+
+  @spec get_keys(module(), :ets.match_spec()) :: [key()]
+  def get_keys(module, key_match_spec) do
+    match_spec =
+      case key_match_spec do
+        key when is_atom(key) -> [{{key, :_}, [], [key]}]
+        key when is_tuple(key) -> [{{key, :_}, [], [{key}]}]
+      end
+
+    :ets.select(MyApp.Web.Endpoint.Cache, match_spec)
   end
 
   @impl true
