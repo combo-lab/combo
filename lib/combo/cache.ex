@@ -76,13 +76,15 @@ defmodule Combo.Cache do
 
   @spec get_keys(module(), :ets.match_spec()) :: [key()]
   def get_keys(module, key_match_spec) do
+    table_name = build_table_name(module)
+
     match_spec =
       case key_match_spec do
         key when is_atom(key) -> [{{key, :_}, [], [key]}]
         key when is_tuple(key) -> [{{key, :_}, [], [{key}]}]
       end
 
-    :ets.select(MyApp.Web.Endpoint.Cache, match_spec)
+    :ets.select(table_name, match_spec)
   end
 
   @impl true
