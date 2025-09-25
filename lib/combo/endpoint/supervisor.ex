@@ -1,22 +1,15 @@
 defmodule Combo.Endpoint.Supervisor do
   @moduledoc false
-  # This module contains the logic used by most functions in Combo.Endpoint
-  # as well the supervisor for sockets, adapters, watchers, etc.
 
-  require Logger
   use Supervisor
+  require Logger
 
   @default_config [
-    ## Compile-time config
-
     live_reloader: false,
     code_reloader: false,
     process_limit: :infinity,
     debug_errors: false,
     render_errors: [layout: false],
-
-    ## Runtime config
-
     url: [host: "localhost", path: "/"],
     static_url: nil,
     adapter: Combo.Endpoint.BanditAdapter,
@@ -24,8 +17,10 @@ defmodule Combo.Endpoint.Supervisor do
     https: false,
     check_origin: true,
     secret_key_base: nil,
-    cache_static_manifest: nil,
-    cache_static_manifest_skip_vsn: false,
+    static: [
+      manifest: nil,
+      vsn: true
+    ],
     watchers: [],
     log_access_url: true
   ]
@@ -83,12 +78,16 @@ defmodule Combo.Endpoint.Supervisor do
     end
 
     children =
-      config_children(module, config, permanent_keys) ++
-        warmup_children(module) ++
-        socket_children(module, safe_config, :child_spec) ++
-        server_children(module, safe_config, server?) ++
-        socket_children(module, safe_config, :drainer_spec) ++
+      Enum.concat([
+        config_children(module, config, permanent_keys),
+        cache_children(module),
+        persistent_children(module, safe_config),
+        static_children(module, safe_config),
+        socket_children(module, safe_config, :child_spec),
+        server_children(module, safe_config, server?),
+        socket_children(module, safe_config, :drainer_spec),
         watcher_children(module, safe_config, server?)
+      ])
 
     Supervisor.init(children, strategy: :one_for_one)
   end
@@ -98,8 +97,16 @@ defmodule Combo.Endpoint.Supervisor do
     [{Combo.Config, args}]
   end
 
-  defp warmup_children(mod) do
-    [%{id: :warmup, start: {__MODULE__, :warmup, [mod]}}]
+  defp cache_children(module) do
+    [{Combo.Cache, module}]
+  end
+
+  defp persistent_children(module, safe_config) do
+    [{Combo.Endpoint.Persistent, {module, safe_config}}]
+  end
+
+  defp static_children(module, safe_config) do
+    [{Combo.Endpoint.Static, {module, safe_config}}]
   end
 
   defp socket_children(endpoint, conf, fun) do
@@ -186,167 +193,14 @@ defmodule Combo.Endpoint.Supervisor do
   """
   def config_change(endpoint, changed, removed) do
     res = Combo.Config.config_change(endpoint, changed, removed)
-    warmup(endpoint)
+
+    # TODO
+    config = Combo.Config.get_all(endpoint)
+    safe_config = safe_config(config)
+    Combo.Endpoint.Persistent.reload(endpoint, safe_config)
+    Combo.Endpoint.Static.reload(endpoint, safe_config)
+
     res
-  end
-
-  @doc """
-  Returns a two item tuple with the first element containing the
-  static path of a file in the static root directory
-  and the second element containing the sha512 of that file (for SRI).
-
-  When the file exists, it includes a timestamp. When it doesn't exist,
-  just the static path is returned.
-
-  The result is wrapped in a `{:cache | :nocache, value}` tuple so
-  the `Combo.Config` layer knows how to cache it.
-  """
-  @invalid_local_url_chars ["\\"]
-
-  def static_lookup(_endpoint, "//" <> _ = path) do
-    raise_invalid_path(path)
-  end
-
-  def static_lookup(_endpoint, "/" <> _ = path) do
-    if String.contains?(path, @invalid_local_url_chars) do
-      raise ArgumentError, "unsafe characters detected for path #{inspect(path)}"
-    else
-      {:nocache, {path, nil}}
-    end
-  end
-
-  def static_lookup(_endpoint, path) when is_binary(path) do
-    raise_invalid_path(path)
-  end
-
-  defp raise_invalid_path(path) do
-    raise ArgumentError, "expected a path starting with a single / but got #{inspect(path)}"
-  end
-
-  defp host_to_binary(host), do: host
-
-  defp port_to_integer(port) when is_binary(port), do: String.to_integer(port)
-  defp port_to_integer(port) when is_integer(port), do: port
-
-  @doc """
-  Invoked to warm up caches on start and config change.
-  """
-  def warmup(endpoint) do
-    warmup_persistent(endpoint)
-
-    try do
-      if manifest = cache_static_manifest(endpoint) do
-        warmup_static(endpoint, manifest)
-      end
-    rescue
-      e -> Logger.error("Could not warm up static assets: #{Exception.message(e)}")
-    end
-
-    # To prevent a race condition where the socket listener is already started
-    # but the config not warmed up, we run warmup/1 as a child in the supervision
-    # tree. As we don't actually want to start a process, we return :ignore here.
-    :ignore
-  end
-
-  defp warmup_persistent(endpoint) do
-    url_config = endpoint.config(:url)
-    static_url_config = endpoint.config(:static_url) || url_config
-
-    struct_url = build_url(endpoint, url_config)
-    host = host_to_binary(url_config[:host] || "localhost")
-    path = empty_string_if_root(url_config[:path] || "/")
-    script_name = String.split(path, "/", trim: true)
-
-    static_url = build_url(endpoint, static_url_config) |> String.Chars.URI.to_string()
-    static_path = empty_string_if_root(static_url_config[:path] || "/")
-
-    :persistent_term.put({Combo.Endpoint, endpoint}, %{
-      struct_url: struct_url,
-      url: String.Chars.URI.to_string(struct_url),
-      host: host,
-      path: path,
-      script_name: script_name,
-      static_path: static_path,
-      static_url: static_url
-    })
-  end
-
-  defp empty_string_if_root("/"), do: ""
-  defp empty_string_if_root(other), do: other
-
-  defp build_url(endpoint, url) do
-    https = endpoint.config(:https)
-    http = endpoint.config(:http)
-
-    {scheme, port} =
-      cond do
-        https -> {"https", https[:port] || 443}
-        http -> {"http", http[:port] || 80}
-        true -> {"http", 80}
-      end
-
-    scheme = url[:scheme] || scheme
-    host = host_to_binary(url[:host] || "localhost")
-    port = port_to_integer(url[:port] || port)
-
-    if host =~ ~r"[^:]:\d" do
-      Logger.warning(
-        "url: [host: ...] configuration value #{inspect(host)} for #{inspect(endpoint)} is invalid"
-      )
-    end
-
-    %URI{scheme: scheme, port: port, host: host}
-  end
-
-  defp warmup_static(endpoint, %{"latest" => latest, "digests" => digests}) do
-    Combo.Config.put(endpoint, :cache_static_manifest_latest, latest)
-    with_vsn? = !endpoint.config(:cache_static_manifest_skip_vsn)
-
-    Enum.each(latest, fn {key, _} ->
-      Combo.Config.cache(endpoint, {:__combo_static__, "/" <> key}, fn _ ->
-        {:cache, static_cache(digests, Map.get(latest, key), with_vsn?)}
-      end)
-    end)
-  end
-
-  defp warmup_static(_endpoint, _manifest) do
-    raise ArgumentError, "expected cache manifest to include 'latest' and 'digests' keys"
-  end
-
-  defp static_cache(digests, value, true) do
-    {"/#{value}?vsn=d", static_integrity(digests[value]["sha512"])}
-  end
-
-  defp static_cache(digests, value, false) do
-    {"/#{value}", static_integrity(digests[value]["sha512"])}
-  end
-
-  defp static_integrity(nil), do: nil
-  defp static_integrity(sha), do: "sha512-#{sha}"
-
-  defp cache_static_manifest(endpoint) do
-    if inner = endpoint.config(:cache_static_manifest) do
-      {app, inner} =
-        case inner do
-          {_, _} = inner -> inner
-          inner when is_binary(inner) -> {endpoint.config(:otp_app), inner}
-          _ -> raise ArgumentError, ":cache_static_manifest must be a binary or a tuple"
-        end
-
-      outer = Application.app_dir(app, inner)
-
-      if File.exists?(outer) do
-        outer |> File.read!() |> Combo.json_module().decode!()
-      else
-        raise ArgumentError, """
-        could not find static manifest at #{inspect(outer)}. \
-        Run "mix combo.digest" after building your static files or \
-        remove the :cache_static_manifest configuration from your config files.
-        """
-      end
-    else
-      nil
-    end
   end
 
   defp log_access_url(endpoint, config) do

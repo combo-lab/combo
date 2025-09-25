@@ -1,0 +1,127 @@
+defmodule Combo.Endpoint.Static do
+  @moduledoc false
+  # To prevent a race condition where the socket listener is already started
+  # but the cache is not ready, this module should be started as a child in
+  # the supervision tree of endpoint.
+
+  require Logger
+
+  def child_spec(arg) do
+    %{
+      id: make_ref(),
+      start: {__MODULE__, :start_link, [arg]}
+    }
+  end
+
+  def start_link({endpoint, safe_config}) do
+    warmup(endpoint, safe_config)
+
+    # As we don't actually want to start a process, we return :ignore here.
+    :ignore
+  end
+
+  def reload(endpoint, safe_config) do
+    warmup(endpoint, safe_config)
+  end
+
+  @invalid_local_url_chars ["\\"]
+
+  @spec lookup(module(), String.t()) :: {String.t(), String.t()} | {String.t(), nil}
+  def lookup(_endpoint, "//" <> _ = path) do
+    raise_invalid_path(path)
+  end
+
+  def lookup(endpoint, "/" <> _ = path) do
+    if String.contains?(path, @invalid_local_url_chars) do
+      raise ArgumentError, "unsafe characters detected for path #{inspect(path)}"
+    else
+      key = {:static, path}
+
+      if value = Combo.Cache.get(endpoint, key) do
+        value
+      else
+        {path, nil}
+      end
+    end
+  end
+
+  def lookup(_endpoint, path) when is_binary(path) do
+    raise_invalid_path(path)
+  end
+
+  defp raise_invalid_path(path) do
+    raise ArgumentError, "expected a path starting with a single /, got #{inspect(path)}"
+  end
+
+  defp warmup(endpoint, config) do
+    try do
+      if manifest = get_manifest(config) do
+        warmup_static(endpoint, config, manifest)
+      end
+
+      :ok
+    rescue
+      e -> Logger.error("Could not warm up static: #{Exception.message(e)}")
+    end
+  end
+
+  defp get_manifest(config) do
+    if from = get_in(config, [:static, :manifest]) do
+      {app, path} =
+        case from do
+          {_, _} -> from
+          path when is_binary(path) -> {Keyword.fetch!(config, :otp_app), path}
+          _ -> raise ArgumentError, "[:static, :manifest] must be a binary or a tuple"
+        end
+
+      manifest_path = Application.app_dir(app, path)
+
+      if File.exists?(manifest_path) do
+        manifest_path |> File.read!() |> Combo.json_module().decode!()
+      else
+        raise ArgumentError, """
+        could not find static manifest at #{inspect(manifest_path)}. \
+        Run "mix combo.static.digest" after building your static files or \
+        disable it by removing the [:static, :manifest] configuration.
+        """
+      end
+    else
+      nil
+    end
+  end
+
+  defp warmup_static(endpoint, config, %{"latest" => latest, "digests" => digests}) do
+    with_vsn? = get_in(config, [:static, :vsn])
+
+    kvs =
+      Enum.map(latest, fn {name, hashed_name} ->
+        key = {:static, "/" <> name}
+        value = build_value(digests, hashed_name, with_vsn?)
+        {key, value}
+      end)
+
+    old_keys = Combo.Cache.get_keys(endpoint, {:static, :"$1"})
+    new_keys = Enum.map(kvs, &elem(&1, 0))
+    staled_keys = old_keys -- new_keys
+
+    Combo.Cache.put(endpoint, kvs)
+    for staled_key <- staled_keys, do: Combo.Cache.delete(endpoint, staled_key)
+
+    :ok
+  end
+
+  defp warmup_static(_endpoint, _static_config, _manifest) do
+    raise ArgumentError, "expected static manifest file to include 'latest' and 'digests' keys"
+  end
+
+  defp build_value(digests, hashed_name, true) do
+    {"/#{hashed_name}?vsn=d", build_static_integrity(digests[hashed_name]["sha512"])}
+  end
+
+  defp build_value(digests, hashed_name, false) do
+    {"/#{hashed_name}", build_static_integrity(digests[hashed_name]["sha512"])}
+  end
+
+  defp build_static_integrity(nil), do: nil
+  defp build_static_integrity(sum), do: "sha512-#{sum}"
+end

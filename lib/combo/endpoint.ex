@@ -548,17 +548,12 @@ defmodule Combo.Endpoint do
         Combo.Endpoint.Supervisor.config_change(__MODULE__, changed, removed)
       end
 
-      defp persistent! do
-        :persistent_term.get({Combo.Endpoint, __MODULE__}, nil) ||
-          raise "could not find persistent term for endpoint #{inspect(__MODULE__)}. Make sure your endpoint is started and note you cannot access endpoint functions at compile-time"
-      end
-
       @doc """
       Generates the endpoint base URL without any path information.
 
       It uses the configuration under `:url` to generate such.
       """
-      def url, do: persistent!().url
+      def url, do: Combo.Endpoint.Persistent.fetch!(__MODULE__, :url)
 
       @doc """
       Generates the static URL without any path information.
@@ -566,7 +561,7 @@ defmodule Combo.Endpoint do
       It uses the configuration under `:static_url` to generate
       such. It falls back to `:url` if `:static_url` is not set.
       """
-      def static_url, do: persistent!().static_url
+      def static_url, do: Combo.Endpoint.Persistent.fetch!(__MODULE__, :static_url)
 
       @doc """
       Generates the endpoint base URL but as a `URI` struct.
@@ -575,28 +570,28 @@ defmodule Combo.Endpoint do
       Useful for manipulating the URL data and passing it to
       URL helpers.
       """
-      def struct_url, do: persistent!().struct_url
+      def struct_url, do: Combo.Endpoint.Persistent.fetch!(__MODULE__, :struct_url)
 
       @doc """
       Returns the host for the given endpoint.
       """
-      def host, do: persistent!().host
+      def host, do: Combo.Endpoint.Persistent.fetch!(__MODULE__, :host)
 
       @doc """
       Generates the path information when routing to this endpoint.
       """
-      def path(path), do: persistent!().path <> path
+      def path(path), do: Combo.Endpoint.Persistent.fetch!(__MODULE__, :path) <> path
 
       @doc """
       Generates the script name.
       """
-      def script_name, do: persistent!().script_name
+      def script_name, do: Combo.Endpoint.Persistent.fetch!(__MODULE__, :script_name)
 
       @doc """
       Generates a route to a static file in `priv/static`.
       """
       def static_path(path) do
-        prefix = persistent!().static_path
+        prefix = Combo.Endpoint.Persistent.fetch!(__MODULE__, :static_path)
 
         case :binary.split(path, "#") do
           [path, fragment] -> prefix <> elem(static_lookup(path), 0) <> "#" <> fragment
@@ -614,13 +609,7 @@ defmodule Combo.Endpoint do
       Returns a two item tuple with the first item being the `static_path`
       and the second item being the `static_integrity`.
       """
-      def static_lookup(path) do
-        Combo.Config.cache(
-          __MODULE__,
-          {:__combo_static__, path},
-          &Combo.Endpoint.Supervisor.static_lookup(&1, path)
-        )
-      end
+      def static_lookup(path), do: Combo.Endpoint.Static.lookup(__MODULE__, path)
 
       @doc """
       Returns the address and port that the server is running on.
