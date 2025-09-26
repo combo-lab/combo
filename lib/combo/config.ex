@@ -103,16 +103,14 @@ defmodule Combo.Config do
     :ok
   end
 
-  @doc """
-  Changes the configuration for the given module.
-
-  It receives a keyword list with changed config and another with removed ones.
-  The changed config are updated while the removed ones stop the configuration
-  server, effectively removing the table.
-  """
-  def config_change(module, changed, removed) do
+  def config_change(module, changed_config) do
     pid = :ets.lookup_element(module, :__pid__, 2)
-    GenServer.call(pid, {:config_change, changed, removed})
+    GenServer.call(pid, {:config_change, changed_config})
+  end
+
+  def stop(module) do
+    pid = :ets.lookup_element(module, :__pid__, 2)
+    GenServer.call(pid, :stop)
   end
 
   @doc """
@@ -184,19 +182,14 @@ defmodule Combo.Config do
   end
 
   @impl true
-  def handle_call({:config_change, changed, removed}, _from, {module, permanent_keys}) do
-    cond do
-      changed = changed[module] ->
-        update(module, changed, permanent_keys)
-        {:reply, :ok, {module, permanent_keys}}
+  def handle_call({:config_change, changed_config}, _from, {module, permanent_keys}) do
+    update(module, changed_config, permanent_keys)
+    {:reply, :ok, {module, permanent_keys}}
+  end
 
-      module in removed ->
-        {:stop, :normal, :ok, {module, permanent_keys}}
-
-      true ->
-        clear_cache(module)
-        {:reply, :ok, {module, permanent_keys}}
-    end
+  @impl true
+  def handle_call(:stop, _from, state) do
+    {:stop, :normal, :ok, state}
   end
 
   defp update(module, config, permanent_keys) do

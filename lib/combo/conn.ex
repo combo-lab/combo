@@ -1421,7 +1421,7 @@ defmodule Combo.Conn do
   For example, to get the current URL always in HTTPS format:
 
       def current_secure_url(conn, params \\ %{}) do
-        current_uri = MyAppWeb.Endpoint.struct_url()
+        current_uri = MyAppWeb.Endpoint.url_struct()
         current_path = Combo.Controller.current_path(conn, params)
         Combo.VerifiedRoutes.unverified_url(%URI{current_uri | scheme: "https"}, current_path)
       end

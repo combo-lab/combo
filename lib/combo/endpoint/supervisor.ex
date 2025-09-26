@@ -191,16 +191,23 @@ defmodule Combo.Endpoint.Supervisor do
   @doc """
   Callback that changes the configuration from the app callback.
   """
+
   def config_change(endpoint, changed, removed) do
-    res = Combo.Config.config_change(endpoint, changed, removed)
+    cond do
+      changed_config = changed[module] ->
+        :ok = Combo.Config.config_change(endpoint, changed_config)
 
-    # TODO
-    config = Combo.Config.get_all(endpoint)
-    safe_config = safe_config(config)
-    Combo.Endpoint.Persistent.reload(endpoint, safe_config)
-    Combo.Endpoint.Static.reload(endpoint, safe_config)
+        config = Combo.Config.get_all(endpoint)
+        safe_config = safe_config(config)
+        :ok = Combo.Endpoint.Persistent.config_change(endpoint, safe_config)
+        :ok = Combo.Endpoint.Static.config_change(endpoint, safe_config)
 
-    res
+      endpoint in removed ->
+        :ok = Combo.Config.stop(endpoint)
+        :ok = Combo.Endpoint.Persistent.stop(endpoint)
+    end
+
+    :ok
   end
 
   defp log_access_url(endpoint, config) do

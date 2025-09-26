@@ -20,55 +20,69 @@ defmodule Combo.Endpoint.Persistent do
     :ignore
   end
 
-  def reload(endpoint, safe_config) do
+  def config_change(endpoint, safe_config) do
     warmup(endpoint, safe_config)
+    :ok
+  end
+
+  def stop(endpoint) do
+    key = build_key(endpoint)
+    true = :persistent_term.erase(key)
+    :ok
   end
 
   def fetch!(endpoint, key) do
     persistent =
       :persistent_term.get(build_key(endpoint), nil) ||
-        raise "could not find persistent term for endpoint #{inspect(endpoint)}. Make sure your endpoint is started and note you cannot access endpoint functions at compile-time"
+        raise "could not find persistent term for endpoint #{inspect(endpoint)}"
 
     Map.fetch!(persistent, key)
   end
 
-  defp warmup(endpoint, _safe_config) do
-    url_config = endpoint.config(:url)
-    static_url_config = endpoint.config(:static_url) || url_config
+  defp warmup(endpoint, safe_config) do
+    url_config = safe_config[:url]
+    static_url_config = safe_config[:static_url] || url_config
 
-    struct_url = build_url(endpoint, url_config)
-    host = host_to_binary(url_config[:host] || "localhost")
-    path = empty_string_if_root(url_config[:path] || "/")
+    %{scheme: scheme, host: host, port: port, path: path} =
+      resolve_url_config(endpoint, url_config, safe_config)
+
+    base_url = build_base_url(scheme, host, port)
+    base_url_struct = build_base_url_struct(scheme, host, port)
     script_name = String.split(path, "/", trim: true)
 
-    static_url = build_url(endpoint, static_url_config) |> String.Chars.URI.to_string()
-    static_path = empty_string_if_root(static_url_config[:path] || "/")
+    %{scheme: static_scheme, host: static_host, port: static_port, path: static_path} =
+      resolve_url_config(endpoint, static_url_config, safe_config)
+
+    static_base_url = build_base_url(static_scheme, static_host, static_port)
 
     :persistent_term.put(build_key(endpoint), %{
-      struct_url: struct_url,
-      url: String.Chars.URI.to_string(struct_url),
+      url: base_url,
+      url_struct: base_url_struct,
       host: host,
       path: path,
       script_name: script_name,
-      static_path: static_path,
-      static_url: static_url
+
+      # for static
+      static_url: static_base_url,
+      static_path: static_path
     })
   end
 
-  defp build_url(endpoint, url) do
-    https = endpoint.config(:https)
-    http = endpoint.config(:http)
+  defp resolve_url_config(endpoint, url_config, safe_config) do
+    https_config = safe_config[:https]
+    http_config = safe_config[:http]
 
     {scheme, port} =
       cond do
-        https -> {"https", https[:port] || 443}
-        http -> {"http", http[:port] || 80}
+        https_config -> {"https", https_config[:port] || 443}
+        http_config -> {"http", http_config[:port] || 80}
         true -> {"http", 80}
       end
 
-    scheme = url[:scheme] || scheme
-    host = host_to_binary(url[:host] || "localhost")
-    port = port_to_integer(url[:port] || port)
+    scheme = url_config[:scheme] || scheme
+    host = to_host(url_config[:host] || "localhost")
+    port = to_port(url_config[:port] || port)
+    path = to_path(url_config[:path] || "/")
 
     if host =~ ~r"[^:]:\d" do
       Logger.warning(
@@ -76,16 +90,24 @@ defmodule Combo.Endpoint.Persistent do
       )
     end
 
-    %URI{scheme: scheme, port: port, host: host}
+    %{scheme: scheme, host: host, port: port, path: path}
   end
 
-  defp empty_string_if_root("/"), do: ""
-  defp empty_string_if_root(other), do: other
+  defp build_base_url(scheme, host, port) do
+    to_string(%URI{scheme: scheme, host: host, port: port})
+  end
 
-  defp host_to_binary(host), do: host
+  defp build_base_url_struct(scheme, host, port) do
+    %URI{scheme: scheme, host: host, port: port}
+  end
 
-  defp port_to_integer(port) when is_binary(port), do: String.to_integer(port)
-  defp port_to_integer(port) when is_integer(port), do: port
+  defp to_host(host) when is_binary(host), do: host
+
+  defp to_port(port) when is_binary(port), do: String.to_integer(port)
+  defp to_port(port) when is_integer(port), do: port
+
+  defp to_path("/"), do: ""
+  defp to_path(other), do: other
 
   defp build_key(endpoint), do: {__MODULE__, endpoint}
 end

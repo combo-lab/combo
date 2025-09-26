@@ -65,6 +65,13 @@ defmodule Combo.Cache do
     :ok
   end
 
+  @spec erase(module()) :: :ok
+  def erase(module) do
+    table_name = build_table_name(module)
+    true = :ets.delete(table_name)
+    :ok
+  end
+
   @spec dump(module()) :: [{key(), value()}]
   def dump(module) do
     table_name = build_table_name(module)
