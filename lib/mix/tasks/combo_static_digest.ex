@@ -23,19 +23,19 @@ defmodule Mix.Tasks.Combo.Static.Digest do
     * a compressed file whose name contains the file name and its digest
     * a manifest file
 
-  An example of generated files:
+  An example of files:
 
     * app.js
     * app.js.gz
     * app-eb0a5b9302e8d32828d8a73f137cc8f0.js
     * app-eb0a5b9302e8d32828d8a73f137cc8f0.js.gz
-    * manifest.json
+    * manifest.digest.json
 
-  You can use `mix combo.static.digest.clean` to prune stale versions of the
+  You can use `mix combo.static.clean` to prune stale versions of the
   static files. If you want to remove all generated files:
 
   ```console
-  $ mix combo.static.digest.clean --all
+  $ mix combo.static.clean --all
   ```
 
   ## vsn

@@ -85,7 +85,7 @@ defmodule Combo.Static.Digester do
   end
 
   defp load_manifest(output_path) do
-    manifest_path = Path.join(output_path, "cache_manifest.json")
+    manifest_path = Path.join(output_path, "manifest.digest.json")
 
     if File.exists?(manifest_path) do
       manifest_path
@@ -124,11 +124,11 @@ defmodule Combo.Static.Digester do
     }
     """
 
-    File.write!(Path.join(output_path, "cache_manifest.json"), json)
+    File.write!(Path.join(output_path, "manifest.digest.json"), json)
   end
 
   defp remove_manifest(output_path) do
-    File.rm(Path.join(output_path, "cache_manifest.json"))
+    File.rm(Path.join(output_path, "manifest.digest.json"))
   end
 
   defp generate_digests(files) do
@@ -159,7 +159,7 @@ defmodule Combo.Static.Digester do
 
     Regex.match?(digested_file_regex, Path.basename(file_path)) ||
       Path.extname(file_path) in compressed_extensions() ||
-      Path.basename(file_path) == "cache_manifest.json"
+      Path.basename(file_path) == "manifest.digest.json"
   end
 
   defp compressed_extensions do

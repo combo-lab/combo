@@ -17,7 +17,7 @@ defmodule Combo.EndpointTest do
     https: [port: 443],
     force_ssl: [subdomains: true],
     static: [
-      manifest: "../../../../test/fixtures/static/compile/cache_manifest.json",
+      manifest: "../../../../test/fixtures/static/compile/manifest.digest.json",
       vsn: true
     ],
     pubsub_server: :endpoint_pub
@@ -44,7 +44,7 @@ defmodule Combo.EndpointTest do
 
   defp apply_static_config(overrides \\ []) do
     default_config = [
-      manifest: "../../../../test/fixtures/static/compile/manifest.json",
+      manifest: "../../../../test/fixtures/static/compile/manifest-new.digest.json",
       vsn: true
     ]
 
@@ -224,7 +224,7 @@ defmodule Combo.EndpointTest do
     config =
       put_in(
         @config[:static][:manifest],
-        "../../../../test/fixtures/static/compile/cache_manifest_upgrade.json"
+        "../../../../test/fixtures/static/compile/manifest_upgrade.digest.json"
       )
 
     assert Endpoint.config_change([{Endpoint, config}], []) == :ok
@@ -339,7 +339,7 @@ defmodule Combo.EndpointTest do
     config =
       put_in(
         @config[:static][:manifest],
-        {:combo, "../../../../test/fixtures/static/compile/cache_manifest.json"}
+        {:combo, "../../../../test/fixtures/static/compile/manifest.digest.json"}
       )
 
     assert Endpoint.config_change([{Endpoint, config}], []) == :ok
