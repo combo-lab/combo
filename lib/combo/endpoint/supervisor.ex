@@ -106,7 +106,7 @@ defmodule Combo.Endpoint.Supervisor do
   end
 
   defp static_children(module, safe_config) do
-    [{Combo.Endpoint.Static, {module, safe_config}}]
+    [{Combo.Static, {module, safe_config}}]
   end
 
   defp socket_children(endpoint, conf, fun) do
@@ -200,7 +200,7 @@ defmodule Combo.Endpoint.Supervisor do
         config = Combo.Config.get_all(endpoint)
         safe_config = safe_config(config)
         :ok = Combo.Endpoint.Persistent.config_change(endpoint, safe_config)
-        :ok = Combo.Endpoint.Static.config_change(endpoint, safe_config)
+        :ok = Combo.Static.config_change(endpoint, safe_config)
 
       endpoint in removed ->
         :ok = Combo.Config.stop(endpoint)

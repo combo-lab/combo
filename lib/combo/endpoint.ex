@@ -105,7 +105,7 @@ defmodule Combo.Endpoint do
     * `:adapter` - which web server adapter to use for serving web requests.
       See the "Adapter configuration" section below.
 
-    * `:static` - the configuration of `Combo.Endpoint.Static`.
+    * `:static` - the configuration of `Combo.Static`.
 
     * `:check_origin` - configure the `:check_origin` option for transports.
       See `socket/3` for options. Defaults to `true`.
@@ -581,7 +581,7 @@ defmodule Combo.Endpoint do
       """
       def static_integrity(path), do: elem(static_lookup(path), 1)
 
-      defp static_lookup(path), do: Combo.Endpoint.Static.lookup(__MODULE__, path)
+      defp static_lookup(path), do: Combo.Static.lookup(__MODULE__, path)
 
       @doc """
       Returns the address and port that the server is running on.
