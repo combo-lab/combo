@@ -1,10 +1,10 @@
 Code.require_file "./mix_helper.exs", __DIR__
 
-defmodule Mix.Tasks.Combo.Digest.CleanTest do
+defmodule Mix.Tasks.Combo.Static.CleanTest do
   use ExUnit.Case
 
   test "fails when the given paths are invalid" do
-    Mix.Tasks.Combo.Digest.Clean.run(["--output", "invalid_path", "--no-compile"])
+    Mix.Tasks.Combo.Static.Clean.run(["--output", "invalid_path", "--no-compile"])
 
     assert_received {:mix_shell, :error, ["The output path \"invalid_path\" does not exist"]}
   end
@@ -16,7 +16,7 @@ defmodule Mix.Tasks.Combo.Digest.CleanTest do
     try do
       :ok = File.mkdir_p!(output_path)
 
-      Mix.Tasks.Combo.Digest.Clean.run([input_path, "-o", output_path, "--no-compile"])
+      Mix.Tasks.Combo.Static.Clean.run([input_path, "-o", output_path, "--no-compile"])
 
       msg = "Clean complete for \"#{output_path}\""
       assert_received {:mix_shell, :info, [^msg]}

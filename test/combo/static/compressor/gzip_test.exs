@@ -1,6 +1,6 @@
-defmodule Combo.Digester.GzipTest do
+defmodule Combo.Static.Compressor.GzipTest do
   use ExUnit.Case, async: true
-  alias Combo.Digester.Gzip
+  alias Combo.Static.Compressor.Gzip
 
   test "compress_file/2 compresses file" do
     file_path = "test/fixtures/digest/priv/static/css/app.css"

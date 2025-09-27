@@ -1,17 +1,17 @@
-defmodule Mix.Tasks.Combo.Digest.Clean do
-  @shortdoc "Cleans old versions of files"
+defmodule Mix.Tasks.Combo.Static.Clean do
+  @shortdoc "Cleans old versions of static files"
 
   @moduledoc """
   #{@shortdoc}.
 
-  By default, it will keep the latest version and 2 previous versions as well
-  as any digest created in the last hour.
+  By default, it will keep the latest version and 2 previous versions of static
+  files as well as any digested static files created in the last hour.
 
   ```console
-  $ mix combo.digest.clean
-  $ mix combo.digest.clean -o /www/public
-  $ mix combo.digest.clean --age 600 --keep 3
-  $ mix combo.digest.clean --all
+  $ mix combo.static.clean
+  $ mix combo.static.clean -o /www/public
+  $ mix combo.static.clean --age 600 --keep 3
+  $ mix combo.static.clean --all
   ```
 
   ## Options
@@ -19,14 +19,15 @@ defmodule Mix.Tasks.Combo.Digest.Clean do
     * `-o, --output` - specifies the path of output directory.
       Defaults to `priv/static`.
 
-    * `--age` - specifies a maximum age (in seconds) for assets. Files older
-     than this age that are not in the last `--keep` versions will be removed.
-     Defaults to `3600`.
+    * `--age` - specifies a maximum age (in seconds) for static files. Files
+      older than this age that are not in the last `--keep` versions will be
+      removed.
+      Defaults to `3600`.
 
-    * `--keep` - specifies how many previous versions of assets to keep.
+    * `--keep` - specifies how many previous versions of static files to keep.
       Defaults to 2 previous versions.
 
-    * `--all` - specifies that all compiled assets (including the manifest)
+    * `--all` - specifies that all digested static files (including the manifest)
       will be removed. Note this overrides the `--age` and `--keep`.
 
     * `--no-compile` - do not run mix compile.
@@ -48,7 +49,7 @@ defmodule Mix.Tasks.Combo.Digest.Clean do
       Mix.Task.run("compile", all_args)
     end
 
-    Mix.Task.reenable("combo.digest.clean")
+    Mix.Task.reenable("combo.static.clean")
 
     {:ok, _} = Application.ensure_all_started(:combo)
 
@@ -60,8 +61,8 @@ defmodule Mix.Tasks.Combo.Digest.Clean do
 
     result =
       if all?,
-        do: Combo.Digester.clean_all(output_path),
-        else: Combo.Digester.clean(output_path, age, keep)
+        do: Combo.Static.Digester.clean_all(output_path),
+        else: Combo.Static.Digester.clean(output_path, age, keep)
 
     case result do
       :ok ->

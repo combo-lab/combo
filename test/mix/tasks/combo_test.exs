@@ -5,8 +5,8 @@ defmodule Mix.Tasks.Combo.Test do
     Mix.Tasks.Combo.run []
     assert_received {:mix_shell, :info, ["mix combo.serve" <> _]}
     assert_received {:mix_shell, :info, ["mix combo.routes" <> _]}
-    assert_received {:mix_shell, :info, ["mix combo.digest" <> _]}
-    assert_received {:mix_shell, :info, ["mix combo.digest.clean" <> _]}
+    assert_received {:mix_shell, :info, ["mix combo.static.digest" <> _]}
+    assert_received {:mix_shell, :info, ["mix combo.static.clean" <> _]}
     assert_received {:mix_shell, :info, ["mix combo.gen.secret" <> _]}
   end
 

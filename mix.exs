@@ -248,9 +248,9 @@ defmodule Combo.MixProject do
         Combo.Endpoint.Cowboy2Adapter,
         Combo.Endpoint.SyncCodeReloadPlug
       ],
-      Digester: [
-        Combo.Digester.Compressor,
-        Combo.Digester.Gzip
+      Static: [
+        Combo.Static.Compressor,
+        Combo.Static.Compressor.Gzip
       ],
       Socket: [
         Combo.Socket.Broadcast,

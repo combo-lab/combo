@@ -1,4 +1,4 @@
-defmodule Combo.DigesterTest do
+defmodule Combo.Static.DigesterTest do
   use ExUnit.Case, async: true
 
   @output_path Path.join("tmp", "combo_digest")
@@ -6,7 +6,7 @@ defmodule Combo.DigesterTest do
   @hash_regex ~S"[a-fA-F\d]{32}"
 
   defmodule DigestTestCompressor do
-    @behaviour Combo.Digester.Compressor
+    @behaviour Combo.Static.Compressor
     def compress_file(_file_path, _content), do: :error
     def file_extensions, do: [".digest_test"]
   end
@@ -19,12 +19,12 @@ defmodule Combo.DigesterTest do
 
   describe "compile" do
     test "fails when the given paths are invalid" do
-      assert {:error, :invalid_path} = Combo.Digester.compile("nonexistent path", "/ ?? /path", true)
+      assert {:error, :invalid_path} = Combo.Static.Digester.compile("nonexistent path", "/ ?? /path", true)
     end
 
     test "digests and compress files" do
       input_path = "test/fixtures/digest/priv/static/"
-      assert :ok = Combo.Digester.compile(input_path, @output_path, true)
+      assert :ok = Combo.Static.Digester.compile(input_path, @output_path, true)
       output_files = assets_files(@output_path)
 
       assert "logo.png" in output_files
@@ -68,7 +68,7 @@ defmodule Combo.DigesterTest do
           Path.join(@output_path, "cache_manifest.json")
         )
 
-      assert :ok = Combo.Digester.compile(input_path, @output_path, true)
+      assert :ok = Combo.Static.Digester.compile(input_path, @output_path, true)
 
       json = Path.join(@output_path, "cache_manifest.json") |> json_read!()
 
@@ -97,13 +97,13 @@ defmodule Combo.DigesterTest do
 
     test "excludes compiled files" do
       input_path = "test/fixtures/digest/priv/static/"
-      assert :ok = Combo.Digester.compile(input_path, @output_path, true)
+      assert :ok = Combo.Static.Digester.compile(input_path, @output_path, true)
       output_files = assets_files(@output_path)
 
       json = Path.join(@output_path, "cache_manifest.json") |> json_read!()
       refute json["latest"]["precompressed.js.gz"]
 
-      assert :ok = Combo.Digester.compile(@output_path, @output_path, true)
+      assert :ok = Combo.Static.Digester.compile(@output_path, @output_path, true)
       assert output_files == assets_files(@output_path)
     end
 
@@ -128,7 +128,7 @@ defmodule Combo.DigesterTest do
 
       File.write!(Path.join(input_path, "foo.css"), ".foo { background-color: blue }")
 
-      assert :ok = Combo.Digester.compile(input_path, @output_path, true)
+      assert :ok = Combo.Static.Digester.compile(input_path, @output_path, true)
       json = Path.join(@output_path, "cache_manifest.json") |> json_read!()
 
       assert json["digests"]["foo-d978852bea6530fcd197b5445ed008fd.css"]["mtime"] == 32_132_171
@@ -151,7 +151,7 @@ defmodule Combo.DigesterTest do
           Path.join(input_path, "cache_manifest.json")
         )
 
-      assert :ok = Combo.Digester.compile(input_path, input_path, true)
+      assert :ok = Combo.Static.Digester.compile(input_path, input_path, true)
 
       json = Path.join(input_path, "cache_manifest.json") |> json_read!()
       assert json["digests"] == %{}
@@ -161,7 +161,7 @@ defmodule Combo.DigesterTest do
 
     test "digests and compress nested files" do
       input_path = "test/fixtures/digest/priv/"
-      assert :ok = Combo.Digester.compile(input_path, @output_path, true)
+      assert :ok = Combo.Static.Digester.compile(input_path, @output_path, true)
 
       output_files = assets_files(@output_path)
 
@@ -185,13 +185,13 @@ defmodule Combo.DigesterTest do
         File.mkdir_p!(@output_path)
 
         File.write!(input_file, "console.log('test');")
-        assert :ok = Combo.Digester.compile(input_path, @output_path, true)
+        assert :ok = Combo.Static.Digester.compile(input_path, @output_path, true)
 
         json1 = Path.join(@output_path, "cache_manifest.json") |> json_read!()
         assert Enum.count(json1["digests"]) == 1
 
         File.write!(input_file, "console.log('test2');")
-        assert :ok = Combo.Digester.compile(input_path, @output_path, true)
+        assert :ok = Combo.Static.Digester.compile(input_path, @output_path, true)
 
         json2 = Path.join(@output_path, "cache_manifest.json") |> json_read!()
         assert Enum.count(json2["digests"]) == 2
@@ -209,8 +209,8 @@ defmodule Combo.DigesterTest do
         File.mkdir_p!(input_path)
         File.write!(input_file, "console.log('test');")
 
-        assert :ok = Combo.Digester.compile(input_path, input_path, true)
-        assert :ok = Combo.Digester.compile(input_path, input_path, true)
+        assert :ok = Combo.Static.Digester.compile(input_path, input_path, true)
+        assert :ok = Combo.Static.Digester.compile(input_path, input_path, true)
 
         output_files = assets_files(input_path)
         refute "file.js.gz.gz" in output_files
@@ -223,7 +223,7 @@ defmodule Combo.DigesterTest do
 
     test "digests only absolute and relative asset paths found within stylesheets with vsn" do
       input_path = "test/fixtures/digest/priv/static/"
-      assert :ok = Combo.Digester.compile(input_path, @output_path, true)
+      assert :ok = Combo.Static.Digester.compile(input_path, @output_path, true)
 
       digested_css_filename =
         assets_files(@output_path)
@@ -244,7 +244,7 @@ defmodule Combo.DigesterTest do
 
     test "digests only absolute and relative asset paths found within stylesheets without vsn" do
       input_path = "test/fixtures/digest/priv/static/"
-      assert :ok = Combo.Digester.compile(input_path, @output_path, false)
+      assert :ok = Combo.Static.Digester.compile(input_path, @output_path, false)
 
       digested_css_filename =
         assets_files(@output_path)
@@ -265,7 +265,7 @@ defmodule Combo.DigesterTest do
 
     test "sha512 matches content of digested file" do
       input_path = "test/fixtures/digest/priv/static/"
-      assert :ok = Combo.Digester.compile(input_path, @output_path, true)
+      assert :ok = Combo.Static.Digester.compile(input_path, @output_path, true)
 
       digested_css_filename =
         assets_files(@output_path)
@@ -287,7 +287,7 @@ defmodule Combo.DigesterTest do
 
     test "digests sourceMappingURL asset paths found within javascript source files" do
       input_path = "test/fixtures/digest/priv/static/"
-      assert :ok = Combo.Digester.compile(input_path, @output_path, true)
+      assert :ok = Combo.Static.Digester.compile(input_path, @output_path, true)
 
       digested_js_map_filename =
         assets_files(@output_path)
@@ -308,7 +308,7 @@ defmodule Combo.DigesterTest do
 
     test "digests file url paths found within javascript mapping files" do
       input_path = "test/fixtures/digest/priv/static/"
-      assert :ok = Combo.Digester.compile(input_path, @output_path, true)
+      assert :ok = Combo.Static.Digester.compile(input_path, @output_path, true)
 
       digested_js_map_filename =
         assets_files(@output_path)
@@ -328,7 +328,7 @@ defmodule Combo.DigesterTest do
 
     test "does not digest assets within undigested files" do
       input_path = "test/fixtures/digest/priv/static/"
-      assert :ok = Combo.Digester.compile(input_path, @output_path, true)
+      assert :ok = Combo.Static.Digester.compile(input_path, @output_path, true)
 
       undigested_css =
         Path.join(@output_path, "css/app.css")
@@ -342,7 +342,7 @@ defmodule Combo.DigesterTest do
 
     test "digested sourcemaps and their asset share the same hash" do
       input_path = "test/fixtures/digest/priv/static/"
-      assert :ok = Combo.Digester.compile(input_path, @output_path, true)
+      assert :ok = Combo.Static.Digester.compile(input_path, @output_path, true)
 
       json = Path.join(@output_path, "cache_manifest.json") |> json_read!()
 
@@ -352,7 +352,7 @@ defmodule Combo.DigesterTest do
 
   describe "clean" do
     test "fails when the given path is invalid" do
-      assert {:error, :invalid_path} = Combo.Digester.clean("nonexistent path", 3600, 2)
+      assert {:error, :invalid_path} = Combo.Static.Digester.clean("nonexistent path", 3600, 2)
     end
 
     test "removes versions over the keep count" do
@@ -371,7 +371,7 @@ defmodule Combo.DigesterTest do
       File.touch("#{@output_path}/manifest.json.gz")
       File.touch("#{@output_path}/app.css")
 
-      assert :ok = Combo.Digester.clean(@output_path, 3600, 1, @fake_now)
+      assert :ok = Combo.Static.Digester.clean(@output_path, 3600, 1, @fake_now)
       output_files = assets_files(@output_path)
 
       assert "app.css" in output_files
@@ -400,7 +400,7 @@ defmodule Combo.DigesterTest do
       File.touch("#{@output_path}/manifest.json.gz")
       File.touch("#{@output_path}/app.css")
 
-      assert :ok = Combo.Digester.clean(@output_path, 1, 10, @fake_now)
+      assert :ok = Combo.Static.Digester.clean(@output_path, 1, 10, @fake_now)
       output_files = assets_files(@output_path)
 
       assert "app.css" in output_files
@@ -429,7 +429,7 @@ defmodule Combo.DigesterTest do
       File.touch("#{@output_path}/manifest.json.gz")
       File.touch("#{@output_path}/app.css")
 
-      assert :ok = Combo.Digester.clean(@output_path, 3600, 1, @fake_now)
+      assert :ok = Combo.Static.Digester.clean(@output_path, 3600, 1, @fake_now)
       output_files = assets_files(@output_path)
 
       assert "app.css" in output_files
@@ -458,7 +458,7 @@ defmodule Combo.DigesterTest do
       File.touch("#{@output_path}/manifest.json.gz")
       File.touch("#{@output_path}/app.css")
 
-      assert :ok = Combo.Digester.clean(@output_path, 3600, 1, @fake_now)
+      assert :ok = Combo.Static.Digester.clean(@output_path, 3600, 1, @fake_now)
       json = Path.join(@output_path, "cache_manifest.json") |> json_read!()
       refute json["digests"]["app-1.css"]
     end
@@ -476,7 +476,7 @@ defmodule Combo.DigesterTest do
       File.touch("#{@output_path}/manifest.json.gz")
       File.touch("#{@output_path}/manifest.json.digest_test")
 
-      assert :ok = Combo.Digester.clean(@output_path, 1, 10, @fake_now)
+      assert :ok = Combo.Static.Digester.clean(@output_path, 1, 10, @fake_now)
       output_files = assets_files(@output_path)
 
       assert "app.css" in output_files
@@ -491,13 +491,13 @@ defmodule Combo.DigesterTest do
 
   describe "clean_all" do
     test "fails when the given path is invalid" do
-      assert {:error, :invalid_path} = Combo.Digester.clean_all("nonexistent path")
+      assert {:error, :invalid_path} = Combo.Static.Digester.clean_all("nonexistent path")
     end
 
     test "no-op when the given path does not contain cache_manifest.json" do
       output_path = "test/fixtures/digest/priv/static/css"
       assert assets_files(output_path) == ["app.css"]
-      assert :ok = Combo.Digester.clean_all(output_path)
+      assert :ok = Combo.Static.Digester.clean_all(output_path)
       assert assets_files(output_path) == ["app.css"]
     end
 
@@ -517,7 +517,7 @@ defmodule Combo.DigesterTest do
       File.touch("#{@output_path}/manifest.json.gz")
       File.touch("#{@output_path}/app.css")
 
-      assert :ok = Combo.Digester.clean_all(@output_path)
+      assert :ok = Combo.Static.Digester.clean_all(@output_path)
       output_files = assets_files(@output_path)
 
       assert "app.css" in output_files
@@ -545,7 +545,7 @@ defmodule Combo.DigesterTest do
       File.touch("#{@output_path}/manifest.json.gz")
       File.touch("#{@output_path}/manifest.json.digest_test")
 
-      assert :ok = Combo.Digester.clean_all(@output_path)
+      assert :ok = Combo.Static.Digester.clean_all(@output_path)
       output_files = assets_files(@output_path)
 
       assert "app.css" in output_files
@@ -577,8 +577,8 @@ defmodule Combo.DigesterTest do
   end
 
   defp add_digest_test_compressor() do
-    compressors = Combo.Digester.compressors()
-    Combo.Env.put_env(:digester, :compressors, [DigestTestCompressor | compressors])
-    on_exit(fn -> Combo.Env.put_env(:digester, :compressors, compressors) end)
+    compressors = Combo.Static.compressors()
+    Combo.Env.put_env(:static, :compressors, [DigestTestCompressor | compressors])
+    on_exit(fn -> Combo.Env.put_env(:static, :compressors, compressors) end)
   end
 end
