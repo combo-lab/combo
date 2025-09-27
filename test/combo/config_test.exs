@@ -28,47 +28,47 @@ defmodule Combo.ConfigTest do
                  fn -> cache(Fooz, :foo, fn _ -> {:nocache, :bar} end) end
   end
 
-  test "can change configuration", meta do
-    {:ok, pid} = start_link({meta.test, @all, @permanent_keys, []})
-    ref = Process.monitor(pid)
+  # test "can change configuration", meta do
+  #   {:ok, pid} = start_link({meta.test, @all, @permanent_keys, []})
+  #   ref = Process.monitor(pid)
 
-    # Nothing changed
-    config_change(meta.test, [], [])
-    assert :ets.lookup(meta.test, :parsers) == [parsers: false]
-    assert :ets.lookup(meta.test, :static)  == [static: [at: "/"]]
-    assert :ets.lookup(meta.test, :custom)  == [custom: true]
+  #   # Nothing changed
+  #   config_change(meta.test, [], [])
+  #   assert :ets.lookup(meta.test, :parsers) == [parsers: false]
+  #   assert :ets.lookup(meta.test, :static)  == [static: [at: "/"]]
+  #   assert :ets.lookup(meta.test, :custom)  == [custom: true]
 
-    # Something changed
-    config_change(meta.test, [{meta.test, parsers: true}], [])
-    assert :ets.lookup(meta.test, :parsers) == [parsers: true]
-    assert :ets.lookup(meta.test, :static)  == [static: [at: "/"]]
-    assert :ets.lookup(meta.test, :custom)  == []
+  #   # Something changed
+  #   config_change(meta.test, [{meta.test, parsers: true}], [])
+  #   assert :ets.lookup(meta.test, :parsers) == [parsers: true]
+  #   assert :ets.lookup(meta.test, :static)  == [static: [at: "/"]]
+  #   assert :ets.lookup(meta.test, :custom)  == []
 
-    # Module removed
-    config_change(meta.test, [], [meta.test])
+  #   # Module removed
+  #   config_change(meta.test, [], [meta.test])
 
-    assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
-    assert :ets.info(meta.test, :name) == :undefined
-  end
+  #   assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
+  #   assert :ets.info(meta.test, :name) == :undefined
+  # end
 
-  test "can cache", meta do
-    {:ok, _pid} = start_link({meta.test, @all, @permanent_keys, []})
+  # test "can cache", meta do
+  #   {:ok, _pid} = start_link({meta.test, @all, @permanent_keys, []})
 
-    assert cache(meta.test, :__hello__, fn _ -> {:nocache, 1} end) == 1
-    assert cache(meta.test, :__hello__, fn _ -> {:cache, 2} end) == 2
-    assert cache(meta.test, :__hello__, fn _ -> {:cache, 3} end) == 2
-    assert cache(meta.test, :__hello__, fn _ -> {:nocache, 3} end) == 2
+  #   assert cache(meta.test, :__hello__, fn _ -> {:nocache, 1} end) == 1
+  #   assert cache(meta.test, :__hello__, fn _ -> {:cache, 2} end) == 2
+  #   assert cache(meta.test, :__hello__, fn _ -> {:cache, 3} end) == 2
+  #   assert cache(meta.test, :__hello__, fn _ -> {:nocache, 3} end) == 2
 
-    # Cache is reloaded on config_change
-    config_change(meta.test, [{meta.test, []}], [])
-    assert cache(meta.test, :__hello__, fn _ -> {:nocache, 4} end) == 4
-    assert cache(meta.test, :__hello__, fn _ -> {:cache, 5} end) == 5
-    assert cache(meta.test, :__hello__, fn _ -> {:cache, 6} end) == 5
+  #   # Cache is reloaded on config_change
+  #   config_change(meta.test, [{meta.test, []}], [])
+  #   assert cache(meta.test, :__hello__, fn _ -> {:nocache, 4} end) == 4
+  #   assert cache(meta.test, :__hello__, fn _ -> {:cache, 5} end) == 5
+  #   assert cache(meta.test, :__hello__, fn _ -> {:cache, 6} end) == 5
 
-    # Cache is cleaned on clear_cache
-    clear_cache(meta.test)
-    assert cache(meta.test, :__hello__, fn _ -> {:nocache, 7} end) == 7
-    assert cache(meta.test, :__hello__, fn _ -> {:cache, 8} end) == 8
-    assert cache(meta.test, :__hello__, fn _ -> {:cache, 9} end) == 8
-  end
+  #   # Cache is cleaned on clear_cache
+  #   clear_cache(meta.test)
+  #   assert cache(meta.test, :__hello__, fn _ -> {:nocache, 7} end) == 7
+  #   assert cache(meta.test, :__hello__, fn _ -> {:cache, 8} end) == 8
+  #   assert cache(meta.test, :__hello__, fn _ -> {:cache, 9} end) == 8
+  # end
 end

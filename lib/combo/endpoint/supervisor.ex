@@ -194,7 +194,7 @@ defmodule Combo.Endpoint.Supervisor do
 
   def config_change(endpoint, changed, removed) do
     cond do
-      changed_config = changed[module] ->
+      changed_config = changed[endpoint] ->
         :ok = Combo.Config.config_change(endpoint, changed_config)
 
         config = Combo.Config.get_all(endpoint)
