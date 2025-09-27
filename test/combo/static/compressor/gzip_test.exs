@@ -3,7 +3,7 @@ defmodule Combo.Static.Compressor.GzipTest do
   alias Combo.Static.Compressor.Gzip
 
   test "compress_file/2 compresses file" do
-    file_path = "test/fixtures/digest/priv/static/css/app.css"
+    file_path = "test/fixtures/static/priv/static/css/app.css"
     content = File.read!(file_path)
 
     {:ok, compressed} = Gzip.compress_file(file_path, content)

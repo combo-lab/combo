@@ -23,7 +23,7 @@ defmodule Combo.Static.DigesterTest do
     end
 
     test "digests and compress files" do
-      input_path = "test/fixtures/digest/priv/static/"
+      input_path = "test/fixtures/static/priv/static/"
       assert :ok = Combo.Static.Digester.compile(input_path, @output_path, true)
       output_files = assets_files(@output_path)
 
@@ -47,7 +47,7 @@ defmodule Combo.Static.DigesterTest do
     end
 
     test "includes existing digests in new cache manifest" do
-      source_path = "test/fixtures/digest/priv/static/"
+      source_path = "test/fixtures/static/priv/static/"
       input_path = "tmp/digest/static"
 
       File.rm_rf!(input_path)
@@ -64,7 +64,7 @@ defmodule Combo.Static.DigesterTest do
 
       :ok =
         File.cp(
-          "test/fixtures/digest/compile/cache_manifest.json",
+          "test/fixtures/static/compile/cache_manifest.json",
           Path.join(@output_path, "cache_manifest.json")
         )
 
@@ -96,7 +96,7 @@ defmodule Combo.Static.DigesterTest do
     end
 
     test "excludes compiled files" do
-      input_path = "test/fixtures/digest/priv/static/"
+      input_path = "test/fixtures/static/priv/static/"
       assert :ok = Combo.Static.Digester.compile(input_path, @output_path, true)
       output_files = assets_files(@output_path)
 
@@ -108,7 +108,7 @@ defmodule Combo.Static.DigesterTest do
     end
 
     test "old versions maintain their mtime" do
-      source_path = "test/fixtures/digest/priv/static/"
+      source_path = "test/fixtures/static/priv/static/"
       input_path = "tmp/digest/static"
       File.rm_rf!(input_path)
       :ok = File.mkdir_p!(@output_path)
@@ -122,7 +122,7 @@ defmodule Combo.Static.DigesterTest do
 
       :ok =
         File.cp(
-          "test/fixtures/digest/compile/cache_manifest.json",
+          "test/fixtures/static/compile/cache_manifest.json",
           Path.join(@output_path, "cache_manifest.json")
         )
 
@@ -147,7 +147,7 @@ defmodule Combo.Static.DigesterTest do
 
       :ok =
         File.cp(
-          "test/fixtures/digest/compile/cache_manifest.json",
+          "test/fixtures/static/compile/cache_manifest.json",
           Path.join(input_path, "cache_manifest.json")
         )
 
@@ -160,7 +160,7 @@ defmodule Combo.Static.DigesterTest do
     end
 
     test "digests and compress nested files" do
-      input_path = "test/fixtures/digest/priv/"
+      input_path = "test/fixtures/static/priv/"
       assert :ok = Combo.Static.Digester.compile(input_path, @output_path, true)
 
       output_files = assets_files(@output_path)
@@ -222,7 +222,7 @@ defmodule Combo.Static.DigesterTest do
     end
 
     test "digests only absolute and relative asset paths found within stylesheets with vsn" do
-      input_path = "test/fixtures/digest/priv/static/"
+      input_path = "test/fixtures/static/priv/static/"
       assert :ok = Combo.Static.Digester.compile(input_path, @output_path, true)
 
       digested_css_filename =
@@ -243,7 +243,7 @@ defmodule Combo.Static.DigesterTest do
     end
 
     test "digests only absolute and relative asset paths found within stylesheets without vsn" do
-      input_path = "test/fixtures/digest/priv/static/"
+      input_path = "test/fixtures/static/priv/static/"
       assert :ok = Combo.Static.Digester.compile(input_path, @output_path, false)
 
       digested_css_filename =
@@ -264,7 +264,7 @@ defmodule Combo.Static.DigesterTest do
     end
 
     test "sha512 matches content of digested file" do
-      input_path = "test/fixtures/digest/priv/static/"
+      input_path = "test/fixtures/static/priv/static/"
       assert :ok = Combo.Static.Digester.compile(input_path, @output_path, true)
 
       digested_css_filename =
@@ -286,7 +286,7 @@ defmodule Combo.Static.DigesterTest do
     end
 
     test "digests sourceMappingURL asset paths found within javascript source files" do
-      input_path = "test/fixtures/digest/priv/static/"
+      input_path = "test/fixtures/static/priv/static/"
       assert :ok = Combo.Static.Digester.compile(input_path, @output_path, true)
 
       digested_js_map_filename =
@@ -307,7 +307,7 @@ defmodule Combo.Static.DigesterTest do
     end
 
     test "digests file url paths found within javascript mapping files" do
-      input_path = "test/fixtures/digest/priv/static/"
+      input_path = "test/fixtures/static/priv/static/"
       assert :ok = Combo.Static.Digester.compile(input_path, @output_path, true)
 
       digested_js_map_filename =
@@ -327,7 +327,7 @@ defmodule Combo.Static.DigesterTest do
     end
 
     test "does not digest assets within undigested files" do
-      input_path = "test/fixtures/digest/priv/static/"
+      input_path = "test/fixtures/static/priv/static/"
       assert :ok = Combo.Static.Digester.compile(input_path, @output_path, true)
 
       undigested_css =
@@ -341,7 +341,7 @@ defmodule Combo.Static.DigesterTest do
     end
 
     test "digested sourcemaps and their asset share the same hash" do
-      input_path = "test/fixtures/digest/priv/static/"
+      input_path = "test/fixtures/static/priv/static/"
       assert :ok = Combo.Static.Digester.compile(input_path, @output_path, true)
 
       json = Path.join(@output_path, "cache_manifest.json") |> json_read!()
@@ -356,7 +356,7 @@ defmodule Combo.Static.DigesterTest do
     end
 
     test "removes versions over the keep count" do
-      manifest_path = "test/fixtures/digest/cleaner/cache_manifest.json"
+      manifest_path = "test/fixtures/static/cleaner/cache_manifest.json"
       File.mkdir_p!(@output_path)
       File.cp(manifest_path, "#{@output_path}/cache_manifest.json")
 
@@ -386,7 +386,7 @@ defmodule Combo.Static.DigesterTest do
     end
 
     test "removes files older than specified number of seconds" do
-      manifest_path = "test/fixtures/digest/cleaner/cache_manifest.json"
+      manifest_path = "test/fixtures/static/cleaner/cache_manifest.json"
       File.mkdir_p!(@output_path)
       File.cp(manifest_path, "#{@output_path}/cache_manifest.json")
       File.touch("#{@output_path}/app.css")
@@ -415,7 +415,7 @@ defmodule Combo.Static.DigesterTest do
     end
 
     test "cleaning doesn't delete the latest even if the mtime is wrong" do
-      manifest_path = "test/fixtures/digest/cleaner/latest_not_most_recent_cache_manifest.json"
+      manifest_path = "test/fixtures/static/cleaner/latest_not_most_recent_cache_manifest.json"
       File.mkdir_p!(@output_path)
       File.cp(manifest_path, "#{@output_path}/cache_manifest.json")
       File.touch("#{@output_path}/app.css")
@@ -444,7 +444,7 @@ defmodule Combo.Static.DigesterTest do
     end
 
     test "cleaning updates cache manifest to remove cleaned files" do
-      manifest_path = "test/fixtures/digest/cleaner/cache_manifest.json"
+      manifest_path = "test/fixtures/static/cleaner/cache_manifest.json"
       File.mkdir_p!(@output_path)
       File.cp(manifest_path, "#{@output_path}/cache_manifest.json")
       File.touch("#{@output_path}/app.css")
@@ -465,7 +465,7 @@ defmodule Combo.Static.DigesterTest do
 
     test "removes compressed versions from all static compressors" do
       add_digest_test_compressor()
-      manifest_path = "test/fixtures/digest/cleaner/cache_manifest.json"
+      manifest_path = "test/fixtures/static/cleaner/cache_manifest.json"
       File.mkdir_p!(@output_path)
       File.cp(manifest_path, "#{@output_path}/cache_manifest.json")
       File.touch("#{@output_path}/app.css")
@@ -495,14 +495,14 @@ defmodule Combo.Static.DigesterTest do
     end
 
     test "no-op when the given path does not contain cache_manifest.json" do
-      output_path = "test/fixtures/digest/priv/static/css"
+      output_path = "test/fixtures/static/priv/static/css"
       assert assets_files(output_path) == ["app.css"]
       assert :ok = Combo.Static.Digester.clean_all(output_path)
       assert assets_files(output_path) == ["app.css"]
     end
 
     test "removes all compressed/compiled files including latest and manifest" do
-      manifest_path = "test/fixtures/digest/cleaner/cache_manifest.json"
+      manifest_path = "test/fixtures/static/cleaner/cache_manifest.json"
       File.mkdir_p!(@output_path)
       File.cp(manifest_path, "#{@output_path}/cache_manifest.json")
       File.touch("#{@output_path}/app.css")
@@ -535,7 +535,7 @@ defmodule Combo.Static.DigesterTest do
 
     test "removes compressed versions from all static compressors" do
       add_digest_test_compressor()
-      manifest_path = "test/fixtures/digest/cleaner/cache_manifest.json"
+      manifest_path = "test/fixtures/static/cleaner/cache_manifest.json"
       File.mkdir_p!(@output_path)
       File.cp(manifest_path, "#{@output_path}/cache_manifest.json")
       File.touch("#{@output_path}/app.css")
