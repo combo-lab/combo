@@ -98,8 +98,6 @@ defmodule Combo.Config do
       :ets.tab2list(module)
       |> Enum.filter(fn
         {:__pid__, _} -> false
-        {{:socket, _}, _} -> false
-        {_, :cache, _} -> false
         {_, _} -> true
       end)
 
