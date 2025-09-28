@@ -88,7 +88,7 @@ defmodule Combo.Static.Cache do
     new_keys = Enum.map(kvs, &elem(&1, 0))
     staled_keys = old_keys -- new_keys
 
-    Combo.Cache.put(endpoint, kvs)
+    Combo.Cache.put_all(endpoint, kvs)
     for staled_key <- staled_keys, do: Combo.Cache.delete(endpoint, staled_key)
 
     :ok

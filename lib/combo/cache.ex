@@ -17,7 +17,7 @@ defmodule Combo.Cache do
     table_name = build_table_name(module)
 
     case :ets.lookup(table_name, key) do
-      [{^key, value}] -> value
+      [{^key, {value, _flags}}] -> value
       [] -> nil
     end
   end
@@ -27,13 +27,13 @@ defmodule Combo.Cache do
     table_name = build_table_name(module)
 
     case :ets.lookup(table_name, key) do
-      [{^key, value}] ->
+      [{^key, {value, _flags}}] ->
         value
 
       [] ->
         case fun.() do
           {:ok, value} ->
-            true = :ets.insert(table_name, {key, value})
+            true = :ets.insert(table_name, {key, {value, []}})
             value
 
           :error ->
@@ -45,15 +45,23 @@ defmodule Combo.Cache do
   @spec put(module(), key(), value()) :: :ok
   def put(module, key, value) do
     table_name = build_table_name(module)
-    true = :ets.insert(table_name, {key, value})
+    true = :ets.insert(table_name, {key, {value, []}})
     :ok
   end
 
-  @spec put(module(), [{key(), value()}]) :: :ok
-  def put(_module, []), do: :ok
-
-  def put(module, [{_, _} | _] = kvs) do
+  @spec put_permanent(module(), key(), value()) :: :ok
+  def put_permanent(module, key, value) do
     table_name = build_table_name(module)
+    true = :ets.insert(table_name, {key, {value, [:permanent]}})
+    :ok
+  end
+
+  @spec put_all(module(), [{key(), value()}]) :: :ok
+  def put_all(_module, []), do: :ok
+
+  def put_all(module, [{_, _} | _] = kvs) do
+    table_name = build_table_name(module)
+    kvs = Enum.map(kvs, fn {key, value} -> {key, {value, []}} end)
     true = :ets.insert(table_name, kvs)
     :ok
   end
