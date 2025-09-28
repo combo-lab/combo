@@ -9,7 +9,6 @@ defmodule Combo.Socket.TransportTest do
   @secret_key_base String.duplicate("abcdefgh", 8)
 
   Application.put_env :combo, __MODULE__.Endpoint,
-    force_ssl: [],
     url: [host: "host.com"],
     check_origin: ["//endpoint.com"],
     secret_key_base: @secret_key_base

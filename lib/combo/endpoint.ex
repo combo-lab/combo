@@ -49,10 +49,7 @@ defmodule Combo.Endpoint do
   compilation and changing it at runtime has no effect.
 
   Runtime configuration, instead, is read during or after your application
-  is started and can be read through the `c:config/2` function:
-
-      DemoWeb.Endpoint.config(:port)
-      DemoWeb.Endpoint.config(:some_config, :default_value)
+  is started and can be read through the `c:config/2` function.
 
   ### Compile-time configuration
 
