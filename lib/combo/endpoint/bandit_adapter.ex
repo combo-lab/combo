@@ -46,8 +46,6 @@ if Code.ensure_loaded?(Bandit) do
     [bandit](https://github.com/mtrudel/bandit) which is created by Mat Trudel.
     """
 
-    alias Combo.Helpers.KeywordHelper
-
     @behaviour Combo.Endpoint.Adapter
 
     @impl true
@@ -58,7 +56,6 @@ if Code.ensure_loaded?(Bandit) do
 
       for scheme <- [:http, :https], opts = config[scheme] do
         ([plug: plug, display_plug: endpoint, scheme: scheme, otp_app: otp_app] ++ opts)
-        |> put_process_limit_opts(config[:process_limit])
         |> Bandit.child_spec()
         |> Supervisor.child_spec(id: {endpoint, scheme})
       end
@@ -80,16 +77,6 @@ if Code.ensure_loaded?(Bandit) do
       else
         endpoint
       end
-    end
-
-    defp put_process_limit_opts(opts, :infinity), do: opts
-
-    defp put_process_limit_opts(opts, limit) do
-      keys = [:thousand_island_options, :num_acceptors]
-
-      if KeywordHelper.has_key?(opts, keys),
-        do: opts,
-        else: KeywordHelper.put(opts, keys, limit)
     end
 
     # Returns the Bandit server process for the provided scheme within the given

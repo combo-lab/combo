@@ -7,7 +7,6 @@ defmodule Combo.Endpoint.Supervisor do
   @default_config [
     live_reloader: false,
     code_reloader: false,
-    process_limit: :infinity,
     debug_errors: false,
     render_errors: [layout: false],
     url: [host: "localhost", path: "/"],

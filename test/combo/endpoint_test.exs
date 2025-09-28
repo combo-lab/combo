@@ -10,7 +10,6 @@ defmodule Combo.EndpointTest do
     assert @otp_app == :combo
     assert live_reloading? == false
     assert code_reloading? == false
-    assert process_limiting? == false
     assert debug_errors? == false
     assert force_ssl == nil
   end
