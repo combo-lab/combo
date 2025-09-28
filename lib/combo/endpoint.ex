@@ -65,14 +65,6 @@ defmodule Combo.Endpoint do
       only in development as it allows listing of the application source
       code during debugging. Defaults to `false`.
 
-    * `:force_ssl` - ensures no data is ever sent via HTTP, always redirecting
-      to HTTPS. It expects a list of options which are forwarded to `Plug.SSL`.
-      By default it sets the "strict-transport-security" header in HTTPS
-      requests, forcing browsers to always use HTTPS. If an unsafe HTTP request
-      is sent, it redirects to the HTTPS version using the `:host` specified in
-      the `:url` configuration. To dynamically redirect to the `host` of the
-      current request, set `:host` in the `:force_ssl` configuration to `nil`.
-
   ### Runtime configuration
 
   The configuration below may be set on `config/dev.exs`, `config/prod.exs`
@@ -375,12 +367,10 @@ defmodule Combo.Endpoint do
       var!(live_reloading?) = !!Application.compile_env(@otp_app, [__MODULE__, :live_reloader])
       var!(code_reloading?) = !!Application.compile_env(@otp_app, [__MODULE__, :code_reloader])
       var!(debug_errors?) = Application.compile_env(@otp_app, [__MODULE__, :debug_errors], false)
-      var!(force_ssl) = Application.compile_env(@otp_app, [__MODULE__, :force_ssl])
 
       # Avoid unused variable warnings
       _ = var!(live_reloading?)
       _ = var!(code_reloading?)
-      _ = var!(force_ssl)
     end
   end
 
@@ -432,10 +422,6 @@ defmodule Combo.Endpoint do
       import Combo.Endpoint
 
       Module.register_attribute(__MODULE__, :combo_sockets, accumulate: true)
-
-      if force_ssl = Combo.Endpoint.__force_ssl__(__MODULE__, var!(force_ssl)) do
-        plug Plug.SSL, force_ssl
-      end
 
       if var!(debug_errors?) do
         use Plug.Debugger,
@@ -560,13 +546,6 @@ defmodule Combo.Endpoint do
       Returns the address and port that the server is listening on.
       """
       def server_info(scheme), do: config(:adapter).server_info(__MODULE__, scheme)
-    end
-  end
-
-  @doc false
-  def __force_ssl__(module, force_ssl) do
-    if force_ssl do
-      Keyword.put_new(force_ssl, :host, {module, :host, []})
     end
   end
 

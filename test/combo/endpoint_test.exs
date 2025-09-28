@@ -11,7 +11,6 @@ defmodule Combo.EndpointTest do
     assert live_reloading? == false
     assert code_reloading? == false
     assert debug_errors? == false
-    assert force_ssl == nil
   end
 
   @manifest_file "../../../../test/fixtures/static/compile/manifest-new.digest.json"
@@ -751,31 +750,5 @@ defmodule Combo.EndpointTest do
       conn = put_in(conn.script_name, ["foo"])
       assert endpoint.call(conn, []).script_name == ["api"]
     end)
-  end
-
-  describe ":force_ssl config" do
-    Application.put_env(:combo, __MODULE__.ForceSSLEndpoint, force_ssl: [subdomains: true])
-
-    defmodule ForceSSLEndpoint do
-      use Combo.Endpoint, otp_app: :combo
-    end
-
-    test "redirects http requests to https on force_ssl" do
-      with_endpoint!(ForceSSLEndpoint, [url: [host: "example.com"]], fn endpoint ->
-        conn = endpoint.call(conn(:get, "/"), [])
-        assert get_resp_header(conn, "location") == ["https://example.com/"]
-        assert conn.halted
-      end)
-    end
-
-    test "sends hsts on https requests on force_ssl" do
-      with_endpoint!(ForceSSLEndpoint, [url: [host: "example.com"]], fn endpoint ->
-        conn = endpoint.call(conn(:get, "https://example.com/"), [])
-
-        assert get_resp_header(conn, "strict-transport-security") == [
-                 "max-age=31536000; includeSubDomains"
-               ]
-      end)
-    end
   end
 end
