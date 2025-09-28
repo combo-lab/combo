@@ -570,7 +570,7 @@ defmodule Combo.Socket.Transport do
   end
 
   defp check_origin_config(handler, endpoint, opts) do
-    Combo.Socket.Cache.get(endpoint, {:socket_config, :check_origin, handler}, fn ->
+    Combo.Socket.Cache.get(endpoint, {:socket, handler, :config, :check_origin}, fn ->
       check_origin =
         case Keyword.get(opts, :check_origin, endpoint.config(:check_origin)) do
           origins when is_list(origins) ->
