@@ -2,7 +2,7 @@ defmodule Combo.Socket.Cache do
   @moduledoc false
   # It's built on top of `Combo.Cache`.
 
-  def get(endpoint, key, fun) when is_function(fun, 0) do
-    Combo.Cache.get(endpoint, key, fun)
-  end
+  defdelegate get(endpoint, key, fun), to: Combo.Cache
+  defdelegate get(endpoint, key), to: Combo.Cache
+  defdelegate put_permanent(endpoint, key, value), to: Combo.Cache
 end

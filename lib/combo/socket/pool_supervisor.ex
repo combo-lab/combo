@@ -13,7 +13,7 @@ defmodule Combo.Socket.PoolSupervisor do
   def start_child(socket, key, spec) do
     %{endpoint: endpoint, handler: name} = socket
 
-    case endpoint.config({:socket, name}) do
+    case Combo.Socket.Cache.get(endpoint, {:socket_ets, name}) do
       ets when not is_nil(ets) ->
         partitions = :ets.lookup_element(ets, :partitions, 2)
         sup = :ets.lookup_element(ets, :erlang.phash2(key, partitions), 2)
@@ -47,7 +47,7 @@ defmodule Combo.Socket.PoolSupervisor do
   def init({endpoint, name, partitions}) do
     ref = :ets.new(name, [:public, read_concurrency: true])
     :ets.insert(ref, {:partitions, partitions})
-    Combo.Config.put_permanent(endpoint, {:socket, name}, ref)
+    Combo.Socket.Cache.put_permanent(endpoint, {:socket_ets, name}, ref)
 
     children =
       for i <- 0..(partitions - 1) do
@@ -94,7 +94,7 @@ defmodule Combo.Socket.PoolDrainer do
 
   @impl true
   def terminate(_reason, {endpoint, name, size, interval, log_level}) do
-    ets = endpoint.config({:socket, name})
+    ets = Combo.Socket.Cache.get(endpoint, {:socket_ets, name})
     partitions = :ets.lookup_element(ets, :partitions, 2)
 
     {collection, total} =

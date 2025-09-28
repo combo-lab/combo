@@ -40,17 +40,6 @@ defmodule Combo.Config do
     GenServer.call(pid, {:put, key, value})
   end
 
-  @doc """
-  Puts a given key-value pair into config, as permanent.
-
-  Permanent configuration is not deleted on hot code reload.
-  """
-  @spec put_permanent(module(), any(), any()) :: :ok
-  def put_permanent(module, key, value) do
-    pid = :ets.lookup_element(module, :__pid__, 2)
-    GenServer.call(pid, {:put_permanent, key, value})
-  end
-
   def config_change(module, changed_config) do
     pid = :ets.lookup_element(module, :__pid__, 2)
     GenServer.call(pid, {:config_change, changed_config})
@@ -121,12 +110,6 @@ defmodule Combo.Config do
   def handle_call({:put, key, value}, _from, {module, permanent_keys}) do
     :ets.insert(module, {key, value})
     {:reply, :ok, {module, permanent_keys}}
-  end
-
-  @impl true
-  def handle_call({:put_permanent, key, value}, _from, {module, permanent_keys}) do
-    :ets.insert(module, {key, value})
-    {:reply, :ok, {module, [key | permanent_keys]}}
   end
 
   @impl true
