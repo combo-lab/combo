@@ -204,7 +204,7 @@ defmodule Combo.Endpoint do
 
   Here's a list of all the functions that are generated in your endpoint:
 
-    * for configuration: `c:start_link/1`, `c:config/2`, and `c:config_change/2`
+    * for configuration: `c:start_link/1`, `c:config/2`
 
     * for handling paths and URLs: `c:url/0`, `c:url_struct/0`, `c:path/1`,
       `c:static_url/0`,`c:static_path/1`, and `c:static_integrity/1`
@@ -240,11 +240,6 @@ defmodule Combo.Endpoint do
   Returns the endpoint configuration for `key`.
   """
   @callback config(key :: atom(), default :: term()) :: term()
-
-  @doc """
-  Reloads the configuration on the application environment changes.
-  """
-  @callback config_change(changed :: term(), removed :: term()) :: term()
 
   # Paths and URLs
 
@@ -474,13 +469,6 @@ defmodule Combo.Endpoint do
       """
       def config(key, default \\ nil) do
         Combo.Config.get(__MODULE__, key, default)
-      end
-
-      @doc """
-      Reloads the configuration on the application environment changes.
-      """
-      def config_change(changed, removed) do
-        Combo.Endpoint.Supervisor.config_change(__MODULE__, changed, removed)
       end
 
       @doc """
