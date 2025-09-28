@@ -570,7 +570,7 @@ defmodule Combo.Socket.Transport do
   end
 
   defp check_origin_config(handler, endpoint, opts) do
-    Combo.Config.cache(endpoint, {:check_origin, handler}, fn _ ->
+    Combo.Socket.Cache.get(endpoint, {:socket_config, :check_origin, handler}, fn ->
       check_origin =
         case Keyword.get(opts, :check_origin, endpoint.config(:check_origin)) do
           origins when is_list(origins) ->
@@ -590,7 +590,7 @@ defmodule Combo.Socket.Transport do
                   ":check_origin expects a boolean, list of hosts, :conn, or MFA tuple, got: #{inspect(invalid)}"
         end
 
-      {:cache, check_origin}
+      {:ok, check_origin}
     end)
   end
 

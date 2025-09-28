@@ -51,58 +51,6 @@ defmodule Combo.Config do
     GenServer.call(pid, {:put_permanent, key, value})
   end
 
-  @doc """
-  Caches a value in configuration handler for the module.
-
-  The given function needs to return a tuple with `:cache` if the value should
-  be cached or `:nocache` if the value should not be cached because it can be
-  consequently considered stale.
-
-  Notice writes are not serialized to the server, we expect the function that
-  generates the cache to be idempotent.
-  """
-  @spec cache(module, term, (module -> {:cache | :nocache, term})) :: term
-  def cache(module, key, fun) do
-    try do
-      :ets.lookup(module, key)
-    rescue
-      e ->
-        case :ets.info(module) do
-          :undefined ->
-            raise """
-            could not find ets table for endpoint #{inspect(module)}. \
-            Make sure your endpoint is started and note you cannot access endpoint functions \
-            at compile-time\
-            """
-
-          _ ->
-            reraise e, __STACKTRACE__
-        end
-    else
-      [{^key, :cache, val}] ->
-        val
-
-      [] ->
-        case fun.(module) do
-          {:cache, val} ->
-            :ets.insert(module, {key, :cache, val})
-            val
-
-          {:nocache, val} ->
-            val
-        end
-    end
-  end
-
-  @doc """
-  Clears all cached entries in the endpoint.
-  """
-  @spec clear_cache(module) :: :ok
-  def clear_cache(module) do
-    :ets.match_delete(module, {:_, :cache, :_})
-    :ok
-  end
-
   def config_change(module, changed_config) do
     pid = :ets.lookup_element(module, :__pid__, 2)
     GenServer.call(pid, {:config_change, changed_config})
@@ -200,7 +148,5 @@ defmodule Combo.Config do
 
     old_useless_keys = (old_keys -- new_keys) -- permanent_keys
     Enum.each(old_useless_keys, &:ets.delete(module, &1))
-
-    clear_cache(module)
   end
 end
