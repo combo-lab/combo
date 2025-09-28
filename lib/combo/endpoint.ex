@@ -584,7 +584,7 @@ defmodule Combo.Endpoint do
       defp static_lookup(path), do: Combo.Static.lookup(__MODULE__, path)
 
       @doc """
-      Returns the address and port that the server is running on.
+      Returns the address and port that the server is listening on.
       """
       def server_info(scheme), do: config(:adapter).server_info(__MODULE__, scheme)
     end

@@ -200,7 +200,6 @@ defmodule Combo.Endpoint.Supervisor do
         config = Combo.Config.get_all(endpoint)
         safe_config = safe_config(config)
         :ok = Combo.Endpoint.Persistent.config_change(endpoint, safe_config)
-        :ok = Combo.Static.config_change(endpoint, safe_config)
 
       endpoint in removed ->
         :ok = Combo.Config.stop(endpoint)
