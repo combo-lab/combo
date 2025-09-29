@@ -68,8 +68,6 @@ defmodule Combo.Endpoint.Supervisor do
 
     safe_config = safe_config(config)
 
-    permanent_keys = Keyword.keys(config) -- Keyword.keys(from_env)
-
     server? = server?(safe_config)
 
     if server? and safe_config[:code_reloader] do
@@ -78,7 +76,7 @@ defmodule Combo.Endpoint.Supervisor do
 
     children =
       Enum.concat([
-        config_children(module, config, permanent_keys),
+        config_children(module, config),
         cache_children(module),
         persistent_children(module, safe_config),
         static_children(module, safe_config),
@@ -91,9 +89,8 @@ defmodule Combo.Endpoint.Supervisor do
     Supervisor.init(children, strategy: :one_for_one)
   end
 
-  defp config_children(mod, conf, default_conf) do
-    args = {mod, conf, default_conf, name: Module.concat(mod, "Config")}
-    [{Combo.Config, args}]
+  defp config_children(mod, config) do
+    [{Combo.Config, {mod, config}}]
   end
 
   defp cache_children(module) do
@@ -185,27 +182,6 @@ defmodule Combo.Endpoint.Supervisor do
 
   defp mix_combo_serve? do
     Application.get_env(:combo, :serve_endpoints, false)
-  end
-
-  @doc """
-  Callback that changes the configuration from the app callback.
-  """
-
-  def config_change(endpoint, changed, removed) do
-    cond do
-      changed_config = changed[endpoint] ->
-        :ok = Combo.Config.config_change(endpoint, changed_config)
-
-        config = Combo.Config.get_all(endpoint)
-        safe_config = safe_config(config)
-        :ok = Combo.Endpoint.Persistent.config_change(endpoint, safe_config)
-
-      endpoint in removed ->
-        :ok = Combo.Config.stop(endpoint)
-        :ok = Combo.Endpoint.Persistent.stop(endpoint)
-    end
-
-    :ok
   end
 
   defp log_access_url(endpoint, config) do
