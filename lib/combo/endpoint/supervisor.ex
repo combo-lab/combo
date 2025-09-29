@@ -32,7 +32,7 @@ defmodule Combo.Endpoint.Supervisor do
   def start_link(otp_app, module, opts \\ []) do
     with {:ok, pid} = ok <-
            Supervisor.start_link(__MODULE__, {otp_app, module, opts}, name: module) do
-      config = Combo.Endpoint.Config.get_all(module)
+      config = Combo.Endpoint.Config.dump(module)
       safe_config = safe_config(config)
 
       log_access_url(module, safe_config)

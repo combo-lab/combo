@@ -12,8 +12,8 @@ defmodule Combo.Endpoint.Config do
     GenServer.start_link(__MODULE__, {module, config}, opts)
   end
 
-  @spec get_all(module()) :: keyword()
-  def get_all(module), do: :ets.tab2list(module)
+  @spec dump(module()) :: keyword()
+  def dump(module), do: :ets.tab2list(module)
 
   @spec get(module(), any(), any()) :: any()
   def get(module, key, default) do
