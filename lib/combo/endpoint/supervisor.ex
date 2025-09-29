@@ -1,27 +1,41 @@
 defmodule Combo.Endpoint.Supervisor do
   @moduledoc false
+  #
+  # ## The Conventions
+  #
+  # ### The values of configurations
+  #
+  #   * `nil` - indicates undefined
+  #   * `false` - indicates explicitly disabled
+  #
+  # And, all default values of configurations should be listed in `@default_config`.
+  #
 
   use Supervisor
   require Logger
 
   @default_config [
+    # compile-time config
     live_reloader: false,
     code_reloader: false,
     debug_errors: false,
-    render_errors: [layout: false],
-    url: [host: "localhost", path: "/"],
-    static_url: nil,
-    adapter: Combo.Endpoint.BanditAdapter,
+
+    # runtime config
     http: false,
     https: false,
+    adapter: Combo.Endpoint.BanditAdapter,
+    url: [host: "localhost", path: "/"],
+    static_url: nil,
+    log_access_url: true,
+    server: nil,
     check_origin: true,
+    render_errors: [layout: false],
     secret_key_base: nil,
     static: [
       manifest: nil,
       vsn: true
     ],
-    watchers: [],
-    log_access_url: true
+    watchers: []
   ]
 
   @unsafe_config_keys [:secret_key_base]
@@ -105,9 +119,9 @@ defmodule Combo.Endpoint.Supervisor do
     [{Combo.Static, {module, safe_config}}]
   end
 
-  defp socket_children(endpoint, conf, fun) do
+  defp socket_children(endpoint, safe_config, fun) do
     for {_, socket, opts} <- Enum.uniq_by(endpoint.__sockets__(), &elem(&1, 1)),
-        _ = check_origin_or_csrf_checked!(conf, opts),
+        _ = check_origin_or_csrf_checked!(safe_config, opts),
         spec = apply_or_ignore(socket, fun, [[endpoint: endpoint] ++ opts]),
         spec != :ignore do
       spec
@@ -123,8 +137,8 @@ defmodule Combo.Endpoint.Supervisor do
     end
   end
 
-  defp check_origin_or_csrf_checked!(endpoint_conf, socket_opts) do
-    check_origin = endpoint_conf[:check_origin]
+  defp check_origin_or_csrf_checked!(endpoint_config, socket_opts) do
+    check_origin = endpoint_config[:check_origin]
 
     for {transport, transport_opts} <- socket_opts, is_list(transport_opts) do
       check_origin = Keyword.get(transport_opts, :check_origin, check_origin)
@@ -139,13 +153,13 @@ defmodule Combo.Endpoint.Supervisor do
     end
   end
 
-  defp server_children(mod, config, server?) do
+  defp server_children(mod, safe_config, server?) do
     cond do
       server? ->
-        adapter = config[:adapter]
-        adapter.child_specs(mod, config)
+        adapter = safe_config[:adapter]
+        adapter.child_specs(mod, safe_config)
 
-      config[:http] || config[:https] ->
+      safe_config[:http] || safe_config[:https] ->
         if System.get_env("RELEASE_NAME") do
           Logger.info(
             "Configuration :server was not enabled for #{inspect(mod)}, http/https services won't start"
@@ -159,8 +173,8 @@ defmodule Combo.Endpoint.Supervisor do
     end
   end
 
-  defp watcher_children(_mod, conf, server?) do
-    watchers = conf[:watchers] || []
+  defp watcher_children(_mod, safe_config, server?) do
+    watchers = safe_config[:watchers] || []
 
     if server? || mix_combo_serve?() do
       Enum.map(watchers, &{Combo.Endpoint.Watcher, &1})
@@ -169,23 +183,24 @@ defmodule Combo.Endpoint.Supervisor do
     end
   end
 
-  @doc """
-  Checks if Endpoint's web server has been configured to start.
-  """
+  @spec server?(atom(), module()) :: boolean()
   def server?(otp_app, endpoint) when is_atom(otp_app) and is_atom(endpoint) do
     server?(Application.get_env(otp_app, endpoint, []))
   end
 
-  defp server?(conf) when is_list(conf) do
-    Keyword.get_lazy(conf, :server, fn -> mix_combo_serve?() end)
+  defp server?(config) when is_list(config) do
+    case Keyword.get(config, :server, nil) do
+      nil -> mix_combo_serve?()
+      other -> !!other
+    end
   end
 
   defp mix_combo_serve? do
     Application.get_env(:combo, :serve_endpoints, false)
   end
 
-  defp log_access_url(endpoint, config) do
-    if Keyword.fetch!(config, :log_access_url) && server?(config) do
+  defp log_access_url(endpoint, safe_config) do
+    if Keyword.fetch!(safe_config, :log_access_url) && server?(safe_config) do
       Logger.info("Access #{inspect(endpoint)} at #{endpoint.url()}")
     end
   end
