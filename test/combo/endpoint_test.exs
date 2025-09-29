@@ -645,38 +645,6 @@ defmodule Combo.EndpointTest do
     end
   end
 
-  test "logs info if :http or :https config is set but not :server when running inside release" do
-    # simulate running inside release
-    System.put_env("RELEASE_NAME", "app-test")
-
-    on_exit(fn ->
-      System.delete_env("RELEASE_NAME")
-      Application.delete_env(:combo, Endpoint)
-    end)
-
-    message = "Configuration :server was not enabled"
-
-    Application.put_env(:combo, Endpoint, server: false, http: [], https: [])
-    assert capture_log(fn -> start_supervised(Endpoint) end) =~ message
-    stop_supervised!(Endpoint)
-
-    Application.put_env(:combo, Endpoint, server: false, http: [])
-    assert capture_log(fn -> start_supervised(Endpoint) end) =~ message
-    stop_supervised!(Endpoint)
-
-    Application.put_env(:combo, Endpoint, server: false, https: [])
-    assert capture_log(fn -> start_supervised(Endpoint) end) =~ message
-    stop_supervised!(Endpoint)
-
-    Application.put_env(:combo, Endpoint, server: false)
-    refute capture_log(fn -> start_supervised(Endpoint) end) =~ message
-    stop_supervised!(Endpoint)
-
-    Application.put_env(:combo, Endpoint, server: true)
-    refute capture_log(fn -> start_supervised(Endpoint) end) =~ message
-    stop_supervised!(Endpoint)
-  end
-
   describe "watchers" do
     @watchers [npm: ["run", "dev", cd: "."]]
 

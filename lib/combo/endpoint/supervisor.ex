@@ -161,15 +161,6 @@ defmodule Combo.Endpoint.Supervisor do
         adapter = safe_config[:adapter]
         adapter.child_specs(mod, safe_config)
 
-      safe_config[:http] || safe_config[:https] ->
-        if System.get_env("RELEASE_NAME") do
-          Logger.info(
-            "Configuration :server was not enabled for #{inspect(mod)}, http/https services won't start"
-          )
-        end
-
-        []
-
       true ->
         []
     end
