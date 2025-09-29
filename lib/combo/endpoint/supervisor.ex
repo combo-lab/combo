@@ -66,20 +66,7 @@ defmodule Combo.Endpoint.Supervisor do
 
   @doc false
   def init({otp_app, module, opts}) do
-    from_opts = opts
-    from_env = Combo.Config.from_env(otp_app, module)
-
-    extra = [
-      endpoint_id: :crypto.strong_rand_bytes(16) |> Base.encode64(padding: false)
-    ]
-
-    config =
-      [otp_app: otp_app]
-      |> Combo.Config.merge(@default_config)
-      |> Combo.Config.merge(from_opts)
-      |> Combo.Config.merge(from_env)
-      |> Combo.Config.merge(extra)
-
+    config = build_config(otp_app, module, opts)
     safe_config = safe_config(config)
 
     server? = server?(safe_config)
@@ -101,6 +88,21 @@ defmodule Combo.Endpoint.Supervisor do
       ])
 
     Supervisor.init(children, strategy: :one_for_one)
+  end
+
+  defp build_config(otp_app, module, opts) do
+    from_opts = opts
+    from_env = Combo.Config.from_env(otp_app, module)
+
+    extra = [
+      endpoint_id: :crypto.strong_rand_bytes(16) |> Base.encode64(padding: false)
+    ]
+
+    [otp_app: otp_app]
+    |> Combo.Config.merge(@default_config)
+    |> Combo.Config.merge(from_opts)
+    |> Combo.Config.merge(from_env)
+    |> Combo.Config.merge(extra)
   end
 
   defp deps_children(module) do
