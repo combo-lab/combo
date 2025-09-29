@@ -76,8 +76,8 @@ defmodule Combo.Endpoint.Supervisor do
 
     children =
       Enum.concat([
+        deps_children(module),
         config_children(module, config),
-        cache_children(module),
         persistent_children(module, safe_config),
         static_children(module, safe_config),
         socket_children(module, safe_config, :child_spec),
@@ -89,12 +89,12 @@ defmodule Combo.Endpoint.Supervisor do
     Supervisor.init(children, strategy: :one_for_one)
   end
 
-  defp config_children(mod, config) do
-    [{Combo.Endpoint.Config, {mod, config}}]
+  defp deps_children(module) do
+    [{Combo.Cache, module}]
   end
 
-  defp cache_children(module) do
-    [{Combo.Cache, module}]
+  defp config_children(mod, config) do
+    [{Combo.Endpoint.Config, {mod, config}}]
   end
 
   defp persistent_children(module, safe_config) do
