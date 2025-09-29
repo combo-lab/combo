@@ -35,7 +35,7 @@ defmodule Combo.Endpoint.Supervisor do
       manifest: nil,
       vsn: true
     ],
-    watchers: []
+    watchers: false
   ]
 
   @unsafe_config_keys [:secret_key_base]
@@ -174,12 +174,16 @@ defmodule Combo.Endpoint.Supervisor do
   end
 
   defp watcher_children(_mod, safe_config, server?) do
-    watchers = safe_config[:watchers] || []
+    case safe_config[:watchers] do
+      false ->
+        []
 
-    if server? || mix_combo_serve?() do
-      Enum.map(watchers, &{Combo.Endpoint.Watcher, &1})
-    else
-      []
+      watchers when is_list(watchers) ->
+        if server? || mix_combo_serve?() do
+          Enum.map(watchers, &{Combo.Endpoint.Watcher, &1})
+        else
+          []
+        end
     end
   end
 
