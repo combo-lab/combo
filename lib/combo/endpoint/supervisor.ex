@@ -53,7 +53,7 @@ defmodule Combo.Endpoint.Supervisor do
   @doc false
   def init({otp_app, module, opts}) do
     from_opts = opts
-    from_env = Combo.Endpoint.Config.from_env(otp_app, module)
+    from_env = Combo.Config.from_env(otp_app, module)
 
     extra = [
       endpoint_id: :crypto.strong_rand_bytes(16) |> Base.encode64(padding: false)
@@ -61,10 +61,10 @@ defmodule Combo.Endpoint.Supervisor do
 
     config =
       [otp_app: otp_app]
-      |> Combo.Endpoint.Config.merge(@default_config)
-      |> Combo.Endpoint.Config.merge(from_opts)
-      |> Combo.Endpoint.Config.merge(from_env)
-      |> Combo.Endpoint.Config.merge(extra)
+      |> Combo.Config.merge(@default_config)
+      |> Combo.Config.merge(from_opts)
+      |> Combo.Config.merge(from_env)
+      |> Combo.Config.merge(extra)
 
     safe_config = safe_config(config)
 
