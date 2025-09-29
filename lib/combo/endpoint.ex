@@ -468,7 +468,7 @@ defmodule Combo.Endpoint do
       Returns `default` if the key does not exist.
       """
       def config(key, default \\ nil) do
-        Combo.Config.get(__MODULE__, key, default)
+        Combo.Endpoint.Config.get(__MODULE__, key, default)
       end
 
       @doc """

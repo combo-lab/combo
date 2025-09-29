@@ -32,7 +32,7 @@ defmodule Combo.Endpoint.Supervisor do
   def start_link(otp_app, module, opts \\ []) do
     with {:ok, pid} = ok <-
            Supervisor.start_link(__MODULE__, {otp_app, module, opts}, name: module) do
-      config = Combo.Config.get_all(module)
+      config = Combo.Endpoint.Config.get_all(module)
       safe_config = safe_config(config)
 
       log_access_url(module, safe_config)
@@ -53,7 +53,7 @@ defmodule Combo.Endpoint.Supervisor do
   @doc false
   def init({otp_app, module, opts}) do
     from_opts = opts
-    from_env = Combo.Config.from_env(otp_app, module)
+    from_env = Combo.Endpoint.Config.from_env(otp_app, module)
 
     extra = [
       endpoint_id: :crypto.strong_rand_bytes(16) |> Base.encode64(padding: false)
@@ -61,10 +61,10 @@ defmodule Combo.Endpoint.Supervisor do
 
     config =
       [otp_app: otp_app]
-      |> Combo.Config.merge(@default_config)
-      |> Combo.Config.merge(from_opts)
-      |> Combo.Config.merge(from_env)
-      |> Combo.Config.merge(extra)
+      |> Combo.Endpoint.Config.merge(@default_config)
+      |> Combo.Endpoint.Config.merge(from_opts)
+      |> Combo.Endpoint.Config.merge(from_env)
+      |> Combo.Endpoint.Config.merge(extra)
 
     safe_config = safe_config(config)
 
@@ -90,7 +90,7 @@ defmodule Combo.Endpoint.Supervisor do
   end
 
   defp config_children(mod, config) do
-    [{Combo.Config, {mod, config}}]
+    [{Combo.Endpoint.Config, {mod, config}}]
   end
 
   defp cache_children(module) do

@@ -1,4 +1,4 @@
-defmodule Combo.Config do
+defmodule Combo.Endpoint.Config do
   @moduledoc false
 
   require Logger
