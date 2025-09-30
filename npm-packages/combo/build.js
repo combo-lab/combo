@@ -2,7 +2,7 @@
 
 import { context, build } from 'esbuild'
 
-const outdir = '../priv/static'
+const outdir = './dist'
 
 function createBuilds(entrypoint, outdir, builds) {
   const baseOptions = {

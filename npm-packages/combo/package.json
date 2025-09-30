@@ -1,6 +1,7 @@
 {
-  "$schema": "https://json.schemastore.org/package.json",
-  "private": true,
+  "name": "combo",
+  "version": "0.1.0",
+  "description": "The JavaScript parts of Combo",
   "type": "module",
   "scripts": {
     "watch": "node build.js --watch",
@@ -11,6 +12,21 @@
     "test.watch": "jest --watch",
     "docs": "documentation build src/socket/index.js -f html -o ../doc/js"
   },
+  "exports": {
+    "./socket": {
+      "import": "./dist/socket.esm.js",
+      "require": "./dist/socket.cjs.js"
+    },
+    "./html": {
+      "import": "./dist/html.esm.js",
+      "require": "./dist/html.cjs.js"
+    }
+  },
+  "files": [
+    "package.json",
+    "dist/*",
+    "LICENSE.md"
+  ],
   "devDependencies": {
     "@babel/core": "7.28.0",
     "@babel/preset-env": "7.28.0",
