@@ -1,4 +1,4 @@
-import { Socket } from '../socket'
+import { Socket } from 'combo/socket'
 import debounce from 'lodash.debounce'
 
 function getFreshUrl(url) {
