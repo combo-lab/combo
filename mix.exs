@@ -273,7 +273,7 @@ defmodule Combo.MixProject do
       ],
       build: ["compile", "npm-packages.build", "assets.build"],
       docs: ["docs", "npm-packages.docs"],
-      publish: ["build", "hex.publish", "tag"],
+      publish: ["hex.publish", "tag"],
       tag: &tag_release/1,
       "npm-packages.deps.get": "cmd --cd npm-packages/combo npm install",
       "npm-packages.build": "cmd --cd npm-packages/combo npm run build",
