@@ -102,17 +102,14 @@ defmodule Combo.MixProject do
 
   defp package do
     [
-      maintainers: ["Chris McCord", "José Valim", "Gary Rennie", "Jason Stiebs"],
       licenses: ["MIT"],
       links: %{"GitHub" => @scm_url},
       files: ~w(
-          lib mix.exs
-          priv package.json
-          .formatter.exs
-          README.md
-          CHANGELOG.md
-          LICENSE.txt
-        )
+        lib/ priv/ mix.exs .formatter.exs README.md CHANGELOG.md LICENSE
+
+        npm-packages/combo/package.json
+        npm-packages/combo/dist/
+      )
     ]
   end
 
