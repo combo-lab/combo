@@ -1,0 +1,15 @@
+{
+  "source": {
+    "include": ["src"],
+    "includePattern": ".+\\.js$"
+  },
+  "sourceType": "module",
+  "opts": {
+    "destination": "../../doc/js",
+    "recurse": true,
+    "verbose": true,
+    "template": "node_modules/docdash",
+    "encoding": "utf8"
+  },
+  "plugins": ["plugins/markdown"]
+}
