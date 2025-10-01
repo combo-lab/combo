@@ -10,7 +10,7 @@
     "test": "jest",
     "test.coverage": "jest --coverage",
     "test.watch": "jest --watch",
-    "docs": "documentation build src/socket/index.js -f html -o ../doc/js"
+    "docs": "documentation build src/socket/index.js -f html -o ../../doc/js"
   },
   "exports": {
     "./socket": {
