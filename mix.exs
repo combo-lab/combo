@@ -264,18 +264,20 @@ defmodule Combo.MixProject do
 
   defp aliases do
     [
-      setup: ["deps.get", "assets.deps.get"],
-      docs: ["docs", "assets.docs"],
-
-      # bridges for npm scripts
-      "assets.deps.get": "cmd npm install --prefix assets",
-      "assets.watch": "cmd npm run watch --prefix assets",
-      "assets.build": "cmd npm run build --prefix assets",
-      "assets.docs": "cmd npm run docs --prefix assets",
-
-      # publish
-      publish: ["hex.publish", "tag"],
-      tag: &tag_release/1
+      setup: [
+        "deps.get",
+        "npm-packages.deps.get",
+        "assets.deps.get"
+      ],
+      build: ["compile", "npm-packages.build", "assets.build"],
+      docs: ["docs", "npm-packages.docs"],
+      publish: ["build", "hex.publish", "tag"],
+      tag: &tag_release/1,
+      "npm-packages.deps.get": "cmd --cd npm-packages/combo npm install",
+      "npm-packages.build": "cmd --cd npm-packages/combo npm run build",
+      "npm-packages.docs": "cmd --cd npm-packages/combo npm run docs",
+      "assets.deps.get": "cmd --cd assets npm install",
+      "assets.build": "cmd --cd assets npm run build"
     ]
   end
 

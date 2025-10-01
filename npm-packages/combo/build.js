@@ -82,19 +82,7 @@ const htmlBuilds = createBuilds('./src/html', outdir, {
   },
 })
 
-const liveReloaderBuilds = createBuilds('./src/live_reloader', outdir, {
-  'live_reloader.min.js': {
-    format: 'iife',
-    platform: 'browser',
-    target: 'es2016',
-    bundle: true,
-    sourcemap: true,
-    minify: true,
-    globalName: 'Combo.LiveReloader',
-  },
-})
-
-const builds = [...socketBuilds, ...htmlBuilds, ...liveReloaderBuilds]
+const builds = [...socketBuilds, ...htmlBuilds]
 
 // Check if we should watch or build once
 const isWatch = process.argv.includes('--watch') || process.argv.includes('-w')
