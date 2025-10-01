@@ -2,16 +2,18 @@ defmodule Combo.MixProject do
   use Mix.Project
 
   @version "0.2.1"
+  @description "A web framework, that combines the good parts of modern web development."
   @elixir_requirement "~> 1.18"
-  @scm_url "https://github.com/combo-lab/combo"
+  @source_url "https://github.com/combo-lab/combo"
+  @changelog_url "https://github.com/combo-lab/combo/blob/v#{@version}/CHANGELOG.md"
 
   def project do
     [
       app: :combo,
       version: @version,
       elixir: @elixir_requirement,
+      elixirc_paths: elixirc_paths(Mix.env()),
       deps: deps(),
-      package: package(),
       consolidate_protocols: Mix.env() != :test,
       xref: [
         exclude: [
@@ -25,12 +27,12 @@ defmodule Combo.MixProject do
           :public_key
         ]
       ],
-      elixirc_paths: elixirc_paths(Mix.env()),
-      name: "Combo",
+      description: @description,
+      source_url: @source_url,
+      homepage_url: @source_url,
       docs: docs(),
+      package: package(),
       aliases: aliases(),
-      source_url: @scm_url,
-      description: "A web framework, that combines the good parts of modern web development.",
       test_ignore_filters: [
         &String.starts_with?(&1, "test/fixtures/"),
         &String.starts_with?(&1, "test/support/")
@@ -103,7 +105,10 @@ defmodule Combo.MixProject do
   defp package do
     [
       licenses: ["MIT"],
-      links: %{"GitHub" => @scm_url},
+      links: %{
+        GitHub: @source_url,
+        Changelog: @changelog_url
+      },
       files: ~w(
         lib/ priv/ mix.exs .formatter.exs README.md CHANGELOG.md LICENSE
 
