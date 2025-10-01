@@ -271,7 +271,7 @@ defmodule Combo.MixProject do
         "npm-packages.deps.get",
         "assets.deps.get"
       ],
-      build: ["compile", "npm-packages.build", "assets.build"],
+      build: ["npm-packages.build", "assets.build", "compile"],
       docs: ["docs", "npm-packages.docs"],
       publish: ["hex.publish", "tag"],
       tag: &tag_release/1,
