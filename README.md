@@ -27,30 +27,15 @@ Read the [documentation](https://hexdocs.pm/combo).
 
 ## Contributing
 
-We appreciate any contribution to Combo. Check our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [CONTRIBUTING.md](CONTRIBUTING.md) guides for more information. We usually keep a list of features and bugs in the [issue tracker][4].
+We appreciate any contribution to Combo. Check our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [CONTRIBUTING.md](CONTRIBUTING.md) guides for more information. We usually keep a list of features and bugs in the [issue tracker](https://github.com/combo-lab/combo/issues).
 
 ### Building from source
 
-To build Combo only:
-
-```console
-$ mix deps.get
-$ mix compile
-```
-
-To build Combo.js only:
-
-```console
-$ mix assets.deps.get
-$ mix assets.build
-```
-
-To build Combo and Combo.js together:
+To build Combo and its related npm-packages and assets:
 
 ```bash
 $ mix setup
-$ mix compile
-$ mix assets.build
+$ mix build
 ```
 
 To build the documentation:
