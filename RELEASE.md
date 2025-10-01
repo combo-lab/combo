@@ -1,14 +1,14 @@
 # Release Instructions
 
-1. Check related deps for required version bumps and compatibility.
-2. Bump version in related files below:
-   - `CHANGELOG`
-   - `mix.exs`
-   - `package.json`
-3. Run tests:
-   - `mix test`
-   - `cd assets && npm run test`
-4. Commit, push code
-5. Publish `combo` Hex package and docs after pruning any extraneous uncommitted files
-6. Generate a new app by using `combo_new`, running `mix deps.get`, and compiling
-7. Start -dev version in related files below
+1. update `CHANGELOG.md`
+2. update the version in `mix.exs`
+3. update the version in `package.json`
+4. run `mix test`
+5. run `cd npm-packages/combo && npm run test `
+6. run `mix build`
+7. commit code, and wait CI to pass.
+8. run `mix publish`
+
+Post operations:
+
+1. update the deps of `combo_new`'s templates
