@@ -110,7 +110,7 @@ class LiveReloader {
     this.debouncedReload = debounce(this.reload, debounceTime)
     this.reloadStrategies = buildReloadStrategies(targetWindow, fullReloadOnCssChanges)
 
-    this.channel = this.socket.channel('combo:live_reload', {})
+    this.channel = this.socket.channel('combo:live_reloader', {})
     this.socket.onOpen(() => {
       if (this.enabledOnce) {
         return

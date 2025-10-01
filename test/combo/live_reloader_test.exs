@@ -75,7 +75,7 @@ defmodule Combo.LiveReloaderTest do
         |> send_resp(200, "<html><body><h1>Demo</h1></body></html>")
 
       assert to_string(conn.resp_body) ==
-               "<html><body><h1>Demo</h1><iframe hidden height=\"0\" width=\"0\" src=\"/combo/live_reload/iframe\"></iframe></body></html>"
+               "<html><body><h1>Demo</h1><iframe hidden height=\"0\" width=\"0\" src=\"/combo/live_reloader/iframe\"></iframe></body></html>"
     end
 
     test "applied for HTML responses whose body contains multiple <body> tags" do
@@ -88,7 +88,7 @@ defmodule Combo.LiveReloaderTest do
         |> send_resp(200, "<html><body><h1><body>Demo</body></h1></body></html>")
 
       assert to_string(conn.resp_body) ==
-               "<html><body><h1><body>Demo</body></h1><iframe hidden height=\"0\" width=\"0\" src=\"/combo/live_reload/iframe\"></iframe></body></html>"
+               "<html><body><h1><body>Demo</body></h1><iframe hidden height=\"0\" width=\"0\" src=\"/combo/live_reloader/iframe\"></iframe></body></html>"
     end
 
     test "skipped for HTML responses whose body missing <body> tag" do
@@ -147,19 +147,19 @@ defmodule Combo.LiveReloaderTest do
         ])
 
       assert to_string(conn.resp_body) ==
-               "<html><body><h1>Demo</h1><iframe hidden height=\"0\" width=\"0\" src=\"/combo/live_reload/iframe\"></iframe></body></html>"
+               "<html><body><h1>Demo</h1><iframe hidden height=\"0\" width=\"0\" src=\"/combo/live_reloader/iframe\"></iframe></body></html>"
     end
   end
 
   test "default iframe content" do
     conn =
-      build_conn("/combo/live_reload/iframe", Endpoint)
+      build_conn("/combo/live_reloader/iframe", Endpoint)
       |> Combo.LiveReloader.call([])
 
     assert conn.status == 200
 
     assert to_string(conn.resp_body) =~
-             ~s[var path = "/combo/live_reload/socket";\n]
+             ~s[var path = "/combo/live_reloader/socket";\n]
 
     assert to_string(conn.resp_body) =~
              ~s[var debounceTime = 100;\n]
@@ -184,6 +184,6 @@ defmodule Combo.LiveReloaderTest do
       |> send_resp(200, "<html><body><h1>Demo</h1></body></html>")
 
     assert to_string(conn.resp_body) ==
-             "<html><body><h1>Demo</h1><iframe hidden height=\"0\" width=\"0\" src=\"/prefix/combo/live_reload/iframe\"></iframe></body></html>"
+             "<html><body><h1>Demo</h1><iframe hidden height=\"0\" width=\"0\" src=\"/prefix/combo/live_reloader/iframe\"></iframe></body></html>"
   end
 end

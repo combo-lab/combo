@@ -43,7 +43,7 @@ defmodule Combo.LiveReloader.ChannelTest do
     {:ok, _, socket} =
       LiveReloader.Socket
       |> socket()
-      |> subscribe_and_join(Channel, "combo:live_reload", %{})
+      |> subscribe_and_join(Channel, "combo:live_reloader", %{})
 
     {:ok, socket: socket}
   end

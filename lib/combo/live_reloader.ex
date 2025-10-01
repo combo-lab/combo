@@ -22,7 +22,7 @@ defmodule Combo.LiveReloader do
   endpoint. For example:
 
       if live_reloading? do
-        socket "/combo/live_reload/socket", Combo.LiveReloader.Socket
+        socket "/combo/live_reloader/socket", Combo.LiveReloader.Socket
         plug Combo.LiveReloader
       end
 
@@ -37,11 +37,11 @@ defmodule Combo.LiveReloader do
 
   In general, the configuration is added to `config/dev.exs`. For example:
 
-      config :demo, Demo.Web.Endpoint,
+      config :my_app, MyApp.Web.Endpoint,
         live_reloader: [
           patterns: [
-            ~r"lib/demo/web/router\.ex",
-            ~r"lib/demo/web/(controllers|layouts|components)/.*\.(ex|ceex)$",
+            ~r"lib/my_app/web/router\.ex",
+            ~r"lib/my_app/web/(controllers|layouts|components)/.*\.(ex|ceex)$",
             ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$"
           ]
         ]
@@ -51,7 +51,7 @@ defmodule Combo.LiveReloader do
     * `:patterns` - a list of patterns to trigger the reloading.
 
     * `:path` - the path of socket's mount-point.
-      Defaults to `/combo/live_reload/socket`.
+      Defaults to `/combo/live_reloader/socket`.
 
     * `:iframe_attrs` - the attrs to be given to the injected iframe. Expects
       a keyword list of atom keys and string values.
@@ -111,8 +111,8 @@ defmodule Combo.LiveReloader do
         dirs: [
           "priv/static",
           "priv/gettext",
-          "lib/demo/web/layouts",
-          "lib/demo/web/controllers",
+          "lib/my_app/web/layouts",
+          "lib/my_app/web/controllers",
           "../another_project/priv/static", # Contents of this directory is not watched
           "/another_project/priv/static",   # Contents of this directory is not watched
         ],
@@ -141,25 +141,25 @@ defmodule Combo.LiveReloader do
     opts
   end
 
-  def call(%Plug.Conn{path_info: ["combo", "live_reload", "live_reloader.min.js"]} = conn, _) do
+  def call(%Plug.Conn{path_info: ["combo", "live_reloader", "live_reloader.min.js"]} = conn, _) do
     conn
     |> put_resp_content_type("text/javascript")
     |> send_resp(200, @live_reloader_min_js)
     |> halt()
   end
 
-  def call(%Plug.Conn{path_info: ["combo", "live_reload", "live_reloader.min.js.map"]} = conn, _) do
+  def call(%Plug.Conn{path_info: ["combo", "live_reloader", "live_reloader.min.js.map"]} = conn, _) do
     conn
     |> put_resp_content_type("application/json")
     |> send_resp(200, @live_reloader_min_js_map)
     |> halt()
   end
 
-  def call(%Plug.Conn{path_info: ["combo", "live_reload", "iframe"]} = conn, _) do
+  def call(%Plug.Conn{path_info: ["combo", "live_reloader", "iframe"]} = conn, _) do
     endpoint = endpoint_module!(conn)
     config = endpoint.config(:live_reloader)
 
-    path = endpoint.path(config[:path] || "/combo/live_reload/socket")
+    path = endpoint.path(config[:path] || "/combo/live_reloader/socket")
     debounce = config[:debounce] || 100
     target_window = config[:target_window] || :parent
     full_reload_on_css_changes? = config[:full_reload_on_css_changes] || false
@@ -169,7 +169,7 @@ defmodule Combo.LiveReloader do
     |> send_resp(200, """
     <!DOCTYPE html>
     <html><body>
-    <script src="#{endpoint.path("/combo/live_reload/live_reloader.min.js")}"></script>
+    <script src="#{endpoint.path("/combo/live_reloader/live_reloader.min.js")}"></script>
     <script>
       (function() {
         var LiveReloader = Combo.LiveReloader.default;
@@ -241,7 +241,7 @@ defmodule Combo.LiveReloader do
 
   defp iframe_tag(conn, config) do
     endpoint = endpoint_module!(conn)
-    path = endpoint.path("/combo/live_reload/iframe")
+    path = endpoint.path("/combo/live_reloader/iframe")
 
     attrs =
       Keyword.merge(

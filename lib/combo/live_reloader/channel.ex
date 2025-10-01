@@ -5,7 +5,7 @@ defmodule Combo.LiveReloader.Channel do
   require Logger
   alias Combo.LiveReloader.Server
 
-  def join("combo:live_reload", _msg, socket) do
+  def join("combo:live_reloader", _msg, socket) do
     endpoint = socket.endpoint
 
     case Server.ensure_started() do
