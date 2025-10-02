@@ -2,27 +2,35 @@ defmodule Combo.Proxy do
   @moduledoc """
   Proxy requests to other plugs.
 
+  ## Features
+
+    * Multiple adatpers support
+    * Plug support
+      * general plugs
+      * Combo endpoints
+    * WebSocket support
+
   ## Usage
 
   A `Combo.Proxy` instance is an isolated supervision tree and you can include it in
   application's supervisor:
 
-      # lib/demo/application.ex
+      # lib/my_app/application.ex
       def start(_type, _args) do
         children = [
           # ...
-          {Combo.Proxy, Application.fetch_env!(:demo, Combo.Proxy)}
+          {Combo.Proxy, Application.fetch_env!(:my_app, MyApp.Proxy)}
         ]
 
-        opts = [strategy: :one_for_one, name: Demo.Supervisor]
+        opts = [strategy: :one_for_one, name: MyApp.Supervisor]
         Supervisor.start_link(children, opts)
       end
 
   Above code requires a piece of configuration:
 
-      config :demo, Combo.Proxy,
+      config :my_app, MyApp.Proxy,
         server: true,
-        adapter: Plug.Cowboy,
+        adapter: Combo.Proxy.BanditAdapter,
         scheme: :http,
         ip: {127, 0, 0, 1},
         port: 4000,
@@ -32,46 +40,39 @@ defmodule Combo.Proxy do
             path: "/health-check"
           },
           %{
-            plug: DemoWebAPI.Endpoint,
-            path: "/api"
-          },
-          %{
-            plug: DemoAdminWeb.Endpoint,
+            plug: MyApp.AdminWeb.Endpoint,
             path: "/admin"
           },
           %{
-            plug: DemoWeb.Endpoint,
+            plug: MyApp.UserWeb.Endpoint,
             path: "/"
           }
         ]
 
-  When using `Combo.Proxy` with Phoenix endpoints, it's required to configure
-  the path of endpoints to a proper value. And it's better to configure
-  `:server` option of endpoints to `false`, which avoids them serving requests
-  bypassing `Combo.Proxy`. For example:
+  When using `Combo.Proxy` with Combo endpoints, it's required to configure the
+  path of endpoints to a proper value. And it's better to configure `:server`
+  option of endpoints to `false`, which avoids them serving requests bypassing
+  `Combo.Proxy`. For example:
 
-      config :demo, DemoWeb.Endpoint,
+      config :my_app, MyApp.UserWeb.Endpoint,
         url: [path: "/"],
         server: false
 
-      config :demo, DemoWebAPI.Endpoint,
-        url: [path: "/api"],
-        server: false
-
-      config :demo, DemoAdminWeb.Endpoint,
+      config :my_app, MyApp.AdminWeb.Endpoint,
         url: [path: "/admin"],
         server: false
 
   ## Options
 
-    * `:server` - start the web server or not. Default to `false`. It is aware
-      of Phoenix startup arguments, if the application is started with
-      `mix phx.server` or `iex -S mix phx.server`, this option will set
-      to `true`.
-    * `:backends` - the list of backends. Default to `[]`. See following section for
-      more details.
-    * `:adapter` - the adapter for web server, `Plug.Cowboy` and `Bandit` are
-      available. Default to `Plug.Cowboy`.
+    * `:server` - start the web server or not. It is aware of Combo startup
+      arguments, if the application is started with `mix combo.serve` or
+      `iex -S mix combo.serve`, this option will be set to `true`.
+      Default to `false`.
+    * `:backends` - the list of backends.  See following section for more details.
+      Default to `[]`.
+    * `:adapter` - the adapter for web server, `Combo.Proxy.Cowboy2Adapter` and
+      `Combo.Proxy.BanditAdapter` are available.
+      Default to `Combo.Proxy.Cowboy2Adapter`.
     * adapter options - all other options will be put into an keyword list and
       passed as the options of the adapter. See following section for more details.
 
@@ -118,18 +119,14 @@ defmodule Combo.Proxy do
 
   If you configure the backends like this:
 
-      config :demo, Combo.Proxy,
+      config :my_app, MyApp.Proxy,
         backends: [
           %{
-            plug: DemoUserWeb.Endpoint,
+            plug: MyApp.UserWeb.Endpoint,
             path: "/"
           },
           %{
-            plug: DemoUserAPI.Endpoint,
-            path: "/api"
-          },
-          %{
-            plug: DemoAdminWeb.Endpoint,
+            plug: MyApp.AdminWeb.Endpoint,
             path: "/admin"
           },
           %{
@@ -142,22 +139,18 @@ defmodule Combo.Proxy do
 
   If you want all backends to have a chance to match, you should configure them like this:
 
-      config :demo, Combo.Proxy,
+      config :my_app, MyApp.Proxy,
         backends: [
           %{
             plug: HealthCheck,
             path: "/health"
           },
           %{
-            plug: DemoUserAPI.Endpoint,
-            path: "/api"
-          },
-          %{
-            plug: DemoAdminWeb.Endpoint,
+            plug: MyApp.AdminWeb.Endpoint,
             path: "/admin"
           },
           %{
-            plug: DemoUserWeb.Endpoint,
+            plug: MyApp.UserWeb.Endpoint,
             path: "/"
           }
         ]
@@ -166,24 +159,27 @@ defmodule Combo.Proxy do
 
   In the section of Options, we said:
 
-  > all other options will be put into an keyword list and passed as the options of the adapter.
+  > all other options will be put into an keyword list and passed as the
+  > options of the adapter.
 
-  It means the all options except `:server`, `:backends`, `:adapter` will be passed as the
-  the options of an adapter.
+  It means the all options except `:server`, `:backends`, `:adapter` will be
+  passed as the the options of an adapter.
 
-  Take `Plug.Cowboy` adapter as an example. If we declare the options like:
+  Take `Combo.Proxy.Cowboy2Adapter` adapter as an example. If we declare the
+  options like:
 
-      config :demo, Combo.Proxy,
+      config :my_app, MyApp.Proxy,
         backends: [
           # ...
         ],
-        adapter: Plug.Cowboy,
+        adapter: Combo.Proxy.Cowboy2Adapter,
         scheme: :http,
         ip: {127, 0, 0, 1},
         port: 4000,
         transport_options: [num_acceptors: 2]
 
-  Then following options will be passed to `Plug.Cowboy` when initializing Combo.Proxy:
+  Then following options will be passed to the underlying `Plug.Cowboy` when
+  initializing `Combo.Proxy`:
 
       [
         scheme: :http,
@@ -193,9 +189,9 @@ defmodule Combo.Proxy do
       ]
 
   For more available adapter options:
-
-    * `Plug.Cowboy` - checkout [Plug.Cowboy options](https://hexdocs.pm/plug_cowboy/Plug.Cowboy.html#module-options).
-    * `Bandit` - checkout [Bandit options](https://hexdocs.pm/bandit/Bandit.html#t:options/0).
+    
+    * `Combo.Proxy.Bandit` - checkout [Bandit options](https://hexdocs.pm/bandit/Bandit.html#t:options/0).
+    * `Combo.Proxy.Cowboy2Adapter` - checkout [Plug.Cowboy options](https://hexdocs.pm/plug_cowboy/Plug.Cowboy.html#module-options).
 
   """
 
@@ -235,7 +231,7 @@ defmodule Combo.Proxy do
 
     check_adapter_module!(config.adapter)
 
-    start_server? = config.server || phoenix_on?()
+    start_server? = config.server || mix_combo_serve?()
 
     children =
       if start_server?,
@@ -256,22 +252,7 @@ defmodule Combo.Proxy do
   defp get_default_port(:http = _scheme), do: 4000
   defp get_default_port(:https = _scheme), do: 4040
 
-  defp check_adapter_module!(Plug.Cowboy) do
-    unless Code.ensure_loaded?(Plug.Cowboy) do
-      Logger.error("""
-      Could not find Plug.Cowboy dependency. Please add :plug_cowboy to your dependencies:
-
-          {:plug_cowboy, "~> 2.6"}
-
-      """)
-
-      raise "missing Plug.Cowboy dependency"
-    end
-
-    :ok
-  end
-
-  defp check_adapter_module!(Bandit) do
+  defp check_adapter_module!(Combo.Proxy.BanditAdapter) do
     unless Code.ensure_loaded?(Bandit) do
       Logger.error("""
       Could not find Bandit dependency. Please add :bandit to your dependencies:
@@ -286,17 +267,32 @@ defmodule Combo.Proxy do
     :ok
   end
 
+  defp check_adapter_module!(Combo.Proxy.Cowboy2Adapter) do
+    unless Code.ensure_loaded?(Plug.Cowboy) do
+      Logger.error("""
+      Could not find Plug.Cowboy dependency. Please add :plug_cowboy to your dependencies:
+
+          {:plug_cowboy, "~> 2.6"}
+
+      """)
+
+      raise "missing Plug.Cowboy dependency"
+    end
+
+    :ok
+  end
+
   defp check_adapter_module!(adapter) do
     raise "unknown adapter #{inspect(adapter)}"
   end
 
-  # Consinder Phoenix is on when meets following cases:
+  # Consinder Combo should serve when meets following cases:
   #
-  # + run `iex -S mix phx.server`
-  # + run `mix phx.server`
+  # + run `iex -S mix combo.serve`
+  # + run `mix combo.serve`
   #
-  defp phoenix_on?() do
-    Application.get_env(:phoenix, :serve_endpoints, false)
+  defp mix_combo_serve?() do
+    Application.get_env(:combo, :serve_endpoints, false)
   end
 
   defp build_child(%Config{} = config) do
@@ -305,18 +301,21 @@ defmodule Combo.Proxy do
     Logger.info(fn -> gen_listen_line(adapter_config) end)
 
     {
-      adapter,
+      fetch_adapter_plug!(adapter),
       [plug: {Dispatcher, [backends: backends]}] ++ build_adapter_opts(adapter, adapter_config)
     }
   end
 
-  defp build_adapter_opts(Plug.Cowboy = _adapter, adapter_config) do
-    {scheme, options} = Keyword.pop!(adapter_config, :scheme)
-    [scheme: scheme, options: options]
+  defp fetch_adapter_plug!(Combo.Proxy.BanditAdapter), do: Bandit
+  defp fetch_adapter_plug!(Combo.Proxy.Cowboy2Adapter), do: Plug.Cowboy
+
+  defp build_adapter_opts(Combo.Proxy.BanditAdapter = _adapter, adapter_config) do
+    adapter_config
   end
 
-  defp build_adapter_opts(Bandit = _adapter, adapter_config) do
-    adapter_config
+  defp build_adapter_opts(Combo.Proxy.Cowboy2Adapter = _adapter, adapter_config) do
+    {scheme, options} = Keyword.pop!(adapter_config, :scheme)
+    [scheme: scheme, options: options]
   end
 
   defp gen_listen_line(adapter_config) do
