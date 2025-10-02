@@ -1,10 +1,15 @@
-defmodule SamplePlug.EchoPath do
+defmodule TestSupport.Proxy.SamplePlug.EchoPath do
   @moduledoc """
   A plug that echos the path info from conn.
 
   ## How to start the server?
 
-      webserver = {Bandit, plug: SamplePlug.EchoPath, scheme: :http, port: 4000}
+      webserver = {Bandit, [
+        plug: TestSupport.Proxy.SamplePlug.EchoPath,
+        scheme: :http,
+        port: 4000
+      ]}
+
       {:ok, _} = Supervisor.start_link([webserver], strategy: :one_for_one)
 
   """

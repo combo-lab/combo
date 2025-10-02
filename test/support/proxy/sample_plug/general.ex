@@ -1,10 +1,15 @@
-defmodule SamplePlug.General do
+defmodule TestSupport.Proxy.SamplePlug.General do
   @moduledoc """
   A sample plug.
 
   ## How to start the server?
 
-      webserver = {Plug.Cowboy, plug: SamplePlug.General, scheme: :http, port: 4000}
+      webserver = {Plug.Cowboy, [
+        plug: TestSupport.Proxy.SamplePlug.General,
+        scheme: :http,
+        port: 4000
+      ]}
+
       {:ok, _} = Supervisor.start_link([webserver], strategy: :one_for_one)
 
   """

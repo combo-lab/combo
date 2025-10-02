@@ -1,4 +1,4 @@
-defmodule SampleCombo.Controller do
+defmodule TestSupport.Proxy.SampleCombo.Controller do
   @moduledoc false
 
   use Combo.Controller

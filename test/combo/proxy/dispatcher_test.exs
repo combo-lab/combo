@@ -5,6 +5,9 @@ defmodule Combo.Proxy.DispatcherTest do
   alias Combo.Proxy.Dispatcher
   alias Combo.Proxy.Backend
 
+  alias TestSupport.Proxy.SamplePlug
+  alias TestSupport.Proxy.SampleCombo
+
   defp dispatch(conn, backends) do
     opts = Dispatcher.init(backends: backends)
     Dispatcher.call(conn, opts)
@@ -152,9 +155,6 @@ defmodule Combo.Proxy.DispatcherTest do
 
     @tag capture_log: true
     test "Combo endpoint is supported" do
-      # prevent the warning of missing necessary configuration
-      Application.put_env(:sample_combo, SampleCombo.Endpoint, [])
-
       backends = [
         Backend.new!(plug: SampleCombo.Endpoint, method: "GET")
       ]

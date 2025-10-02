@@ -1,4 +1,4 @@
-defmodule SamplePlug.WebSocket.EchoServer do
+defmodule TestSupport.Proxy.SamplePlug.WebSocket.EchoServer do
   @moduledoc false
 
   def init(_args) do
@@ -14,25 +14,29 @@ defmodule SamplePlug.WebSocket.EchoServer do
   end
 end
 
-defmodule SamplePlug.WebSocket do
+defmodule TestSupport.Proxy.SamplePlug.WebSocket do
   @moduledoc """
   A sample plug with WebSocket support.
 
   ## How to start the server?
 
-      webserver = {Plug.Cowboy, plug: SamplePlug.WebSocket, scheme: :http, port: 4000}
+      webserver = {Plug.Cowboy, [
+        plug: TestSupport.Proxy.SamplePlug.WebSocket,
+        scheme: :http,
+        port: 4000
+      ]}
+
       {:ok, _} = Supervisor.start_link([webserver], strategy: :one_for_one)
 
   ## How to connect to the server?
 
   ### Use the console of Web browser
 
-      ```javascript
-      let sock  = new WebSocket("ws://localhost:4000/")
-      sock.addEventListener("message", console.log)
-      sock.addEventListener("open", () => sock.send("ping"))
-      ```
-
+  ```javascript
+  let sock  = new WebSocket("ws://localhost:4000/")
+  sock.addEventListener("message", console.log)
+  sock.addEventListener("open", () => sock.send("ping"))
+  ```
   """
 
   import Plug.Conn
