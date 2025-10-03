@@ -24,11 +24,11 @@ defmodule Combo.VerifiedRoutes do
   warning: no route path for Demo.Web.Router matches "/postz/#{post}"
   ```
 
-  Additionally, interpolated `~p` values are encoded via the `Combo.Param`
+  Additionally, interpolated `~p` values are encoded via the `Combo.URLParam`
   protocol. For example, a `%Post{}` struct in your application may derive
-  the `Combo.Param` protocol to generate slug-based paths rather than ID
+  the `Combo.URLParam` protocol to generate slug-based paths rather than ID
   based ones. This allows you to use `~p"/posts/#{post}"` rather than
-  `~p"/posts/#{post.slug}"` throughout your application. Check `Combo.Param`
+  `~p"/posts/#{post.slug}"` throughout your application. Check `Combo.URLParam`
   for more details.
 
   Finally, query strings are also supported in verified routes, either in
@@ -350,7 +350,7 @@ defmodule Combo.VerifiedRoutes do
   @doc ~S'''
   Generates the router path with route verification.
 
-  Interpolated named parameters are encoded via the `Combo.Param` protocol.
+  Interpolated named parameters are encoded via the `Combo.URLParam` protocol.
 
   Warns when the provided path does not match against the router specified
   in `use Combo.VerifiedRoutes` or the `@router` module attribute.
@@ -767,7 +767,7 @@ defmodule Combo.VerifiedRoutes do
 
   defp encode_segment(data) do
     data
-    |> Combo.Param.to_param()
+    |> Combo.URLParam.to_param()
     |> URI.encode(&URI.char_unreserved?/1)
   end
 
@@ -903,14 +903,14 @@ defmodule Combo.VerifiedRoutes do
 
   @doc false
   def __encode_query__(dict) when is_list(dict) or (is_map(dict) and not is_struct(dict)) do
-    case Plug.Conn.Query.encode(dict, &Combo.Param.to_param/1) do
+    case Plug.Conn.Query.encode(dict, &Combo.URLParam.to_param/1) do
       "" -> ""
       query_str -> query_str
     end
   end
 
   def __encode_query__(val) do
-    val |> Combo.Param.to_param() |> URI.encode_www_form()
+    val |> Combo.URLParam.to_param() |> URI.encode_www_form()
   end
 
   defp build_route(route_ast, sigil_p, env, endpoint_ctx, router) do

@@ -1,7 +1,7 @@
-defmodule Combo.ParamTest do
+defmodule Combo.URLParamTest do
   use ExUnit.Case, async: true
 
-  import Combo.Param
+  import Combo.URLParam
 
   test "to_param for integers" do
     assert to_param(1) == "1"
@@ -38,29 +38,29 @@ defmodule Combo.ParamTest do
   end
 
   test "to_param for derivable structs without id" do
-    msg = ~r"cannot derive Combo.Param for struct Combo.ParamTest.Bar"
+    msg = ~r"cannot derive Combo.URLParam for struct Combo.URLParamTest.Bar"
     assert_raise ArgumentError, msg, fn ->
       defmodule Bar do
-        @derive Combo.Param
+        @derive Combo.URLParam
         defstruct [:uuid]
       end
     end
 
     defmodule Bar do
-      @derive {Combo.Param, key: :uuid}
+      @derive {Combo.URLParam, key: :uuid}
       defstruct [:uuid]
     end
 
     assert to_param(struct(Bar, uuid: 1)) == "1"
     assert to_param(struct(Bar, uuid: "foo")) == "foo"
 
-    msg = ~r"cannot convert Combo.ParamTest.Bar to param, key :uuid contains a nil value"
+    msg = ~r"cannot convert Combo.URLParamTest.Bar to param, key :uuid contains a nil value"
     assert_raise ArgumentError, msg, fn ->
       to_param(struct(Bar, uuid: nil))
     end
   after
-    :code.purge(Module.concat(Combo.Param, __MODULE__.Bar))
-    :code.delete(Module.concat(Combo.Param, __MODULE__.Bar))
+    :code.purge(Module.concat(Combo.URLParam, __MODULE__.Bar))
+    :code.delete(Module.concat(Combo.URLParam, __MODULE__.Bar))
     :code.purge(__MODULE__.Bar)
     :code.delete(__MODULE__.Bar)
   end

@@ -38,7 +38,7 @@ defmodule Combo.VerifiedRoutesTest do
   import ExUnit.CaptureIO
   import Plug.Test
 
-  @derive {Combo.Param, key: :slug}
+  @derive {Combo.URLParam, key: :slug}
   defstruct [:id, :slug]
 
   defmodule AdminRouter do
@@ -140,7 +140,7 @@ defmodule Combo.VerifiedRoutesTest do
     assert ~p"/posts/1?foo=bar" == "/posts/1?foo=bar"
   end
 
-  test "~p with dynamic string uses Combo.Param" do
+  test "~p with dynamic string uses Combo.URLParam" do
     struct = %__MODULE__{id: 123, slug: "post-123"}
     assert ~p"/posts/#{struct}" == "/posts/post-123"
     assert ~p"/posts/#{123}" == "/posts/123"

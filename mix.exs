@@ -208,7 +208,7 @@ defmodule Combo.MixProject do
     # Combo.Endpoint
     # Combo.Naming
     # Combo.Logger
-    # Combo.Param
+    # Combo.URLParam
     # Combo.Presence
     # Combo.Router
     # Combo.Socket
