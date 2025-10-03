@@ -29,7 +29,7 @@ defmodule Combo.HTML.ComponentsTest do
     test "with href - nil" do
       assigns = %{}
 
-      assert to_x(~CE|<.a href={nil} >text</.a>|) ==
+      assert to_x(~CE|<.a href={nil}>text</.a>|) ==
                ~X|<a href="#">text</a>|
     end
 

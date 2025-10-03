@@ -269,7 +269,16 @@ defmodule Combo.Socket.Transport do
 
     connect_info =
       Enum.map(connect_info, fn
-        key when key in [:peer_data, :trace_context_headers, :uri, :user_agent, :x_headers, :sec_websocket_headers, :auth_token] ->
+        key
+        when key in [
+               :peer_data,
+               :trace_context_headers,
+               :uri,
+               :user_agent,
+               :x_headers,
+               :sec_websocket_headers,
+               :auth_token
+             ] ->
           key
 
         {:session, session} ->

@@ -1,4 +1,4 @@
-Code.require_file "./mix_helper.exs", __DIR__
+Code.require_file("./mix_helper.exs", __DIR__)
 
 defmodule Mix.Tasks.Combo.Static.CleanTest do
   use ExUnit.Case

@@ -181,15 +181,18 @@ defmodule Combo.ChannelTest do
 
   @doc false
   defmacro __using__(_) do
-    IO.warn """
-    Using Combo.ChannelTest is deprecated, instead of:
+    IO.warn(
+      """
+      Using Combo.ChannelTest is deprecated, instead of:
 
-        use Combo.ChannelTest
+          use Combo.ChannelTest
 
-    do:
+      do:
 
-        import Combo.ChannelTest
-    """, Macro.Env.stacktrace(__CALLER__)
+          import Combo.ChannelTest
+      """,
+      Macro.Env.stacktrace(__CALLER__)
+    )
 
     quote do
       import Combo.ChannelTest
@@ -274,7 +277,7 @@ defmodule Combo.ChannelTest do
 
   defp first_socket!(endpoint) do
     case endpoint.__sockets__ do
-      [] -> raise ArgumentError, "#{inspect endpoint} has no socket declaration"
+      [] -> raise ArgumentError, "#{inspect(endpoint)} has no socket declaration"
       [{_, socket, _} | _] -> socket
     end
   end
@@ -376,7 +379,7 @@ defmodule Combo.ChannelTest do
       when is_atom(channel) and is_binary(topic) and is_map(payload) do
     case subscribe_and_join(socket, channel, topic, payload) do
       {:ok, _, socket} -> socket
-      {:error, error}  -> raise "could not join channel, got error: #{inspect(error)}"
+      {:error, error} -> raise "could not join channel, got error: #{inspect(error)}"
     end
   end
 
@@ -458,6 +461,7 @@ defmodule Combo.ChannelTest do
       {:ok, reply, pid} ->
         Process.link(pid)
         {:ok, reply, Server.socket(pid)}
+
       {:error, _} = error ->
         error
     end
@@ -474,11 +478,15 @@ defmodule Combo.ChannelTest do
       reference
 
   """
-  @spec push(Socket.t, String.t, map()) :: reference()
+  @spec push(Socket.t(), String.t(), map()) :: reference()
   def push(%Socket{} = socket, event, payload \\ %{}) do
     ref = make_ref()
-    send(socket.channel_pid,
-         %Message{event: event, topic: socket.topic, ref: ref, payload: __stringify__(payload)})
+
+    send(
+      socket.channel_pid,
+      %Message{event: event, topic: socket.topic, ref: ref, payload: __stringify__(payload)}
+    )
+
     ref
   end
 
@@ -489,7 +497,7 @@ defmodule Combo.ChannelTest do
   `Process.unlink(socket.channel_pid)` before this to prevent
   this from happening. See [Leave and close](#module-leave-and-close).
   """
-  @spec leave(Socket.t) :: reference()
+  @spec leave(Socket.t()) :: reference()
   def leave(%Socket{} = socket) do
     push(socket, "combo_leave", %{})
   end
@@ -522,7 +530,7 @@ defmodule Combo.ChannelTest do
   """
   def broadcast_from(%Socket{} = socket, event, message) do
     %{pubsub_server: pubsub_server, topic: topic, transport_pid: transport_pid} = socket
-    Server.broadcast_from pubsub_server, transport_pid, topic, event, message
+    Server.broadcast_from(pubsub_server, transport_pid, topic, event, message)
   end
 
   @doc """
@@ -530,7 +538,7 @@ defmodule Combo.ChannelTest do
   """
   def broadcast_from!(%Socket{} = socket, event, message) do
     %{pubsub_server: pubsub_server, topic: topic, transport_pid: transport_pid} = socket
-    Server.broadcast_from! pubsub_server, transport_pid, topic, event, message
+    Server.broadcast_from!(pubsub_server, transport_pid, topic, event, message)
   end
 
   @doc """
@@ -564,11 +572,17 @@ defmodule Combo.ChannelTest do
       # The code above does not assert the payload matches the described map.
 
   """
-  defmacro assert_push(event, payload, timeout \\ Application.fetch_env!(:ex_unit, :assert_receive_timeout)) do
+  defmacro assert_push(
+             event,
+             payload,
+             timeout \\ Application.fetch_env!(:ex_unit, :assert_receive_timeout)
+           ) do
     quote do
       assert_receive %Combo.Socket.Message{
-                        event: unquote(event),
-                        payload: unquote(payload)}, unquote(timeout)
+                       event: unquote(event),
+                       payload: unquote(payload)
+                     },
+                     unquote(timeout)
     end
   end
 
@@ -584,11 +598,17 @@ defmodule Combo.ChannelTest do
   timeout value, so use it only when necessary as overuse
   will certainly slow down your test suite.
   """
-  defmacro refute_push(event, payload, timeout \\ Application.fetch_env!(:ex_unit, :refute_receive_timeout)) do
+  defmacro refute_push(
+             event,
+             payload,
+             timeout \\ Application.fetch_env!(:ex_unit, :refute_receive_timeout)
+           ) do
     quote do
       refute_receive %Combo.Socket.Message{
-                        event: unquote(event),
-                        payload: unquote(payload)}, unquote(timeout)
+                       event: unquote(event),
+                       payload: unquote(payload)
+                     },
+                     unquote(timeout)
     end
   end
 
@@ -607,13 +627,21 @@ defmodule Combo.ChannelTest do
   The timeout is in milliseconds and defaults to the `:assert_receive_timeout`
   set on the `:ex_unit` application (which defaults to 100ms).
   """
-  defmacro assert_reply(ref, status, payload \\ Macro.escape(%{}), timeout \\ Application.fetch_env!(:ex_unit, :assert_receive_timeout)) do
+  defmacro assert_reply(
+             ref,
+             status,
+             payload \\ Macro.escape(%{}),
+             timeout \\ Application.fetch_env!(:ex_unit, :assert_receive_timeout)
+           ) do
     quote do
       ref = unquote(ref)
+
       assert_receive %Combo.Socket.Reply{
-                        ref: ^ref,
-                        status: unquote(status),
-                        payload: unquote(payload)}, unquote(timeout)
+                       ref: ^ref,
+                       status: unquote(status),
+                       payload: unquote(payload)
+                     },
+                     unquote(timeout)
     end
   end
 
@@ -629,13 +657,21 @@ defmodule Combo.ChannelTest do
   timeout value, so use it only when necessary as overuse
   will certainly slow down your test suite.
   """
-  defmacro refute_reply(ref, status, payload \\ Macro.escape(%{}), timeout \\ Application.fetch_env!(:ex_unit, :refute_receive_timeout)) do
+  defmacro refute_reply(
+             ref,
+             status,
+             payload \\ Macro.escape(%{}),
+             timeout \\ Application.fetch_env!(:ex_unit, :refute_receive_timeout)
+           ) do
     quote do
       ref = unquote(ref)
+
       refute_receive %Combo.Socket.Reply{
-                        ref: ^ref,
-                        status: unquote(status),
-                        payload: unquote(payload)}, unquote(timeout)
+                       ref: ^ref,
+                       status: unquote(status),
+                       payload: unquote(payload)
+                     },
+                     unquote(timeout)
     end
   end
 
@@ -657,10 +693,14 @@ defmodule Combo.ChannelTest do
   The timeout is in milliseconds and defaults to the `:assert_receive_timeout`
   set on the `:ex_unit` application (which defaults to 100ms).
   """
-  defmacro assert_broadcast(event, payload, timeout \\ Application.fetch_env!(:ex_unit, :assert_receive_timeout)) do
+  defmacro assert_broadcast(
+             event,
+             payload,
+             timeout \\ Application.fetch_env!(:ex_unit, :assert_receive_timeout)
+           ) do
     quote do
-      assert_receive %Combo.Socket.Broadcast{event: unquote(event),
-                                               payload: unquote(payload)}, unquote(timeout)
+      assert_receive %Combo.Socket.Broadcast{event: unquote(event), payload: unquote(payload)},
+                     unquote(timeout)
     end
   end
 
@@ -675,17 +715,21 @@ defmodule Combo.ChannelTest do
   timeout value, so use it only when necessary as overuse
   will certainly slow down your test suite.
   """
-  defmacro refute_broadcast(event, payload, timeout \\ Application.fetch_env!(:ex_unit, :refute_receive_timeout)) do
+  defmacro refute_broadcast(
+             event,
+             payload,
+             timeout \\ Application.fetch_env!(:ex_unit, :refute_receive_timeout)
+           ) do
     quote do
-      refute_receive %Combo.Socket.Broadcast{event: unquote(event),
-                                               payload: unquote(payload)}, unquote(timeout)
+      refute_receive %Combo.Socket.Broadcast{event: unquote(event), payload: unquote(payload)},
+                     unquote(timeout)
     end
   end
 
   defp match_topic_to_channel!(socket, topic) do
     unless socket.handler do
       raise """
-      no socket handler found to lookup channel for topic #{inspect topic}.
+      no socket handler found to lookup channel for topic #{inspect(topic)}.
       Use connect/3 when calling subscribe_and_join/* (or subscribe_and_join!/*)
       without a channel, for example:
 
@@ -697,17 +741,20 @@ defmodule Combo.ChannelTest do
 
     case socket.handler.__channel__(topic) do
       {channel, opts} when is_atom(channel) -> {channel, opts}
-      _ -> raise "no channel found for topic #{inspect topic} in #{inspect socket.handler}"
+      _ -> raise "no channel found for topic #{inspect(topic)} in #{inspect(socket.handler)}"
     end
   end
 
   @doc false
   def __stringify__(%{__struct__: _} = struct),
     do: struct
+
   def __stringify__(%{} = params),
     do: Enum.into(params, %{}, &stringify_kv/1)
+
   def __stringify__(params) when is_list(params),
     do: Enum.map(params, &__stringify__/1)
+
   def __stringify__(other),
     do: other
 

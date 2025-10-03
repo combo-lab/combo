@@ -175,8 +175,8 @@ defmodule Combo.Test.ChannelTest do
   import Combo.ChannelTest
 
   setup_all do
-    start_supervised! @endpoint
-    start_supervised! {Combo.PubSub, name: Combo.Test.ChannelTest.PubSub}
+    start_supervised!(@endpoint)
+    start_supervised!({Combo.PubSub, name: Combo.Test.ChannelTest.PubSub})
     :ok
   end
 
@@ -253,8 +253,8 @@ defmodule Combo.Test.ChannelTest do
     assert {:ok, socket, client} =
              Task.async(fn ->
                join(socket, Channel, "foo:socket")
-              end)
-              |> Task.await()
+             end)
+             |> Task.await()
 
     assert %{socket | joined: true} == client
   end

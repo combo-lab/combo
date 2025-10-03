@@ -51,7 +51,6 @@ defmodule ComboTest.Template.CEExEngine.Helper do
     end
   end
 
-
   @doc """
   A component for inspecting the internal of itself.
   """

@@ -37,12 +37,13 @@ defmodule Combo.Controller.Pipeline do
   @doc false
   def __action_fallback__(plug, caller) do
     plug = Macro.expand(plug, %{caller | function: {:init, 1}})
+
     quote bind_quoted: [plug: plug] do
       @combo_fallback Combo.Controller.Pipeline.validate_fallback(
-                          plug,
-                          __MODULE__,
-                          Module.get_attribute(__MODULE__, :combo_fallback)
-                        )
+                        plug,
+                        __MODULE__,
+                        Module.get_attribute(__MODULE__, :combo_fallback)
+                      )
     end
   end
 

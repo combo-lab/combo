@@ -5,7 +5,7 @@ defmodule Combo.Channel.ChannelTest do
   import Combo.Channel
 
   setup_all do
-    start_supervised! {Combo.PubSub, name: @pubsub, pool_size: 1}
+    start_supervised!({Combo.PubSub, name: @pubsub, pool_size: 1})
     :ok
   end
 

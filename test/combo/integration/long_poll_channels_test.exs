@@ -689,7 +689,9 @@ defmodule Combo.Integration.LongPollChannelsTest do
           assert resp.status == 200
 
           resp = poll(:get, "/ws", @vsn, session)
-          [_combo_reply, _joined, _user_entered, _leave_reply, combo_close] = resp.body["messages"]
+
+          [_combo_reply, _joined, _user_entered, _leave_reply, combo_close] =
+            resp.body["messages"]
 
           assert combo_close == %Message{
                    event: "combo_close",

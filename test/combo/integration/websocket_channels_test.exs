@@ -194,7 +194,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
           :user_agent,
           :sec_websocket_headers,
           session: @session_config,
-          signing_salt: "salt",
+          signing_salt: "salt"
         ]
       ]
 

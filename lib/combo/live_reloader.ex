@@ -148,7 +148,10 @@ defmodule Combo.LiveReloader do
     |> halt()
   end
 
-  def call(%Plug.Conn{path_info: ["combo", "live_reloader", "live_reloader.min.js.map"]} = conn, _) do
+  def call(
+        %Plug.Conn{path_info: ["combo", "live_reloader", "live_reloader.min.js.map"]} = conn,
+        _
+      ) do
     conn
     |> put_resp_content_type("application/json")
     |> send_resp(200, @live_reloader_min_js_map)

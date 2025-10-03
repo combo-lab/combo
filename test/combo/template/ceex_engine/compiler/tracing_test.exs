@@ -46,8 +46,10 @@ defmodule Combo.Template.CEExEngine.Compiler.TracingTest do
     assert meta[:line] == __ENV__.line - 4
     assert meta[:column] == 5
 
-    assert_receive {:remote_function, meta, Combo.Template.CEExEngine.CompilerTest.Component, :link, 1}
-    assert meta[:line] == __ENV__.line - 8
+    assert_receive {:remote_function, meta, Combo.Template.CEExEngine.CompilerTest.Component,
+                    :link, 1}
+
+    assert meta[:line] == __ENV__.line - 10
     assert meta[:column] == 55
   end
 
@@ -56,8 +58,10 @@ defmodule Combo.Template.CEExEngine.Compiler.TracingTest do
     <.link>OK</.link>
     """)
 
-    assert_receive {:imported_function, meta, Combo.Template.CEExEngine.CompilerTest.Component, :link, 1}
-    assert meta[:line] == __ENV__.line - 4
+    assert_receive {:imported_function, meta, Combo.Template.CEExEngine.CompilerTest.Component,
+                    :link, 1}
+
+    assert meta[:line] == __ENV__.line - 6
     assert meta[:column] == 5
   end
 
@@ -66,16 +70,20 @@ defmodule Combo.Template.CEExEngine.Compiler.TracingTest do
     <C.link>Ok</C.link>
     """)
 
-    assert_receive {:alias_expansion, meta, Elixir.C, Combo.Template.CEExEngine.CompilerTest.Component}
-    assert meta[:line] == __ENV__.line - 4
+    assert_receive {:alias_expansion, meta, Elixir.C,
+                    Combo.Template.CEExEngine.CompilerTest.Component}
+
+    assert meta[:line] == __ENV__.line - 6
     assert meta[:column] == 5
 
     assert_receive {:alias_reference, meta, Combo.Template.CEExEngine.CompilerTest.Component}
     assert meta[:line] == __ENV__.line - 8
     assert meta[:column] == 5
 
-    assert_receive {:remote_function, meta, Combo.Template.CEExEngine.CompilerTest.Component, :link, 1}
-    assert meta[:line] == __ENV__.line - 12
+    assert_receive {:remote_function, meta, Combo.Template.CEExEngine.CompilerTest.Component,
+                    :link, 1}
+
+    assert meta[:line] == __ENV__.line - 14
     assert meta[:column] == 8
   end
 end

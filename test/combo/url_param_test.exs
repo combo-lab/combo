@@ -30,6 +30,7 @@ defmodule Combo.URLParamTest do
     defmodule Foo do
       defstruct [:id]
     end
+
     assert to_param(struct(Foo, id: 1)) == "1"
     assert to_param(struct(Foo, id: "foo")) == "foo"
   after
@@ -39,6 +40,7 @@ defmodule Combo.URLParamTest do
 
   test "to_param for derivable structs without id" do
     msg = ~r"cannot derive Combo.URLParam for struct Combo.URLParamTest.Bar"
+
     assert_raise ArgumentError, msg, fn ->
       defmodule Bar do
         @derive Combo.URLParam
@@ -55,6 +57,7 @@ defmodule Combo.URLParamTest do
     assert to_param(struct(Bar, uuid: "foo")) == "foo"
 
     msg = ~r"cannot convert Combo.URLParamTest.Bar to param, key :uuid contains a nil value"
+
     assert_raise ArgumentError, msg, fn ->
       to_param(struct(Bar, uuid: nil))
     end

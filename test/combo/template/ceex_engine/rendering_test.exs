@@ -1411,7 +1411,7 @@ defmodule Combo.Template.CEExEngine.RenderingTest do
              """) == "<div>c1</div>\n\n  <div>c2</div>"
     end
 
-      defp c_render_default_slot(assigns) do
+    defp c_render_default_slot(assigns) do
       compile_string!("""
       {render_slot(@inner_block)}
       """)

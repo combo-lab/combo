@@ -6,17 +6,17 @@ defmodule Combo.Endpoint.WatcherTest do
 
   test "starts watching and writes to stdio with args" do
     assert capture_io(fn ->
-      {:ok, pid} = Watcher.start_link({"echo", ["hello", cd: File.cwd!()]})
-      ref = Process.monitor(pid)
-      assert_receive {:DOWN, ^ref, :process, ^pid, :normal}, 1000
-    end) == "hello\n"
+             {:ok, pid} = Watcher.start_link({"echo", ["hello", cd: File.cwd!()]})
+             ref = Process.monitor(pid)
+             assert_receive {:DOWN, ^ref, :process, ^pid, :normal}, 1000
+           end) == "hello\n"
   end
 
   test "starts watching and writes to stdio with fun" do
     assert capture_io(fn ->
-      {:ok, pid} = Watcher.start_link({"echo", {IO, :puts, ["hello"]}})
-      ref = Process.monitor(pid)
-      assert_receive {:DOWN, ^ref, :process, ^pid, :normal}, 1000
-    end) == "hello\n"
+             {:ok, pid} = Watcher.start_link({"echo", {IO, :puts, ["hello"]}})
+             ref = Process.monitor(pid)
+             assert_receive {:DOWN, ^ref, :process, ^pid, :normal}, 1000
+           end) == "hello\n"
   end
 end

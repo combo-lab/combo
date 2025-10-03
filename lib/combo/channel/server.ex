@@ -17,9 +17,17 @@ defmodule Combo.Channel.Server do
   def join(socket, channel, message, opts) do
     %{topic: topic, payload: payload, ref: ref, join_ref: join_ref} = message
 
-    starter = opts[:starter] || &PoolSupervisor.start_child/3
+    starter = opts[:starter] || (&PoolSupervisor.start_child/3)
     assigns = Map.merge(socket.assigns, Keyword.get(opts, :assigns, %{}))
-    socket = %{socket | topic: topic, channel: channel, join_ref: join_ref || ref, assigns: assigns}
+
+    socket = %{
+      socket
+      | topic: topic,
+        channel: channel,
+        join_ref: join_ref || ref,
+        assigns: assigns
+    }
+
     ref = make_ref()
     from = {self(), ref}
     child_spec = channel.child_spec({socket.endpoint, from})
@@ -312,7 +320,10 @@ defmodule Combo.Channel.Server do
     state
   end
 
-  def handle_info(%Message{topic: topic, event: "combo_leave", ref: ref}, %{topic: topic} = socket) do
+  def handle_info(
+        %Message{topic: topic, event: "combo_leave", ref: ref},
+        %{topic: topic} = socket
+      ) do
     handle_in({:stop, {:shutdown, :left}, :ok, put_in(socket.ref, ref)})
   end
 

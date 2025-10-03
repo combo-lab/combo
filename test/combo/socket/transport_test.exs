@@ -8,10 +8,11 @@ defmodule Combo.Socket.TransportTest do
 
   @secret_key_base String.duplicate("abcdefgh", 8)
 
-  Application.put_env :combo, __MODULE__.Endpoint,
+  Application.put_env(:combo, __MODULE__.Endpoint,
     url: [host: "host.com"],
     check_origin: ["//endpoint.com"],
     secret_key_base: @secret_key_base
+  )
 
   defmodule Endpoint do
     use Combo.Endpoint, otp_app: :combo
@@ -300,33 +301,35 @@ defmodule Combo.Socket.TransportTest do
       csrf_token = conn.resp_body
       session_cookie = conn.cookies["_hello_key"]
 
-      connect_info = load_connect_info(
-        session: {
-          Endpoint,
-          :session_config,
-          [[csrf_token_key: "_custom_csrf_token"]]
-        }
-      )
+      connect_info =
+        load_connect_info(
+          session: {
+            Endpoint,
+            :session_config,
+            [[csrf_token_key: "_custom_csrf_token"]]
+          }
+        )
 
       assert %{session: %{"from_session" => "123"}} =
-              conn(:get, "https://foo.com/", _csrf_token: csrf_token)
-              |> put_req_cookie("_hello_key", session_cookie)
-              |> fetch_query_params()
-              |> Transport.connect_info(Endpoint, connect_info)
+               conn(:get, "https://foo.com/", _csrf_token: csrf_token)
+               |> put_req_cookie("_hello_key", session_cookie)
+               |> fetch_query_params()
+               |> Transport.connect_info(Endpoint, connect_info)
 
-      connect_info = load_connect_info(
-        session: {
-          Endpoint,
-          :session_config,
-          [[csrf_token_key: "bad_key"]]
-        }
-      )
+      connect_info =
+        load_connect_info(
+          session: {
+            Endpoint,
+            :session_config,
+            [[csrf_token_key: "bad_key"]]
+          }
+        )
 
       assert %{session: nil} =
-              conn(:get, "https://foo.com/", _csrf_token: csrf_token)
-              |> put_req_cookie("_hello_key", session_cookie)
-              |> fetch_query_params()
-              |> Transport.connect_info(Endpoint, connect_info)
+               conn(:get, "https://foo.com/", _csrf_token: csrf_token)
+               |> put_req_cookie("_hello_key", session_cookie)
+               |> fetch_query_params()
+               |> Transport.connect_info(Endpoint, connect_info)
     end
 
     test "loads the session when CSRF is disabled despite CSRF token not being provided" do
@@ -336,10 +339,10 @@ defmodule Combo.Socket.TransportTest do
       connect_info = load_connect_info(session: {Endpoint, :session_config, []})
 
       assert %{session: %{"from_session" => "123"}} =
-        conn(:get, "https://foo.com/")
-        |> put_req_cookie("_hello_key", session_cookie)
-        |> fetch_query_params()
-        |> Transport.connect_info(Endpoint, connect_info, check_csrf: false)
+               conn(:get, "https://foo.com/")
+               |> put_req_cookie("_hello_key", session_cookie)
+               |> fetch_query_params()
+               |> Transport.connect_info(Endpoint, connect_info, check_csrf: false)
     end
 
     test "doesn't load session when an invalid CSRF token is provided" do
@@ -350,10 +353,10 @@ defmodule Combo.Socket.TransportTest do
       connect_info = load_connect_info(session: {Endpoint, :session_config, []})
 
       assert %{session: nil} =
-        conn(:get, "https://foo.com/", _csrf_token: invalid_csrf_token)
-        |> put_req_cookie("_hello_key", session_cookie)
-        |> fetch_query_params()
-        |> Transport.connect_info(Endpoint, connect_info)
+               conn(:get, "https://foo.com/", _csrf_token: invalid_csrf_token)
+               |> put_req_cookie("_hello_key", session_cookie)
+               |> fetch_query_params()
+               |> Transport.connect_info(Endpoint, connect_info)
     end
   end
 end

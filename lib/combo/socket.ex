@@ -719,7 +719,12 @@ defmodule Combo.Socket do
     end
   end
 
-  defp handle_in({pid, _ref, status}, %{event: "combo_join", topic: topic} = message, state, socket) do
+  defp handle_in(
+         {pid, _ref, status},
+         %{event: "combo_join", topic: topic} = message,
+         state,
+         socket
+       ) do
     receive do
       {:socket_close, ^pid, _reason} -> :ok
     after

@@ -19,7 +19,8 @@ defmodule Combo.Static.DigesterTest do
 
   describe "compile" do
     test "fails when the given paths are invalid" do
-      assert {:error, :invalid_path} = Combo.Static.Digester.compile("nonexistent path", "/ ?? /path", true)
+      assert {:error, :invalid_path} =
+               Combo.Static.Digester.compile("nonexistent path", "/ ?? /path", true)
     end
 
     test "digests and compress files" do

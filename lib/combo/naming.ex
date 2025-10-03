@@ -42,6 +42,7 @@ defmodule Combo.Naming do
     string = to_string(value)
     suffix_size = byte_size(suffix)
     prefix_size = byte_size(string) - suffix_size
+
     case string do
       <<prefix::binary-size(prefix_size), ^suffix::binary>> -> prefix
       _ -> string
@@ -99,11 +100,13 @@ defmodule Combo.Naming do
 
   @spec camelize(String.t(), :lower) :: String.t()
   def camelize("", :lower), do: ""
-  def camelize(<<?_, t :: binary>>, :lower) do
+
+  def camelize(<<?_, t::binary>>, :lower) do
     camelize(t, :lower)
   end
-  def camelize(<<h, _t :: binary>> = value, :lower) do
-    <<_first, rest :: binary>> = camelize(value)
+
+  def camelize(<<h, _t::binary>> = value, :lower) do
+    <<_first, rest::binary>> = camelize(value)
     <<to_lower_char(h)>> <> rest
   end
 
@@ -134,6 +137,6 @@ defmodule Combo.Naming do
         bin
       end
 
-    bin |> String.replace("_", " ") |> String.capitalize
+    bin |> String.replace("_", " ") |> String.capitalize()
   end
 end
