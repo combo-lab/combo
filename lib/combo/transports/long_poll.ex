@@ -132,7 +132,7 @@ defmodule Combo.Transports.LongPoll do
 
   defp new_session(conn, endpoint, handler, opts) do
     priv_topic =
-      "phx:lp:" <>
+      "combo:lp:" <>
         Base.encode64(:crypto.strong_rand_bytes(16)) <>
         (System.system_time(:millisecond) |> Integer.to_string())
 

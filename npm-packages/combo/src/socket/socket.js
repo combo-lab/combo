@@ -413,7 +413,7 @@ export default class Socket {
       this.replaceTransport(fallbackTransport)
       this.transportConnect()
     }
-    if (this.getSession(`phx:fallback:${fallbackTransport.name}`)) {
+    if (this.getSession(`combo:fallback:${fallbackTransport.name}`)) {
       return fallback('memorized')
     }
 
@@ -431,7 +431,7 @@ export default class Socket {
       if (!primaryTransport) {
         // only memorize LP if we never connected to primary
         if (!this.primaryPassedHealthCheck) {
-          this.storeSession(`phx:fallback:${fallbackTransport.name}`, 'true')
+          this.storeSession(`combo:fallback:${fallbackTransport.name}`, 'true')
         }
         return this.log('transport', `established ${fallbackTransport.name} fallback`)
       }
