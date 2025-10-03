@@ -4,7 +4,7 @@
 2. update the version in `mix.exs`
 3. update the version in `package.json`
 4. run `mix test`
-5. run `cd npm-packages/combo && npm run test `
+5. run `npm run test --prefix npm-packages/combo`
 6. run `mix build`
 7. commit code, and wait CI to pass.
 8. run `mix publish`
