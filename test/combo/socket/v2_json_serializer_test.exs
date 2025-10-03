@@ -106,7 +106,7 @@ defmodule Combo.Socket.V2.JSONSerializerTest do
              nil,
              nil,
              "t",
-             "phx_reply",
+             "combo_reply",
              %{"response" => %{"m" => 1}, "status" => nil}
            ]
   end

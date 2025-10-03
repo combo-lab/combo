@@ -79,7 +79,7 @@ describe('binary', () => {
       expect(result.join_ref).toBe('100')
       expect(result.ref).toBe('12')
       expect(result.topic).toBe('top')
-      expect(result.event).toBe('phx_reply')
+      expect(result.event).toBe('combo_reply')
       expect(result.payload.status).toBe('ok')
       expect(result.payload.response.constructor).toBe(ArrayBuffer)
       expect(decoder.decode(result.payload.response)).toBe('\x01\x01')

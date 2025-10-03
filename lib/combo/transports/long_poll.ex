@@ -232,19 +232,19 @@ defmodule Combo.Transports.LongPoll do
   defp client_ref(pid) when is_pid(pid), do: self()
 
   defp subscribe(endpoint, topic) when is_binary(topic),
-    do: Phoenix.PubSub.subscribe(endpoint.config(:pubsub_server), topic)
+    do: Combo.PubSub.subscribe(endpoint.config(:pubsub_server), topic)
 
   defp subscribe(_endpoint, pid) when is_pid(pid),
     do: :ok
 
   defp unsubscribe(endpoint, topic) when is_binary(topic),
-    do: Phoenix.PubSub.unsubscribe(endpoint.config(:pubsub_server), topic)
+    do: Combo.PubSub.unsubscribe(endpoint.config(:pubsub_server), topic)
 
   defp unsubscribe(_endpoint, pid) when is_pid(pid),
     do: :ok
 
   defp broadcast_from!(endpoint, topic, msg) when is_binary(topic),
-    do: Phoenix.PubSub.broadcast_from!(endpoint.config(:pubsub_server), self(), topic, msg)
+    do: Combo.PubSub.broadcast_from!(endpoint.config(:pubsub_server), self(), topic, msg)
 
   defp broadcast_from!(_endpoint, pid, msg) when is_pid(pid),
     do: send(pid, msg)

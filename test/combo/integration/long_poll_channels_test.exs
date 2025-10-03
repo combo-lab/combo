@@ -145,7 +145,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
     config = Application.get_env(:combo, Endpoint)
     Application.put_env(:combo, Endpoint, Keyword.merge(config, adapter: adapter))
     capture_log(fn -> start_supervised!(Endpoint) end)
-    start_supervised!({Phoenix.PubSub, name: __MODULE__, pool_size: @pool_size})
+    start_supervised!({Combo.PubSub, name: __MODULE__, pool_size: @pool_size})
     :ok
   end
 
@@ -286,7 +286,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
         session,
         %{
           "topic" => topic,
-          "event" => "phx_join",
+          "event" => "combo_join",
           "ref" => "1",
           "join_ref" => join_ref,
           "payload" => payload
@@ -328,10 +328,10 @@ defmodule Combo.Integration.LongPollChannelsTest do
           resp = poll(:get, "/ws", @vsn, session)
           assert resp.body["status"] == 200
 
-          [phx_reply, user_entered, status_msg] = resp.body["messages"]
+          [combo_reply, user_entered, status_msg] = resp.body["messages"]
 
-          assert phx_reply == %Message{
-                   event: "phx_reply",
+          assert combo_reply == %Message{
+                   event: "combo_reply",
                    payload: %{"response" => %{}, "status" => "ok"},
                    ref: "1",
                    topic: "room:lobby"
@@ -368,7 +368,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
           resp = poll(:get, "/ws/connect_info", @vsn, session)
           assert resp.body["status"] == 200
 
-          [_phx_reply, _user_entered, status_msg] = resp.body["messages"]
+          [_combo_reply, _user_entered, status_msg] = resp.body["messages"]
 
           assert %{"connect_info" => %{"x_headers" => %{"x-application" => "Demo"}}} =
                    status_msg.payload
@@ -387,7 +387,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
           resp = poll(:get, "/ws/connect_info", @vsn, session)
           assert resp.body["status"] == 200
 
-          [_phx_reply, _user_entered, status_msg] = resp.body["messages"]
+          [_combo_reply, _user_entered, status_msg] = resp.body["messages"]
 
           assert %{"connect_info" => %{"trace_context_headers" => ^ctx_headers}} =
                    status_msg.payload
@@ -403,7 +403,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
           resp = poll(:get, "/ws/connect_info", @vsn, session)
           assert resp.body["status"] == 200
 
-          [_phx_reply, _user_entered, status_msg] = resp.body["messages"]
+          [_combo_reply, _user_entered, status_msg] = resp.body["messages"]
 
           assert %{"connect_info" => %{"peer_data" => %{"address" => "127.0.0.1"}}} =
                    status_msg.payload
@@ -419,7 +419,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
           resp = poll(:get, "/ws/connect_info", @vsn, session)
           assert resp.body["status"] == 200
 
-          [_phx_reply, _user_entered, status_msg] = resp.body["messages"]
+          [_combo_reply, _user_entered, status_msg] = resp.body["messages"]
           query = "vsn=#{@vsn}"
 
           assert %{
@@ -435,7 +435,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
         end
 
         test "#{@mode}: publishing events" do
-          Phoenix.PubSub.subscribe(__MODULE__, "room:lobby")
+          Combo.PubSub.subscribe(__MODULE__, "room:lobby")
           session = join("/ws", "room:lobby", @vsn, "1", @mode)
 
           # Publish successfully
@@ -464,7 +464,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
 
           # Publish event to an unjoined room
           capture_log(fn ->
-            Phoenix.PubSub.subscribe(__MODULE__, "room:private-room")
+            Combo.PubSub.subscribe(__MODULE__, "room:private-room")
 
             resp =
               poll(:post, "/ws", @vsn, session, %{
@@ -483,7 +483,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
 
             assert List.last(resp.body["messages"]) == %Message{
                      join_ref: nil,
-                     event: "phx_reply",
+                     event: "combo_reply",
                      payload: %{
                        "response" => %{"reason" => "unmatched topic"},
                        "status" => "error"
@@ -496,7 +496,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
 
         test "#{@mode}: lonpoll publishing batch events on v2 protocol" do
           vsn = "2.0.0"
-          Phoenix.PubSub.subscribe(__MODULE__, "room:lobby")
+          Combo.PubSub.subscribe(__MODULE__, "room:lobby")
           session = join("/ws", "room:lobby", vsn, "1", @mode)
           # Publish successfully
           resp =
@@ -549,7 +549,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
           assert resp.body["status"] == 200
 
           assert [
-                   _phx_reply,
+                   _combo_reply,
                    _user_entered,
                    _joined,
                    %Message{
@@ -642,7 +642,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
           assert log =~ "Parameters: %{\"foo\" => \"bar\", \"password\" => \"[FILTERED]\"}"
         end
 
-        test "sends phx_error if a channel server abnormally exits", %{topic: topic} do
+        test "sends combo_error if a channel server abnormally exits", %{topic: topic} do
           session = join("/ws", topic, @vsn, @join_ref)
 
           capture_log(fn ->
@@ -662,10 +662,10 @@ defmodule Combo.Integration.LongPollChannelsTest do
           assert_down(topic)
 
           resp = poll(:get, "/ws", @vsn, session)
-          [_phx_reply, _user_entered, _joined, chan_error] = resp.body["messages"]
+          [_combo_reply, _user_entered, _joined, chan_error] = resp.body["messages"]
 
           assert chan_error == %Message{
-                   event: "phx_error",
+                   event: "combo_error",
                    payload: %{},
                    topic: topic,
                    ref: @join_ref,
@@ -673,13 +673,13 @@ defmodule Combo.Integration.LongPollChannelsTest do
                  }
         end
 
-        test "sends phx_close if a channel server normally exits" do
+        test "sends combo_close if a channel server normally exits" do
           session = join("/ws", "room:lobby", @vsn, @join_ref)
 
           resp =
             poll(:post, "/ws", @vsn, session, %{
               "topic" => "room:lobby",
-              "event" => "phx_leave",
+              "event" => "combo_leave",
               "join_ref" => @join_ref,
               "ref" => "2",
               "payload" => %{}
@@ -689,10 +689,10 @@ defmodule Combo.Integration.LongPollChannelsTest do
           assert resp.status == 200
 
           resp = poll(:get, "/ws", @vsn, session)
-          [_phx_reply, _joined, _user_entered, _leave_reply, phx_close] = resp.body["messages"]
+          [_combo_reply, _joined, _user_entered, _leave_reply, combo_close] = resp.body["messages"]
 
-          assert phx_close == %Message{
-                   event: "phx_close",
+          assert combo_close == %Message{
+                   event: "combo_close",
                    payload: %{},
                    ref: @join_ref,
                    join_ref: @join_ref,
@@ -707,7 +707,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
           for topic <- ["room:lpdisconnect1", "room:lpdisconnect2"] do
             poll(:post, "/ws", @vsn, session, %{
               "topic" => topic,
-              "event" => "phx_join",
+              "event" => "combo_join",
               "ref" => "1",
               "payload" => %{}
             })
@@ -753,7 +753,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
               session,
               %{
                 "topic" => "room:lobby",
-                "event" => "phx_leave",
+                "event" => "combo_leave",
                 "ref" => "2",
                 "join_ref" => @join_ref,
                 "payload" => %{}

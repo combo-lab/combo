@@ -78,7 +78,7 @@ defmodule Combo.Integration.LongPollSocketTest do
     config = Application.get_env(:combo, Endpoint)
     Application.put_env(:combo, Endpoint, Keyword.merge(config, adapter: adapter))
     capture_log(fn -> start_supervised!(Endpoint) end)
-    start_supervised!({Phoenix.PubSub, name: __MODULE__, pool_size: @pool_size})
+    start_supervised!({Combo.PubSub, name: __MODULE__, pool_size: @pool_size})
     :ok
   end
 

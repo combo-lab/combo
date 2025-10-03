@@ -633,7 +633,7 @@ defmodule Combo.VerifiedRoutesTest do
         end)
 
       refute warnings =~
-               "no route path for Phoenix.VerifiedRoutesTest.CatchAllWarningRouter matches"
+               "no route path for Combo.VerifiedRoutesTest.CatchAllWarningRouter matches"
     after
       :code.purge(__MODULE__.VerifyFalseTrueMatchesFirst)
       :code.delete(__MODULE__.VerifyFalseTrueMatchesFirst)

@@ -14,7 +14,7 @@ defmodule Combo.Socket.V1.JSONSerializer do
   def encode!(%Reply{} = reply) do
     map = %Message{
       topic: reply.topic,
-      event: "phx_reply",
+      event: "combo_reply",
       ref: reply.ref,
       payload: %{status: reply.status, response: reply.payload}
     }

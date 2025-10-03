@@ -127,7 +127,7 @@ defmodule Combo.Socket.PoolDrainer do
 
       spawn(fn ->
         for pid <- pids do
-          send(pid, %Combo.Socket.Broadcast{event: "phx_drain"})
+          send(pid, %Combo.Socket.Broadcast{event: "combo_drain"})
         end
       end)
 

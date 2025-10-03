@@ -434,7 +434,7 @@ defmodule Combo.ChannelTest do
   def join(%Socket{} = socket, channel, topic, payload \\ %{})
       when is_atom(channel) and is_binary(topic) and is_map(payload) do
     message = %Message{
-      event: "phx_join",
+      event: "combo_join",
       payload: __stringify__(payload),
       topic: topic,
       ref: System.unique_integer([:positive])
@@ -491,7 +491,7 @@ defmodule Combo.ChannelTest do
   """
   @spec leave(Socket.t) :: reference()
   def leave(%Socket{} = socket) do
-    push(socket, "phx_leave", %{})
+    push(socket, "combo_leave", %{})
   end
 
   @doc """

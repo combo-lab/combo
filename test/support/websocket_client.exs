@@ -68,14 +68,14 @@ defmodule Combo.Integration.WebsocketClient do
   Sends join event to the WebSocket server per the Message protocol
   """
   def join(socket, topic, msg) do
-    send_event(socket, topic, "phx_join", msg)
+    send_event(socket, topic, "combo_join", msg)
   end
 
   @doc """
   Sends leave event to the WebSocket server per the Message protocol
   """
   def leave(socket, topic, msg) do
-    send_event(socket, topic, "phx_leave", msg)
+    send_event(socket, topic, "combo_leave", msg)
   end
 
   ## GenServer implementation
@@ -281,7 +281,7 @@ defmodule Combo.Integration.WebsocketClient do
   defp serialize_msg(msg, state), do: {msg, state}
 
   defp join_ref_for(
-         %{topic: topic, event: "phx_join"},
+         %{topic: topic, event: "combo_join"},
          %{topics: topics, join_ref: join_ref} = state
        ) do
     topics = Map.put(topics, topic, join_ref)
@@ -347,6 +347,6 @@ defmodule Combo.Integration.WebsocketClient do
          data::binary
        >>) do
     payload = %{"status" => status, "response" => {:binary, data}}
-    %Message{join_ref: join_ref, ref: ref, topic: topic, event: "phx_reply", payload: payload}
+    %Message{join_ref: join_ref, ref: ref, topic: topic, event: "combo_reply", payload: payload}
   end
 end

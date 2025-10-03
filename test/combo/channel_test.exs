@@ -5,12 +5,12 @@ defmodule Combo.Channel.ChannelTest do
   import Combo.Channel
 
   setup_all do
-    start_supervised! {Phoenix.PubSub, name: @pubsub, pool_size: 1}
+    start_supervised! {Combo.PubSub, name: @pubsub, pool_size: 1}
     :ok
   end
 
   test "broadcasts from self" do
-    Phoenix.PubSub.subscribe(@pubsub, "sometopic")
+    Combo.PubSub.subscribe(@pubsub, "sometopic")
 
     socket = %Combo.Socket{
       pubsub_server: @pubsub,
@@ -53,7 +53,7 @@ defmodule Combo.Channel.ChannelTest do
   end
 
   test "broadcasts from other" do
-    Phoenix.PubSub.subscribe(@pubsub, "sometopic")
+    Combo.PubSub.subscribe(@pubsub, "sometopic")
 
     socket = %Combo.Socket{
       pubsub_server: @pubsub,

@@ -37,7 +37,7 @@ defmodule Combo.Socket.V1.JSONSerializerTest do
     encoded = encode!(@serializer, msg)
 
     assert JSON.decode!(encoded) == %{
-             "event" => "phx_reply",
+             "event" => "combo_reply",
              "payload" => %{"response" => nil, "status" => nil},
              "ref" => "null",
              "topic" => "t"

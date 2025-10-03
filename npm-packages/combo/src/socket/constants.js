@@ -13,11 +13,11 @@ export const CHANNEL_STATES = {
   leaving: 'leaving',
 }
 export const CHANNEL_EVENTS = {
-  close: 'phx_close',
-  error: 'phx_error',
-  join: 'phx_join',
-  reply: 'phx_reply',
-  leave: 'phx_leave',
+  close: 'combo_close',
+  error: 'combo_error',
+  join: 'combo_join',
+  reply: 'combo_reply',
+  leave: 'combo_leave',
 }
 
 export const TRANSPORTS = {

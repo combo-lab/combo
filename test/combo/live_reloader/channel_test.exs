@@ -31,7 +31,7 @@ defmodule Combo.LiveReloader.ChannelTest do
   setup_all do
     children =
       [
-        {Phoenix.PubSub, name: __MODULE__.PubSub},
+        {Combo.PubSub, name: __MODULE__.PubSub},
         Endpoint
       ]
 

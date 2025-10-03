@@ -6,13 +6,13 @@ defmodule Combo.Presence do
   presences for a given topic, as well as handling diffs of
   join and leave events as they occur in real-time. Using this
   module defines a supervisor and a module that implements the
-  `Phoenix.Tracker` behaviour that uses `Phoenix.PubSub` to
+  `Combo.Tracker` behaviour that uses `Combo.PubSub` to
   broadcast presence updates.
 
   In case you want to use only a subset of the functionality
   provided by `Combo.Presence`, such as tracking processes
   but without broadcasting updates, we recommend that you look
-  at the `Phoenix.Tracker` functionality from the `phoenix_pubsub`
+  at the `Combo.Tracker` functionality from the `combo_pubsub`
   project.
 
   ## Example Usage
@@ -37,7 +37,7 @@ defmodule Combo.Presence do
 
       children = [
         ...
-        {Phoenix.PubSub, name: MyApp.PubSub},
+        {Combo.PubSub, name: MyApp.PubSub},
         MyAppWeb.Presence,
         MyAppWeb.Endpoint
       ]
@@ -73,8 +73,8 @@ defmodule Combo.Presence do
   The diff structure will be a map of `:joins` and `:leaves` of the form:
 
       %{
-        joins: %{"123" => %{metas: [%{status: "away", phx_ref: ...}]}},
-        leaves: %{"456" => %{metas: [%{status: "online", phx_ref: ...}]}}
+        joins: %{"123" => %{metas: [%{status: "away", combo_ref: ...}]}},
+        leaves: %{"456" => %{metas: [%{status: "online", combo_ref: ...}]}}
       },
 
   See `c:list/1` for more information on the presence data structure.
@@ -146,7 +146,7 @@ defmodule Combo.Presence do
           for {user_id, presence} <- joins do
             user_data = %{user: presence.user, metas: Map.fetch!(presences, user_id)}
             msg = {MyApp.PresenceClient, {:join, user_data}}
-            Phoenix.PubSub.local_broadcast(MyApp.PubSub, topic, msg)
+            Combo.PubSub.local_broadcast(MyApp.PubSub, topic, msg)
           end
 
           # fetch existing presence information for the left users and broadcast the
@@ -160,7 +160,7 @@ defmodule Combo.Presence do
 
             user_data = %{user: presence.user, metas: metas}
             msg = {MyApp.PresenceClient, {:leave, user_data}}
-            Phoenix.PubSub.local_broadcast(MyApp.PubSub, topic, msg)
+            Combo.PubSub.local_broadcast(MyApp.PubSub, topic, msg)
           end
 
           {:ok, state}
@@ -266,23 +266,23 @@ defmodule Combo.Presence do
   The presence information is returned as a map with presences grouped
   by key, cast as a string, and accumulated metadata, with the following form:
 
-      %{key => %{metas: [%{phx_ref: ..., ...}, ...]}}
+      %{key => %{metas: [%{combo_ref: ..., ...}, ...]}}
 
   For example, imagine a user with id `123` online from two
   different devices, as well as a user with id `456` online from
   just one device. The following presence information might be returned:
 
-      %{"123" => %{metas: [%{status: "away", phx_ref: ...},
-                           %{status: "online", phx_ref: ...}]},
-        "456" => %{metas: [%{status: "online", phx_ref: ...}]}}
+      %{"123" => %{metas: [%{status: "away", combo_ref: ...},
+                           %{status: "online", combo_ref: ...}]},
+        "456" => %{metas: [%{status: "online", combo_ref: ...}]}}
 
   The keys of the map will usually point to a resource ID. The value
   will contain a map with a `:metas` key containing a list of metadata
   for each resource. Additionally, every metadata entry will contain a
-  `:phx_ref` key which can be used to uniquely identify metadata for a
+  `:combo_ref` key which can be used to uniquely identify metadata for a
   given key. In the event that the metadata was previously updated,
-  a `:phx_ref_prev` key will be present containing the previous
-  `:phx_ref` value.
+  a `:combo_ref_prev` key will be present containing the previous
+  `:combo_ref` value.
   """
   @callback list(socket_or_topic :: Combo.Socket.t() | topic) :: presences
 
@@ -380,7 +380,7 @@ defmodule Combo.Presence do
       end
 
       def track(pid, topic, key, meta) do
-        Phoenix.Tracker.track(__MODULE__, pid, topic, key, meta)
+        Combo.Tracker.track(__MODULE__, pid, topic, key, meta)
       end
 
       def untrack(%Combo.Socket{} = socket, key) do
@@ -388,7 +388,7 @@ defmodule Combo.Presence do
       end
 
       def untrack(pid, topic, key) do
-        Phoenix.Tracker.untrack(__MODULE__, pid, topic, key)
+        Combo.Tracker.untrack(__MODULE__, pid, topic, key)
       end
 
       def update(%Combo.Socket{} = socket, key, meta) do
@@ -396,7 +396,7 @@ defmodule Combo.Presence do
       end
 
       def update(pid, topic, key, meta) do
-        Phoenix.Tracker.update(__MODULE__, pid, topic, key, meta)
+        Combo.Tracker.update(__MODULE__, pid, topic, key, meta)
       end
 
       def list(%Combo.Socket{topic: topic}), do: list(topic)
@@ -411,13 +411,13 @@ defmodule Combo.Presence do
 
   defmodule Tracker do
     @moduledoc false
-    use Phoenix.Tracker
+    use Combo.Tracker
 
     def start_link({module, task_supervisor, opts}) do
       pubsub_server =
         opts[:pubsub_server] || raise "use Combo.Presence expects :pubsub_server to be given"
 
-      Phoenix.Tracker.start_link(
+      Combo.Tracker.start_link(
         __MODULE__,
         {module, task_supervisor, pubsub_server},
         opts
@@ -529,7 +529,7 @@ defmodule Combo.Presence do
   def list(module, topic) do
     grouped =
       module
-      |> Phoenix.Tracker.list(topic)
+      |> Combo.Tracker.list(topic)
       |> group()
 
     module.fetch(topic, grouped)
@@ -539,7 +539,7 @@ defmodule Combo.Presence do
   def get_by_key(module, topic, key) do
     string_key = to_string(key)
 
-    case Phoenix.Tracker.get_by_key(module, topic, key) do
+    case Combo.Tracker.get_by_key(module, topic, key) do
       [] ->
         []
 

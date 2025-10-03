@@ -3,7 +3,7 @@ defmodule Combo.Channel do
   Defines a channel.
 
   Channels provide a means for bidirectional communication from clients that
-  integrate with the `Phoenix.PubSub` layer for soft-realtime functionality.
+  integrate with the `Combo.PubSub` layer for soft-realtime functionality.
 
   For a conceptual overview, see the [Channels guide](channels.html).
 

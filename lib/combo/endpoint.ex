@@ -297,7 +297,7 @@ defmodule Combo.Endpoint do
   @doc """
   Subscribes the caller to the given topic.
 
-  See `Phoenix.PubSub.subscribe/3` for options.
+  See `Combo.PubSub.subscribe/3` for options.
   """
   @callback subscribe(topic, opts :: keyword()) :: :ok | {:error, term()}
 
@@ -372,11 +372,11 @@ defmodule Combo.Endpoint do
   defp pubsub do
     quote do
       def subscribe(topic, opts \\ []) when is_binary(topic) do
-        Phoenix.PubSub.subscribe(pubsub_server!(), topic, opts)
+        Combo.PubSub.subscribe(pubsub_server!(), topic, opts)
       end
 
       def unsubscribe(topic) do
-        Phoenix.PubSub.unsubscribe(pubsub_server!(), topic)
+        Combo.PubSub.unsubscribe(pubsub_server!(), topic)
       end
 
       def broadcast_from(from, topic, event, msg) do

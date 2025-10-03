@@ -85,10 +85,10 @@ export default class Presence {
     this.map(newState, (key, newPresence) => {
       let currentPresence = state[key]
       if (currentPresence) {
-        let newRefs = newPresence.metas.map(m => m.phx_ref)
-        let curRefs = currentPresence.metas.map(m => m.phx_ref)
-        let joinedMetas = newPresence.metas.filter(m => curRefs.indexOf(m.phx_ref) < 0)
-        let leftMetas = currentPresence.metas.filter(m => newRefs.indexOf(m.phx_ref) < 0)
+        let newRefs = newPresence.metas.map(m => m.combo_ref)
+        let curRefs = currentPresence.metas.map(m => m.combo_ref)
+        let joinedMetas = newPresence.metas.filter(m => curRefs.indexOf(m.combo_ref) < 0)
+        let leftMetas = currentPresence.metas.filter(m => newRefs.indexOf(m.combo_ref) < 0)
         if (joinedMetas.length > 0) {
           joins[key] = newPresence
           joins[key].metas = joinedMetas
@@ -126,8 +126,8 @@ export default class Presence {
       let currentPresence = state[key]
       state[key] = this.clone(newPresence)
       if (currentPresence) {
-        let joinedRefs = state[key].metas.map(m => m.phx_ref)
-        let curMetas = currentPresence.metas.filter(m => joinedRefs.indexOf(m.phx_ref) < 0)
+        let joinedRefs = state[key].metas.map(m => m.combo_ref)
+        let curMetas = currentPresence.metas.filter(m => joinedRefs.indexOf(m.combo_ref) < 0)
         state[key].metas.unshift(...curMetas)
       }
       onJoin(key, currentPresence, newPresence)
@@ -137,9 +137,9 @@ export default class Presence {
       if (!currentPresence) {
         return
       }
-      let refsToRemove = leftPresence.metas.map(m => m.phx_ref)
+      let refsToRemove = leftPresence.metas.map(m => m.combo_ref)
       currentPresence.metas = currentPresence.metas.filter((p) => {
-        return refsToRemove.indexOf(p.phx_ref) < 0
+        return refsToRemove.indexOf(p.combo_ref) < 0
       })
       onLeave(key, currentPresence, leftPresence)
       if (currentPresence.metas.length === 0) {

@@ -65,7 +65,7 @@ defmodule Combo.Socket.V2.JSONSerializer do
       reply.join_ref,
       reply.ref,
       reply.topic,
-      "phx_reply",
+      "combo_reply",
       %{status: reply.status, response: reply.payload}
     ]
 

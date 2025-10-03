@@ -214,7 +214,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
     config = Application.get_env(:combo, Endpoint)
     Application.put_env(:combo, Endpoint, Keyword.merge(config, adapter: adapter))
     capture_log(fn -> start_supervised!(Endpoint) end)
-    start_supervised!({Phoenix.PubSub, name: __MODULE__})
+    start_supervised!({Combo.PubSub, name: __MODULE__})
     :ok
   end
 
@@ -247,7 +247,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
           WebsocketClient.join(sock, "room:admin-lobby1", %{})
 
           assert_receive %Message{
-            event: "phx_reply",
+            event: "combo_reply",
             payload: %{"response" => %{}, "status" => "ok"},
             join_ref: @join_ref,
             ref: "1",
@@ -261,7 +261,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
           WebsocketClient.join(sock, lobby, %{})
 
           assert_receive %Message{
-            event: "phx_reply",
+            event: "combo_reply",
             join_ref: @join_ref,
             payload: %{"response" => %{}, "status" => "ok"},
             ref: "1",
@@ -295,15 +295,15 @@ defmodule Combo.Integration.WebSocketChannelsTest do
 
           WebsocketClient.leave(sock, lobby, %{})
           assert_receive %Message{event: "you_left", payload: %{"message" => "bye!"}}
-          assert_receive %Message{event: "phx_reply", payload: %{"status" => "ok"}}
-          assert_receive %Message{event: "phx_close", payload: %{}}
+          assert_receive %Message{event: "combo_reply", payload: %{"status" => "ok"}}
+          assert_receive %Message{event: "combo_close", payload: %{}}
           refute Process.alive?(channel_pid)
 
           WebsocketClient.send_event(sock, lobby, "new_msg", %{body: "Should ignore"})
           refute_receive %Message{event: "new_msg"}
 
           assert_receive %Message{
-            event: "phx_reply",
+            event: "combo_reply",
             payload: %{"response" => %{"reason" => "unmatched topic"}}
           }
 
@@ -554,7 +554,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
               WebsocketClient.join(sock, topic, %{"join" => "yes", "password" => "no"})
 
               assert_receive %Message{
-                event: "phx_reply",
+                event: "combo_reply",
                 join_ref: @join_ref,
                 payload: %{"response" => %{}, "status" => "ok"},
                 ref: "1",
@@ -572,7 +572,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
                 "password" => "no"
               })
 
-              assert_receive %Message{event: "phx_reply", ref: "2"}
+              assert_receive %Message{event: "combo_reply", ref: "2"}
             end)
 
           assert log =~
@@ -581,14 +581,14 @@ defmodule Combo.Integration.WebSocketChannelsTest do
           assert log =~ "Parameters: %{\"in\" => \"yes\", \"password\" => \"[FILTERED]\"}"
         end
 
-        test "sends phx_error if a channel server abnormally exits" do
+        test "sends combo_error if a channel server abnormally exits" do
           {:ok, sock} = WebsocketClient.connect(self(), @vsn_path, @serializer)
 
           lobby = lobby()
           WebsocketClient.join(sock, lobby, %{})
 
           assert_receive %Message{
-            event: "phx_reply",
+            event: "combo_reply",
             ref: "1",
             payload: %{"response" => %{}, "status" => "ok"}
           }
@@ -598,7 +598,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
 
           capture_log(fn ->
             WebsocketClient.send_event(sock, lobby, "boom", %{})
-            assert_receive %Message{event: "phx_error", payload: %{}, topic: ^lobby}
+            assert_receive %Message{event: "combo_error", payload: %{}, topic: ^lobby}
           end)
         end
 
@@ -609,7 +609,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
           WebsocketClient.join(sock, lobby, %{})
 
           assert_receive %Message{
-            event: "phx_reply",
+            event: "combo_reply",
             ref: "1",
             payload: %{"response" => %{}, "status" => "ok"}
           }
@@ -636,7 +636,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
           refute_receive %Message{event: "new_msg"}
 
           assert_receive %Message{
-            event: "phx_reply",
+            event: "combo_reply",
             payload: %{"response" => %{"reason" => "unmatched topic"}}
           }
 
@@ -675,7 +675,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
 
           assert_receive %Message{
             topic: "room:wsdisconnect1",
-            event: "phx_reply",
+            event: "combo_reply",
             ref: "1",
             payload: %{"response" => %{}, "status" => "ok"}
           }
@@ -684,7 +684,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
 
           assert_receive %Message{
             topic: "room:wsdisconnect2",
-            event: "phx_reply",
+            event: "combo_reply",
             ref: "2",
             payload: %{"response" => %{}, "status" => "ok"}
           }
@@ -714,7 +714,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
 
           assert_receive %Message{
             topic: "room:joiner",
-            event: "phx_reply",
+            event: "combo_reply",
             ref: "1",
             payload: %{"response" => %{}, "status" => "ok"}
           }
@@ -723,7 +723,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
 
           assert_receive %Message{
             topic: "room:joiner",
-            event: "phx_reply",
+            event: "combo_reply",
             ref: "2",
             payload: %{"response" => %{}, "status" => "ok"}
           }
@@ -745,7 +745,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
           WebsocketClient.send_heartbeat(socket)
 
           assert_receive %Message{
-            event: "phx_reply",
+            event: "combo_reply",
             payload: %{"response" => %{}, "status" => "ok"},
             ref: "1",
             topic: "combo"
@@ -763,7 +763,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
               WebsocketClient.join(sock, "unmatched-topic", %{})
 
               assert_receive %Message{
-                event: "phx_reply",
+                event: "combo_reply",
                 ref: "1",
                 topic: "unmatched-topic",
                 join_ref: nil,
@@ -796,7 +796,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
         WebsocketClient.join(sock, "custom:ignore", %{"action" => "ignore"})
 
         assert_receive %Message{
-          event: "phx_reply",
+          event: "combo_reply",
           join_ref: "11",
           payload: %{"response" => %{"action" => "ignore"}, "status" => "error"},
           ref: "1",
@@ -806,7 +806,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
         WebsocketClient.join(sock, "custom:error", %{"action" => "error"})
 
         assert_receive %Message{
-          event: "phx_reply",
+          event: "combo_reply",
           join_ref: "12",
           payload: %{"response" => %{"reason" => "join crashed"}, "status" => "error"},
           ref: "2",
@@ -816,7 +816,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
         WebsocketClient.join(sock, "custom:ok", %{"action" => "ok"})
 
         assert_receive %Message{
-          event: "phx_reply",
+          event: "combo_reply",
           join_ref: "13",
           payload: %{"response" => %{"action" => "ok"}, "status" => "ok"},
           ref: "3",
@@ -824,7 +824,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
         }
 
         WebsocketClient.send_event(sock, "custom:ok", "close", %{body: "bye!"})
-        assert_receive %Message{event: "phx_close", payload: %{}}
+        assert_receive %Message{event: "combo_close", payload: %{}}
       end
     end
 
@@ -847,7 +847,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
         WebsocketClient.join(socket, topic, %{})
 
         assert_receive %Message{
-          event: "phx_reply",
+          event: "combo_reply",
           payload: %{"response" => %{}, "status" => "ok"},
           join_ref: @join_ref,
           ref: "1",
@@ -857,7 +857,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
         WebsocketClient.send_event(socket, topic, "binary_event", {:binary, <<1, 2>>})
 
         assert_receive %Message{
-          event: "phx_reply",
+          event: "combo_reply",
           payload: %{"response" => {:binary, <<1, 2, 3, 4>>}, "status" => "ok"},
           join_ref: @join_ref,
           ref: "2",

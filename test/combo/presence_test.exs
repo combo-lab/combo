@@ -22,7 +22,7 @@ defmodule Combo.PresenceTest do
     def init(state), do: {:ok, state}
 
     def handle_metas(topic, diff, presences, state) do
-      Phoenix.PubSub.local_broadcast(PresPub, topic, %{diff: diff, presences: presences})
+      Combo.PubSub.local_broadcast(PresPub, topic, %{diff: diff, presences: presences})
       {:ok, state}
     end
   end
@@ -47,7 +47,7 @@ defmodule Combo.PresenceTest do
   Application.put_env(:combo, MetasPresence, pubsub_server: PresPub)
 
   setup_all do
-    start_supervised!({Phoenix.PubSub, name: PresPub, pool_size: 1})
+    start_supervised!({Combo.PubSub, name: PresPub, pool_size: 1})
     start_supervised!(MyPresence)
     start_supervised!(MetasPresence)
     {:ok, pubsub: PresPub}
@@ -72,7 +72,7 @@ defmodule Combo.PresenceTest do
   end
 
   test "default fetch/2 returns pass-through data", config do
-    presences = %{"u1" => %{metas: [%{name: "u1", phx_ref: "ref"}]}}
+    presences = %{"u1" => %{metas: [%{name: "u1", combo_ref: "ref"}]}}
     assert DefaultPresence.fetch(config.topic, presences) == presences
   end
 
@@ -81,17 +81,17 @@ defmodule Combo.PresenceTest do
     assert MyPresence.list(%Combo.Socket{topic: config.topic}) == %{}
     assert {:ok, _} = MyPresence.track(self(), config.topic, "u1", %{name: "u1"})
 
-    assert %{"u1" => %{extra: "extra", metas: [%{name: "u1", phx_ref: _}]}} =
+    assert %{"u1" => %{extra: "extra", metas: [%{name: "u1", combo_ref: _}]}} =
              MyPresence.list(config.topic)
 
-    assert %{"u1" => %{extra: "extra", metas: [%{name: "u1", phx_ref: _}]}} =
+    assert %{"u1" => %{extra: "extra", metas: [%{name: "u1", combo_ref: _}]}} =
              MyPresence.list(%Combo.Socket{topic: config.topic})
   end
 
   test "list/1 returns keys as strings", config do
     assert {:ok, _} = MyPresence.track(self(), config.topic, 1, %{name: "u1"})
 
-    assert %{"1" => %{extra: "extra", metas: [%{name: "u1", phx_ref: _}]}} =
+    assert %{"1" => %{extra: "extra", metas: [%{name: "u1", combo_ref: _}]}} =
              MyPresence.list(config.topic)
   end
 
@@ -103,7 +103,7 @@ defmodule Combo.PresenceTest do
     assert {:ok, _} = MyPresence.track(pid2, config.topic, 1, %{name: "u1.2"})
     assert {:ok, _} = MyPresence.track(pid3, config.topic, 2, %{name: "u1.2"})
 
-    assert %{extra: "extra", metas: [%{name: "u1", phx_ref: _}, %{name: "u1.2", phx_ref: _}]} =
+    assert %{extra: "extra", metas: [%{name: "u1", combo_ref: _}, %{name: "u1.2", combo_ref: _}]} =
              MyPresence.get_by_key(config.topic, 1)
 
     assert MyPresence.get_by_key(config.topic, "another_key") == []
@@ -113,7 +113,7 @@ defmodule Combo.PresenceTest do
   test "handle_diff broadcasts events with default fetched data",
        %{topic: topic} = config do
     pid = spawn(fn -> :timer.sleep(:infinity) end)
-    Phoenix.PubSub.subscribe(config.pubsub, topic)
+    Combo.PubSub.subscribe(config.pubsub, topic)
     start_supervised!({DefaultPresence, pubsub_server: config.pubsub})
     DefaultPresence.track(pid, topic, "u1", %{name: "u1"})
 
@@ -121,12 +121,12 @@ defmodule Combo.PresenceTest do
       topic: ^topic,
       event: "presence_diff",
       payload: %{
-        joins: %{"u1" => %{metas: [%{name: "u1", phx_ref: u1_ref}]}},
+        joins: %{"u1" => %{metas: [%{name: "u1", combo_ref: u1_ref}]}},
         leaves: %{}
       }
     }
 
-    assert %{"u1" => %{metas: [%{name: "u1", phx_ref: ^u1_ref}]}} = DefaultPresence.list(topic)
+    assert %{"u1" => %{metas: [%{name: "u1", combo_ref: ^u1_ref}]}} = DefaultPresence.list(topic)
 
     Process.exit(pid, :kill)
 
@@ -135,7 +135,7 @@ defmodule Combo.PresenceTest do
       event: "presence_diff",
       payload: %{
         joins: %{},
-        leaves: %{"u1" => %{metas: [%{name: "u1", phx_ref: ^u1_ref}]}}
+        leaves: %{"u1" => %{metas: [%{name: "u1", combo_ref: ^u1_ref}]}}
       }
     }
 
@@ -145,19 +145,19 @@ defmodule Combo.PresenceTest do
   test "handle_diff broadcasts events with custom fetched data",
        %{topic: topic} = config do
     pid = spawn(fn -> :timer.sleep(:infinity) end)
-    Phoenix.PubSub.subscribe(config.pubsub, topic)
+    Combo.PubSub.subscribe(config.pubsub, topic)
     MyPresence.track(pid, topic, "u1", %{name: "u1"})
 
     assert_receive %Broadcast{
       topic: ^topic,
       event: "presence_diff",
       payload: %{
-        joins: %{"u1" => %{extra: "extra", metas: [%{name: "u1", phx_ref: u1_ref}]}},
+        joins: %{"u1" => %{extra: "extra", metas: [%{name: "u1", combo_ref: u1_ref}]}},
         leaves: %{}
       }
     }
 
-    assert %{"u1" => %{extra: "extra", metas: [%{name: "u1", phx_ref: ^u1_ref}]}} =
+    assert %{"u1" => %{extra: "extra", metas: [%{name: "u1", combo_ref: ^u1_ref}]}} =
              MyPresence.list(topic)
 
     Process.exit(pid, :kill)
@@ -167,7 +167,7 @@ defmodule Combo.PresenceTest do
       event: "presence_diff",
       payload: %{
         joins: %{},
-        leaves: %{"u1" => %{extra: "extra", metas: [%{name: "u1", phx_ref: ^u1_ref}]}}
+        leaves: %{"u1" => %{extra: "extra", metas: [%{name: "u1", combo_ref: ^u1_ref}]}}
       }
     }
 
@@ -175,7 +175,7 @@ defmodule Combo.PresenceTest do
   end
 
   test "untrack with pid", %{topic: topic} = config do
-    Phoenix.PubSub.subscribe(config.pubsub, config.topic)
+    Combo.PubSub.subscribe(config.pubsub, config.topic)
     MyPresence.track(self(), config.topic, "u1", %{})
     MyPresence.track(self(), config.topic, "u2", %{})
 
@@ -200,7 +200,7 @@ defmodule Combo.PresenceTest do
   end
 
   test "track and untrack with %Socket{}", %{topic: topic} = config do
-    Phoenix.PubSub.subscribe(config.pubsub, topic)
+    Combo.PubSub.subscribe(config.pubsub, topic)
     socket = %Combo.Socket{topic: topic, channel_pid: self()}
     MyPresence.track(socket, "u1", %{})
     assert %{"u1" => %{metas: [%{}]}} = MyPresence.list(topic)
@@ -223,7 +223,7 @@ defmodule Combo.PresenceTest do
   end
 
   test "update sends join and leave diff", %{topic: topic} = config do
-    Phoenix.PubSub.subscribe(config.pubsub, topic)
+    Combo.PubSub.subscribe(config.pubsub, topic)
     MyPresence.track(self(), topic, "u1", %{name: "u1"})
     assert %{"u1" => %{metas: [%{name: "u1"}]}} = MyPresence.list(topic)
     assert {:ok, _} = MyPresence.update(self(), topic, "u1", %{name: "updated"})
@@ -259,7 +259,7 @@ defmodule Combo.PresenceTest do
 
     test "async_merge/2 creates new topic and metas",
          %{topic: topic} = config do
-      Phoenix.PubSub.subscribe(config.pubsub, topic)
+      Combo.PubSub.subscribe(config.pubsub, topic)
       MetasPresence.track(self(), topic, "u1", %{name: "u1"})
 
       assert_receive %{
@@ -270,12 +270,12 @@ defmodule Combo.PresenceTest do
         presences: presences
       }
 
-      assert %{"u1" => [%{name: "u1", phx_ref: _ref}]} = presences
+      assert %{"u1" => [%{name: "u1", combo_ref: _ref}]} = presences
     end
 
     test "async_merge/2 adds new presences to existing topic",
          %{topic: topic} = config do
-      Phoenix.PubSub.subscribe(config.pubsub, topic)
+      Combo.PubSub.subscribe(config.pubsub, topic)
       pid1 = spawn(fn -> :timer.sleep(:infinity) end)
       pid2 = spawn(fn -> :timer.sleep(:infinity) end)
       MetasPresence.track(pid1, topic, "u1", %{name: "u1"})
@@ -291,15 +291,15 @@ defmodule Combo.PresenceTest do
       }
 
       assert %{
-               "u1" => [%{name: "u1", phx_ref: _u1_ref}],
-               "u2" => [%{name: "u2", phx_ref: _u2_ref}],
-               "u3" => [%{name: "u3", phx_ref: _u3_ref}]
+               "u1" => [%{name: "u1", combo_ref: _u1_ref}],
+               "u2" => [%{name: "u2", combo_ref: _u2_ref}],
+               "u3" => [%{name: "u3", combo_ref: _u3_ref}]
              } = presences
     end
 
     test "async_merge/2 adds new metas to existing presence",
          %{topic: topic} = config do
-      Phoenix.PubSub.subscribe(config.pubsub, topic)
+      Combo.PubSub.subscribe(config.pubsub, topic)
       pid1 = spawn(fn -> :timer.sleep(:infinity) end)
       pid2 = spawn(fn -> :timer.sleep(:infinity) end)
       MetasPresence.track(pid1, topic, "u1", %{name: "u1.1"})
@@ -316,16 +316,16 @@ defmodule Combo.PresenceTest do
 
       assert %{
                "u1" => [
-                 %{name: "u1.1", phx_ref: _u1_1_ref},
-                 %{name: "u1.2", phx_ref: _u1_2_ref},
-                 %{name: "u1.3", phx_ref: _u1_3_ref}
+                 %{name: "u1.1", combo_ref: _u1_1_ref},
+                 %{name: "u1.2", combo_ref: _u1_2_ref},
+                 %{name: "u1.3", combo_ref: _u1_3_ref}
                ]
              } = presences
     end
 
     test "async_merge/2 removes topic if it doesn't have presences",
          %{topic: topic} = config do
-      Phoenix.PubSub.subscribe(config.pubsub, topic)
+      Combo.PubSub.subscribe(config.pubsub, topic)
       pid1 = spawn(fn -> :timer.sleep(:infinity) end)
       pid2 = spawn(fn -> :timer.sleep(:infinity) end)
 
@@ -350,7 +350,7 @@ defmodule Combo.PresenceTest do
 
     test "async_merge/2 removes presence info if it only has one meta",
          %{topic: topic} = config do
-      Phoenix.PubSub.subscribe(config.pubsub, topic)
+      Combo.PubSub.subscribe(config.pubsub, topic)
 
       pid1 = spawn(fn -> :timer.sleep(:infinity) end)
       pid2 = spawn(fn -> :timer.sleep(:infinity) end)
@@ -371,14 +371,14 @@ defmodule Combo.PresenceTest do
       assert map_size(presences) == 2
 
       assert %{
-               "u1" => [%{name: "u1", phx_ref: _u1_ref}],
-               "u2" => [%{name: "u2", phx_ref: _u2_ref}]
+               "u1" => [%{name: "u1", combo_ref: _u1_ref}],
+               "u2" => [%{name: "u2", combo_ref: _u2_ref}]
              } = presences
     end
 
     test "async_merge/2 removes metas when a presence left",
          %{topic: topic} = config do
-      Phoenix.PubSub.subscribe(config.pubsub, topic)
+      Combo.PubSub.subscribe(config.pubsub, topic)
       pid1 = spawn(fn -> :timer.sleep(:infinity) end)
       pid2 = spawn(fn -> :timer.sleep(:infinity) end)
       MetasPresence.track(pid1, topic, "u1", %{name: "u1.1"})
@@ -400,8 +400,8 @@ defmodule Combo.PresenceTest do
       assert length(metas) == 2
 
       assert [
-               %{name: "u1.1", phx_ref: _u1_1_ref},
-               %{name: "u1.2", phx_ref: _u1_2_ref}
+               %{name: "u1.1", combo_ref: _u1_1_ref},
+               %{name: "u1.2", combo_ref: _u1_2_ref}
              ] = metas
     end
   end

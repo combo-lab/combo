@@ -36,7 +36,7 @@ defmodule Combo.Test.ChannelTest do
     end
 
     def join("foo:external", _, socket) do
-      :ok = Phoenix.PubSub.subscribe(Combo.Test.ChannelTest.PubSub, "external:topic")
+      :ok = Combo.PubSub.subscribe(Combo.Test.ChannelTest.PubSub, "external:topic")
       {:ok, socket}
     end
 
@@ -176,7 +176,7 @@ defmodule Combo.Test.ChannelTest do
 
   setup_all do
     start_supervised! @endpoint
-    start_supervised! {Phoenix.PubSub, name: Combo.Test.ChannelTest.PubSub}
+    start_supervised! {Combo.PubSub, name: Combo.Test.ChannelTest.PubSub}
     :ok
   end
 

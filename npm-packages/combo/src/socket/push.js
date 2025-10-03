@@ -1,7 +1,7 @@
 /**
  * Initializes the Push
  * @param {Channel} channel - The Channel
- * @param {string} event - The event, for example `"phx_join"`
+ * @param {string} event - The event, for example `"combo_join"`
  * @param {Object} payload - The payload, for example `{user_id: 123}`
  * @param {number} timeout - The push timeout in milliseconds
  */

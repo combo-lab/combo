@@ -2,7 +2,7 @@ defmodule Combo.Transports.LongPoll.Server do
   @moduledoc false
 
   use GenServer, restart: :temporary
-  alias Phoenix.PubSub
+  alias Combo.PubSub
 
   def start_link(arg) do
     GenServer.start_link(__MODULE__, arg)

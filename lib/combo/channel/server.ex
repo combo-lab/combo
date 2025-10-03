@@ -4,7 +4,7 @@ defmodule Combo.Channel.Server do
   use GenServer, restart: :temporary
 
   require Logger
-  alias Phoenix.PubSub
+  alias Combo.PubSub
   alias Combo.Socket
   alias Combo.Socket.{Broadcast, Message, Reply, PoolSupervisor}
 
@@ -81,7 +81,7 @@ defmodule Combo.Channel.Server do
   ## Channel API
 
   @doc """
-  Hook invoked by Phoenix.PubSub dispatch.
+  Hook invoked by Combo.PubSub dispatch.
   """
   def dispatch(subscribers, from, %Broadcast{event: event} = msg) do
     Enum.reduce(subscribers, %{}, fn
@@ -312,7 +312,7 @@ defmodule Combo.Channel.Server do
     state
   end
 
-  def handle_info(%Message{topic: topic, event: "phx_leave", ref: ref}, %{topic: topic} = socket) do
+  def handle_info(%Message{topic: topic, event: "combo_leave", ref: ref}, %{topic: topic} = socket) do
     handle_in({:stop, {:shutdown, :left}, :ok, put_in(socket.ref, ref)})
   end
 
@@ -329,7 +329,7 @@ defmodule Combo.Channel.Server do
   end
 
   def handle_info(
-        %Broadcast{event: "phx_drain"},
+        %Broadcast{event: "combo_drain"},
         %{transport_pid: transport_pid} = socket
       ) do
     send(transport_pid, :socket_drain)
@@ -421,13 +421,13 @@ defmodule Combo.Channel.Server do
       The :pubsub_server was not configured for endpoint #{inspect(socket.endpoint)}.
       Make sure to start a PubSub process in your application supervision tree:
 
-          {Phoenix.PubSub, [name: Demo.PubSub, adapter: Phoenix.PubSub.PG2]}
+          {Combo.PubSub, name: MyApp.PubSub}
 
       And then add it to your endpoint config:
 
-          config :demo, Demo.Web.Endpoint,
+          config :my_app, MyApp.Web.Endpoint,
             # ...
-            pubsub_server: Demo.PubSub
+            pubsub_server: MyApp.PubSub
       """
     end
 

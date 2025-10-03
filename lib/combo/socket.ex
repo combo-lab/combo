@@ -104,8 +104,8 @@ defmodule Combo.Socket do
   which is forwarded to channels except:
 
     * `"heartbeat"` events in the "combo" topic - should just emit an OK reply
-    * `"phx_join"` on any topic - should join the topic
-    * `"phx_leave"` on any topic - should leave the topic
+    * `"combo_join"` on any topic - should join the topic
+    * `"combo_leave"` on any topic - should leave the topic
 
   Each message also has a `ref` field which is used to track responses.
 
@@ -117,10 +117,10 @@ defmodule Combo.Socket do
   The `Combo.Socket` implementation may also send special messages
   and replies:
 
-    * `"phx_error"` - in case of errors, such as a channel process
+    * `"combo_error"` - in case of errors, such as a channel process
       crashing, or when attempting to join an already joined channel
 
-    * `"phx_close"` - the channel was gracefully closed
+    * `"combo_close"` - the channel was gracefully closed
 
   Combo ships with a JavaScript implementation of both websocket and long
   polling that interacts with `Combo.Socket` and can be used as reference
@@ -156,11 +156,11 @@ defmodule Combo.Socket do
   structs, encoding them with the serializer and dispatching the
   serialized result to the transport.
 
-  For example, to handle "phx_leave" messages, which is recommended
+  For example, to handle "combo_leave" messages, which is recommended
   to be handled by all channel implementations, one may do:
 
       def handle_info(
-            %Message{topic: topic, event: "phx_leave"} = message,
+            %Message{topic: topic, event: "combo_leave"} = message,
             %{topic: topic, serializer: serializer, transport_pid: transport_pid} = socket
           ) do
         send transport_pid, serializer.encode!(build_leave_reply(message))
@@ -168,12 +168,12 @@ defmodule Combo.Socket do
       end
 
   A special message delivered to all channels is a Broadcast with
-  event "phx_drain", which is sent when draining the socket during
+  event "combo_drain", which is sent when draining the socket during
   application shutdown. Typically it is handled by sending a drain
   message to the transport, causing it to shutdown:
 
       def handle_info(
-            %Broadcast{event: "phx_drain"},
+            %Broadcast{event: "combo_drain"},
             %{transport_pid: transport_pid} = socket
           ) do
         send(transport_pid, :socket_drain)
@@ -682,7 +682,7 @@ defmodule Combo.Socket do
 
   defp handle_in(
          nil,
-         %{event: "phx_join", topic: topic, ref: ref, join_ref: join_ref} = message,
+         %{event: "combo_join", topic: topic, ref: ref, join_ref: join_ref} = message,
          state,
          socket
        ) do
@@ -719,7 +719,7 @@ defmodule Combo.Socket do
     end
   end
 
-  defp handle_in({pid, _ref, status}, %{event: "phx_join", topic: topic} = message, state, socket) do
+  defp handle_in({pid, _ref, status}, %{event: "combo_join", topic: topic} = message, state, socket) do
     receive do
       {:socket_close, ^pid, _reason} -> :ok
     after
@@ -738,7 +738,7 @@ defmodule Combo.Socket do
     handle_in(nil, message, new_state, new_socket)
   end
 
-  defp handle_in({pid, _ref, _status}, %{event: "phx_leave"} = msg, state, socket) do
+  defp handle_in({pid, _ref, _status}, %{event: "combo_leave"} = msg, state, socket) do
     %{topic: topic, join_ref: join_ref} = msg
 
     case state.channels_inverse do
@@ -760,7 +760,7 @@ defmodule Combo.Socket do
 
   defp handle_in(
          nil,
-         %{event: "phx_leave", ref: ref, topic: topic, join_ref: join_ref},
+         %{event: "combo_leave", ref: ref, topic: topic, join_ref: join_ref},
          state,
          socket
        ) do
@@ -804,7 +804,7 @@ defmodule Combo.Socket do
   end
 
   defp encode_on_exit(socket, topic, ref, _reason) do
-    message = %Message{join_ref: ref, ref: ref, topic: topic, event: "phx_error", payload: %{}}
+    message = %Message{join_ref: ref, ref: ref, topic: topic, event: "combo_error", payload: %{}}
     encode_reply(socket, message)
   end
 
@@ -823,7 +823,7 @@ defmodule Combo.Socket do
       join_ref: join_ref,
       ref: join_ref,
       topic: topic,
-      event: "phx_close",
+      event: "combo_close",
       payload: %{}
     }
 

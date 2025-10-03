@@ -6,7 +6,7 @@ defmodule Combo.Socket.Message do
 
     * `:topic` - The string topic or topic:subtopic pair namespace, for
       example "messages", "messages:123"
-    * `:event`- The string event name, for example "phx_join"
+    * `:event`- The string event name, for example "combo_join"
     * `:payload` - The message payload
     * `:ref` - The unique string ref
     * `:join_ref` - The unique string ref when joining
@@ -62,7 +62,7 @@ defmodule Combo.Socket.Broadcast do
   The message format requires the following keys:
 
     * `:topic` - The string topic or topic:subtopic pair namespace, for example "messages", "messages:123"
-    * `:event`- The string event name, for example "phx_join"
+    * `:event`- The string event name, for example "combo_join"
     * `:payload` - The message payload
 
   """

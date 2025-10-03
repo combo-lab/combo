@@ -49,7 +49,7 @@ describe('with transport', function () {
 
       expect(joinPush.channel).toBe(channel)
       expect(joinPush.payload()).toEqual({ one: 'two' })
-      expect(joinPush.event).toBe('phx_join')
+      expect(joinPush.event).toBe('combo_join')
       expect(joinPush.timeout).toBe(1234)
     })
 
@@ -59,7 +59,7 @@ describe('with transport', function () {
 
       expect(joinPush.channel).toBe(channel)
       expect(joinPush.payload()).toEqual({ one: 'two' })
-      expect(joinPush.event).toBe('phx_join')
+      expect(joinPush.event).toBe('combo_join')
       expect(joinPush.timeout).toBe(1234)
     })
 
@@ -83,7 +83,7 @@ describe('with transport', function () {
 
       expect(joinPush.channel).toBe(channel)
       expect(joinPush.payload()).toEqual({ value: 0 })
-      expect(joinPush.event).toBe('phx_join')
+      expect(joinPush.event).toBe('combo_join')
       expect(joinPush.timeout).toBe(1234)
 
       counter++
@@ -91,7 +91,7 @@ describe('with transport', function () {
       expect(joinPush.channel).toBe(channel)
       expect(joinPush.payload()).toEqual({ value: 1 })
       expect(channel.params()).toEqual({ value: 1 })
-      expect(joinPush.event).toBe('phx_join')
+      expect(joinPush.event).toBe('combo_join')
       expect(joinPush.timeout).toBe(1234)
     })
   })
@@ -132,7 +132,7 @@ describe('with transport', function () {
       expect(spy).toHaveBeenCalledTimes(1)
       expect(spy).toHaveBeenCalledWith({
         topic: 'topic',
-        event: 'phx_join',
+        event: 'combo_join',
         payload: { one: 'two' },
         ref: defaultRef,
         join_ref: channel.joinRef(),
@@ -290,7 +290,7 @@ describe('with transport', function () {
       receiveOk() {
         jest.advanceTimersByTime(joinPush.timeout / 2) // before timeout
         return joinPush.channel.trigger(
-          'phx_reply',
+          'combo_reply',
           { status: 'ok', response: response },
           joinPush.ref,
           joinPush.ref,
@@ -599,7 +599,7 @@ describe('with transport', function () {
     it('sets state to \'errored\'', function () {
       expect(channel.state).not.toBe('errored')
 
-      channel.trigger('phx_error')
+      channel.trigger('combo_error')
 
       expect(channel.state).toBe('errored')
     })
@@ -609,7 +609,7 @@ describe('with transport', function () {
 
       expect(spy).toHaveBeenCalledTimes(0)
 
-      channel.trigger('phx_error')
+      channel.trigger('combo_error')
 
       jest.advanceTimersByTime(1000)
       expect(spy).toHaveBeenCalledTimes(1)
@@ -660,7 +660,7 @@ describe('with transport', function () {
       expect(channel.state).toBe('joined')
       expect(spy).toHaveBeenCalledTimes(0)
 
-      channel.trigger('phx_error')
+      channel.trigger('combo_error')
 
       expect(spy).toHaveBeenCalledTimes(1)
     })
@@ -690,7 +690,7 @@ describe('with transport', function () {
     it('sets state to \'closed\'', function () {
       expect(channel.state).not.toBe('closed')
 
-      channel.trigger('phx_close')
+      channel.trigger('combo_close')
 
       expect(channel.state).toBe('closed')
     })
@@ -698,7 +698,7 @@ describe('with transport', function () {
     it('does not rejoin', function () {
       const spy = jest.spyOn(joinPush, 'send')
 
-      channel.trigger('phx_close')
+      channel.trigger('combo_close')
 
       jest.advanceTimersByTime(1000)
       expect(spy).toHaveBeenCalledTimes(0)
@@ -713,7 +713,7 @@ describe('with transport', function () {
 
       expect(spy).toHaveBeenCalledTimes(0)
 
-      channel.trigger('phx_close')
+      channel.trigger('combo_close')
 
       expect(spy).toHaveBeenCalledTimes(1)
     })
@@ -722,7 +722,7 @@ describe('with transport', function () {
       expect(socket.channels.length).toBe(1)
       expect(socket.channels[0]).toBe(channel)
 
-      channel.trigger('phx_close')
+      channel.trigger('combo_close')
 
       expect(socket.channels.length).toBe(0)
     })
@@ -1003,7 +1003,7 @@ describe('with transport', function () {
 
       expect(socketSpy).toHaveBeenCalledWith({
         topic: 'topic',
-        event: 'phx_leave',
+        event: 'combo_leave',
         payload: {},
         ref: defaultRef,
         join_ref: joinRef,

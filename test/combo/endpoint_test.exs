@@ -34,7 +34,7 @@ defmodule Combo.EndpointTest do
   end
 
   test "injects pubsub functions" do
-    start_supervised!({Phoenix.PubSub, name: :endpoint_pubsub})
+    start_supervised!({Combo.PubSub, name: :endpoint_pubsub})
 
     with_endpoint!([pubsub_server: :endpoint_pubsub], fn endpoint ->
       assert :ok = endpoint.subscribe("sometopic")
