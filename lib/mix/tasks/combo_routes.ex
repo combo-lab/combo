@@ -12,14 +12,14 @@ defmodule Mix.Tasks.Combo.Routes do
 
   Print all routes for the given router:
 
-      $ mix combo.routes Demo.Web.Router
+      $ mix combo.routes MyApp.Web.Router
 
   If you find it annoying to specify the router every time, add an alias to
   `mix.exs`:
 
       defp aliases do
         [
-          "combo.routes": "combo.routes Demo.Web.Router",
+          "combo.routes": "combo.routes MyApp.Web.Router",
           # ...
         ]
       end
@@ -55,7 +55,7 @@ defmodule Mix.Tasks.Combo.Routes do
     Mix.raise("""
     `mix combo.routes` requires an explicit router to be given, for example:
 
-        $ mix combo.routes Demo.Web.Router
+        $ mix combo.routes MyApp.Web.Router
     """)
   end
 
