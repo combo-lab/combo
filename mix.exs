@@ -55,15 +55,15 @@ defmodule Combo.MixProject do
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
-  defp extra_applications(:test), do: [:inets]
-  defp extra_applications(_), do: []
-
   def application do
     [
       mod: {Combo, []},
       extra_applications: extra_applications(Mix.env()) ++ [:logger, :eex, :crypto]
     ]
   end
+
+  defp extra_applications(:test), do: [:inets]
+  defp extra_applications(_), do: []
 
   defp deps do
     [
@@ -106,7 +106,7 @@ defmodule Combo.MixProject do
     [
       licenses: ["MIT"],
       links: %{
-        GitHub: @source_url,
+        Source: @source_url,
         Changelog: @changelog_url
       },
       files: ~w(
@@ -120,14 +120,12 @@ defmodule Combo.MixProject do
 
   defp docs do
     [
+      main: "readme",
+      source_url: @source_url,
       source_ref: "v#{@version}",
-      main: "overview",
-      extra_section: "GUIDES",
-      assets: %{"guides/assets" => "assets"},
       formatters: ["html"],
       groups_for_modules: groups_for_modules(),
       extras: extras(),
-      groups_for_extras: groups_for_extras(),
       groups_for_docs: [
         Reflection: &(&1[:type] == :reflection)
       ],
@@ -137,65 +135,12 @@ defmodule Combo.MixProject do
 
   defp extras do
     [
-      # "guides/introduction/overview.md",
-      # "guides/introduction/installation.md",
-      # "guides/introduction/up_and_running.md",
-      # "guides/introduction/packages_glossary.md",
-      # "guides/directory_structure.md",
-      # "guides/request_lifecycle.md",
-      # "guides/plug.md",
-      # "guides/routing.md",
-      # "guides/controllers.md",
-      # "guides/components.md",
-      # "guides/ecto.md",
-      # "guides/json_and_apis.md",
-      # "guides/live_view.md",
-      # "guides/asset_management.md",
-      # "guides/telemetry.md",
-      # "guides/security.md",
-      # "guides/authn_authz/authn_authz.md",
-      # "guides/authn_authz/mix_combo_gen_auth.md",
-      # "guides/authn_authz/scopes.md",
-      # "guides/authn_authz/api_authentication.md",
-      # "guides/data_modelling/contexts.md",
-      # "guides/data_modelling/your_first_context.md",
-      # "guides/data_modelling/in_context_relationships.md",
-      # "guides/data_modelling/cross_context_boundaries.md",
-      # "guides/data_modelling/more_examples.md",
-      # "guides/data_modelling/faq.md",
-      # "guides/real_time/channels.md",
-      # "guides/real_time/presence.md",
-      # "guides/testing/testing.md",
-      # "guides/testing/testing_contexts.md",
-      # "guides/testing/testing_controllers.md",
-      # "guides/testing/testing_channels.md",
-      # "guides/deployment/deployment.md",
-      # "guides/deployment/releases.md",
-      # "guides/deployment/fly.md",
-      # "guides/deployment/gigalixir.md",
-      # "guides/deployment/heroku.md",
-      # "guides/howto/custom_error_pages.md",
-      # "guides/howto/file_uploads.md",
-      # "guides/howto/swapping_databases.md",
-      # "guides/howto/using_ssl.md",
-      # "guides/howto/writing_a_channels_client.md",
-      # "guides/cheatsheets/router.cheatmd",
+      "README.md",
+      "LICENSE",
       "CHANGELOG.md",
+      "CONTRIBUTING.md",
+      "CODE_OF_CONDUCT.md",
       "JS Documentation": [url: "js/index.html"]
-    ]
-  end
-
-  defp groups_for_extras do
-    [
-      Introduction: ~r/guides\/introduction\/.?/,
-      "Core Concepts": ~r/guides\/[^\/]+\.md/,
-      "Data Modelling": ~r/guides\/data_modelling\/.?/,
-      "Authn and Authz": ~r/guides\/authn_authz\/.?/,
-      "Real-time": ~r/guides\/real_time\/.?/,
-      Testing: ~r/guides\/testing\/.?/,
-      Deployment: ~r/guides\/deployment\/.?/,
-      Cheatsheets: ~r/guides\/cheatsheets\/.?/,
-      "How-to's": ~r/guides\/howto\/.?/
     ]
   end
 
@@ -203,19 +148,29 @@ defmodule Combo.MixProject do
     # Ungrouped Modules:
     #
     # Combo
-    # Combo.Channel
-    # Combo.Controller
-    # Combo.Endpoint
     # Combo.Naming
-    # Combo.Logger
-    # Combo.URLParam
-    # Combo.Presence
-    # Combo.Router
-    # Combo.Socket
     # Combo.Token
-    # Combo.VerifiedRoutes
+    #
 
     [
+      Connection: [
+        Combo.Conn,
+        Combo.Flash
+      ],
+      Endpoint: [
+        Combo.Endpoint,
+        Combo.Endpoint.BanditAdapter,
+        Combo.Endpoint.Cowboy2Adapter,
+        Combo.Endpoint.SyncCodeReloadPlug
+      ],
+      Router: [
+        Combo.Router,
+        Combo.VerifiedRoutes,
+        Combo.URLParam
+      ],
+      Controller: [
+        Combo.Controller
+      ],
       Template: [
         Combo.Template,
         Combo.Template.Engine,
@@ -241,25 +196,44 @@ defmodule Combo.MixProject do
         Combo.SafeHTML,
         Combo.SafeHTML.Safe
       ],
-      Testing: [
-        Combo.ChannelTest,
-        Combo.ConnTest
-      ],
-      "Adapters and Plugs": [
-        Combo.CodeReloader,
-        Combo.Endpoint.Cowboy2Adapter,
-        Combo.Endpoint.SyncCodeReloadPlug
-      ],
       Static: [
+        Combo.Static,
         Combo.Static.Compressor,
         Combo.Static.Compressor.Gzip
       ],
       Socket: [
+        Combo.Socket,
         Combo.Socket.Broadcast,
         Combo.Socket.Message,
         Combo.Socket.Reply,
         Combo.Socket.Serializer,
         Combo.Socket.Transport
+      ],
+      Channel: [
+        Combo.Channel,
+        Combo.Presence
+      ],
+      Logging: [
+        Combo.Logger,
+        Combo.FilteredParams
+      ],
+      "Extra Utils": [
+        Combo.Naming,
+        Combo.Token,
+        Combo.Proxy
+      ],
+      Development: [
+        Combo.LiveReloader,
+        Combo.LiveReloader.Socket,
+        Combo.CodeReloader
+      ],
+      Debugging: [
+        Combo.Debug
+      ],
+      Testing: [
+        Combo.ConnTest,
+        Combo.ChannelTest,
+        Combo.HTMLTest
       ]
     ]
   end

@@ -79,5 +79,5 @@ defmodule Combo.Static do
     )
   end
 
-  defdelegate lookup(endpoint, path), to: Cache
+  def lookup(endpoint, path), do: Cache.lookup(endpoint, path)
 end

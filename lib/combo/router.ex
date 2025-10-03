@@ -216,11 +216,6 @@ defmodule Combo.Router do
   For generating routes inside your application, see the `Combo.VerifiedRoutes`
   documentation for `~p` based route generation which generates route paths and
   URLs with compile-time verification.
-
-  ## Learn more
-
-  See the [Routing](routing.md) guide for more information and examples within
-  an actual application.
   """
 
   alias Combo.Router.{Resource, Scope, Route}
