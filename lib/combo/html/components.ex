@@ -821,11 +821,6 @@ defmodule Combo.HTML.Components do
   Then we render a button containing the "delete" text with the name `mailing_list[emails_drop][]`,
   containing the index of the child as its value.
 
-  Like before, this tells Ecto to delete the child at this index when the button is
-  clicked. We use `phx-click={JS.dispatch("change")}` on the button to tell XX
-  to treat this button click as a change event, rather than a submit event on the form,
-  which invokes our form's `phx-change` binding.
-
   Outside the `inputs_for`, we render an empty `mailing_list[emails_drop][]` input,
   to ensure that all children are deleted when saving a form where the user
   dropped all entries. This hidden input is required whenever dropping associations.
