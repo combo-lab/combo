@@ -1,12 +1,17 @@
 # Combo
 
+[![CI](https://github.com/combo-lab/combo/actions/workflows/ci.yml/badge.svg)](https://github.com/combo-lab/combo/actions/workflows/ci.yml)
+[![Hex.pm](https://img.shields.io/hexpm/v/combo.svg)](https://hex.pm/packages/combo)
+
 A web framework, that combines the good parts of modern web development.
 
-[![Build Status](https://github.com/combo-lab/combo/workflows/CI/badge.svg)](https://github.com/combo-lab/combo/actions/workflows/ci.yml) [![Hex.pm](https://img.shields.io/hexpm/v/combo.svg)](https://hex.pm/packages/combo)
+## Getting started
+
+Read the [documentation](https://hexdocs.pm/combo).
 
 ## About
 
-Combo started as a fork of Phoenix. Its goals includes:
+Combo started as a fork of [Phoenix](https://github.com/phoenixframework/phoenix). Its goals includes:
 
 - being a typical MVC framework.
 - integrating with the modern frontend tooling.
@@ -20,10 +25,6 @@ To archive the goals, it:
 - ...
 
 Although Combo is forked from Phoenix and will continue to track upstream changes in the future, full compatibility between the two is not guaranteed.
-
-## Getting started
-
-Read the [documentation](https://hexdocs.pm/combo).
 
 ## Contributing
 
