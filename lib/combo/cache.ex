@@ -89,7 +89,7 @@ defmodule Combo.Cache do
   @spec get_keys(module()) :: [key()]
   def get_keys(module), do: get_keys(module, :"$1")
 
-  @spec get_keys(module(), :ets.match_spec()) :: [key()]
+  @spec get_keys(module(), atom() | tuple()) :: [key()]
   def get_keys(module, key_match_spec) do
     table_name = build_table_name(module)
 
