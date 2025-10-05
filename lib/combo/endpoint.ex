@@ -224,8 +224,6 @@ defmodule Combo.Endpoint do
   @type event :: String.t()
   @type msg :: map() | {:binary, binary()}
 
-  require Logger
-
   # Configuration
 
   @doc """
