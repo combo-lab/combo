@@ -8,7 +8,7 @@ defmodule Combo.VerifiedRoutes do
   For example, the following path and URL usages:
 
       ~CE"""
-      <.link href={~p"/sessions/new"} method="post">Log in</.link>
+      <a href={~p"/login"}>Log in</a>
       """
 
       redirect(to: url(~p"/posts/#{post}"))
