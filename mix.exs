@@ -1,7 +1,7 @@
 defmodule Combo.MixProject do
   use Mix.Project
 
-  @version "0.4.0"
+  @version "0.4.1"
   @description "A web framework, that combines the good parts of modern web development."
   @elixir_requirement "~> 1.18"
   @source_url "https://github.com/combo-lab/combo"
@@ -245,11 +245,12 @@ defmodule Combo.MixProject do
         "npm-packages.deps.get",
         "assets.deps.get"
       ],
-      build: ["npm-packages.build", "assets.build", "compile"],
+      build: ["npm-packages.sync-lock-file", "npm-packages.build", "assets.build", "compile"],
       docs: ["docs", "npm-packages.docs"],
       publish: ["hex.publish", "tag"],
       tag: &tag_release/1,
       "npm-packages.deps.get": "cmd --cd npm-packages/combo npm install",
+      "npm-packages.sync-lock-file": "cmd --cd npm-packages/combo npm install",
       "npm-packages.build": "cmd --cd npm-packages/combo npm run build",
       "npm-packages.docs": "cmd --cd npm-packages/combo npm run docs",
       "assets.deps.get": "cmd --cd assets npm install",

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.4.1
+
 ### `Combo.Proxy`
 
 - fix the default value of `:adapter` option
