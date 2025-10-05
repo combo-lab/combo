@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### `Combo.Proxy`
+
+- sort backends by specificity
+
 ## v0.4.1
 
 ### `Combo.Proxy`

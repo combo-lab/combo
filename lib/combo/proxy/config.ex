@@ -55,7 +55,11 @@ defmodule Combo.Proxy.Config do
   end
 
   defp struct_backends!(%__MODULE__{backends: backends} = config) do
-    backends = Enum.map(backends, &Backend.new!(&1))
+    backends =
+      backends
+      |> Enum.map(&Backend.new!(&1))
+      |> Enum.sort_by(&Backend.specificity/1, :desc)
+
     %{config | backends: backends}
   end
 end

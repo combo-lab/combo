@@ -52,4 +52,29 @@ defmodule Combo.Proxy.Backend do
     config = Map.take(config, valid_keys)
     Map.merge(default_struct, config)
   end
+
+  @doc """
+  Calculate specificity score for a backend.
+  """
+  def specificity(%__MODULE__{} = backend) do
+    method_score = method_score(backend.method)
+    host_score = host_score(backend.host)
+    path_score = path_score(backend.path)
+    {method_score, host_score, path_score}
+  end
+
+  defp method_score(:unset), do: 0
+  defp method_score(_), do: 1
+
+  defp host_score(:unset), do: 0
+  defp host_score(regex) when is_struct(regex, Regex), do: 1
+  defp host_score(binary) when is_binary(binary), do: 2
+
+  defp path_score(:unset), do: 0
+  defp path_score("/"), do: 1
+
+  defp path_score(path) when is_binary(path) do
+    segments = String.split(path, "/", trim: true)
+    length(segments) * 10
+  end
 end

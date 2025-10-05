@@ -40,14 +40,17 @@ defmodule Combo.Proxy do
             path: "/health-check"
           },
           %{
-            plug: MyApp.AdminWeb.Endpoint,
-            path: "/admin"
-          },
-          %{
             plug: MyApp.UserWeb.Endpoint,
             path: "/"
+          },
+          %{
+            plug: MyApp.AdminWeb.Endpoint,
+            path: "/admin"
           }
         ]
+
+  > Before used for matching connections, the backends will be sorted by
+  > specificity. So feel free to arrange them in whatever way you like.
 
   When using `Combo.Proxy` with Combo endpoints, it's required to configure the
   path of endpoints to a proper value. And it's better to configure `:server`
@@ -114,46 +117,6 @@ defmodule Combo.Proxy do
       * examples:
         * `true`
         * `false`
-
-  ### The order of backends matters
-
-  If you configure the backends like this:
-
-      config :my_app, MyApp.Proxy,
-        backends: [
-          %{
-            plug: MyApp.UserWeb.Endpoint,
-            path: "/"
-          },
-          %{
-            plug: MyApp.AdminWeb.Endpoint,
-            path: "/admin"
-          },
-          %{
-            plug: HealthCheck,
-            path: "/health"
-          }
-        ]
-
-  The first backend will always match, which may not what you expected.
-
-  If you want all backends to have a chance to match, you should configure them like this:
-
-      config :my_app, MyApp.Proxy,
-        backends: [
-          %{
-            plug: HealthCheck,
-            path: "/health"
-          },
-          %{
-            plug: MyApp.AdminWeb.Endpoint,
-            path: "/admin"
-          },
-          %{
-            plug: MyApp.UserWeb.Endpoint,
-            path: "/"
-          }
-        ]
 
   ## About adapter options
 
