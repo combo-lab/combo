@@ -302,8 +302,7 @@ defmodule Combo.Channel.Server do
     Process.put(:"$initial_call", {channel, :join, 3})
     Process.put(:"$callers", [pid])
 
-    # TODO: replace with Process.put_label/2 when we require Elixir 1.17
-    Process.put(:"$process_label", {Combo.Channel, channel, topic})
+    Process.set_label({Combo.Channel, channel, topic})
 
     socket = %{
       socket
