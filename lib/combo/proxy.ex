@@ -72,7 +72,7 @@ defmodule Combo.Proxy do
       Default to `[]`.
     * `:adapter` - the adapter for web server, `Combo.Proxy.Cowboy2Adapter` and
       `Combo.Proxy.BanditAdapter` are available.
-      Default to `Combo.Proxy.Cowboy2Adapter`.
+      Default to `Combo.Proxy.BanditAdapter`.
     * adapter options - all other options will be put into an keyword list and
       passed as the options of the adapter. See following section for more details.
 
@@ -211,7 +211,7 @@ defmodule Combo.Proxy do
   @impl true
   def init(init_arg) do
     {server, rest_arg} = Keyword.pop(init_arg, :server, false)
-    {adapter, rest_arg} = Keyword.pop(rest_arg, :adapter, Plug.Cowboy)
+    {adapter, rest_arg} = Keyword.pop(rest_arg, :adapter, Combo.Proxy.BanditAdapter)
     {backends, rest_arg} = Keyword.pop(rest_arg, :backends, [])
 
     adapter_config =
