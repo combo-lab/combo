@@ -66,7 +66,6 @@ end
 defmodule Combo.Socket.PoolDrainer do
   @moduledoc false
   use GenServer
-  require Logger
 
   def child_spec({_endpoint, name, opts} = tuple) do
     # The process should terminate within shutdown but,

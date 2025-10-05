@@ -98,7 +98,6 @@ defmodule Combo.Token do
   e-mail confirmation and more.
   """
 
-  require Logger
   import Combo.Conn, only: [endpoint_module!: 1]
 
   @type context ::
