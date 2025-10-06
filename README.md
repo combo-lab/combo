@@ -9,23 +9,6 @@ A web framework, that combines the good parts of modern web development.
 
 Read the [documentation](https://hexdocs.pm/combo).
 
-## About
-
-Combo started as a fork of [Phoenix](https://github.com/phoenixframework/phoenix). Its goals includes:
-
-- being a typical MVC framework.
-- integrating with the modern frontend tooling.
-- ...
-
-To archive the goals, it:
-
-- merges closely related dependencies, such as `phoenix_template`, `phoenix_html`, `phoenix_live_reload` etc.
-- merges the HEEx engine-related code from `phoenix_live_view` and completely removes the dependency on `phoenix_live_view`.
-- provides packages for integrating with the modern frontend tooling.
-- ...
-
-Although Combo is forked from Phoenix and will continue to track upstream changes in the future, full compatibility between the two is not guaranteed.
-
 ## Contributing
 
 We appreciate any contribution to Combo. Check our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [CONTRIBUTING.md](CONTRIBUTING.md) guides for more information. We usually keep a list of features and bugs in the [issue tracker](https://github.com/combo-lab/combo/issues).
