@@ -799,7 +799,7 @@ defmodule Combo.Conn do
   """
   @spec json(Conn.t(), term()) :: Conn.t()
   def json(conn, data) do
-    response = Combo.json_module().encode_to_iodata!(data)
+    response = Combo.json_library().encode_to_iodata!(data)
     send_resp(conn, conn.status || 200, "application/json", response)
   end
 

@@ -94,7 +94,7 @@ defmodule Combo.Integration.LongPollSocketTest do
     headers = Map.merge(%{"content-type" => "application/json"}, headers)
     url = "http://127.0.0.1:#{@port}/#{path}?" <> URI.encode_query(params)
     {:ok, resp} = HTTPClient.request(method, url, headers, body)
-    update_in(resp.body, &Combo.json_module().decode!(&1))
+    update_in(resp.body, &Combo.json_library().decode!(&1))
   end
 
   for %{adapter: adapter} <- [

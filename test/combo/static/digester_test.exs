@@ -574,7 +574,7 @@ defmodule Combo.Static.DigesterTest do
   defp json_read!(path) do
     path
     |> File.read!()
-    |> Combo.json_module().decode!()
+    |> Combo.json_library().decode!()
   end
 
   defp add_digest_test_compressor() do

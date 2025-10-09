@@ -61,7 +61,7 @@ defmodule Combo.Static.Cache do
       manifest_path = Application.app_dir(app, path)
 
       if File.exists?(manifest_path) do
-        manifest_path |> File.read!() |> Combo.json_module().decode!()
+        manifest_path |> File.read!() |> Combo.json_library().decode!()
       else
         raise ArgumentError, """
         could not find static manifest at #{inspect(manifest_path)}. \

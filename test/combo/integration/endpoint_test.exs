@@ -168,7 +168,7 @@ defmodule Combo.Integration.EndpointTest do
 
       assert resp.status == 404
 
-      assert resp.body |> Combo.json_module().decode!() == %{
+      assert resp.body |> Combo.json_library().decode!() == %{
                "error" => "Got 404.json from error with GET"
              }
 

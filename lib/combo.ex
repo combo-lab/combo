@@ -7,7 +7,7 @@ defmodule Combo do
 
   @doc false
   def start(_type, _args) do
-    warn_on_missing_json_module()
+    warn_on_missing_json_library()
 
     # Warm up caches
     _ = Combo.Template.engines()
@@ -27,8 +27,8 @@ defmodule Combo do
     Supervisor.start_link(children, strategy: :one_for_one, name: Combo.Supervisor)
   end
 
-  defp warn_on_missing_json_module do
-    module = json_module()
+  defp warn_on_missing_json_library do
+    module = json_library()
 
     if module && not Code.ensure_loaded?(module) do
       IO.warn("""
@@ -40,17 +40,17 @@ defmodule Combo do
   end
 
   @doc """
-  Returns the value of `:json_module` option, which specifies the module
+  Returns the value of `:json_library` option, which specifies the module
   for JSON encoding.
 
   To customize the JSON module, including the following in your
   `config/config.exs`:
 
-      config :combo, :json_module, Jason
+      config :combo, :json_library, Jason
 
   """
-  def json_module do
-    Application.get_env(:combo, :json_module, JSON)
+  def json_library do
+    Application.get_env(:combo, :json_library, JSON)
   end
 
   @doc """

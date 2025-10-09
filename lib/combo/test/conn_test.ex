@@ -421,7 +421,7 @@ defmodule Combo.ConnTest do
     body = response(conn, status)
     _ = response_content_type(conn, :json)
 
-    Combo.json_module().decode!(body)
+    Combo.json_library().decode!(body)
   end
 
   @doc """

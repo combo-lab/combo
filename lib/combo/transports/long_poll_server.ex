@@ -138,7 +138,7 @@ defmodule Combo.Transports.LongPoll.Server do
         "Please return JSON encoded data instead (see Combo.Socket.Serializer)"
     )
 
-    publish_reply(state, Combo.json_module().encode_to_iodata!(reply))
+    publish_reply(state, Combo.json_library().encode_to_iodata!(reply))
   end
 
   defp publish_reply(state, reply) do

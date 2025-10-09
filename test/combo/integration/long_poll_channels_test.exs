@@ -197,7 +197,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
 
   defp decode_body(serializer, %{} = resp) do
     resp
-    |> update_in([:body], &Combo.json_module().decode!(&1))
+    |> update_in([:body], &Combo.json_library().decode!(&1))
     |> update_in([:body, "messages"], fn messages ->
       for msg <- messages || [] do
         serializer.decode!(msg, opcode: :text)
@@ -238,7 +238,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
         >>)
 
       _ ->
-        Combo.json_module().encode!([
+        Combo.json_library().encode!([
           map["join_ref"],
           map["ref"],
           map["topic"],
@@ -248,7 +248,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
     end
   end
 
-  defp encode(V1.JSONSerializer, %{} = map), do: Combo.json_module().encode!(map)
+  defp encode(V1.JSONSerializer, %{} = map), do: Combo.json_library().encode!(map)
 
   @doc """
   Joins a long poll socket.
