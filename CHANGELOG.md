@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.5.0
+
 ### `Combo`
 
 - rename `json_module/0` to `json_library/0`, because other packages are using the same pattern, like `:postgrex`, `:swoosh`, etc.
