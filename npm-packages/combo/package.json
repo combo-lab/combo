@@ -1,6 +1,6 @@
 {
   "name": "combo",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "The JavaScript parts of Combo",
   "type": "module",
   "scripts": {
@@ -22,11 +22,7 @@
       "require": "./dist/html.cjs.js"
     }
   },
-  "files": [
-    "package.json",
-    "dist/*",
-    "LICENSE.md"
-  ],
+  "files": ["package.json", "dist/*", "LICENSE.md"],
   "devDependencies": {
     "@babel/core": "7.28.0",
     "@babel/preset-env": "7.28.0",

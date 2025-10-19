@@ -1,7 +1,7 @@
 defmodule Combo.MixProject do
   use Mix.Project
 
-  @version "0.5.0"
+  @version "0.5.1"
   @description "A web framework, that combines the good parts of modern web development."
   @elixir_requirement "~> 1.18"
   @source_url "https://github.com/combo-lab/combo"
