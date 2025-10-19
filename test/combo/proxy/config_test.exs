@@ -52,7 +52,9 @@ defmodule Combo.Proxy.ConfigTest do
                    host: "www.example.com"
                  },
                  %Combo.Proxy.Backend{
-                   host: ~r/^.*\.example\.com$/
+                   host: %Regex{
+                     source: "^.*\\.example\\.com$"
+                   }
                  }
                ]
              } =
