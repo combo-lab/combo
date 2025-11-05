@@ -1,0 +1,23 @@
+This software contains code derived from:
+
+- phoenixframework/phoenix (https://github.com/phoenixframework/phoenix)
+  Copyright (c) Chris McCord
+  Licensed under MIT License
+
+- phoenixframework/phoenix_template (https://github.com/phoenixframework/phoenix_template)
+  Copyright (c) Chris McCord
+  Licensed under MIT License
+
+- phoenixframework/phoenix_html (https://github.com/phoenixframework/phoenix_html)
+  Copyright (c) Chris McCord
+  Licensed under MIT License
+
+- phoenixframework/phoenix_live_reload (https://github.com/phoenixframework/phoenix_live_reload)
+  Copyright (c) Chris McCord
+  Licensed under MIT License
+
+- phoenixframework/phoenix_live_view (https://github.com/phoenixframework/phoenix_live_view)
+  Copyright (c) Chris McCord
+  Licensed under MIT License
+
+Full license texts are available in the LICENSES directory.
