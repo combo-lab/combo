@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.6.0
+
 ### `Combo.Conn`
 
 - add `put_previous_url/2`, `get_previous_url/1` for URL tracking
