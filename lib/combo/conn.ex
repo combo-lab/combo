@@ -703,8 +703,10 @@ defmodule Combo.Conn do
   end
 
   defp extract_path(url) do
-    %URI{path: path, query: query} = URI.parse(url)
-    path <> "?" <> query
+    case URI.parse(url) do
+      %URI{path: path, query: nil} -> path
+      %URI{path: path, query: query} -> path <> "?" <> query
+    end
   end
 
   @doc """
