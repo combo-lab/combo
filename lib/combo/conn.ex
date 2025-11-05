@@ -680,7 +680,7 @@ defmodule Combo.Conn do
       iex> redirect_back(conn, fallback: ~p"/users")
 
   """
-  def redirect_back(conn, opts) do
+  def redirect_back(conn, opts \\ []) do
     referrer =
       case get_req_header(conn, "referer") do
         [value] -> value
