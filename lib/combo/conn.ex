@@ -11,8 +11,8 @@ defmodule Combo.Conn do
       put_private: 3,
       get_session: 2,
       put_session: 3,
-      get_req_header: 2,
       delete_session: 2,
+      get_req_header: 2,
       get_resp_header: 2,
       put_resp_header: 3,
       merge_resp_headers: 2,
@@ -663,6 +663,51 @@ defmodule Combo.Conn do
   end
 
   @doc """
+  Sends redirect response to the previous location.
+
+  It attempts to use path from the following sources in sequence:
+
+    1. the path retrieved from "Referer" request header
+    2. the path retrieved by `get_previous_url/1`. To make it work, you need
+       to add `put_previous_url/2` to the pipeline first.
+    3. the path retrieved from `:fallback` option
+    4. the root path
+
+  ## Examples
+
+      iex> redirect_back(conn)
+
+      iex> redirect_back(conn, fallback: ~p"/users")
+
+  """
+  def redirect_back(conn, opts) do
+    referrer =
+      case get_req_header(conn, "referer") do
+        [value] -> value
+        _ -> nil
+      end
+
+    url =
+      referrer ||
+        get_previous_url(conn) ||
+        Keyword.get(opts, :fallback) ||
+        root_url(conn)
+
+    path = extract_path(url)
+    redirect(conn, to: path)
+  end
+
+  defp root_url(conn) do
+    endpoint = endpoint_module!(conn)
+    endpoint.url() <> endpoint.path("/")
+  end
+
+  defp extract_path(url) do
+    %URI{path: path, query: query} = URI.parse(url)
+    path <> "?" <> query
+  end
+
+  @doc """
   Sends the given file or binary as a download.
 
   The second argument must be `{:binary, contents}`, where
@@ -787,6 +832,11 @@ defmodule Combo.Conn do
           "The download may not work as expected under XMLHttpRequest"
       )
     end
+  end
+
+  defp prefetch?(conn) do
+    "prefetch" in get_req_header(conn, "purpose") ||
+      "prefetch" in get_req_header(conn, "sec-purpose")
   end
 
   @doc """
@@ -1265,6 +1315,36 @@ defmodule Combo.Conn do
       end)
 
     %{conn | resp_headers: resp_headers}
+  end
+
+  ## URL tracking
+
+  @doc """
+  Puts current url to the session before sending the response, and it will be
+  available as previous url for subsequence requests.
+
+  In general, it's added to the pipeline for browser.
+  """
+  def put_previous_url(conn, _opts) do
+    register_before_send(conn, &put_previous_url/1)
+  end
+
+  defp put_previous_url(conn) do
+    if conn.method == "GET" &&
+         conn.status in 200..299 &&
+         !ajax?(conn) &&
+         !prefetch?(conn) do
+      put_session(conn, :_previous_url, current_url(conn))
+    else
+      conn
+    end
+  end
+
+  @doc """
+  Gets previous url.
+  """
+  def get_previous_url(conn) do
+    get_session(conn, :_previous_url)
   end
 
   ## URL generation
