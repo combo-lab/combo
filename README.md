@@ -15,7 +15,7 @@ We appreciate any contribution to Combo. Check our [CODE_OF_CONDUCT.md](CODE_OF_
 
 ### Building from source
 
-To build Combo and its related npm-packages and assets:
+To build Combo and its related node-packages and assets:
 
 ```bash
 $ mix setup

@@ -112,8 +112,8 @@ defmodule Combo.MixProject do
       files: ~w(
         lib/ priv/ mix.exs .formatter.exs README.md CHANGELOG.md LICENSE
 
-        npm-packages/combo/package.json
-        npm-packages/combo/dist/
+        node-packages/combo/package.json
+        node-packages/combo/dist/
       )
     ]
   end
@@ -242,19 +242,19 @@ defmodule Combo.MixProject do
     [
       setup: [
         "deps.get",
-        "npm-packages.deps.get",
+        "node-packages.deps.get",
         "assets.deps.get"
       ],
-      build: ["npm-packages.sync-lock-file", "npm-packages.build", "assets.build", "compile"],
-      docs: ["docs", "npm-packages.docs"],
+      build: ["node-packages.sync-lock-file", "node-packages.build", "assets.build", "compile"],
+      docs: ["docs", "node-packages.docs"],
       publish: ["hex.publish", "tag"],
       tag: &tag_release/1,
-      "npm-packages.deps.get": "cmd --cd npm-packages/combo npm install",
-      "npm-packages.sync-lock-file": "cmd --cd npm-packages/combo npm install",
-      "npm-packages.build": "cmd --cd npm-packages/combo npm run build",
-      "npm-packages.docs": "cmd --cd npm-packages/combo npm run docs",
-      "assets.deps.get": "cmd --cd assets npm install",
-      "assets.build": "cmd --cd assets npm run build"
+      "node-packages.deps.get": "cmd --cd node-packages/combo pnpm install",
+      "node-packages.sync-lock-file": "cmd --cd node-packages/combo pnpm install",
+      "node-packages.build": "cmd --cd node-packages/combo pnpm run build",
+      "node-packages.docs": "cmd --cd node-packages/combo pnpm run docs",
+      "assets.deps.get": "cmd --cd assets pnpm install",
+      "assets.build": "cmd --cd assets pnpm run build"
     ]
   end
 
