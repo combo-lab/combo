@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.7.0
+
+No substantial changes, just restructured the project.
+
 ## v0.6.0
 
 ### `Combo.Conn`
