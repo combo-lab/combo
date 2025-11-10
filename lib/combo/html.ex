@@ -731,45 +731,6 @@ defmodule Combo.HTML do
   <p>Howdy from the named slot!</p>
   ```
 
-  ## Debug annotations
-
-  CEEx support adding debug annotations to the rendered templates.
-
-  Debug annotations are special HTML comments that help to identify which
-  component is used for rendering content of rendered templates.
-
-  For example, imagine the following template:
-
-  ```ceex
-  <.header>
-    <.button>Save</.button>
-  </.header>
-  ```
-
-  By enabling debug annotations, the rendered templates would receive the
-  comments like this:
-
-  ```html
-  <!-- @caller lib/demo_web/home_live.ex:20 -->
-  <!-- <DemoWeb.Components.header> lib/demo_web/components.ex:123 -->
-  <header class="p-5">
-    <!-- @caller lib/demo_web/home_live.ex:48 -->
-    <!-- <DemoWeb.Components.button> lib/demo_web/components.ex:456 -->
-    <button class="px-2 bg-indigo-500 text-white">Save</button>
-    <!-- </DemoWeb.Components.button> -->
-  </header>
-  <!-- </DemoWeb.Components.header> -->
-  ```
-
-  To enable debug annotations, put following configuration into
-  `config/dev.exs` file:
-
-  ```elixir
-  config :combo, :template, debug_annotations: true
-  ```
-
-  Note that changing this configuration will require `mix clean` and a full recompile.
-
   ## Code formatting
 
   You can automatically format CEEx template files (using .ceex extension) and

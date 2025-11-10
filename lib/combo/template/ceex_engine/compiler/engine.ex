@@ -6,7 +6,6 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
   alias Combo.Template.CEExEngine.Compiler.IOBuilder
   alias Combo.Template.CEExEngine.Compiler.Attr
   alias Combo.Template.CEExEngine.Compiler.Assigns
-  alias Combo.Template.CEExEngine.Compiler.DebugAnnotation
 
   @doc false
   def __reserved_assigns__, do: [:__slot__, :inner_block]
@@ -81,7 +80,6 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     %{
       source: source,
       file: file,
-      caller: caller,
       tokens: tokens,
       cont: cont
     } = state
@@ -90,16 +88,6 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
     quoted = handle_tokens(state, "template", tokens)
     quoted = Assigns.traverse(quoted)
-
-    quoted =
-      if caller && DebugAnnotation.enable?() do
-        %{module: mod, function: {fun, _}, file: file, line: line} = caller
-        component_name = "#{inspect(mod)}.#{fun}"
-        annotation = DebugAnnotation.build_annotation(component_name, file, line)
-        annotate_block(quoted, annotation)
-      else
-        quoted
-      end
 
     quote do
       require unquote(__MODULE__)
@@ -528,7 +516,6 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       state =
         state
         |> iob_push_ctx()
-        |> maybe_annotate_caller(meta)
         |> iob_acc_expr(quoted)
 
       quoted =
@@ -541,7 +528,6 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       |> iob_acc_expr(quoted)
     else
       state
-      |> maybe_annotate_caller(meta)
       |> iob_acc_expr(quoted)
     end
     |> reduce_tokens(tokens)
@@ -589,7 +575,6 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       state =
         state
         |> iob_push_ctx()
-        |> maybe_annotate_caller(meta)
         |> iob_acc_expr(quoted)
 
       quoted =
@@ -602,7 +587,6 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       |> iob_acc_expr(quoted)
     else
       state
-      |> maybe_annotate_caller(meta)
       |> iob_acc_expr(quoted)
     end
     |> reduce_tokens(tokens)
@@ -630,7 +614,6 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       state =
         state
         |> iob_push_ctx()
-        |> maybe_annotate_caller(meta)
         |> iob_acc_expr(quoted)
 
       quoted =
@@ -643,7 +626,6 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       |> iob_acc_expr(quoted)
     else
       state
-      |> maybe_annotate_caller(meta)
       |> iob_acc_expr(quoted)
     end
     |> reduce_tokens(tokens)
@@ -687,7 +669,6 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       state =
         state
         |> iob_push_ctx()
-        |> maybe_annotate_caller(meta)
         |> iob_acc_expr(quoted)
 
       quoted =
@@ -700,7 +681,6 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       |> iob_acc_expr(quoted)
     else
       state
-      |> maybe_annotate_caller(meta)
       |> iob_acc_expr(quoted)
     end
     |> reduce_tokens(tokens)
@@ -1146,20 +1126,8 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
 
   defp line_column(%{line: line, column: column}), do: {line, column}
 
-  defp build_inner_block(slot_name, meta, state) do
+  defp build_inner_block(_slot_name, meta, state) do
     quoted = iob_dump(state)
-
-    %{caller: caller} = state
-
-    quoted =
-      if caller && DebugAnnotation.enable?() do
-        %{file: file} = caller
-        %{line: line} = meta
-        annotation = DebugAnnotation.build_annotation(":#{slot_name}", file, line)
-        annotate_block(quoted, annotation)
-      else
-        quoted
-      end
 
     clauses =
       case meta[:let] do
@@ -1289,33 +1257,6 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
       line: line,
       column: column,
       description: message <> SyntaxError.code_snippet(source, indentation, {line, column})
-  end
-
-  defp maybe_annotate_caller(state, meta) do
-    %{file: file} = state
-    %{line: line} = meta
-
-    if DebugAnnotation.enable?() do
-      annotation = DebugAnnotation.build_caller_annotation(file, line)
-      state |> iob_acc_text(annotation)
-    else
-      state
-    end
-  end
-
-  defp annotate_block({:__block__, meta, block}, {anno_begin, anno_end}) do
-    {dynamic, [{:safe, binary}]} = Enum.split(block, -1)
-
-    binary =
-      case binary do
-        [] ->
-          ["#{anno_begin}#{anno_end}"]
-
-        [_ | _] ->
-          [to_string(anno_begin) | binary] ++ [to_string(anno_end)]
-      end
-
-    {:__block__, meta, dynamic ++ [{:safe, binary}]}
   end
 
   defp to_quoted!(source, %{line: line, column: column} = _meta, %{file: file} = _state)

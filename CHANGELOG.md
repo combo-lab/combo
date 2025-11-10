@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- remove the support of debug annotation for HEEx templates
+
 ## v0.7.0
 
 No substantial changes, just restructured the project.
