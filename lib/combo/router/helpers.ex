@@ -56,9 +56,7 @@ defmodule Combo.Router.Helpers do
                 unquote(segs),
                 params,
                 unquote(bins),
-                unquote(trailing_slash?),
-                {unquote(helper), unquote(Macro.escape(opts)),
-                 unquote(Enum.map(vars, &Macro.to_string/1))}
+                unquote(trailing_slash?)
               )
             )
           end
@@ -211,11 +209,11 @@ defmodule Combo.Router.Helpers do
         defp to_param(true), do: "true"
         defp to_param(data), do: Combo.URLParam.to_param(data)
 
-        defp segments(segments, [], _reserved, trailing_slash?, _opts) do
+        defp segments(segments, [], _reserved, trailing_slash?) do
           maybe_append_slash(segments, trailing_slash?)
         end
 
-        defp segments(segments, query, reserved, trailing_slash?, _opts)
+        defp segments(segments, query, reserved, trailing_slash?)
              when is_list(query) or is_map(query) do
           dict =
             for {k, v} <- query,
