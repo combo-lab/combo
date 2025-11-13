@@ -355,27 +355,30 @@ defmodule Combo.Router.Helpers do
   end
 
   defp expand_segments(segments) do
-    quote(do: "/" <> Enum.map_join(unquote(segments), "/", &unquote(__MODULE__).encode_param/1))
+    quote do
+      "/" <> Enum.map_join(unquote(segments), "/", &unquote(__MODULE__).encode_param/1)
+    end
   end
 
-  defp expand_segments([{:|, _, [h, t]}], acc),
-    do:
-      quote(
-        do:
-          unquote(expand_segments([h], acc)) <>
-            "/" <> Enum.map_join(unquote(t), "/", &unquote(__MODULE__).encode_param/1)
-      )
+  defp expand_segments([{:|, _, [h, t]}], acc) do
+    quote do
+      unquote(expand_segments([h], acc)) <>
+        "/" <> Enum.map_join(unquote(t), "/", &unquote(__MODULE__).encode_param/1)
+    end
+  end
 
-  defp expand_segments([h | t], acc) when is_binary(h),
-    do: expand_segments(t, quote(do: unquote(acc) <> unquote("/" <> h)))
+  defp expand_segments([h | t], acc) when is_binary(h) do
+    expand_segments(t, quote(do: unquote(acc) <> unquote("/" <> h)))
+  end
 
-  defp expand_segments([h | t], acc),
-    do:
-      expand_segments(
-        t,
-        quote(do: unquote(acc) <> "/" <> unquote(__MODULE__).encode_param(to_param(unquote(h))))
-      )
+  defp expand_segments([h | t], acc) do
+    expand_segments(
+      t,
+      quote(do: unquote(acc) <> "/" <> unquote(__MODULE__).encode_param(to_param(unquote(h))))
+    )
+  end
 
-  defp expand_segments([], acc),
-    do: acc
+  defp expand_segments([], acc) do
+    acc
+  end
 end
