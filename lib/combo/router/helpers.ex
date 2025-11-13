@@ -14,8 +14,8 @@ defmodule Combo.Router.Helpers do
         is_nil(route.helper) or route.kind == :forward
       end)
 
-    trailing_slash? = Enum.any?(routes, fn {route, _} -> route.trailing_slash? end)
     groups = Enum.group_by(routes, fn {route, _exprs} -> route.helper end)
+    trailing_slash? = Enum.any?(routes, fn {route, _} -> route.trailing_slash? end)
 
     impls =
       for {_helper, helper_routes} <- groups,
