@@ -224,7 +224,7 @@ defmodule Combo.Router.Helpers do
 
           case Conn.Query.encode(dict, &to_param/1) do
             "" -> maybe_append_slash(segments, trailing_slash?)
-            o -> maybe_append_slash(segments, trailing_slash?) <> "?" <> o
+            query -> maybe_append_slash(segments, trailing_slash?) <> "?" <> query
           end
         end
 
