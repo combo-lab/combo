@@ -541,25 +541,25 @@ defmodule Combo.Router.HelpersTest do
 
   ## Dynamics
 
-  test "phoenix_router_url with string takes precedence over endpoint" do
-    url = "https://phoenixframework.org"
+  test "combo_router_url with string takes precedence over endpoint" do
+    url = "https://comboframework.org"
     conn = Combo.Conn.put_router_url(conn_with_endpoint(), url)
     assert Helpers.url(conn) == url
     assert Helpers.admin_message_url(conn, :show, 1) == url <> "/admin/new/messages/1"
   end
 
-  test "phoenix_router_url with URI takes precedence over endpoint" do
-    uri = %URI{scheme: "https", host: "phoenixframework.org", port: 123, path: "/path"}
+  test "combo_router_url with URI takes precedence over endpoint" do
+    uri = %URI{scheme: "https", host: "comboframework.org", port: 123, path: "/path"}
     conn = Combo.Conn.put_router_url(conn_with_endpoint(), uri)
 
-    assert Helpers.url(conn) == "https://phoenixframework.org:123/path"
+    assert Helpers.url(conn) == "https://comboframework.org:123/path"
 
     assert Helpers.admin_message_url(conn, :show, 1) ==
-             "https://phoenixframework.org:123/path/admin/new/messages/1"
+             "https://comboframework.org:123/path/admin/new/messages/1"
   end
 
-  test "phoenix_static_url with string takes precedence over endpoint" do
-    url = "https://phoenixframework.org"
+  test "combo_static_url with string takes precedence over endpoint" do
+    url = "https://comboframework.org"
     conn = Combo.Conn.put_static_url(conn_with_endpoint(), url)
     assert Helpers.static_url(conn, "/images/foo.png") == url <> "/images/foo.png"
 
@@ -567,8 +567,8 @@ defmodule Combo.Router.HelpersTest do
     assert Helpers.static_url(conn, "/images/foo.png") == url <> "/images/foo.png"
   end
 
-  test "phoenix_static_url set to string with path results in static url with that path" do
-    url = "https://phoenixframework.org/path"
+  test "combo_static_url set to string with path results in static url with that path" do
+    url = "https://comboframework.org/path"
     conn = Combo.Conn.put_static_url(conn_with_endpoint(), url)
     assert Helpers.static_url(conn, "/images/foo.png") == url <> "/images/foo.png"
 
@@ -576,32 +576,32 @@ defmodule Combo.Router.HelpersTest do
     assert Helpers.static_url(conn, "/images/foo.png") == url <> "/images/foo.png"
   end
 
-  test "phoenix_static_url with URI takes precedence over endpoint" do
-    uri = %URI{scheme: "https", host: "phoenixframework.org", port: 123}
+  test "combo_static_url with URI takes precedence over endpoint" do
+    uri = %URI{scheme: "https", host: "comboframework.org", port: 123}
 
     conn = Combo.Conn.put_static_url(conn_with_endpoint(), uri)
 
     assert Helpers.static_url(conn, "/images/foo.png") ==
-             "https://phoenixframework.org:123/images/foo.png"
+             "https://comboframework.org:123/images/foo.png"
 
     conn = Combo.Conn.put_static_url(conn_with_script_name(), uri)
 
     assert Helpers.static_url(conn, "/images/foo.png") ==
-             "https://phoenixframework.org:123/images/foo.png"
+             "https://comboframework.org:123/images/foo.png"
   end
 
-  test "phoenix_static_url set to URI with path results in static url with that path" do
-    uri = %URI{scheme: "https", host: "phoenixframework.org", port: 123, path: "/path"}
+  test "combo_static_url set to URI with path results in static url with that path" do
+    uri = %URI{scheme: "https", host: "comboframework.org", port: 123, path: "/path"}
 
     conn = Combo.Conn.put_static_url(conn_with_endpoint(), uri)
 
     assert Helpers.static_url(conn, "/images/foo.png") ==
-             "https://phoenixframework.org:123/path/images/foo.png"
+             "https://comboframework.org:123/path/images/foo.png"
 
     conn = Combo.Conn.put_static_url(conn_with_script_name(), uri)
 
     assert Helpers.static_url(conn, "/images/foo.png") ==
-             "https://phoenixframework.org:123/path/images/foo.png"
+             "https://comboframework.org:123/path/images/foo.png"
   end
 
   describe "helpers: false" do
