@@ -52,7 +52,7 @@ defmodule Combo.Router.Helpers do
               when is_list(params) or is_map(params) do
             path(
               conn_or_endpoint,
-              segments(
+              build_path(
                 unquote(segs),
                 params,
                 unquote(bins),
@@ -209,20 +209,23 @@ defmodule Combo.Router.Helpers do
         defp to_param(true), do: "true"
         defp to_param(data), do: Combo.URLParam.to_param(data)
 
-        defp segments(segments, [], _reserved, trailing_slash?) do
+        defp build_path(segments, [], _reserved_param_keys, trailing_slash?) do
           maybe_append_slash(segments, trailing_slash?)
         end
 
-        defp segments(segments, query, reserved, trailing_slash?)
-             when is_list(query) or is_map(query) do
-          dict =
-            for {k, v} <- query,
-                (k = to_string(k)) not in reserved,
+        defp build_path(pathname, params, reserved_param_keys, trailing_slash?)
+             when is_list(params) or is_map(params) do
+          pathname = maybe_append_slash(pathname, trailing_slash?)
+
+          filtered_params =
+            for {k, v} <- params,
+                k = to_string(k),
+                k not in reserved_param_keys,
                 do: {k, v}
 
-          case Conn.Query.encode(dict, &to_param/1) do
-            "" -> maybe_append_slash(segments, trailing_slash?)
-            query -> maybe_append_slash(segments, trailing_slash?) <> "?" <> query
+          case Conn.Query.encode(filtered_params, &to_param/1) do
+            "" -> pathname
+            query -> pathname <> "?" <> query
           end
         end
 
