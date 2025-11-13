@@ -4,8 +4,8 @@ defmodule Combo.Router.Scope do
   alias Combo.Router.Scope
 
   @stack :combo_router_scopes
-  @pipes :combo_pipeline_scopes
   @top :combo_top_scopes
+  @pipes :combo_pipeline_scopes
 
   defstruct path: [],
             alias: [],
