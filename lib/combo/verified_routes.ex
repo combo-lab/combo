@@ -990,21 +990,6 @@ defmodule Combo.VerifiedRoutes do
     end)
   end
 
-  defp attr!(%{function: nil}, _) do
-    raise "Combo.VerifiedRoutes can only be used inside functions, please move your usage of ~p to functions"
-  end
-
-  defp attr!(env, :endpoint) do
-    Module.get_attribute(env.module, :endpoint) ||
-      raise """
-      expected @endpoint to be set. For dynamic endpoint resolution, use path/2 instead.
-
-      for example:
-
-          path(conn_or_socket, ~p"/my-path")
-      """
-  end
-
   defp attr!(env, name) do
     Module.get_attribute(env.module, name) || raise "expected @#{name} module attribute to be set"
   end
