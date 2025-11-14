@@ -369,8 +369,7 @@ defmodule Combo.VerifiedRoutes do
       <.link href={~p"/users?#{@params}"}>profile</.link>
       """
   '''
-  defmacro sigil_p({:<<>>, _meta, _segments} = route, extra) do
-    validate_sigil_p!(extra)
+  defmacro sigil_p({:<<>>, _meta, _segments} = route, _extra) do
     endpoint = attr!(__CALLER__, :endpoint)
     router = attr!(__CALLER__, :router)
 
@@ -408,12 +407,6 @@ defmodule Combo.VerifiedRoutes do
     end
   end
 
-  defp validate_sigil_p!([]), do: :ok
-
-  defp validate_sigil_p!(extra) do
-    raise ArgumentError, "~p does not support modifiers after closing, got: #{extra}"
-  end
-
   defp raise_invalid_route(ast) do
     raise ArgumentError,
           "expected compile-time ~p path string, got: #{Macro.to_string(ast)}\n" <>
@@ -443,10 +436,8 @@ defmodule Combo.VerifiedRoutes do
   defmacro path(
              conn_or_socket_or_endpoint_or_uri,
              router,
-             {:sigil_p, _, [{:<<>>, _meta, _segments} = route, extra]} = sigil_p
+             {:sigil_p, _, [{:<<>>, _meta, _segments} = route, _extra]} = sigil_p
            ) do
-    validate_sigil_p!(extra)
-
     route
     |> build_route(sigil_p, __CALLER__, conn_or_socket_or_endpoint_or_uri, router)
     |> inject_path(__CALLER__)
@@ -476,9 +467,8 @@ defmodule Combo.VerifiedRoutes do
   '''
   defmacro path(
              conn_or_socket_or_endpoint_or_uri,
-             {:sigil_p, _, [{:<<>>, _meta, _segments} = route, extra]} = sigil_p
+             {:sigil_p, _, [{:<<>>, _meta, _segments} = route, _extra]} = sigil_p
            ) do
-    validate_sigil_p!(extra)
     router = attr!(__CALLER__, :router)
 
     route
