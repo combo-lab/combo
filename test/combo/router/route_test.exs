@@ -25,7 +25,6 @@ defmodule Combo.Router.RouteTest do
         %{foo: "bar"},
         %{bar: "baz"},
         %{log: :debug},
-        true,
         true
       )
 
@@ -59,8 +58,7 @@ defmodule Combo.Router.RouteTest do
         %{},
         %{},
         %{},
-        false,
-        true
+        false
       )
       |> exprs()
 
@@ -83,8 +81,7 @@ defmodule Combo.Router.RouteTest do
         %{foo: "bar"},
         %{bar: "baz"},
         %{},
-        false,
-        true
+        false
       )
       |> exprs()
 
@@ -104,8 +101,7 @@ defmodule Combo.Router.RouteTest do
         %{foo: "bar"},
         %{bar: "baz"},
         %{},
-        false,
-        true
+        false
       )
       |> exprs()
 
@@ -125,8 +121,7 @@ defmodule Combo.Router.RouteTest do
         %{foo: "bar"},
         %{bar: "baz"},
         %{},
-        false,
-        true
+        false
       )
       |> exprs()
 
@@ -148,8 +143,7 @@ defmodule Combo.Router.RouteTest do
         %{foo: "bar"},
         %{bar: "baz"},
         %{},
-        false,
-        true
+        false
       )
 
     assert route.verb == :*
@@ -172,8 +166,7 @@ defmodule Combo.Router.RouteTest do
         %{foo: "bar"},
         %{bar: "baz"},
         %{forward: ~w(foo)},
-        false,
-        true
+        false
       )
 
     assert route.verb == :*

@@ -104,23 +104,12 @@ defmodule Combo.Router do
   > Combo does its best to keep the usage of macros low. You may have noticed,
   > however, that the `Combo.Router` relies heavily on macros. Why is that?
   >
-  > We use macros for two purposes:
+  > We use macros for one purposes:
   >
   > * To be faster. They define the routing engine, used on every request, to
   >   choose which controller to dispatch the request to. Thanks to macros,
   >   Combo compiles all of your routes to a single case-statement with pattern
   >   matching rules, which is heavily optimized by the Erlang VM.
-  >
-  > * To be safer. For each route you define, we also define metadata to
-  >   implement `Combo.VerifiedRoutes`. As we will soon learn, verified routes
-  >   allows us to reference any route as if it is a plain looking string,
-  >   except it is verified by the compiler to be valid (making it much harder
-  >   to ship broken links, forms, mails, etc to production). Also remember
-  >   that macros in Elixir are compile-time only, which gives plenty of
-  >   stability after the code is compiled.
-  >
-  > To summarize, the router relies on macros to build applications that are
-  > faster and safer.
 
   ### Route helpers
 
@@ -265,9 +254,8 @@ defmodule Combo.Router do
 
   ## Generating routes
 
-  For generating routes inside your application, see the `Combo.VerifiedRoutes`
-  documentation for `~p` based route generation which generates route paths and
-  URLs with compile-time verification.
+  For generating routes inside your application, see the `Combo.Router.Helpers`
+  documentation.
   """
 
   alias Combo.Router.{Resource, Scope, Route, Helpers}
@@ -280,7 +268,6 @@ defmodule Combo.Router do
       unquote(prelude(opts))
       unquote(defs())
       unquote(match_dispatch())
-      unquote(verified_routes())
     end
   end
 
@@ -455,20 +442,6 @@ defmodule Combo.Router do
     end
   end
 
-  defp verified_routes do
-    quote location: :keep, generated: true do
-      @behaviour Combo.VerifiedRoutes
-
-      def formatted_routes(_) do
-        Combo.Router.__formatted_routes__(__MODULE__)
-      end
-
-      def verified_route?(_, split_path) do
-        Combo.Router.__verified_route__?(__MODULE__, split_path)
-      end
-    end
-  end
-
   @doc false
   defmacro __before_compile__(env) do
     routes = env.module |> Module.get_attribute(:combo_routes) |> Enum.reverse()
@@ -481,24 +454,6 @@ defmodule Combo.Router do
 
     {matches, {pipelines, _}} =
       Enum.map_reduce(routes_with_exprs, {[], %{}}, &build_match/2)
-
-    routes_per_path =
-      routes_with_exprs
-      |> Enum.group_by(&elem(&1, 1).path, &elem(&1, 0))
-
-    verifies =
-      routes_with_exprs
-      |> Enum.map(&elem(&1, 1).path)
-      |> Enum.uniq()
-      |> Enum.map(&build_verify(&1, routes_per_path))
-
-    verify_catch_all =
-      quote generated: true do
-        @doc false
-        def __verify_route__(_path_info) do
-          :error
-        end
-      end
 
     match_catch_all =
       quote generated: true do
@@ -545,37 +500,9 @@ defmodule Combo.Router do
       end
 
       unquote(pipelines)
-      unquote(verifies)
-      unquote(verify_catch_all)
       unquote(matches)
       unquote(match_catch_all)
       unquote(forward_catch_all)
-    end
-  end
-
-  defp build_verify(path, routes_per_path) do
-    routes = Map.get(routes_per_path, path)
-    warn_on_verify? = Enum.all?(routes, & &1.warn_on_verify?)
-
-    case Enum.find(routes, &(&1.kind == :forward)) do
-      %{metadata: %{forward: forward}, plug: plug, plug_opts: plug_opts} ->
-        quote generated: true do
-          def __forward__(unquote(plug)) do
-            unquote(forward)
-          end
-
-          def __verify_route__(unquote(path)) do
-            {{unquote(plug), unquote(forward), unquote(Macro.escape(plug_opts))},
-             unquote(warn_on_verify?)}
-          end
-        end
-
-      _ ->
-        quote generated: true do
-          def __verify_route__(unquote(path)) do
-            {nil, unquote(warn_on_verify?)}
-          end
-        end
     end
   end
 
@@ -682,10 +609,6 @@ defmodule Combo.Router do
     * `:metadata` - a map of metadata used by the telemetry events and returned by
       `route_info/4`. The `:mfa` field is used by telemetry to print logs and by the
       router to emit compile time checks. Custom fields may be added.
-    * `:warn_on_verify` - the boolean for whether matches to this route trigger
-      an unmatched route warning for `Combo.VerifiedRoutes`. It is useful to ignore
-      an otherwise catch-all route definition from being matched when verifying routes.
-      Defaults `false`.
 
   ## Examples
 
@@ -1295,28 +1218,5 @@ defmodule Combo.Router do
         ]
       end
     end)
-  end
-
-  @doc false
-  def __verified_route__?(router, split_path) do
-    case router.__verify_route__(split_path) do
-      {_forward_plug, true = _warn_on_verify?} ->
-        false
-
-      {nil = _forward_plug, false = _warn_on_verify?} ->
-        true
-
-      {{router, script_name, plug_opts}, false = _warn_on_verify?} ->
-        Code.ensure_loaded(router)
-
-        if function_exported?(router, :verified_route?, 2) do
-          router.verified_route?(plug_opts, split_path -- script_name)
-        else
-          true
-        end
-
-      :error ->
-        false
-    end
   end
 end

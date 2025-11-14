@@ -1,5 +1,53 @@
 defmodule Combo.Router.Helpers do
-  @moduledoc false
+  @moduledoc """
+  Generates a module for named routes helpers and generic url helpers.
+
+  Named routes helpers exist to avoid hardcoding routes, if you wrote
+  `<a href="/login">` and then changed your router, the link would point to a
+  page that no longer exist. By using router helpers, we make sure it always
+  points to a valid URL in our router.
+
+  Generic url helpers exist for convenience.
+
+  ## Examples
+
+      defmodule MyApp.Web.Router do
+        use Combo.Router
+        # ...
+      end
+
+  It will generated a module named `MyApp.Web.Router.Helpers`, and following
+  functions are available:
+
+    * `url/_`
+    * `path/_`
+    * `static_url/_`
+    * `static_path/_`
+    * `static_integrity/_`
+    * `*_url/_`
+    * `*_path/_`
+
+  ## Override endpoint's URL
+
+      - `Combo.Conn.put_router_url/2` is used to override the endpoint's URL
+      - `Combo.Conn.put_static_url/2` is used to override the endpoint's static URL
+
+  ## Forwarded routes
+
+  Forwarded routes are also resolved automatically. For example, imagine you
+  have a forward path to an admin router in your main router:
+
+      defmodule MyApp.Web.Router do
+        # ...
+        forward "/admin", MyApp.Web.AdminRouter
+      end
+
+      defmodule MyApp.Web.AdminRouter do
+        # ...
+        get "/users", MyApp.Web.Admin.UserController
+      end
+
+  """
 
   alias Combo.Router.Route
   alias Plug.Conn
@@ -15,7 +63,6 @@ defmodule Combo.Router.Helpers do
       end)
 
     groups = Enum.group_by(routes, fn {route, _exprs} -> route.helper end)
-    trailing_slash? = Enum.any?(routes, fn {route, _} -> route.trailing_slash? end)
 
     impls =
       for {_helper, helper_routes} <- groups,
@@ -81,7 +128,7 @@ defmodule Combo.Router.Helpers do
                 params
               )
               when is_list(params) or is_map(params) do
-            url(conn_or_endpoint) <>
+            url(conn_or_endpoint, "") <>
               unquote(:"#{helper}_path")(
                 conn_or_endpoint,
                 unquote(Macro.escape(opts)),
@@ -105,7 +152,7 @@ defmodule Combo.Router.Helpers do
             end
 
             def unquote(:"#{helper}_url")(conn_or_endpoint, action, unquote_splicing(binding)) do
-              url(conn_or_endpoint)
+              url(conn_or_endpoint, "/")
               raise_route_error(unquote(helper), :url, unquote(arity), action, [])
             end
           end
@@ -130,7 +177,7 @@ defmodule Combo.Router.Helpers do
                   unquote_splicing(binding),
                   params
                 ) do
-              url(conn_or_endpoint)
+              url(conn_or_endpoint, "/")
               raise_route_error(unquote(helper), :url, unquote(arity + 1), action, params)
             end
           end
@@ -166,38 +213,38 @@ defmodule Combo.Router.Helpers do
         unquote_splicing(catch_all)
 
         @doc """
-        Generates the path information including any necessary prefix.
+        See `Combo.URLBuilder.url/3` for more information.
         """
-        def path(data, path) do
-          Combo.VerifiedRoutes.unverified_path(data, unquote(env.module), path)
+        def url(conn_or_socket_or_endpoint, path \\ "", params \\ %{}) do
+          Combo.URLBuilder.url(conn_or_socket_or_endpoint, path, params)
         end
 
         @doc """
-        Generates the connection/endpoint base URL without any path information.
+        See `Combo.URLBuilder.path/4` for more information.
         """
-        def url(data) do
-          Combo.VerifiedRoutes.unverified_url(data, "")
+        def path(conn_or_socket_or_endpoint, path, params \\ %{}) do
+          Combo.URLBuilder.path(conn_or_socket_or_endpoint, unquote(env.module), path, params)
         end
 
         @doc """
-        Generates path to a static asset given its file path.
+        See `Combo.URLBuilder.static_url/2` for more information.
         """
-        def static_path(conn_or_endpoint_ctx, path) do
-          Combo.VerifiedRoutes.static_path(conn_or_endpoint_ctx, path)
+        def static_url(conn_or_socket_or_endpoint, path) do
+          Combo.URLBuilder.static_url(conn_or_socket_or_endpoint, path)
         end
 
         @doc """
-        Generates url to a static asset given its file path.
+        See `Combo.URLBuilder.static_path/2` for more information.
         """
-        def static_url(conn_or_endpoint_ctx, path) do
-          Combo.VerifiedRoutes.static_url(conn_or_endpoint_ctx, path)
+        def static_path(conn_or_socket_or_endpoint, path) do
+          Combo.URLBuilder.static_path(conn_or_socket_or_endpoint, path)
         end
 
         @doc """
-        Generates an integrity hash to a static asset given its file path.
+        See `Combo.URLBuilder.static_integrity/2` for more information.
         """
-        def static_integrity(conn_or_endpoint_ctx, path) do
-          Combo.VerifiedRoutes.static_integrity(conn_or_endpoint_ctx, path)
+        def static_integrity(conn_or_socket_or_endpoint, path) do
+          Combo.URLBuilder.static_integrity(conn_or_socket_or_endpoint, path)
         end
 
         # Functions used by generated helpers
@@ -229,11 +276,8 @@ defmodule Combo.Router.Helpers do
           end
         end
 
-        if unquote(trailing_slash?) do
-          defp maybe_append_slash("/", _), do: "/"
-          defp maybe_append_slash(path, true), do: path <> "/"
-        end
-
+        defp maybe_append_slash("/", _), do: "/"
+        defp maybe_append_slash(path, true), do: path <> "/"
         defp maybe_append_slash(path, _), do: path
       end
 
@@ -344,10 +388,18 @@ defmodule Combo.Router.Helpers do
     """
   end
 
+  # TODO: replace it
   @doc """
   Callback for properly encoding parameters in routes.
   """
   def encode_param(str), do: URI.encode(str, &URI.char_unreserved?/1)
+
+  # HERE
+  defp encode_segment(data) do
+    data
+    |> Combo.URLParam.to_param()
+    |> URI.encode(&URI.char_unreserved?/1)
+  end
 
   defp expand_segments([]), do: "/"
 
@@ -383,3 +435,12 @@ defmodule Combo.Router.Helpers do
     acc
   end
 end
+
+# @doc false
+# def __encode_segment__(data) do
+#   case data do
+#     [] -> ""
+#     [str | _] when is_binary(str) -> Enum.map_join(data, "/", &encode_segment/1)
+#     _ -> encode_segment(data)
+#   end
+# end

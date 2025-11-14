@@ -1,6 +1,5 @@
 modules = [
   PostController,
-  ChatController,
   UserController,
   CommentController,
   FileController,
@@ -66,26 +65,45 @@ defmodule Combo.Router.HelpersTest do
     get "/mfa_path", SubPlug, func: {M, :f, [10]}
   end
 
-  # Emulate regular endpoint functions
-
   defmodule Endpoint do
-    def url do
-      "https://example.com"
-    end
-
-    def static_url do
-      "https://static.example.com"
-    end
-
-    def path(path) do
-      path
-    end
-
-    def static_path(path) do
-      path
-    end
-
+    def url, do: "https://example.com"
+    def static_url, do: "https://static.example.com"
+    def path(path), do: path
+    def static_path(path), do: path
     def static_integrity(_path), do: nil
+  end
+
+  defmodule EndpointWithScriptName do
+    def url, do: "https://example.com"
+    def static_url, do: "https://static.example.com"
+    def path(path), do: "/api" <> path
+    def static_path(path), do: "/api" <> path
+  end
+
+  defmodule EndpointWithStaticPath do
+    def url, do: "https://example.com"
+    def static_url, do: "https://example.com"
+    def path(path), do: path
+    def static_path(path), do: "/static" <> path
+    def static_integrity(_path), do: nil
+  end
+
+  defmodule Post do
+    @derive Combo.URLParam
+    defstruct [:id]
+  end
+
+  defp conn_with_endpoint(endpoint \\ Endpoint) do
+    conn(:get, "/") |> put_private(:combo_endpoint, endpoint)
+  end
+
+  defp socket_with_endpoint(endpoint \\ Endpoint) do
+    %Combo.Socket{endpoint: endpoint}
+  end
+
+  def conn_with_script_name(script_name \\ ~w(api)) do
+    conn = conn(:get, "/") |> put_private(:combo_endpoint, EndpointWithScriptName)
+    put_in(conn.script_name, script_name)
   end
 
   alias Router.Helpers
@@ -118,8 +136,9 @@ defmodule Combo.Router.HelpersTest do
              "/posts/5?foo=5"
   end
 
-  test "url helper with param protocol" do
-    assert Helpers.post_path(Endpoint, :show, %{__struct__: Foo, id: 5}) == "/posts/5"
+  test "url helper with URLParam protocol" do
+    post = %Post{id: 5}
+    assert Helpers.post_path(Endpoint, :show, post) == "/posts/5"
 
     assert_raise ArgumentError, fn ->
       Helpers.post_path(Endpoint, :show, nil)
@@ -389,61 +408,81 @@ defmodule Combo.Router.HelpersTest do
 
   ## Others
 
-  defp conn_with_endpoint do
-    conn(:get, "/") |> put_private(:combo_endpoint, Endpoint)
-  end
-
-  defp socket_with_endpoint do
-    %Combo.Socket{endpoint: Endpoint}
-  end
-
-  defp uri do
-    %URI{scheme: "https", host: "example.com", port: 443}
-  end
-
-  test "helpers module generates a static_path helper" do
-    assert Helpers.static_path(Endpoint, "/images/foo.png") == "/images/foo.png"
-    assert Helpers.static_path(conn_with_endpoint(), "/images/foo.png") == "/images/foo.png"
-    assert Helpers.static_path(socket_with_endpoint(), "/images/foo.png") == "/images/foo.png"
-  end
-
-  test "helpers module generates a static_url helper" do
-    url = "https://static.example.com/images/foo.png"
-    assert Helpers.static_url(Endpoint, "/images/foo.png") == url
-    assert Helpers.static_url(conn_with_endpoint(), "/images/foo.png") == url
-    assert Helpers.static_url(socket_with_endpoint(), "/images/foo.png") == url
-  end
-
   test "helpers module generates a url helper" do
-    assert Helpers.url(Endpoint) == "https://example.com"
-    assert Helpers.url(conn_with_endpoint()) == "https://example.com"
-    assert Helpers.url(socket_with_endpoint()) == "https://example.com"
-    assert Helpers.url(uri()) == "https://example.com"
+    endpoint = Endpoint
+    conn = conn_with_endpoint()
+    socket = socket_with_endpoint()
+
+    assert Helpers.url(endpoint) == "https://example.com"
+    assert Helpers.url(endpoint, "/posts") == "https://example.com/posts"
+    assert Helpers.url(endpoint, "/posts", page: 1) == "https://example.com/posts?page=1"
+    assert Helpers.url(conn) == "https://example.com"
+    assert Helpers.url(conn, "/posts") == "https://example.com/posts"
+    assert Helpers.url(conn, "/posts", page: 1) == "https://example.com/posts?page=1"
+    assert Helpers.url(socket) == "https://example.com"
+    assert Helpers.url(socket, "/posts") == "https://example.com/posts"
+    assert Helpers.url(socket, "/posts", page: 1) == "https://example.com/posts?page=1"
   end
 
   test "helpers module generates a path helper" do
-    assert Helpers.path(Endpoint, "/") == "/"
-    assert Helpers.path(conn_with_endpoint(), "/") == "/"
-    assert Helpers.path(socket_with_endpoint(), "/") == "/"
-    assert Helpers.path(uri(), "/") == "/"
+    endpoint = Endpoint
+    conn = conn_with_endpoint()
+    socket = socket_with_endpoint()
+
+    assert Helpers.path(endpoint, "/") == "/"
+    assert Helpers.path(conn, "/") == "/"
+    assert Helpers.path(socket, "/") == "/"
+    assert Helpers.path(endpoint, "/posts") == "/posts"
+    assert Helpers.path(conn, "/posts") == "/posts"
+    assert Helpers.path(socket, "/posts") == "/posts"
+    assert Helpers.path(endpoint, "/posts", page: 1) == "/posts?page=1"
+    assert Helpers.path(conn, "/posts", page: 1) == "/posts?page=1"
+    assert Helpers.path(socket, "/posts", page: 1) == "/posts?page=1"
+  end
+
+  test "helpers module generates a static_url helper" do
+    endpoint = Endpoint
+    conn = conn_with_endpoint()
+    socket = socket_with_endpoint()
+
+    url = "https://static.example.com/images/foo.png"
+    assert Helpers.static_url(endpoint, "/images/foo.png") == url
+    assert Helpers.static_url(conn, "/images/foo.png") == url
+    assert Helpers.static_url(socket, "/images/foo.png") == url
+  end
+
+  test "helpers module generates a static_path helper" do
+    endpoint = Endpoint
+    conn = conn_with_endpoint()
+    socket = socket_with_endpoint()
+
+    assert Helpers.static_path(endpoint, "/images/foo.png") == "/images/foo.png"
+    assert Helpers.static_path(conn, "/images/foo.png") == "/images/foo.png"
+    assert Helpers.static_path(socket, "/images/foo.png") == "/images/foo.png"
   end
 
   test "helpers module generates a static_integrity helper" do
-    assert is_nil(Helpers.static_integrity(Endpoint, "/images/foo.png"))
-    assert is_nil(Helpers.static_integrity(conn_with_endpoint(), "/images/foo.png"))
-    assert is_nil(Helpers.static_integrity(socket_with_endpoint(), "/images/foo.png"))
+    endpoint = Endpoint
+    conn = conn_with_endpoint()
+    socket = socket_with_endpoint()
+
+    assert is_nil(Helpers.static_integrity(endpoint, "/images/foo.png"))
+    assert is_nil(Helpers.static_integrity(conn, "/images/foo.png"))
+    assert is_nil(Helpers.static_integrity(socket, "/images/foo.png"))
   end
 
   test "helpers module generates named routes url helpers" do
+    endpoint = Endpoint
+    conn = conn_with_endpoint()
+    socket = socket_with_endpoint()
+
     url = "https://example.com/admin/new/messages/1"
-    assert Helpers.admin_message_url(Endpoint, :show, 1) == url
-    assert Helpers.admin_message_url(Endpoint, :show, 1, []) == url
-    assert Helpers.admin_message_url(conn_with_endpoint(), :show, 1) == url
-    assert Helpers.admin_message_url(conn_with_endpoint(), :show, 1, []) == url
-    assert Helpers.admin_message_url(socket_with_endpoint(), :show, 1) == url
-    assert Helpers.admin_message_url(socket_with_endpoint(), :show, 1, []) == url
-    assert Helpers.admin_message_url(uri(), :show, 1) == url
-    assert Helpers.admin_message_url(uri(), :show, 1, []) == url
+    assert Helpers.admin_message_url(endpoint, :show, 1) == url
+    assert Helpers.admin_message_url(endpoint, :show, 1, []) == url
+    assert Helpers.admin_message_url(conn, :show, 1) == url
+    assert Helpers.admin_message_url(conn, :show, 1, []) == url
+    assert Helpers.admin_message_url(socket, :show, 1) == url
+    assert Helpers.admin_message_url(socket, :show, 1, []) == url
   end
 
   test "helpers properly encode named and query string params" do
@@ -469,56 +508,14 @@ defmodule Combo.Router.HelpersTest do
 
   ## Script name
 
-  defmodule ScriptName do
-    def url do
-      "https://example.com"
-    end
-
-    def static_url do
-      "https://static.example.com"
-    end
-
-    def path(path) do
-      "/api" <> path
-    end
-
-    def static_path(path) do
-      "/api" <> path
-    end
-  end
-
-  def conn_with_script_name(script_name \\ ~w(api)) do
-    conn =
-      conn(:get, "/")
-      |> put_private(:combo_endpoint, ScriptName)
-
-    put_in(conn.script_name, script_name)
-  end
-
-  defp uri_with_script_name do
-    %URI{scheme: "https", host: "example.com", port: 123, path: "/api"}
-  end
-
-  test "paths use script name" do
-    assert Helpers.page_path(ScriptName, :root) == "/api/"
-    assert Helpers.page_path(conn_with_script_name(), :root) == "/api/"
-    assert Helpers.page_path(uri_with_script_name(), :root) == "/api/"
-    assert Helpers.post_path(ScriptName, :show, 5) == "/api/posts/5"
-    assert Helpers.post_path(conn_with_script_name(), :show, 5) == "/api/posts/5"
-    assert Helpers.post_path(uri_with_script_name(), :show, 5) == "/api/posts/5"
-  end
-
   test "urls use script name" do
-    assert Helpers.page_url(ScriptName, :root) ==
+    assert Helpers.page_url(EndpointWithScriptName, :root) ==
              "https://example.com/api/"
 
     assert Helpers.page_url(conn_with_script_name(~w(foo)), :root) ==
              "https://example.com/foo/"
 
-    assert Helpers.page_url(uri_with_script_name(), :root) ==
-             "https://example.com:123/api/"
-
-    assert Helpers.post_url(ScriptName, :show, 5) ==
+    assert Helpers.post_url(EndpointWithScriptName, :show, 5) ==
              "https://example.com/api/posts/5"
 
     assert Helpers.post_url(conn_with_script_name(), :show, 5) ==
@@ -526,9 +523,16 @@ defmodule Combo.Router.HelpersTest do
 
     assert Helpers.post_url(conn_with_script_name(~w(foo)), :show, 5) ==
              "https://example.com/foo/posts/5"
+  end
 
-    assert Helpers.post_url(uri_with_script_name(), :show, 5) ==
-             "https://example.com:123/api/posts/5"
+  test "paths use script name" do
+    endpoint = EndpointWithScriptName
+    conn = conn_with_script_name()
+
+    assert Helpers.page_path(endpoint, :root) == "/api/"
+    assert Helpers.post_path(endpoint, :show, 5) == "/api/posts/5"
+    assert Helpers.page_path(conn, :root) == "/api/"
+    assert Helpers.post_path(conn, :show, 5) == "/api/posts/5"
   end
 
   test "static use endpoint script name only" do
