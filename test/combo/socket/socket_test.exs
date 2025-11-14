@@ -82,6 +82,15 @@ defmodule Combo.SocketTest do
     end
   end
 
+  test "accepts functions" do
+    socket = %Combo.Socket{}
+    assert socket.assigns[:foo] == nil
+    socket = assign(socket, :foo, :bar)
+    assert socket.assigns[:foo] == :bar
+    socket = assign(socket, fn %{foo: :bar} -> [baz: :quux] end)
+    assert socket.assigns[:baz] == :quux
+  end
+
   describe "drainer_spec/1" do
     defmodule Endpoint do
       use Combo.Endpoint, otp_app: :combo
