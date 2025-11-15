@@ -266,7 +266,7 @@ defmodule Combo.Router.ResourcesTest do
 
   test "singleton resources declaring an :index route throws an ArgumentError" do
     assert_raise ArgumentError,
-                 ~r/supported singleton actions: \[:edit, :new, :show, :create, :update, :delete\]/,
+                 ~r/supported singleton actions: \[:new, :create, :show, :edit, :update, :delete\]/,
                  fn ->
                    defmodule SingletonRouter.Router do
                      use Support.Router
@@ -277,7 +277,7 @@ defmodule Combo.Router.ResourcesTest do
 
   test "resources validates :only actions" do
     assert_raise ArgumentError,
-                 ~r/supported actions: \[:index, :edit, :new, :show, :create, :update, :delete\]/,
+                 ~r/supported actions: \[:index, :new, :create, :show, :edit, :update, :delete\]/,
                  fn ->
                    defmodule SingletonRouter.Router do
                      use Support.Router
@@ -288,7 +288,7 @@ defmodule Combo.Router.ResourcesTest do
 
   test "resources validates :except actions" do
     assert_raise ArgumentError,
-                 ~r/supported actions: \[:index, :edit, :new, :show, :create, :update, :delete\]/,
+                 ~r/supported actions: \[:index, :new, :create, :show, :edit, :update, :delete\]/,
                  fn ->
                    defmodule SingletonRouter.Router do
                      use Support.Router

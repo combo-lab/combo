@@ -41,10 +41,10 @@ defmodule Combo.Router.ConsoleFormatterTest do
   test "format resource routes" do
     assert draw(RouterTestResources) == """
            image_path  GET     /images           RouteFormatter.ImageController :index
-           image_path  GET     /images/:id/edit  RouteFormatter.ImageController :edit
            image_path  GET     /images/new       RouteFormatter.ImageController :new
-           image_path  GET     /images/:id       RouteFormatter.ImageController :show
            image_path  POST    /images           RouteFormatter.ImageController :create
+           image_path  GET     /images/:id       RouteFormatter.ImageController :show
+           image_path  GET     /images/:id/edit  RouteFormatter.ImageController :edit
            image_path  PATCH   /images/:id       RouteFormatter.ImageController :update
                        PUT     /images/:id       RouteFormatter.ImageController :update
            image_path  DELETE  /images/:id       RouteFormatter.ImageController :delete
@@ -60,10 +60,10 @@ defmodule Combo.Router.ConsoleFormatterTest do
 
   test "format single resource routes" do
     assert draw(RouterTestResource) == """
-           image_path  GET     /image/edit  RouteFormatter.ImageController :edit
            image_path  GET     /image/new   RouteFormatter.ImageController :new
-           image_path  GET     /image       RouteFormatter.ImageController :show
            image_path  POST    /image       RouteFormatter.ImageController :create
+           image_path  GET     /image       RouteFormatter.ImageController :show
+           image_path  GET     /image/edit  RouteFormatter.ImageController :edit
            image_path  PATCH   /image       RouteFormatter.ImageController :update
                        PUT     /image       RouteFormatter.ImageController :update
            image_path  DELETE  /image       RouteFormatter.ImageController :delete
@@ -101,10 +101,10 @@ defmodule Combo.Router.ConsoleFormatterTest do
   test "helpers: false" do
     assert draw(HelpersFalseRouter) == """
              GET     /image           RouteFormatter.ImageController :index
-             GET     /image/:id/edit  RouteFormatter.ImageController :edit
              GET     /image/new       RouteFormatter.ImageController :new
-             GET     /image/:id       RouteFormatter.ImageController :show
              POST    /image           RouteFormatter.ImageController :create
+             GET     /image/:id       RouteFormatter.ImageController :show
+             GET     /image/:id/edit  RouteFormatter.ImageController :edit
              PATCH   /image/:id       RouteFormatter.ImageController :update
              PUT     /image/:id       RouteFormatter.ImageController :update
              DELETE  /image/:id       RouteFormatter.ImageController :delete
@@ -112,10 +112,10 @@ defmodule Combo.Router.ConsoleFormatterTest do
 
     assert draw(HelpersFalseRouter, FormatterEndpoint) == """
              GET     /image             RouteFormatter.ImageController :index
-             GET     /image/:id/edit    RouteFormatter.ImageController :edit
              GET     /image/new         RouteFormatter.ImageController :new
-             GET     /image/:id         RouteFormatter.ImageController :show
              POST    /image             RouteFormatter.ImageController :create
+             GET     /image/:id         RouteFormatter.ImageController :show
+             GET     /image/:id/edit    RouteFormatter.ImageController :edit
              PATCH   /image/:id         RouteFormatter.ImageController :update
              PUT     /image/:id         RouteFormatter.ImageController :update
              DELETE  /image/:id         RouteFormatter.ImageController :delete
