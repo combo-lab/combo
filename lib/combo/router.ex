@@ -746,8 +746,8 @@ defmodule Combo.Router do
   Defines a list of plugs (and pipelines) to send the connection through.
 
   Plugs are specified using the atom name of any imported 2-arity function
-  which takes a `Plug.Conn` and options and returns a `Plug.Conn`. For
-  example, `:require_authenticated_user`.
+  which takes a `Plug.Conn` struct and options and returns a `Plug.Conn` struct.
+  For example, `:require_authenticated_user`.
 
   Pipelines are defined in the router, see `pipeline/2` for more information.
 
@@ -825,12 +825,12 @@ defmodule Combo.Router do
     * `:param` - the name of the parameter for this resource, defaults to `"id"`
     * `:name` - the prefix for this resource. This is used for the named helper
       and as the prefix for the parameter in nested resources. The default value
-      is automatically derived from the controller name, i.e. `UserController` will
-      have name `"user"`
+      is automatically derived from the controller name, i.e. `UserController`
+       will have name `"user"`.
     * `:as` - configures the named helper. If `nil`, does not generate
       a helper.
-    * `:singleton` - defines routes for a singleton resource that is looked up by
-      the client without referencing an ID. Read below for more information
+    * `:singleton` - defines routes for a singleton resource.
+      Read below for more information.
 
   ## Singleton resources
 
@@ -839,9 +839,9 @@ defmodule Combo.Router do
   option can be used to generate a set of routes that are specific to
   such single resource:
 
-    * `GET /user` => `:show`
     * `GET /user/new` => `:new`
     * `POST /user` => `:create`
+    * `GET /user` => `:show`
     * `GET /user/edit` => `:edit`
     * `PATCH /user` => `:update`
     * `PUT /user` => `:update`
@@ -867,10 +867,10 @@ defmodule Combo.Router do
 
   ```console
   user_post_path  GET     /users/:user_id/posts           PostController :index
-  user_post_path  GET     /users/:user_id/posts/:id/edit  PostController :edit
   user_post_path  GET     /users/:user_id/posts/new       PostController :new
-  user_post_path  GET     /users/:user_id/posts/:id       PostController :show
   user_post_path  POST    /users/:user_id/posts           PostController :create
+  user_post_path  GET     /users/:user_id/posts/:id       PostController :show
+  user_post_path  GET     /users/:user_id/posts/:id/edit  PostController :edit
   user_post_path  PATCH   /users/:user_id/posts/:id       PostController :update
                   PUT     /users/:user_id/posts/:id       PostController :update
   user_post_path  DELETE  /users/:user_id/posts/:id       PostController :delete
