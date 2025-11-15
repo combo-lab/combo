@@ -1365,8 +1365,6 @@ defmodule Combo.Conn do
         put_router_url(conn, user.account_name <> ".example.com")
       end
 
-  > Following docs should be fixed.
-
   Now when you call `Routes.some_route_url(conn, ...)`, it will use the router
   url set above. Keep in mind that, if you want to generate routes to the
   current domain, it is preferred to use `Routes.some_route_path` helpers,
@@ -1382,8 +1380,6 @@ defmodule Combo.Conn do
 
   @doc """
   Sets the URL string or `%URI{}` to be used for the URL generation of statics.
-
-  > Following docs should be fixed.
 
   Using this function on a `%Plug.Conn{}` struct tells `static_url/2` to use
   the given information for URL generation instead of the `%Plug.Conn{}`'s
@@ -1468,7 +1464,7 @@ defmodule Combo.Conn do
 
   """
   def current_url(%Plug.Conn{} = conn) do
-    Combo.VerifiedRoutes.unverified_url(conn, current_path(conn))
+    Combo.URLBuilder.url(conn, current_path(conn))
   end
 
   @doc ~S"""
@@ -1503,15 +1499,15 @@ defmodule Combo.Conn do
   For example, to get the current URL always in HTTPS format:
 
       def current_secure_url(conn, params \\ %{}) do
-        current_uri = MyAppWeb.Endpoint.url_struct()
-        current_path = Combo.Controller.current_path(conn, params)
-        Combo.VerifiedRoutes.unverified_url(%URI{current_uri | scheme: "https"}, current_path)
+        current_uri = URI.new!(Combo.URLBuilder.url(conn, params))
+        current_secure_uri = %URI{current_uri | scheme: "https"}
+        URI.to_string(current_secure_uri)
       end
 
   If you want all generated URLs to always have a certain schema, host, etc,
   you may use `put_router_url/2`.
   """
   def current_url(%Plug.Conn{} = conn, %{} = params) do
-    Combo.VerifiedRoutes.unverified_url(conn, current_path(conn, params))
+    Combo.URLBuilder.url(conn, current_path(conn, params))
   end
 end

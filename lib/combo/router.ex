@@ -104,40 +104,81 @@ defmodule Combo.Router do
   > Combo does its best to keep the usage of macros low. You may have noticed,
   > however, that the `Combo.Router` relies heavily on macros. Why is that?
   >
-  > We use macros for two purposes:
+  > We use macros for one purposes:
   >
   > * To be faster. They define the routing engine, used on every request, to
   >   choose which controller to dispatch the request to. Thanks to macros,
   >   Combo compiles all of your routes to a single case-statement with pattern
   >   matching rules, which is heavily optimized by the Erlang VM.
-  >
-  > * To be safer. For each route you define, we also define metadata to
-  >   implement `Combo.VerifiedRoutes`. As we will soon learn, verified routes
-  >   allows us to reference any route as if it is a plain looking string,
-  >   except it is verified by the compiler to be valid (making it much harder
-  >   to ship broken links, forms, mails, etc to production). Also remember
-  >   that macros in Elixir are compile-time only, which gives plenty of
-  >   stability after the code is compiled.
-  >
-  > To summarize, the router relies on macros to build applications that are
-  > faster and safer.
+
+  ### Route helpers
+
+  Combo generates a module `Helpers` inside your router by default, which
+  contains named helpers to help developers generate and keep their routes
+  up to date. Helpers can be disabled by using:
+
+      use Combo.Router, helpers: false
+
+  Helpers are automatically generated based on the controller name.
+  For example, the route:
+
+      get "/pages/:page", PageController, :show
+
+  will generate the following named helper:
+
+      MyApp.Web.Router.Helpers.page_path(conn, :show, "hello")
+      "/pages/hello"
+
+      MyApp.Web.Router.Helpers.page_path(conn, :show, "hello", some: "query")
+      "/pages/hello?some=query"
+
+      MyApp.Web.Router.Helpers.page_url(conn, :show, "hello")
+      "http://example.com/pages/hello"
+
+      MyApp.Web.Router.Helpers.page_url(conn, :show, "hello", some: "query")
+      "http://example.com/pages/hello?some=query"
+
+  If the route contains glob-like patterns, parameters for those have to be given as
+  list:
+
+      MyApp.Web.Router.Helpers.page_path(conn, :show, ["hello", "world"])
+      "/pages/hello/world"
+
+  The URL generated in the named URL helpers is based on the configuration for
+  `:url`, `:http` and `:https`. However, if for some reason you need to manually
+  control the URL generation, the url helpers also allow you to pass in a `URI`
+  struct:
+
+      uri = %URI{scheme: "https", host: "other.example.com"}
+      MyApp.Web.Router.Helpers.page_url(uri, :show, "hello")
+      "https://other.example.com/pages/hello"
+
+  The named helper can also be customized with the `:as` option. Given
+  the route:
+
+      get "/pages/:page", PageController, :show, as: :special_page
+
+  the named helper will be:
+
+      MyApp.Web.Router.Helpers.special_page_path(conn, :show, "hello")
+      "/pages/hello"
 
   ## Scopes and Resources
 
   It is very common to namespace routes under a scope. For example:
 
-      scope "/", Demo.Web do
+      scope "/", MyApp.Web do
         get "/pages/:id", PageController, :show
       end
 
-  The route above will dispatch to `Demo.Web.PageController`. This syntax is
-  convenient to use, since you don't have to repeat `Demo.Web.` prefix on all
+  The route above will dispatch to `MyApp.Web.PageController`. This syntax is
+  convenient to use, since you don't have to repeat `MyApp.Web.` prefix on all
   routes.
 
   Like all paths, you can define dynamic segments that will be applied as
   parameters in the controller. For example:
 
-      scope "/api/:version", Demo.Web do
+      scope "/api/:version", MyApp.Web do
         get "/pages/:id", PageController, :show
       end
 
@@ -148,7 +189,7 @@ defmodule Combo.Router do
   Combo also provides a `resources/4` macro that allows to generate "RESTful"
   routes to a given resource:
 
-      defmodule Demo.Web.Router do
+      defmodule MyApp.Web.Router do
         use Combo.Router
 
         resources "/pages", PageController, only: [:show]
@@ -162,7 +203,7 @@ defmodule Combo.Router do
   Combo ships with a `mix combo.routes` task that formats all routes in a given
   router. We can use it to verify all routes included in the router above:
 
-      $ mix combo.routes Demo.Web.Router
+      $ mix combo.routes MyApp.Web.Router
       GET    /pages/:id       PageController.show/2
       GET    /users           UserController.index/2
       GET    /users/:id/edit  UserController.edit/2
@@ -185,7 +226,7 @@ defmodule Combo.Router do
 
   For example:
 
-      defmodule Demo.Web.Router do
+      defmodule MyApp.Web.Router do
         use Combo.Router
 
         import Combo.Controller
@@ -213,28 +254,27 @@ defmodule Combo.Router do
 
   ## Generating routes
 
-  For generating routes inside your application, see the `Combo.VerifiedRoutes`
-  documentation for `~p` based route generation which generates route paths and
-  URLs with compile-time verification.
+  For generating routes inside your application, see the `Combo.Router.Helpers`
+  documentation.
   """
 
-  alias Combo.Router.{Resource, Scope, Route}
+  alias Combo.Router.{Resource, Scope, Route, Helpers}
 
   @http_methods [:get, :post, :put, :patch, :delete, :options, :connect, :trace, :head]
 
   @doc false
-  defmacro __using__(_) do
+  defmacro __using__(opts) do
     quote do
-      unquote(prelude())
+      unquote(prelude(opts))
       unquote(defs())
       unquote(match_dispatch())
-      unquote(verified_routes())
     end
   end
 
-  defp prelude do
+  defp prelude(opts) do
     quote do
       Module.register_attribute(__MODULE__, :combo_routes, accumulate: true)
+      @combo_helpers Keyword.get(unquote(opts), :helpers, true)
 
       import Combo.Router
 
@@ -402,45 +442,18 @@ defmodule Combo.Router do
     end
   end
 
-  defp verified_routes do
-    quote location: :keep, generated: true do
-      @behaviour Combo.VerifiedRoutes
-
-      def formatted_routes(_) do
-        Combo.Router.__formatted_routes__(__MODULE__)
-      end
-
-      def verified_route?(_, split_path) do
-        Combo.Router.__verified_route__?(__MODULE__, split_path)
-      end
-    end
-  end
-
   @doc false
   defmacro __before_compile__(env) do
     routes = env.module |> Module.get_attribute(:combo_routes) |> Enum.reverse()
     routes_with_exprs = Enum.map(routes, &{&1, Route.exprs(&1)})
 
+    helpers =
+      if Module.get_attribute(env.module, :combo_helpers) do
+        Helpers.define(env, routes_with_exprs)
+      end
+
     {matches, {pipelines, _}} =
       Enum.map_reduce(routes_with_exprs, {[], %{}}, &build_match/2)
-
-    routes_per_path =
-      routes_with_exprs
-      |> Enum.group_by(&elem(&1, 1).path, &elem(&1, 0))
-
-    verifies =
-      routes_with_exprs
-      |> Enum.map(&elem(&1, 1).path)
-      |> Enum.uniq()
-      |> Enum.map(&build_verify(&1, routes_per_path))
-
-    verify_catch_all =
-      quote generated: true do
-        @doc false
-        def __verify_route__(_path_info) do
-          :error
-        end
-      end
 
     match_catch_all =
       quote generated: true do
@@ -476,6 +489,9 @@ defmodule Combo.Router do
       @doc false
       def __checks__, do: unquote({:__block__, [], checks})
 
+      @doc false
+      def __helpers__, do: unquote(helpers)
+
       defp prepare(conn) do
         Plug.Conn.merge_private(conn, [
           {:combo_router, __MODULE__},
@@ -484,37 +500,9 @@ defmodule Combo.Router do
       end
 
       unquote(pipelines)
-      unquote(verifies)
-      unquote(verify_catch_all)
       unquote(matches)
       unquote(match_catch_all)
       unquote(forward_catch_all)
-    end
-  end
-
-  defp build_verify(path, routes_per_path) do
-    routes = Map.get(routes_per_path, path)
-    warn_on_verify? = Enum.all?(routes, & &1.warn_on_verify?)
-
-    case Enum.find(routes, &(&1.kind == :forward)) do
-      %{metadata: %{forward: forward}, plug: plug, plug_opts: plug_opts} ->
-        quote generated: true do
-          def __forward__(unquote(plug)) do
-            unquote(forward)
-          end
-
-          def __verify_route__(unquote(path)) do
-            {{unquote(plug), unquote(forward), unquote(Macro.escape(plug_opts))},
-             unquote(warn_on_verify?)}
-          end
-        end
-
-      _ ->
-        quote generated: true do
-          def __verify_route__(unquote(path)) do
-            {nil, unquote(warn_on_verify?)}
-          end
-        end
     end
   end
 
@@ -621,10 +609,6 @@ defmodule Combo.Router do
     * `:metadata` - a map of metadata used by the telemetry events and returned by
       `route_info/4`. The `:mfa` field is used by telemetry to print logs and by the
       router to emit compile time checks. Custom fields may be added.
-    * `:warn_on_verify` - the boolean for whether matches to this route trigger
-      an unmatched route warning for `Combo.VerifiedRoutes`. It is useful to ignore
-      an otherwise catch-all route definition from being matched when verifying routes.
-      Defaults `false`.
 
   ## Examples
 
@@ -1166,18 +1150,18 @@ defmodule Combo.Router do
     * `:log` - the configured log level. For example `:debug`
     * `:path_params` - the map of runtime path params
     * `:pipe_through` - the list of pipelines for the route's scope, for example `[:browser]`
-    * `:plug` - the plug to dispatch the route to, for example `AppWeb.PostController`
+    * `:plug` - the plug to dispatch the route to, for example `MyApp.Web.PostController`
     * `:plug_opts` - the options to pass when calling the plug, for example: `:index`
     * `:route` - the string route pattern, such as `"/posts/:id"`
 
   ## Examples
 
-      iex> Combo.Router.route_info(AppWeb.Router, "GET", "/posts/123", "myhost")
+      iex> Combo.Router.route_info(MyApp.Web.Router, "GET", "/posts/123", "myhost")
       %{
         log: :debug,
         path_params: %{"id" => "123"},
         pipe_through: [:browser],
-        plug: AppWeb.PostController,
+        plug: MyApp.Web.PostController,
         plug_opts: :show,
         route: "/posts/:id",
       }
@@ -1234,28 +1218,5 @@ defmodule Combo.Router do
         ]
       end
     end)
-  end
-
-  @doc false
-  def __verified_route__?(router, split_path) do
-    case router.__verify_route__(split_path) do
-      {_forward_plug, true = _warn_on_verify?} ->
-        false
-
-      {nil = _forward_plug, false = _warn_on_verify?} ->
-        true
-
-      {{router, script_name, plug_opts}, false = _warn_on_verify?} ->
-        Code.ensure_loaded(router)
-
-        if function_exported?(router, :verified_route?, 2) do
-          router.verified_route?(plug_opts, split_path -- script_name)
-        else
-          true
-        end
-
-      :error ->
-        false
-    end
   end
 end

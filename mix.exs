@@ -165,7 +165,7 @@ defmodule Combo.MixProject do
       ],
       Router: [
         Combo.Router,
-        Combo.VerifiedRoutes,
+        Combo.URLBuilder,
         Combo.URLParam
       ],
       Controller: [

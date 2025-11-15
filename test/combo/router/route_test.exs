@@ -40,6 +40,7 @@ defmodule Combo.Router.RouteTest do
     assert route.private == %{foo: "bar"}
     assert route.assigns == %{bar: "baz"}
     assert route.metadata == %{log: :debug}
+    assert route.trailing_slash? == true
   end
 
   test "builds expressions based on the route" do
@@ -57,7 +58,7 @@ defmodule Combo.Router.RouteTest do
         %{},
         %{},
         %{},
-        true
+        false
       )
       |> exprs()
 
@@ -80,7 +81,7 @@ defmodule Combo.Router.RouteTest do
         %{foo: "bar"},
         %{bar: "baz"},
         %{},
-        true
+        false
       )
       |> exprs()
 
@@ -100,7 +101,7 @@ defmodule Combo.Router.RouteTest do
         %{foo: "bar"},
         %{bar: "baz"},
         %{},
-        true
+        false
       )
       |> exprs()
 
@@ -120,7 +121,7 @@ defmodule Combo.Router.RouteTest do
         %{foo: "bar"},
         %{bar: "baz"},
         %{},
-        true
+        false
       )
       |> exprs()
 
@@ -142,7 +143,7 @@ defmodule Combo.Router.RouteTest do
         %{foo: "bar"},
         %{bar: "baz"},
         %{},
-        true
+        false
       )
 
     assert route.verb == :*
@@ -165,7 +166,7 @@ defmodule Combo.Router.RouteTest do
         %{foo: "bar"},
         %{bar: "baz"},
         %{forward: ~w(foo)},
-        true
+        false
       )
 
     assert route.verb == :*
@@ -174,12 +175,12 @@ defmodule Combo.Router.RouteTest do
   end
 
   test "as a plug, it forwards and sets path_info and script_name for target, then resumes" do
-    conn = %Plug.Conn{path_info: ["admin", "stats"], script_name: ["demo_app"]}
+    conn = %Plug.Conn{path_info: ["admin", "stats"], script_name: ["my_app"]}
     conn = call(conn, {["admin"], AdminRouter, []})
     fwd_conn = conn.assigns[:fwd_conn]
     assert fwd_conn.path_info == ["stats"]
-    assert fwd_conn.script_name == ["demo_app", "admin"]
+    assert fwd_conn.script_name == ["my_app", "admin"]
     assert conn.path_info == ["admin", "stats"]
-    assert conn.script_name == ["demo_app"]
+    assert conn.script_name == ["my_app"]
   end
 end

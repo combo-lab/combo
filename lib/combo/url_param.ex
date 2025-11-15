@@ -2,10 +2,11 @@ defprotocol Combo.URLParam do
   @moduledoc ~S"""
   A protocol that converts data structures into URL parameters.
 
-  This protocol is mainly used by `Combo.VerifiedRoutes`. For example, when
+  This protocol is mainly used by router helpers. For example, when
   you write:
 
-      ~p"/user/#{@user}/edit"
+      alias MyApp.Web.Router.Helpers, as: Routes
+      Routes.user_path(conn, :show, @user)
 
   It knows how to convert `@user` to a string thanks to this protocol.
 
