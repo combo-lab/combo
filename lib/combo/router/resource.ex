@@ -1,59 +1,57 @@
 defmodule Combo.Router.Resource do
   @moduledoc false
 
-  alias Combo.Router.Resource
-
   @default_param_key "id"
   @actions [:index, :new, :create, :show, :edit, :update, :delete]
 
   @doc """
   The `Combo.Router.Resource` struct. It stores:
 
-    * `:path` - the path as string (not normalized)
-    * `:param` - the param to be used in routes (not normalized)
-    * `:controller` - the controller as an atom
-    * `:actions` - a list of actions as atoms
-    * `:route` - the context for resource routes
-    * `:member` - the context for member routes
-    * `:collection` - the context for collection routes
+    * `:singleton` - if the resource is a singleton resource.
+    * `:path` - the path as string (not normalized).
+    * `:param` - the param to be used in routes (not normalized).
+    * `:controller` - the controller as an atom.
+    * `:actions` - the list of actions as atoms.
+    * `:route` - the context for resource routes.
+    * `:member` - the context for member routes.
+    * `:collection` - the context for collection routes.
 
   """
-  defstruct [:path, :actions, :param, :route, :controller, :member, :collection, :singleton]
-  @type t :: %Resource{}
+  defstruct [:singleton, :path, :param, :controller, :actions, :route, :collection, :member]
+  @type t :: %__MODULE__{}
 
   @doc """
   Builds a resource struct.
   """
-  def build(path, controller, options) when is_atom(controller) and is_list(options) do
+  def build(path, controller, opts) when is_atom(controller) and is_list(opts) do
+    singleton = Keyword.get(opts, :singleton, false)
     path = Combo.Router.Scope.validate_path(path)
-    alias = Keyword.get(options, :alias)
-    param = Keyword.get(options, :param, @default_param_key)
-    name = Keyword.get(options, :name, Combo.Naming.resource_name(controller, "Controller"))
-    as = Keyword.get(options, :as, name)
-    private = Keyword.get(options, :private, %{})
-    assigns = Keyword.get(options, :assigns, %{})
+    param = Keyword.get(opts, :param, @default_param_key)
+    actions = build_actions(opts, singleton)
 
-    singleton = Keyword.get(options, :singleton, false)
-    actions = extract_actions(options, singleton)
-
+    name = Keyword.get(opts, :name, Combo.Naming.resource_name(controller, "Controller"))
+    alias = Keyword.get(opts, :alias)
+    as = Keyword.get(opts, :as, name)
+    private = Keyword.get(opts, :private, %{})
+    assigns = Keyword.get(opts, :assigns, %{})
     route = [as: as, private: private, assigns: assigns]
     collection = [path: path, as: as, private: private, assigns: assigns]
     member_path = if singleton, do: path, else: Path.join(path, ":#{name}_#{param}")
     member = [path: member_path, as: as, alias: alias, private: private, assigns: assigns]
 
-    %Resource{
+    %__MODULE__{
+      singleton: singleton,
       path: path,
-      actions: actions,
       param: param,
-      route: route,
-      member: member,
-      collection: collection,
       controller: controller,
-      singleton: singleton
+      actions: actions,
+      route: route,
+      collection: collection,
+      member: member
     }
   end
 
-  defp extract_actions(opts, singleton) do
+  defp build_actions(opts, singleton) do
     only = Keyword.get(opts, :only)
     except = Keyword.get(opts, :except)
 
@@ -74,9 +72,9 @@ defmodule Combo.Router.Resource do
   defp validate_actions(type, singleton, actions) do
     supported_actions = default_actions(singleton)
 
-    unless actions -- supported_actions == [] do
+    if actions -- supported_actions != [] do
       raise ArgumentError, """
-      invalid :#{type} action(s) passed to resources.
+      invalid #{inspect(type)} action(s) passed to resources.
 
       supported#{if singleton, do: " singleton", else: ""} actions: #{inspect(supported_actions)}
 

@@ -2,12 +2,12 @@ defmodule Combo.Router.ResourceTest do
   use ExUnit.Case, async: true
   use Support.RouterHelper
 
-  defmodule Api.GenericController do
+  defmodule API.GenericController do
     use Support.Controller
-    def show(conn, _params), do: text(conn, "show")
     def new(conn, _params), do: text(conn, "new")
-    def edit(conn, _params), do: text(conn, "edit")
     def create(conn, _params), do: text(conn, "create")
+    def show(conn, _params), do: text(conn, "show")
+    def edit(conn, _params), do: text(conn, "edit")
     def update(conn, _params), do: text(conn, "update")
     def delete(conn, _params), do: text(conn, "delete")
   end
@@ -15,12 +15,12 @@ defmodule Combo.Router.ResourceTest do
   defmodule Router do
     use Support.Router
 
-    resources "/account", Api.GenericController, alias: Api, singleton: true do
+    resources "/account", API.GenericController, alias: API, singleton: true do
       resources "/comments", GenericController
       resources "/session", GenericController, except: [:delete], singleton: true
     end
 
-    resources "/session", Api.GenericController, only: [:show], singleton: true
+    resources "/session", API.GenericController, only: [:show], singleton: true
   end
 
   setup do
@@ -28,31 +28,31 @@ defmodule Combo.Router.ResourceTest do
     :ok
   end
 
-  test "toplevel route matches new action" do
+  test "top-level route matches new action" do
     conn = call(Router, :get, "/account/new")
     assert conn.status == 200
     assert conn.resp_body == "new"
   end
 
-  test "toplevel route matches show action" do
+  test "top-level route matches show action" do
     conn = call(Router, :get, "/account")
     assert conn.status == 200
     assert conn.resp_body == "show"
   end
 
-  test "toplevel route matches edit action" do
-    conn = call(Router, :get, "/account/edit")
-    assert conn.status == 200
-    assert conn.resp_body == "edit"
-  end
-
-  test "toplevel route matches create action" do
+  test "top-level route matches create action" do
     conn = call(Router, :post, "/account")
     assert conn.status == 200
     assert conn.resp_body == "create"
   end
 
-  test "toplevel route matches update action with both PUT and PATCH" do
+  test "top-level route matches edit action" do
+    conn = call(Router, :get, "/account/edit")
+    assert conn.status == 200
+    assert conn.resp_body == "edit"
+  end
+
+  test "top-level route matches update action with both PUT and PATCH" do
     for method <- [:put, :patch] do
       conn = call(Router, method, "/account")
       assert conn.status == 200
@@ -64,13 +64,13 @@ defmodule Combo.Router.ResourceTest do
     end
   end
 
-  test "toplevel route matches delete action" do
+  test "top-level route matches delete action" do
     conn = call(Router, :delete, "/account")
     assert conn.status == 200
     assert conn.resp_body == "delete"
   end
 
-  test "1-Level nested route matches" do
+  test "1-level nested route matches" do
     conn = call(Router, :get, "/account/comments/2")
     assert conn.status == 200
     assert conn.resp_body == "show"
@@ -87,21 +87,21 @@ defmodule Combo.Router.ResourceTest do
     assert conn.resp_body == "show"
   end
 
-  test "limit resource by passing :except option" do
-    assert_raise Combo.Router.NoRouteError, fn ->
-      call(Router, :delete, "/account/session")
-    end
-
-    conn = call(Router, :get, "/account/session/new")
-    assert conn.status == 200
-  end
-
   test "limit resource by passing :only option" do
     assert_raise Combo.Router.NoRouteError, fn ->
       call(Router, :patch, "/session/new")
     end
 
     conn = call(Router, :get, "/session")
+    assert conn.status == 200
+  end
+
+  test "limit resource by passing :except option" do
+    assert_raise Combo.Router.NoRouteError, fn ->
+      call(Router, :delete, "/account/session")
+    end
+
+    conn = call(Router, :get, "/account/session/new")
     assert conn.status == 200
   end
 end

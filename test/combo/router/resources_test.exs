@@ -2,39 +2,40 @@ defmodule Combo.Router.ResourcesTest do
   use ExUnit.Case, async: true
   use Support.RouterHelper
 
-  defmodule UserController do
+  defmodule API.UserController do
     use Support.Controller
-    def show(conn, _params), do: text(conn, "show users")
     def index(conn, _params), do: text(conn, "index users")
-    def new(conn, _params), do: text(conn, "new users")
-    def edit(conn, _params), do: text(conn, "edit users")
-    def create(conn, _params), do: text(conn, "create users")
-    def update(conn, _params), do: text(conn, "update users")
-    def delete(conn, _params), do: text(conn, "delete users")
+    def new(conn, _params), do: text(conn, "new user")
+    def create(conn, _params), do: text(conn, "create user")
+    def show(conn, _params), do: text(conn, "show user")
+    def edit(conn, _params), do: text(conn, "edit user")
+    def update(conn, _params), do: text(conn, "update user")
+    def delete(conn, _params), do: text(conn, "delete user")
   end
 
-  defmodule Api.FileController do
+  defmodule API.FileController do
     use Support.Controller
-    def show(conn, _params), do: text(conn, "show files")
     def index(conn, _params), do: text(conn, "index files")
-    def new(conn, _params), do: text(conn, "new files")
+    def new(conn, _params), do: text(conn, "new file")
+    def show(conn, _params), do: text(conn, "show file")
   end
 
-  defmodule Api.CommentController do
+  defmodule API.CommentController do
     use Support.Controller
-    def show(conn, _params), do: text(conn, "show comments")
     def index(conn, _params), do: text(conn, "index comments")
-    def new(conn, _params), do: text(conn, "new comments")
-    def create(conn, _params), do: text(conn, "create comments")
-    def update(conn, _params), do: text(conn, "update comments")
-    def delete(conn, _params), do: text(conn, "delete comments")
-    def special(conn, _params), do: text(conn, "special comments")
+    def new(conn, _params), do: text(conn, "new comment")
+    def create(conn, _params), do: text(conn, "create comment")
+    def show(conn, _params), do: text(conn, "show comment")
+    def edit(conn, _params), do: text(conn, "edit comment")
+    def update(conn, _params), do: text(conn, "update comment")
+    def delete(conn, _params), do: text(conn, "delete comment")
+    def special(conn, _params), do: text(conn, "special comment")
   end
 
   defmodule Router do
     use Support.Router
 
-    resources "/users", UserController, alias: Api do
+    resources "/users", API.UserController, alias: API do
       resources "/comments", CommentController do
         get "/special", CommentController, :special
       end
@@ -42,11 +43,15 @@ defmodule Combo.Router.ResourcesTest do
       resources "/files", FileController, except: [:delete]
     end
 
-    resources "/members", UserController, only: [:show, :new, :delete]
+    resources "/members", API.UserController, only: [:show, :new, :delete]
 
-    resources "/files", Api.FileController, only: [:index]
+    resources "/files", API.FileController, only: [:index]
 
-    resources "/admin", UserController, param: "slug", name: "admin", only: [:show], alias: Api do
+    resources "/admin", API.UserController,
+      param: "slug",
+      name: "admin",
+      only: [:show],
+      alias: API do
       resources "/comments", CommentController, param: "key", name: "post", except: [:delete]
       resources "/files", FileController, only: [:show, :index, :new]
     end
@@ -57,124 +62,127 @@ defmodule Combo.Router.ResourcesTest do
     :ok
   end
 
-  test "toplevel route matches new action" do
-    conn = call(Router, :get, "/users/new")
-    assert conn.status == 200
-    assert conn.resp_body == "new users"
-  end
-
-  test "toplevel route matches index action" do
+  test "top-level route matches index action" do
     conn = call(Router, :get, "/users")
     assert conn.status == 200
     assert conn.resp_body == "index users"
   end
 
-  test "toplevel route matches show action with named param" do
-    conn = call(Router, :get, "/users/123")
+  test "top-level route matches new action" do
+    conn = call(Router, :get, "/users/new")
     assert conn.status == 200
-    assert conn.resp_body == "show users"
-    assert conn.params["id"] == "123"
+    assert conn.resp_body == "new user"
   end
 
-  test "toplevel route matches edit action with named param" do
-    conn = call(Router, :get, "/users/123/edit")
-    assert conn.status == 200
-    assert conn.resp_body == "edit users"
-    assert conn.params["id"] == "123"
-  end
-
-  test "toplevel route matches create action" do
+  test "top-level route matches create action" do
     conn = call(Router, :post, "/users")
     assert conn.status == 200
-    assert conn.resp_body == "create users"
+    assert conn.resp_body == "create user"
   end
 
-  test "toplevel route matches update action with both PUT and PATCH" do
+  test "top-level route matches show action" do
+    conn = call(Router, :get, "/users/1")
+    assert conn.params["id"] == "1"
+    assert conn.status == 200
+    assert conn.resp_body == "show user"
+  end
+
+  test "top-level route matches edit action" do
+    conn = call(Router, :get, "/users/1/edit")
+    assert conn.params["id"] == "1"
+    assert conn.status == 200
+    assert conn.resp_body == "edit user"
+  end
+
+  test "top-level route matches update action" do
     for method <- [:put, :patch] do
       conn = call(Router, method, "/users/1")
-      assert conn.status == 200
-      assert conn.resp_body == "update users"
       assert conn.params["id"] == "1"
-
-      conn = call(Router, method, "/users/2")
       assert conn.status == 200
-      assert conn.resp_body == "update users"
-      assert conn.params["id"] == "2"
+      assert conn.resp_body == "update user"
     end
   end
 
-  test "toplevel route matches delete action" do
-    conn = call(Router, :delete, "/users/2")
+  test "top-level route matches delete action" do
+    conn = call(Router, :delete, "/users/1")
+    assert conn.params["id"] == "1"
     assert conn.status == 200
-    assert conn.resp_body == "delete users"
-    assert conn.params["id"] == "2"
+    assert conn.resp_body == "delete user"
   end
 
-  test "1-Level nested route matches with named param prefix on show" do
-    conn = call(Router, :get, "/users/1/comments/2")
-    assert conn.status == 200
-    assert conn.resp_body == "show comments"
-    assert conn.params["id"] == "2"
-    assert conn.params["user_id"] == "1"
-  end
-
-  test "1-Level nested route matches with named param prefix on index" do
+  test "1-level nested route matches index action" do
     conn = call(Router, :get, "/users/1/comments")
+    assert conn.params["user_id"] == "1"
     assert conn.status == 200
     assert conn.resp_body == "index comments"
-    assert conn.params["user_id"] == "1"
   end
 
-  test "1-Level nested route matches with named param prefix on create" do
+  test "1-level nested route matches new action" do
+    conn = call(Router, :get, "/users/1/comments/new")
+    assert conn.params["user_id"] == "1"
+    assert conn.status == 200
+    assert conn.resp_body == "new comment"
+  end
+
+  test "1-level nested route matches create action" do
     conn = call(Router, :post, "/users/1/comments")
-    assert conn.status == 200
-    assert conn.resp_body == "create comments"
     assert conn.params["user_id"] == "1"
+    assert conn.status == 200
+    assert conn.resp_body == "create comment"
   end
 
-  test "1-Level nested route matches with named param prefix on update" do
-    conn = call(Router, :patch, "/users/1/comments/123")
-    assert conn.status == 200
-    assert conn.resp_body == "update comments"
+  test "1-level nested route matches show action" do
+    conn = call(Router, :get, "/users/1/comments/2")
     assert conn.params["user_id"] == "1"
-    assert conn.params["id"] == "123"
+    assert conn.params["id"] == "2"
+    assert conn.status == 200
+    assert conn.resp_body == "show comment"
   end
 
-  test "1-Level nested route matches with named param prefix on delete" do
-    conn = call(Router, :delete, "/users/1/comments/123")
-    assert conn.status == 200
-    assert conn.resp_body == "delete comments"
+  test "1-level nested route matches edit action" do
+    conn = call(Router, :get, "/users/1/comments/2/edit")
     assert conn.params["user_id"] == "1"
-    assert conn.params["id"] == "123"
+    assert conn.params["id"] == "2"
+    assert conn.status == 200
+    assert conn.resp_body == "edit comment"
   end
 
-  test "2-Level nested route with get matches" do
-    conn = call(Router, :get, "/users/1/comments/123/special")
-    assert conn.status == 200
-    assert conn.resp_body == "special comments"
+  test "1-level nested route matches update action" do
+    for method <- [:put, :patch] do
+      conn = call(Router, method, "/users/1/comments/2")
+      assert conn.params["user_id"] == "1"
+      assert conn.params["id"] == "2"
+      assert conn.status == 200
+      assert conn.resp_body == "update comment"
+    end
+  end
+
+  test "1-level nested route matches delete action" do
+    conn = call(Router, :delete, "/users/1/comments/2")
     assert conn.params["user_id"] == "1"
-    assert conn.params["comment_id"] == "123"
+    assert conn.params["id"] == "2"
+    assert conn.status == 200
+    assert conn.resp_body == "delete comment"
+  end
+
+  test "2-level nested matches" do
+    conn = call(Router, :get, "/users/1/comments/2/special")
+    assert conn.params["user_id"] == "1"
+    assert conn.params["comment_id"] == "2"
+    assert conn.status == 200
+    assert conn.resp_body == "special comment"
   end
 
   test "nested prefix context reverts back to previous scope after expansion" do
     conn = call(Router, :get, "/users/8/files/10")
     assert conn.status == 200
-    assert conn.resp_body == "show files"
+    assert conn.resp_body == "show file"
     assert conn.params["user_id"] == "8"
     assert conn.params["id"] == "10"
 
     conn = call(Router, :get, "/files")
     assert conn.status == 200
     assert conn.resp_body == "index files"
-  end
-
-  test "nested options limit resource by passing :except option" do
-    assert_raise Combo.Router.NoRouteError, fn ->
-      call(Router, :delete, "/users/1/files/2")
-    end
-
-    conn = call(Router, :get, "/users/1/files/new")
-    assert conn.status == 200
   end
 
   test "nested options limit resource by passing :only option" do
@@ -198,10 +206,19 @@ defmodule Combo.Router.ResourcesTest do
     assert conn.status == 200
   end
 
+  test "nested options limit resource by passing :except option" do
+    assert_raise Combo.Router.NoRouteError, fn ->
+      call(Router, :delete, "/users/1/files/2")
+    end
+
+    conn = call(Router, :get, "/users/1/files/new")
+    assert conn.status == 200
+  end
+
   test "resource limiting options should work for nested resources" do
     conn = call(Router, :get, "/admin/1")
     assert conn.status == 200
-    assert conn.resp_body == "show users"
+    assert conn.resp_body == "show user"
 
     assert_raise Combo.Router.NoRouteError, fn ->
       call(Router, :get, "/admin/")
@@ -225,15 +242,15 @@ defmodule Combo.Router.ResourcesTest do
 
     conn = call(Router, :get, "/admin/1/comments/1")
     assert conn.status == 200
-    assert conn.resp_body == "show comments"
+    assert conn.resp_body == "show comment"
 
     conn = call(Router, :patch, "/admin/1/comments/1")
     assert conn.status == 200
-    assert conn.resp_body == "update comments"
+    assert conn.resp_body == "update comment"
 
     conn = call(Router, :post, "/admin/1/comments")
     assert conn.status == 200
-    assert conn.resp_body == "create comments"
+    assert conn.resp_body == "create comment"
 
     assert_raise Combo.Router.NoRouteError, fn ->
       call(Router, :delete, "/scoped_files/1")
@@ -244,23 +261,23 @@ defmodule Combo.Router.ResourcesTest do
     conn = call(Router, :get, "/admin/foo")
     assert conn.status == 200
     assert conn.params["slug"] == "foo"
-    assert conn.resp_body == "show users"
+    assert conn.resp_body == "show user"
 
     conn = call(Router, :get, "/admin/bar/comments/the_key")
     assert conn.status == 200
     assert conn.params["admin_slug"] == "bar"
     assert conn.params["key"] == "the_key"
-    assert conn.resp_body == "show comments"
+    assert conn.resp_body == "show comment"
   end
 
   test "resources with :only sets proper match order for :show and :new" do
     conn = call(Router, :get, "/members/new")
     assert conn.status == 200
-    assert conn.resp_body == "new users"
+    assert conn.resp_body == "new user"
 
     conn = call(Router, :get, "/members/2")
     assert conn.status == 200
-    assert conn.resp_body == "show users"
+    assert conn.resp_body == "show user"
     assert conn.params["id"] == "2"
   end
 
@@ -270,29 +287,29 @@ defmodule Combo.Router.ResourcesTest do
                  fn ->
                    defmodule SingletonRouter.Router do
                      use Support.Router
-                     resources "/", UserController, singleton: true, only: [:index]
+                     resources "/", API.UserController, singleton: true, only: [:index]
                    end
                  end
   end
 
-  test "resources validates :only actions" do
+  test "validates :only actions" do
     assert_raise ArgumentError,
                  ~r/supported actions: \[:index, :new, :create, :show, :edit, :update, :delete\]/,
                  fn ->
                    defmodule SingletonRouter.Router do
                      use Support.Router
-                     resources "/", UserController, only: [:bad_index]
+                     resources "/", API.UserController, only: [:bad_index]
                    end
                  end
   end
 
-  test "resources validates :except actions" do
+  test "validates :except actions" do
     assert_raise ArgumentError,
                  ~r/supported actions: \[:index, :new, :create, :show, :edit, :update, :delete\]/,
                  fn ->
                    defmodule SingletonRouter.Router do
                      use Support.Router
-                     resources "/", UserController, except: [:bad_index]
+                     resources "/", API.UserController, except: [:bad_index]
                    end
                  end
   end
