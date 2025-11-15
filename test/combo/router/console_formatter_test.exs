@@ -93,38 +93,6 @@ defmodule Combo.Router.ConsoleFormatterTest do
     end
   end
 
-  defmodule HelpersFalseRouter do
-    use Combo.Router, helpers: false
-    resources "/image", RouteFormatter.ImageController
-  end
-
-  test "helpers: false" do
-    assert draw(HelpersFalseRouter) == """
-             GET     /image           RouteFormatter.ImageController :index
-             GET     /image/new       RouteFormatter.ImageController :new
-             POST    /image           RouteFormatter.ImageController :create
-             GET     /image/:id       RouteFormatter.ImageController :show
-             GET     /image/:id/edit  RouteFormatter.ImageController :edit
-             PATCH   /image/:id       RouteFormatter.ImageController :update
-             PUT     /image/:id       RouteFormatter.ImageController :update
-             DELETE  /image/:id       RouteFormatter.ImageController :delete
-           """
-
-    assert draw(HelpersFalseRouter, FormatterEndpoint) == """
-             GET     /image             RouteFormatter.ImageController :index
-             GET     /image/new         RouteFormatter.ImageController :new
-             POST    /image             RouteFormatter.ImageController :create
-             GET     /image/:id         RouteFormatter.ImageController :show
-             GET     /image/:id/edit    RouteFormatter.ImageController :edit
-             PATCH   /image/:id         RouteFormatter.ImageController :update
-             PUT     /image/:id         RouteFormatter.ImageController :update
-             DELETE  /image/:id         RouteFormatter.ImageController :delete
-             WS      /socket/websocket  TestSocket
-             GET     /socket/longpoll   TestSocket
-             POST    /socket/longpoll   TestSocket
-           """
-  end
-
   defp draw(router, endpoint \\ nil) do
     ConsoleFormatter.format(router, endpoint)
   end

@@ -113,11 +113,8 @@ defmodule Combo.Router do
 
   ### Route helpers
 
-  Combo generates a module `Helpers` inside your router by default, which
-  contains named helpers to help developers generate and keep their routes
-  up to date. Helpers can be disabled by using:
-
-      use Combo.Router, helpers: false
+  Combo generates a module `Helpers` for your routes, which contains named
+  helpers to help you generate and keep your routes up to date.
 
   Helpers are automatically generated based on the controller name.
   For example, the route:
@@ -138,8 +135,8 @@ defmodule Combo.Router do
       MyApp.Web.Router.Helpers.page_url(conn, :show, "hello", some: "query")
       "http://example.com/pages/hello?some=query"
 
-  If the route contains glob-like patterns, parameters for those have to be given as
-  list:
+  If the route contains glob-like patterns, parameters for those have to be
+  given as list:
 
       MyApp.Web.Router.Helpers.page_path(conn, :show, ["hello", "world"])
       "/pages/hello/world"
@@ -241,18 +238,17 @@ defmodule Combo.Router do
   @http_methods [:get, :post, :put, :patch, :delete, :options, :connect, :trace, :head]
 
   @doc false
-  defmacro __using__(opts) do
+  defmacro __using__ do
     quote do
-      unquote(prelude(opts))
+      unquote(prelude())
       unquote(defs())
       unquote(match_dispatch())
     end
   end
 
-  defp prelude(opts) do
+  defp prelude do
     quote do
       Module.register_attribute(__MODULE__, :combo_routes, accumulate: true)
-      @combo_helpers Keyword.get(unquote(opts), :helpers, true)
 
       import Combo.Router
 
@@ -425,10 +421,7 @@ defmodule Combo.Router do
     routes = env.module |> Module.get_attribute(:combo_routes) |> Enum.reverse()
     routes_with_exprs = Enum.map(routes, &{&1, Route.exprs(&1)})
 
-    helpers =
-      if Module.get_attribute(env.module, :combo_helpers) do
-        Helpers.define(env, routes_with_exprs)
-      end
+    helpers = Helpers.define(env, routes_with_exprs)
 
     {matches, {pipelines, _}} =
       Enum.map_reduce(routes_with_exprs, {[], %{}}, &build_match/2)
