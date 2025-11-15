@@ -8,7 +8,7 @@ defmodule Combo.Router.ConsoleFormatter do
   Format the routes for printing.
   """
   def format(router, endpoint \\ nil) do
-    routes = Combo.Router.routes(router)
+    routes = Combo.Router.__formatted_routes__(router)
     column_widths = calculate_column_widths(router, routes, endpoint)
 
     IO.iodata_to_binary([
@@ -100,18 +100,15 @@ defmodule Combo.Router.ConsoleFormatter do
 
   defp format_route(route, router, column_widths) do
     %{
+      helper: helper,
       verb: verb,
       path: path,
-      plug: plug,
-      metadata: metadata,
-      plug_opts: plug_opts,
-      helper: helper
+      label: label
     } = route
 
     verb = verb_name(verb)
     route_name = route_name(router, helper)
     {verb_len, path_len, route_name_len} = column_widths
-    log_module = metadata[:log_module] || plug
 
     String.pad_leading(route_name, route_name_len) <>
       "  " <>
@@ -119,7 +116,7 @@ defmodule Combo.Router.ConsoleFormatter do
       "  " <>
       String.pad_trailing(path, path_len) <>
       "  " <>
-      "#{inspect(log_module)} #{inspect(plug_opts)}\n"
+      label <> "\n"
   end
 
   defp route_name(_router, nil), do: ""
