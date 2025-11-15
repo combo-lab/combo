@@ -4,7 +4,7 @@ defmodule Combo.Router.Resource do
   alias Combo.Router.Resource
 
   @default_param_key "id"
-  @actions [:index, :edit, :new, :show, :create, :update, :delete]
+  @actions [:index, :new, :create, :show, :edit, :update, :delete]
 
   @doc """
   The `Combo.Router.Resource` struct. It stores:
