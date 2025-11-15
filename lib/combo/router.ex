@@ -268,55 +268,55 @@ defmodule Combo.Router do
     quote unquote: false do
       var!(add_resources, Combo.Router) = fn resource ->
         path = resource.path
-        ctrl = resource.controller
+        controller = resource.controller
         opts = resource.route
 
         if resource.singleton do
           Enum.each(resource.actions, fn
             :new ->
-              get path <> "/new", ctrl, :new, opts
+              get path <> "/new", controller, :new, opts
 
             :create ->
-              post path, ctrl, :create, opts
+              post path, controller, :create, opts
 
             :show ->
-              get path, ctrl, :show, opts
+              get path, controller, :show, opts
 
             :edit ->
-              get path <> "/edit", ctrl, :edit, opts
+              get path <> "/edit", controller, :edit, opts
 
             :update ->
-              patch path, ctrl, :update, opts
-              put path, ctrl, :update, Keyword.put(opts, :as, nil)
+              patch path, controller, :update, opts
+              put path, controller, :update, Keyword.put(opts, :as, nil)
 
             :delete ->
-              delete path, ctrl, :delete, opts
+              delete path, controller, :delete, opts
           end)
         else
           param = resource.param
 
           Enum.each(resource.actions, fn
             :index ->
-              get path, ctrl, :index, opts
+              get path, controller, :index, opts
 
             :new ->
-              get path <> "/new", ctrl, :new, opts
+              get path <> "/new", controller, :new, opts
 
             :create ->
-              post path, ctrl, :create, opts
+              post path, controller, :create, opts
 
             :show ->
-              get path <> "/:" <> param, ctrl, :show, opts
+              get path <> "/:" <> param, controller, :show, opts
 
             :edit ->
-              get path <> "/:" <> param <> "/edit", ctrl, :edit, opts
+              get path <> "/:" <> param <> "/edit", controller, :edit, opts
 
             :update ->
-              patch path <> "/:" <> param, ctrl, :update, opts
-              put path <> "/:" <> param, ctrl, :update, Keyword.put(opts, :as, nil)
+              patch path <> "/:" <> param, controller, :update, opts
+              put path <> "/:" <> param, controller, :update, Keyword.put(opts, :as, nil)
 
             :delete ->
-              delete path <> "/:" <> param, ctrl, :delete, opts
+              delete path <> "/:" <> param, controller, :delete, opts
           end)
         end
       end
