@@ -564,7 +564,7 @@ defmodule Combo.Router do
   end
 
   @doc """
-  Generates a route match based on an arbitrary HTTP method.
+  Defines a route based on an arbitrary HTTP method.
 
   Useful for defining routes not included in the built-in macros.
 
@@ -572,27 +572,27 @@ defmodule Combo.Router do
 
   ## Options
 
-    * `:as` - configures the named helper. If `nil`, does not generate
-      a helper. Has no effect when using verified routes exclusively
-    * `:alias` - configure if the scope alias should be applied to the route.
-      Defaults to true, disables scoping if false.
-    * `:log` - the level to log the route dispatching under, may be set to false. Defaults to
-      `:debug`. Route dispatching contains information about how the route is handled (which controller
-      action is called, what parameters are available and which pipelines are used) and is separate from
-      the plug level logging. To alter the plug log level, please see
+    * `:as` - the named helper. If `nil`, does not generate a helper.
+    * `:alias` - if the scope alias should be applied to the route.
+      Defaults to `true`.
+    * `:log` - the level to log the route dispatching under, may be set to false.
+      Defaults to `:debug`. Route dispatching contains information about how the
+      route is handled (which controller action is called, what parameters are
+      available and which pipelines are used) and is separate from the plug
+      level logging. To alter the plug log level, please see
       https://hexdocs.pm/combo/Combo.Logger.html#module-dynamic-log-level.
-    * `:private` - a map of private data to merge into the connection
-      when a route matches
-    * `:assigns` - a map of data to merge into the connection when a route matches
+    * `:private` - a map of private data to merge into the connection when a
+      a route matches.
+    * `:assigns` - a map of data to merge into the connection when a route matches.
     * `:metadata` - a map of metadata used by the telemetry events and returned by
       `route_info/4`. The `:mfa` field is used by telemetry to print logs and by the
       router to emit compile time checks. Custom fields may be added.
 
   ## Examples
 
-      match(:move, "/events/:id", EventController, :move)
+      match :move, "/events/:id", EventController, :move
 
-      match(:*, "/any", SomeController, :any)
+      match :*, "/any", CatchAllController, :any
 
   """
   defmacro match(verb, path, plug, plug_opts, options \\ []) do
@@ -601,9 +601,9 @@ defmodule Combo.Router do
 
   for verb <- @http_methods do
     @doc """
-    Generates a route to handle a #{verb} request to the given path.
+    Defines a route to handle a #{verb} request to the given path.
 
-        #{verb}("/events/:id", EventController, :action)
+        #{verb} "/events/:id", EventController, :action
 
     See `match/5` for options.
 
@@ -611,11 +611,10 @@ defmodule Combo.Router do
       """
       ## Compatibility with `Plug.Head`
 
-      By default, Combo apps include `Plug.Head` in their endpoint,
-      which converts HEAD requests into regular GET requests. Therefore, if
-      you intend to use `head/4` in your router, you need to move `Plug.Head`
-      to inside your router in a way it does not conflict with the paths given
-      to `head/4`.
+      By default, Combo apps include `Plug.Head` in their endpoint, which converts
+      HEAD requests into regular GET requests. Therefore, if you intend to use
+      `head/4` in your router, you need to move `Plug.Head` to inside your router
+      in a way it does not conflict with the paths given to `head/4`.
       """
     end}
     """
@@ -642,8 +641,7 @@ defmodule Combo.Router do
   @doc """
   Defines a plug pipeline.
 
-  Pipelines are defined at the router root and can be used
-  from any scope.
+  Pipelines are defined at the router root and can be used from any scope.
 
   ## Examples
 
@@ -658,33 +656,33 @@ defmodule Combo.Router do
         pipe_through :api
       end
 
-  Every time `pipe_through/1` is called, the new pipelines
-  are appended to the ones previously given.
+  Every time `pipe_through/1` is called, the new pipelines are appended to the
+  ones previously given.
   """
-  defmacro pipeline(plug, do: block) do
-    with true <- is_atom(plug),
+  defmacro pipeline(name, do: block) do
+    with true <- is_atom(name),
          imports = __CALLER__.macros ++ __CALLER__.functions,
-         {mod, _} <- Enum.find(imports, fn {_, imports} -> {plug, 2} in imports end) do
+         {mod, _} <- Enum.find(imports, fn {_, imports} -> {name, 2} in imports end) do
       raise ArgumentError,
-            "cannot define pipeline named #{inspect(plug)} " <>
+            "cannot define pipeline named #{inspect(name)} " <>
               "because there is an import from #{inspect(mod)} with the same name"
     end
 
     block =
       quote do
-        plug = unquote(plug)
+        name = unquote(name)
         @combo_pipeline []
         unquote(block)
       end
 
     compiler =
       quote unquote: false do
-        Scope.pipeline(__MODULE__, plug)
+        Scope.pipeline(__MODULE__, name)
 
         {conn, body} =
           Plug.Builder.compile(__ENV__, @combo_pipeline, init_mode: Combo.plug_init_mode())
 
-        def unquote(plug)(unquote(conn), _) do
+        def unquote(name)(unquote(conn), _) do
           try do
             unquote(body)
           rescue
@@ -837,7 +835,7 @@ defmodule Combo.Router do
       is automatically derived from the controller name, i.e. `UserController` will
       have name `"user"`
     * `:as` - configures the named helper. If `nil`, does not generate
-      a helper. Has no effect when using verified routes exclusively
+      a helper.
     * `:singleton` - defines routes for a singleton resource that is looked up by
       the client without referencing an ID. Read below for more information
 
@@ -1085,7 +1083,7 @@ defmodule Combo.Router do
   handled as `/`, `/foo`, and `/bar/baz`.
 
   A common use case for `forward` is for sharing a router between
-  applications or even breaking a big router into smaller ones.
+  applications or breaking a big router into smaller ones.
   However, in other for route generation to route accordingly, you
   can only forward to a given `Combo.Router` once.
 
@@ -1125,12 +1123,12 @@ defmodule Combo.Router do
 
   A map of metadata is returned with the following keys:
 
-    * `:log` - the configured log level. For example `:debug`
-    * `:path_params` - the map of runtime path params
-    * `:pipe_through` - the list of pipelines for the route's scope, for example `[:browser]`
-    * `:plug` - the plug to dispatch the route to, for example `MyApp.Web.PostController`
-    * `:plug_opts` - the options to pass when calling the plug, for example: `:index`
-    * `:route` - the string route pattern, such as `"/posts/:id"`
+    * `:log` - the configured log level, such as `:debug`.
+    * `:path_params` - the map of runtime path params.
+    * `:pipe_through` - the list of pipelines for the route's scope, such as `[:browser]`.
+    * `:plug` - the plug to dispatch the route to, such as `MyApp.Web.PostController`.
+    * `:plug_opts` - the options to pass when calling the plug, such as `:index`.
+    * `:route` - the string route pattern, such as `"/posts/:id"`.
 
   ## Examples
 
