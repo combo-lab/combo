@@ -273,24 +273,24 @@ defmodule Combo.Router do
 
         if resource.singleton do
           Enum.each(resource.actions, fn
-            :show ->
-              get path, ctrl, :show, opts
-
             :new ->
               get path <> "/new", ctrl, :new, opts
-
-            :edit ->
-              get path <> "/edit", ctrl, :edit, opts
 
             :create ->
               post path, ctrl, :create, opts
 
-            :delete ->
-              delete path, ctrl, :delete, opts
+            :show ->
+              get path, ctrl, :show, opts
+
+            :edit ->
+              get path <> "/edit", ctrl, :edit, opts
 
             :update ->
               patch path, ctrl, :update, opts
               put path, ctrl, :update, Keyword.put(opts, :as, nil)
+
+            :delete ->
+              delete path, ctrl, :delete, opts
           end)
         else
           param = resource.param
@@ -299,24 +299,24 @@ defmodule Combo.Router do
             :index ->
               get path, ctrl, :index, opts
 
-            :show ->
-              get path <> "/:" <> param, ctrl, :show, opts
-
             :new ->
               get path <> "/new", ctrl, :new, opts
-
-            :edit ->
-              get path <> "/:" <> param <> "/edit", ctrl, :edit, opts
 
             :create ->
               post path, ctrl, :create, opts
 
-            :delete ->
-              delete path <> "/:" <> param, ctrl, :delete, opts
+            :show ->
+              get path <> "/:" <> param, ctrl, :show, opts
+
+            :edit ->
+              get path <> "/:" <> param <> "/edit", ctrl, :edit, opts
 
             :update ->
               patch path <> "/:" <> param, ctrl, :update, opts
               put path <> "/:" <> param, ctrl, :update, Keyword.put(opts, :as, nil)
+
+            :delete ->
+              delete path <> "/:" <> param, ctrl, :delete, opts
           end)
         end
       end
