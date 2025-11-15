@@ -76,7 +76,7 @@ defmodule Combo.Router.Helpers do
 
     defhelper =
       quote generated: true, unquote: false do
-        defhelper = fn helper, vars, opts, bins, segs, trailing_slash? ->
+        defhelper = fn helper, vars, opts, bins, segs ->
           def unquote(:"#{helper}_path")(
                 conn_or_endpoint,
                 unquote(Macro.escape(opts)),
@@ -102,8 +102,7 @@ defmodule Combo.Router.Helpers do
               build_path(
                 unquote(segs),
                 params,
-                unquote(bins),
-                unquote(trailing_slash?)
+                unquote(bins)
               )
             )
           end
@@ -256,14 +255,12 @@ defmodule Combo.Router.Helpers do
         defp to_param(true), do: "true"
         defp to_param(data), do: Combo.URLParam.to_param(data)
 
-        defp build_path(segments, [], _reserved_param_keys, trailing_slash?) do
-          maybe_append_slash(segments, trailing_slash?)
+        defp build_path(segments, [], _reserved_param_keys) do
+          segments
         end
 
-        defp build_path(pathname, params, reserved_param_keys, trailing_slash?)
+        defp build_path(pathname, params, reserved_param_keys)
              when is_list(params) or is_map(params) do
-          pathname = maybe_append_slash(pathname, trailing_slash?)
-
           filtered_params =
             for {k, v} <- params,
                 k = to_string(k),
@@ -294,7 +291,6 @@ defmodule Combo.Router.Helpers do
   def defhelper(%Route{} = route, exprs) do
     helper = route.helper
     opts = route.plug_opts
-    trailing_slash? = route.trailing_slash?
 
     {bins, vars} = :lists.unzip(exprs.binding)
     segs = expand_segments(exprs.path)
@@ -305,8 +301,7 @@ defmodule Combo.Router.Helpers do
         unquote(Macro.escape(vars)),
         unquote(Macro.escape(opts)),
         unquote(Macro.escape(bins)),
-        unquote(Macro.escape(segs)),
-        unquote(Macro.escape(trailing_slash?))
+        unquote(Macro.escape(segs))
       )
     end
   end

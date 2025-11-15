@@ -14,8 +14,7 @@ defmodule Combo.Router.Scope do
             hosts: [],
             private: %{},
             assigns: %{},
-            log: :debug,
-            trailing_slash?: false
+            log: :debug
 
   @doc """
   Initializes the scope.
@@ -41,7 +40,6 @@ defmodule Combo.Router.Scope do
     assigns = Keyword.get(opts, :assigns, %{})
     as = Keyword.get_lazy(opts, :as, fn -> Combo.Naming.resource_name(plug, "Controller") end)
     alias? = Keyword.get(opts, :alias, true)
-    trailing_slash? = get_trailing_slash(opts, top)
 
     if to_string(as) == "static" do
       raise ArgumentError,
@@ -74,8 +72,7 @@ defmodule Combo.Router.Scope do
       top.pipes,
       private,
       assigns,
-      metadata,
-      trailing_slash?
+      metadata
     )
   end
 
@@ -170,16 +167,8 @@ defmodule Combo.Router.Scope do
       pipes: top.pipes,
       private: Map.merge(top.private, private),
       assigns: Map.merge(top.assigns, assigns),
-      log: Keyword.get(opts, :log, top.log),
-      trailing_slash?: get_trailing_slash(opts, top)
+      log: Keyword.get(opts, :log, top.log)
     })
-  end
-
-  defp get_trailing_slash(opts, top) do
-    case Keyword.fetch(opts, :trailing_slash) do
-      {:ok, value} -> value == true
-      :error -> top.trailing_slash?
-    end
   end
 
   defp validate_hosts!(nil), do: []

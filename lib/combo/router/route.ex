@@ -18,7 +18,6 @@ defmodule Combo.Router.Route do
     * `:assigns` - the route info
     * `:pipe_through` - the pipeline names as a list of atoms
     * `:metadata` - general metadata used on telemetry events and route info
-    * `:trailing_slash?` - whether or not the helper functions append a trailing slash
 
   """
 
@@ -34,8 +33,7 @@ defmodule Combo.Router.Route do
     :private,
     :pipe_through,
     :assigns,
-    :metadata,
-    :trailing_slash?
+    :metadata
   ]
 
   @type t :: %Route{}
@@ -68,8 +66,7 @@ defmodule Combo.Router.Route do
           pipe_through :: [atom()],
           private :: map(),
           assigns :: map(),
-          metadata :: map(),
-          trailing_slash? :: boolean()
+          metadata :: map()
         ) :: t()
   def build(
         line,
@@ -83,14 +80,12 @@ defmodule Combo.Router.Route do
         pipe_through,
         private,
         assigns,
-        metadata,
-        trailing_slash?
+        metadata
       )
       when is_atom(verb) and is_list(hosts) and
              is_atom(plug) and (is_binary(helper) or is_nil(helper)) and
              is_list(pipe_through) and is_map(private) and is_map(assigns) and
-             is_map(metadata) and kind in [:match, :forward] and
-             is_boolean(trailing_slash?) do
+             is_map(metadata) and kind in [:match, :forward] do
     %Route{
       kind: kind,
       verb: verb,
@@ -103,8 +98,7 @@ defmodule Combo.Router.Route do
       pipe_through: pipe_through,
       assigns: assigns,
       line: line,
-      metadata: metadata,
-      trailing_slash?: trailing_slash?
+      metadata: metadata
     }
   end
 

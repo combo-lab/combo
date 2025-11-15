@@ -24,8 +24,7 @@ defmodule Combo.Router.RouteTest do
         [:foo, :bar],
         %{foo: "bar"},
         %{bar: "baz"},
-        %{log: :debug},
-        true
+        %{log: :debug}
       )
 
     assert route.kind == :match
@@ -40,7 +39,6 @@ defmodule Combo.Router.RouteTest do
     assert route.private == %{foo: "bar"}
     assert route.assigns == %{bar: "baz"}
     assert route.metadata == %{log: :debug}
-    assert route.trailing_slash? == true
   end
 
   test "builds expressions based on the route" do
@@ -57,8 +55,7 @@ defmodule Combo.Router.RouteTest do
         [],
         %{},
         %{},
-        %{},
-        false
+        %{}
       )
       |> exprs()
 
@@ -80,8 +77,7 @@ defmodule Combo.Router.RouteTest do
         [:foo, :bar],
         %{foo: "bar"},
         %{bar: "baz"},
-        %{},
-        false
+        %{}
       )
       |> exprs()
 
@@ -100,8 +96,7 @@ defmodule Combo.Router.RouteTest do
         [:foo, :bar],
         %{foo: "bar"},
         %{bar: "baz"},
-        %{},
-        false
+        %{}
       )
       |> exprs()
 
@@ -120,8 +115,7 @@ defmodule Combo.Router.RouteTest do
         [],
         %{foo: "bar"},
         %{bar: "baz"},
-        %{},
-        false
+        %{}
       )
       |> exprs()
 
@@ -142,8 +136,7 @@ defmodule Combo.Router.RouteTest do
         [:foo, :bar],
         %{foo: "bar"},
         %{bar: "baz"},
-        %{},
-        false
+        %{}
       )
 
     assert route.verb == :*
@@ -165,8 +158,7 @@ defmodule Combo.Router.RouteTest do
         [:foo],
         %{foo: "bar"},
         %{bar: "baz"},
-        %{forward: ~w(foo)},
-        false
+        %{forward: ~w(foo)}
       )
 
     assert route.verb == :*
