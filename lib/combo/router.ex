@@ -32,10 +32,10 @@ defmodule Combo.Router do
   specific controllers and actions. Those macros are named after HTTP verbs.
   For example:
 
-      defmodule Demo.Web.Router do
+      defmodule MyApp.Web.Router do
         use Combo.Router
 
-        get "/pages/:page", Demo.Web.PageController, :show
+        get "/pages/:page", MyApp.Web.PageController, :show
       end
 
   Combo's router is extremely efficient, as it relies on pattern matching for
@@ -144,15 +144,6 @@ defmodule Combo.Router do
       MyApp.Web.Router.Helpers.page_path(conn, :show, ["hello", "world"])
       "/pages/hello/world"
 
-  The URL generated in the named URL helpers is based on the configuration for
-  `:url`, `:http` and `:https`. However, if for some reason you need to manually
-  control the URL generation, the url helpers also allow you to pass in a `URI`
-  struct:
-
-      uri = %URI{scheme: "https", host: "other.example.com"}
-      MyApp.Web.Router.Helpers.page_url(uri, :show, "hello")
-      "https://other.example.com/pages/hello"
-
   The named helper can also be customized with the `:as` option. Given
   the route:
 
@@ -162,6 +153,8 @@ defmodule Combo.Router do
 
       MyApp.Web.Router.Helpers.special_page_path(conn, :show, "hello")
       "/pages/hello"
+
+  See the `Combo.Router.Helpers` for more information.
 
   ## Scopes and Resources
 
@@ -201,17 +194,7 @@ defmodule Combo.Router do
   ## Listing routes
 
   Combo ships with a `mix combo.routes` task that formats all routes in a given
-  router. We can use it to verify all routes included in the router above:
-
-      $ mix combo.routes MyApp.Web.Router
-      GET    /pages/:id       PageController.show/2
-      GET    /users           UserController.index/2
-      GET    /users/:id/edit  UserController.edit/2
-      GET    /users/new       UserController.new/2
-      GET    /users/:id       UserController.show/2
-      POST   /users           UserController.create/2
-      PATCH  /users/:id       UserController.update/2
-      PUT    /users/:id       UserController.update/2
+  router. We can use it to verify all routes included in the router.
 
   ## Pipelines and plugs
 
@@ -251,11 +234,6 @@ defmodule Combo.Router do
 
   Note that router pipelines are only invoked after a route is found.
   No plug is invoked in case no matches were found.
-
-  ## Generating routes
-
-  For generating routes inside your application, see the `Combo.Router.Helpers`
-  documentation.
   """
 
   alias Combo.Router.{Resource, Scope, Route, Helpers}
