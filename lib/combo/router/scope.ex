@@ -30,8 +30,9 @@ defmodule Combo.Router.Scope do
   Builds a route based on the top of the stack.
   """
   def route(line, module, kind, verb, path, plug, plug_opts, opts) do
-    unless is_atom(plug) do
-      raise ArgumentError, "routes expect a module plug as second argument, got: #{inspect(plug)}"
+    if not is_atom(plug) do
+      raise ArgumentError,
+            "routes expect a module plug as second argument, got: #{inspect(plug)}"
     end
 
     top = get_top(module)
