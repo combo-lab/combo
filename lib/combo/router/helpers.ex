@@ -246,15 +246,6 @@ defmodule Combo.Router.Helpers do
           Combo.URLBuilder.static_integrity(conn_or_socket_or_endpoint, path)
         end
 
-        # Functions used by generated helpers
-        # Those are inlined here for performance
-
-        defp to_param(int) when is_integer(int), do: Integer.to_string(int)
-        defp to_param(bin) when is_binary(bin), do: bin
-        defp to_param(false), do: "false"
-        defp to_param(true), do: "true"
-        defp to_param(data), do: Combo.URLParam.to_param(data)
-
         defp append_params(path, [], _ignored_param_keys) do
           path
         end
@@ -272,7 +263,7 @@ defmodule Combo.Router.Helpers do
                 k not in ignored_param_keys,
                 do: {k, v}
 
-          case Conn.Query.encode(filtered_params, &to_param/1) do
+          case Conn.Query.encode(filtered_params, &Combo.URLParam.to_param/1) do
             "" -> path
             query -> path <> "?" <> query
           end
@@ -384,59 +375,62 @@ defmodule Combo.Router.Helpers do
     """
   end
 
-  # TODO: replace it
-  @doc """
-  Callback for properly encoding parameters in routes.
-  """
-  def encode_param(str), do: URI.encode(str, &URI.char_unreserved?/1)
+  def expand_segments([]), do: "/"
 
-  # HERE
-  defp encode_segment(data) do
+  def expand_segments(segments) when is_list(segments) do
+    segments =
+      segments |> Enum.map(&expand_segment(&1)) |> List.flatten() |> Enum.intersperse("/")
+
+    build_concat_chain(["/" | segments])
+  end
+
+  def expand_segments(segment) do
+    expand_segments([segment])
+  end
+
+  def expand_segment({:|, _, [h, t]}) do
+    [
+      expand_segment(h),
+      quote do
+        Enum.map_join(unquote(t), "/", &unquote(__MODULE__).encode_segment/1)
+      end
+    ]
+  end
+
+  def expand_segment(segment) when is_binary(segment) do
+    segment
+  end
+
+  def expand_segment({_, _, _} = segment) do
+    quote do
+      unquote(__MODULE__).encode_segment(unquote(segment))
+    end
+  end
+
+  defp build_concat_chain([_ | _] = list) do
+    # Reverse the list to build a concat chain like:
+    #
+    #     "a" <> "b" <> "c" <> "d"
+    #
+    # Or, it will be:
+    #
+    #     (("a" <> "b") <> "c") <> "d"
+    #
+    [h | t] = Enum.reverse(list)
+    build_concat_chain(t, h)
+  end
+
+  defp build_concat_chain([], acc), do: acc
+
+  defp build_concat_chain([h | t], acc) do
+    new_acc = quote(do: unquote(h) <> unquote(acc))
+    build_concat_chain(t, new_acc)
+  end
+
+  @doc false
+  def encode_segment(data) do
     data
     |> Combo.URLParam.to_param()
     |> URI.encode(&URI.char_unreserved?/1)
   end
-
-  defp expand_segments([]), do: "/"
-
-  defp expand_segments(segments) when is_list(segments) do
-    expand_segments(segments, "")
-  end
-
-  defp expand_segments(segments) do
-    quote do
-      "/" <> Enum.map_join(unquote(segments), "/", &unquote(__MODULE__).encode_param/1)
-    end
-  end
-
-  defp expand_segments([{:|, _, [h, t]}], acc) do
-    quote do
-      unquote(expand_segments([h], acc)) <>
-        "/" <> Enum.map_join(unquote(t), "/", &unquote(__MODULE__).encode_param/1)
-    end
-  end
-
-  defp expand_segments([h | t], acc) when is_binary(h) do
-    expand_segments(t, quote(do: unquote(acc) <> unquote("/" <> h)))
-  end
-
-  defp expand_segments([h | t], acc) do
-    expand_segments(
-      t,
-      quote(do: unquote(acc) <> "/" <> unquote(__MODULE__).encode_param(to_param(unquote(h))))
-    )
-  end
-
-  defp expand_segments([], acc) do
-    acc
-  end
 end
-
-# @doc false
-# def __encode_segment__(data) do
-#   case data do
-#     [] -> ""
-#     [str | _] when is_binary(str) -> Enum.map_join(data, "/", &encode_segment/1)
-#     _ -> encode_segment(data)
-#   end
-# end
