@@ -60,8 +60,8 @@ defmodule Combo.Router.RouteTest do
       |> exprs()
 
     assert exprs.verb == "GET"
-    assert exprs.path == ["foo", {:arg0, [], Combo.Router.Route}]
-    assert exprs.binding == [{"bar", {:arg0, [], Combo.Router.Route}}]
+    assert exprs.path == ["foo", {:bar, [], Combo.Router.Route}]
+    assert exprs.binding == [{"bar", {:bar, [], Combo.Router.Route}}]
     assert Macro.to_string(exprs.hosts) == "[_]"
 
     exprs =

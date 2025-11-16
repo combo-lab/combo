@@ -132,15 +132,12 @@ defmodule Combo.Router.Route do
     rewrite_segments(segments)
   end
 
-  # Rewrite segments to use consistent variable naming as we want to group
-  # routes later on.
   defp rewrite_segments(segments) do
-    {segments, {binding, _counter}} =
-      Macro.prewalk(segments, {[], 0}, fn
-        {name, _meta, nil}, {binding, counter}
-        when is_atom(name) and name != :_forward_path_info ->
-          var = Macro.var(:"arg#{counter}", __MODULE__)
-          {var, {[{Atom.to_string(name), var} | binding], counter + 1}}
+    {segments, binding} =
+      Macro.prewalk(segments, [], fn
+        {name, _meta, nil}, binding when is_atom(name) and name != :_forward_path_info ->
+          var = Macro.var(name, __MODULE__)
+          {var, [{Atom.to_string(name), var} | binding]}
 
         other, acc ->
           {other, acc}
