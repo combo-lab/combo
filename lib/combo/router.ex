@@ -483,7 +483,7 @@ defmodule Combo.Router do
     %{
       prepare: prepare,
       dispatch: dispatch,
-      verb_match: verb_match,
+      verb: verb,
       path_params: path_params,
       hosts: hosts,
       path: path
@@ -492,7 +492,7 @@ defmodule Combo.Router do
     clauses =
       for host <- hosts do
         quote line: route.line do
-          def __match_route__(unquote(path), unquote(verb_match), unquote(host)) do
+          def __match_route__(unquote(path), unquote(verb), unquote(host)) do
             {unquote(build_metadata(route, path_params)),
              fn var!(conn, :conn), %{path_params: var!(path_params, :conn)} ->
                unquote(prepare)

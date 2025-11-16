@@ -59,7 +59,7 @@ defmodule Combo.Router.RouteTest do
       )
       |> exprs()
 
-    assert exprs.verb_match == "GET"
+    assert exprs.verb == "GET"
     assert exprs.path == ["foo", {:arg0, [], Combo.Router.Route}]
     assert exprs.binding == [{"bar", {:arg0, [], Combo.Router.Route}}]
     assert Macro.to_string(exprs.hosts) == "[_]"
@@ -122,7 +122,7 @@ defmodule Combo.Router.RouteTest do
     assert Macro.to_string(exprs.hosts) == "[\"foo.com\"]"
   end
 
-  test "builds a catch-all verb_match for match routes" do
+  test "builds a catch-all verb for match routes" do
     route =
       build(
         1,
@@ -141,10 +141,10 @@ defmodule Combo.Router.RouteTest do
 
     assert route.verb == :*
     assert route.kind == :match
-    assert exprs(route).verb_match == {:_verb, [], nil}
+    assert exprs(route).verb == {:_verb, [], nil}
   end
 
-  test "builds a catch-all verb_match for forwarded routes" do
+  test "builds a catch-all verb for forwarded routes" do
     route =
       build(
         1,
@@ -163,7 +163,7 @@ defmodule Combo.Router.RouteTest do
 
     assert route.verb == :*
     assert route.kind == :forward
-    assert exprs(route).verb_match == {:_verb, [], nil}
+    assert exprs(route).verb == {:_verb, [], nil}
   end
 
   test "as a plug, it forwards and sets path_info and script_name for target, then resumes" do

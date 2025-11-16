@@ -112,13 +112,13 @@ defmodule Combo.Router.Route do
     {path, binding} = build_path_and_binding(route)
 
     %{
+      verb: build_verb(route.verb),
       path: path,
       binding: binding,
       dispatch: build_dispatch(route),
       hosts: build_host_match(route.hosts),
       path_params: build_path_params(binding),
-      prepare: build_prepare(route),
-      verb_match: verb_match(route.verb)
+      prepare: build_prepare(route)
     }
   end
 
@@ -132,7 +132,7 @@ defmodule Combo.Router.Route do
     rewrite_segments(segments)
   end
 
-  # We rewrite segments to use consistent variable naming as we want to group
+  # Rewrite segments to use consistent variable naming as we want to group
   # routes later on.
   defp rewrite_segments(segments) do
     {segments, {binding, _counter}} =
@@ -175,8 +175,8 @@ defmodule Combo.Router.Route do
     for host <- hosts, do: Plug.Router.Utils.build_host_match(host)
   end
 
-  defp verb_match(:*), do: Macro.var(:_verb, nil)
-  defp verb_match(verb), do: verb |> to_string() |> String.upcase()
+  defp build_verb(:*), do: Macro.var(:_verb, nil)
+  defp build_verb(verb), do: verb |> to_string() |> String.upcase()
 
   defp build_path_params(binding), do: {:%{}, [], binding}
 
