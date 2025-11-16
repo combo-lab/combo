@@ -64,152 +64,30 @@ defmodule Combo.Router.Helpers do
 
     groups = Enum.group_by(routes, fn {route, _exprs} -> route.helper end)
 
-    impls =
+    helpers =
       for {_helper, helper_routes} <- groups,
           {_, [{route, exprs} | _]} <-
             helper_routes
             |> Enum.group_by(fn {route, exprs} -> [length(exprs.binding) | route.plug_opts] end)
             |> Enum.sort(),
-          do: defhelper(route, exprs)
+          do: def_helper(route, exprs)
 
-    catch_all = Enum.map(groups, &defhelper_catch_all/1)
+    helpers_catch_all = Enum.map(groups, &def_helper_catch_all/1)
 
-    defhelper =
-      quote generated: true, unquote: false do
-        defhelper = fn helper, plug_opts, vars, bins, path ->
-          def unquote(:"#{helper}_path")(
-                conn_or_endpoint,
-                unquote(Macro.escape(plug_opts)),
-                unquote_splicing(vars)
-              ) do
-            unquote(:"#{helper}_path")(
-              conn_or_endpoint,
-              unquote(Macro.escape(plug_opts)),
-              unquote_splicing(vars),
-              []
-            )
-          end
-
-          def unquote(:"#{helper}_path")(
-                conn_or_endpoint,
-                unquote(Macro.escape(plug_opts)),
-                unquote_splicing(vars),
-                params
-              )
-              when is_list(params) or is_map(params) do
-            path(
-              conn_or_endpoint,
-              append_params(
-                unquote(path),
-                params,
-                unquote(bins)
-              )
-            )
-          end
-
-          def unquote(:"#{helper}_url")(
-                conn_or_endpoint,
-                unquote(Macro.escape(plug_opts)),
-                unquote_splicing(vars)
-              ) do
-            unquote(:"#{helper}_url")(
-              conn_or_endpoint,
-              unquote(Macro.escape(plug_opts)),
-              unquote_splicing(vars),
-              []
-            )
-          end
-
-          def unquote(:"#{helper}_url")(
-                conn_or_endpoint,
-                unquote(Macro.escape(plug_opts)),
-                unquote_splicing(vars),
-                params
-              )
-              when is_list(params) or is_map(params) do
-            url(conn_or_endpoint, "") <>
-              unquote(:"#{helper}_path")(
-                conn_or_endpoint,
-                unquote(Macro.escape(plug_opts)),
-                unquote_splicing(vars),
-                params
-              )
-          end
-        end
-      end
-
-    defcatch_all =
-      quote generated: true, unquote: false do
-        defcatch_all = fn helper, binding_lengths, params_lengths, routes ->
-          for length <- binding_lengths do
-            binding = List.duplicate({:_, [], nil}, length)
-            arity = length + 2
-
-            def unquote(:"#{helper}_path")(conn_or_endpoint, action, unquote_splicing(binding)) do
-              path(conn_or_endpoint, "/")
-              raise_route_error(unquote(helper), :path, unquote(arity), action, [])
-            end
-
-            def unquote(:"#{helper}_url")(conn_or_endpoint, action, unquote_splicing(binding)) do
-              url(conn_or_endpoint, "/")
-              raise_route_error(unquote(helper), :url, unquote(arity), action, [])
-            end
-          end
-
-          for length <- params_lengths do
-            binding = List.duplicate({:_, [], nil}, length)
-            arity = length + 2
-
-            def unquote(:"#{helper}_path")(
-                  conn_or_endpoint,
-                  action,
-                  unquote_splicing(binding),
-                  params
-                ) do
-              path(conn_or_endpoint, "/")
-              raise_route_error(unquote(helper), :path, unquote(arity + 1), action, params)
-            end
-
-            def unquote(:"#{helper}_url")(
-                  conn_or_endpoint,
-                  action,
-                  unquote_splicing(binding),
-                  params
-                ) do
-              url(conn_or_endpoint, "/")
-              raise_route_error(unquote(helper), :url, unquote(arity + 1), action, params)
-            end
-          end
-
-          defp raise_route_error(unquote(helper), suffix, arity, action, params) do
-            Combo.Router.Helpers.raise_route_error(
-              __MODULE__,
-              "#{unquote(helper)}_#{suffix}",
-              arity,
-              action,
-              unquote(Macro.escape(routes)),
-              params
-            )
-          end
-        end
-      end
-
-    # It is in general bad practice to generate large chunks of code
-    # inside quoted expressions. However, we can get away with this
-    # here for two reasons:
+    # It is in general bad practice to generate large chunks of code inside
+    # quoted expressions. However, we can get away with this here for two
+    # reasons:
     #
     # * Helper modules are quite uncommon, typically one per project.
-    #
     # * We inline most of the code for performance, so it is specific
     #   per helper module anyway.
     #
     code =
       quote do
         @moduledoc false
-        unquote(defhelper)
-        unquote(defcatch_all)
-        unquote_splicing(impls)
-        unquote_splicing(catch_all)
+        unquote(defs())
+        unquote_splicing(helpers)
+        unquote_splicing(helpers_catch_all)
 
         @doc """
         See `Combo.URLBuilder.url/3` for more information.
@@ -275,12 +153,130 @@ defmodule Combo.Router.Helpers do
     name
   end
 
+  def defs do
+    quote generated: true, unquote: false do
+      def_helper = fn helper, plug_opts, vars, bins, path ->
+        def unquote(:"#{helper}_path")(
+              conn_or_endpoint,
+              unquote(Macro.escape(plug_opts)),
+              unquote_splicing(vars)
+            ) do
+          unquote(:"#{helper}_path")(
+            conn_or_endpoint,
+            unquote(Macro.escape(plug_opts)),
+            unquote_splicing(vars),
+            []
+          )
+        end
+
+        def unquote(:"#{helper}_path")(
+              conn_or_endpoint,
+              unquote(Macro.escape(plug_opts)),
+              unquote_splicing(vars),
+              params
+            )
+            when is_list(params) or is_map(params) do
+          path(
+            conn_or_endpoint,
+            append_params(
+              unquote(path),
+              params,
+              unquote(bins)
+            )
+          )
+        end
+
+        def unquote(:"#{helper}_url")(
+              conn_or_endpoint,
+              unquote(Macro.escape(plug_opts)),
+              unquote_splicing(vars)
+            ) do
+          unquote(:"#{helper}_url")(
+            conn_or_endpoint,
+            unquote(Macro.escape(plug_opts)),
+            unquote_splicing(vars),
+            []
+          )
+        end
+
+        def unquote(:"#{helper}_url")(
+              conn_or_endpoint,
+              unquote(Macro.escape(plug_opts)),
+              unquote_splicing(vars),
+              params
+            )
+            when is_list(params) or is_map(params) do
+          url(conn_or_endpoint, "") <>
+            unquote(:"#{helper}_path")(
+              conn_or_endpoint,
+              unquote(Macro.escape(plug_opts)),
+              unquote_splicing(vars),
+              params
+            )
+        end
+      end
+
+      def_helper_catch_all = fn helper, binding_lengths, params_lengths, routes ->
+        for length <- binding_lengths do
+          binding = List.duplicate({:_, [], nil}, length)
+          arity = length + 2
+
+          def unquote(:"#{helper}_path")(conn_or_endpoint, action, unquote_splicing(binding)) do
+            path(conn_or_endpoint, "/")
+            raise_route_error(unquote(helper), :path, unquote(arity), action, [])
+          end
+
+          def unquote(:"#{helper}_url")(conn_or_endpoint, action, unquote_splicing(binding)) do
+            url(conn_or_endpoint, "/")
+            raise_route_error(unquote(helper), :url, unquote(arity), action, [])
+          end
+        end
+
+        for length <- params_lengths do
+          binding = List.duplicate({:_, [], nil}, length)
+          arity = length + 2
+
+          def unquote(:"#{helper}_path")(
+                conn_or_endpoint,
+                action,
+                unquote_splicing(binding),
+                params
+              ) do
+            path(conn_or_endpoint, "/")
+            raise_route_error(unquote(helper), :path, unquote(arity + 1), action, params)
+          end
+
+          def unquote(:"#{helper}_url")(
+                conn_or_endpoint,
+                action,
+                unquote_splicing(binding),
+                params
+              ) do
+            url(conn_or_endpoint, "/")
+            raise_route_error(unquote(helper), :url, unquote(arity + 1), action, params)
+          end
+        end
+
+        defp raise_route_error(unquote(helper), suffix, arity, action, params) do
+          Combo.Router.Helpers.raise_route_error(
+            __MODULE__,
+            "#{unquote(helper)}_#{suffix}",
+            arity,
+            action,
+            unquote(Macro.escape(routes)),
+            params
+          )
+        end
+      end
+    end
+  end
+
   @doc """
   Receives a route and returns the quoted definition for its helper function.
 
   In case a helper name was not given, or route is forwarded, returns nil.
   """
-  def defhelper(%Route{} = route, exprs) do
+  def def_helper(%Route{} = route, exprs) do
     helper = route.helper
     plug_opts = route.plug_opts
 
@@ -288,7 +284,7 @@ defmodule Combo.Router.Helpers do
     path = expand_segments(exprs.path)
 
     quote do
-      defhelper.(
+      def_helper.(
         unquote(helper),
         unquote(Macro.escape(plug_opts)),
         unquote(Macro.escape(vars)),
@@ -298,7 +294,7 @@ defmodule Combo.Router.Helpers do
     end
   end
 
-  def defhelper_catch_all({helper, routes_and_exprs}) do
+  def def_helper_catch_all({helper, routes_and_exprs}) do
     routes =
       routes_and_exprs
       |> Enum.map(fn {routes, exprs} ->
@@ -322,7 +318,7 @@ defmodule Combo.Router.Helpers do
     binding_lengths = Enum.reject(params_lengths, &((&1 - 1) in params_lengths))
 
     quote do
-      defcatch_all.(
+      def_helper_catch_all.(
         unquote(helper),
         unquote(binding_lengths),
         unquote(params_lengths),
@@ -379,9 +375,14 @@ defmodule Combo.Router.Helpers do
 
   def expand_segments(segments) when is_list(segments) do
     segments =
-      segments |> Enum.map(&expand_segment(&1)) |> List.flatten() |> Enum.intersperse("/")
+      segments
+      |> Enum.map(&expand_segment(&1))
+      |> List.flatten()
+      |> Enum.intersperse("/")
 
-    build_concat_chain(["/" | segments])
+    segments = ["/" | segments]
+
+    build_concat_chain(segments)
   end
 
   def expand_segments(segment) do
