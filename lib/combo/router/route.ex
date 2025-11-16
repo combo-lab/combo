@@ -1,42 +1,39 @@
 defmodule Combo.Router.Route do
   @moduledoc false
 
-  alias Combo.Router.Route
-
   @doc """
   The `Combo.Router.Route` struct. It stores:
 
-    * `:verb` - the HTTP verb as an atom
-    * `:line` - the line the route was defined
-    * `:kind` - the kind of route, either `:match` or `:forward`
-    * `:path` - the normalized path as string
-    * `:hosts` - the list of request hosts or host prefixes
-    * `:plug` - the plug module
-    * `:plug_opts` - the plug options
-    * `:helper` - the name of the helper as a string (may be nil)
-    * `:private` - the private route info
-    * `:assigns` - the route info
-    * `:pipe_through` - the pipeline names as a list of atoms
-    * `:metadata` - general metadata used on telemetry events and route info
+    * `:line` - the line the route was defined.
+    * `:kind` - the kind of route as an atom, either `:match` or `:forward`.
+    * `:verb` - the HTTP verb as an atom, such as `:get` or `:post`.
+    * `:path` - the normalized path as a string.
+    * `:hosts` - the list of request hosts or host prefixes.
+    * `:plug` - the plug module.
+    * `:plug_opts` - the plug options.
+    * `:helper` - the name of the helper as a string, or `nil`.
+    * `:pipe_through` - the pipeline names as a list of atoms.
+    * `:private` - the private route info as a map.
+    * `:assigns` - the route info as a map.
+    * `:metadata` - the metadata as a map, used on telemetry events and route info.
 
   """
-
   defstruct [
-    :verb,
     :line,
     :kind,
+    :verb,
     :path,
     :hosts,
     :plug,
     :plug_opts,
     :helper,
-    :private,
     :pipe_through,
+    :private,
     :assigns,
     :metadata
   ]
 
-  @type t :: %Route{}
+  @type t :: %__MODULE__{}
 
   @doc "Used as a plug on forwarding."
   def init(opts), do: opts
@@ -62,7 +59,7 @@ defmodule Combo.Router.Route do
           hosts :: [String.t()],
           plug :: atom(),
           plug_opts :: atom(),
-          helper :: atom() | nil,
+          helper :: binary() | nil,
           pipe_through :: [atom()],
           private :: map(),
           assigns :: map(),
@@ -82,28 +79,34 @@ defmodule Combo.Router.Route do
         assigns,
         metadata
       )
-      when is_atom(verb) and is_list(hosts) and
-             is_atom(plug) and (is_binary(helper) or is_nil(helper)) and
-             is_list(pipe_through) and is_map(private) and is_map(assigns) and
-             is_map(metadata) and kind in [:match, :forward] do
-    %Route{
+      when kind in [:match, :forward] and
+             is_atom(verb) and
+             is_binary(path) and
+             is_list(hosts) and
+             is_atom(plug) and
+             (is_binary(helper) or is_nil(helper)) and
+             is_list(pipe_through) and
+             is_map(private) and
+             is_map(assigns) and
+             is_map(metadata) do
+    %__MODULE__{
+      line: line,
       kind: kind,
       verb: verb,
       path: path,
       hosts: hosts,
-      private: private,
       plug: plug,
       plug_opts: plug_opts,
       helper: helper,
       pipe_through: pipe_through,
+      private: private,
       assigns: assigns,
-      line: line,
       metadata: metadata
     }
   end
 
   @doc """
-  Builds the compiled expressions used by the route.
+  Builds the compiled expressions of route.
   """
   def exprs(route) do
     {path, binding} = build_path_and_binding(route)
@@ -119,22 +122,11 @@ defmodule Combo.Router.Route do
     }
   end
 
-  def build_host_match([]), do: [Plug.Router.Utils.build_host_match(nil)]
-
-  def build_host_match([_ | _] = hosts) do
-    for host <- hosts, do: Plug.Router.Utils.build_host_match(host)
-  end
-
-  defp verb_match(:*), do: Macro.var(:_verb, nil)
-  defp verb_match(verb), do: verb |> to_string() |> String.upcase()
-
-  defp build_path_params(binding), do: {:%{}, [], binding}
-
-  defp build_path_and_binding(%Route{path: path} = route) do
+  defp build_path_and_binding(%__MODULE__{path: path} = route) do
     {_params, segments} =
       case route.kind do
-        :forward -> Plug.Router.Utils.build_path_match(path <> "/*_forward_path_info")
         :match -> Plug.Router.Utils.build_path_match(path)
+        :forward -> Plug.Router.Utils.build_path_match(path <> "/*_forward_path_info")
       end
 
     rewrite_segments(segments)
@@ -157,6 +149,37 @@ defmodule Combo.Router.Route do
     {segments, Enum.reverse(binding)}
   end
 
+  defp build_dispatch(%__MODULE__{kind: :match, plug: plug, plug_opts: plug_opts}) do
+    quote do
+      {unquote(plug), unquote(Macro.escape(plug_opts))}
+    end
+  end
+
+  defp build_dispatch(%__MODULE__{
+         kind: :forward,
+         plug: plug,
+         plug_opts: plug_opts,
+         metadata: metadata
+       }) do
+    quote do
+      {
+        Combo.Router.Route,
+        {unquote(metadata.forward), unquote(plug), unquote(Macro.escape(plug_opts))}
+      }
+    end
+  end
+
+  def build_host_match([]), do: [Plug.Router.Utils.build_host_match(nil)]
+
+  def build_host_match([_ | _] = hosts) do
+    for host <- hosts, do: Plug.Router.Utils.build_host_match(host)
+  end
+
+  defp verb_match(:*), do: Macro.var(:_verb, nil)
+  defp verb_match(verb), do: verb |> to_string() |> String.upcase()
+
+  defp build_path_params(binding), do: {:%{}, [], binding}
+
   defp build_prepare(route) do
     {match_params, merge_params} = build_params()
     {match_private, merge_private} = build_prepare_expr(:private, route.private)
@@ -177,26 +200,6 @@ defmodule Combo.Router.Route do
     var = Macro.var(key, :conn)
     merge = quote(do: Map.merge(unquote(var), unquote(Macro.escape(data))))
     {[{key, var}], [{key, merge}]}
-  end
-
-  defp build_dispatch(%Route{kind: :match, plug: plug, plug_opts: plug_opts}) do
-    quote do
-      {unquote(plug), unquote(Macro.escape(plug_opts))}
-    end
-  end
-
-  defp build_dispatch(%Route{
-         kind: :forward,
-         plug: plug,
-         plug_opts: plug_opts,
-         metadata: metadata
-       }) do
-    quote do
-      {
-        Combo.Router.Route,
-        {unquote(metadata.forward), unquote(plug), unquote(Macro.escape(plug_opts))}
-      }
-    end
   end
 
   defp build_params() do
