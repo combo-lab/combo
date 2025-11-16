@@ -76,15 +76,15 @@ defmodule Combo.Router.Helpers do
 
     defhelper =
       quote generated: true, unquote: false do
-        defhelper = fn helper, vars, opts, bins, segs ->
+        defhelper = fn helper, plug_opts, vars, bins, path ->
           def unquote(:"#{helper}_path")(
                 conn_or_endpoint,
-                unquote(Macro.escape(opts)),
+                unquote(Macro.escape(plug_opts)),
                 unquote_splicing(vars)
               ) do
             unquote(:"#{helper}_path")(
               conn_or_endpoint,
-              unquote(Macro.escape(opts)),
+              unquote(Macro.escape(plug_opts)),
               unquote_splicing(vars),
               []
             )
@@ -92,15 +92,15 @@ defmodule Combo.Router.Helpers do
 
           def unquote(:"#{helper}_path")(
                 conn_or_endpoint,
-                unquote(Macro.escape(opts)),
+                unquote(Macro.escape(plug_opts)),
                 unquote_splicing(vars),
                 params
               )
               when is_list(params) or is_map(params) do
             path(
               conn_or_endpoint,
-              build_path(
-                unquote(segs),
+              append_params(
+                unquote(path),
                 params,
                 unquote(bins)
               )
@@ -109,12 +109,12 @@ defmodule Combo.Router.Helpers do
 
           def unquote(:"#{helper}_url")(
                 conn_or_endpoint,
-                unquote(Macro.escape(opts)),
+                unquote(Macro.escape(plug_opts)),
                 unquote_splicing(vars)
               ) do
             unquote(:"#{helper}_url")(
               conn_or_endpoint,
-              unquote(Macro.escape(opts)),
+              unquote(Macro.escape(plug_opts)),
               unquote_splicing(vars),
               []
             )
@@ -122,7 +122,7 @@ defmodule Combo.Router.Helpers do
 
           def unquote(:"#{helper}_url")(
                 conn_or_endpoint,
-                unquote(Macro.escape(opts)),
+                unquote(Macro.escape(plug_opts)),
                 unquote_splicing(vars),
                 params
               )
@@ -130,7 +130,7 @@ defmodule Combo.Router.Helpers do
             url(conn_or_endpoint, "") <>
               unquote(:"#{helper}_path")(
                 conn_or_endpoint,
-                unquote(Macro.escape(opts)),
+                unquote(Macro.escape(plug_opts)),
                 unquote_splicing(vars),
                 params
               )
@@ -255,27 +255,28 @@ defmodule Combo.Router.Helpers do
         defp to_param(true), do: "true"
         defp to_param(data), do: Combo.URLParam.to_param(data)
 
-        defp build_path(segments, [], _reserved_param_keys) do
-          segments
+        defp append_params(path, [], _ignored_param_keys) do
+          path
         end
 
-        defp build_path(pathname, params, reserved_param_keys)
+        defp append_params(path, params, _ignored_param_keys)
+             when is_map(params) and map_size(params) == 0 do
+          path
+        end
+
+        defp append_params(path, params, ignored_param_keys)
              when is_list(params) or is_map(params) do
           filtered_params =
             for {k, v} <- params,
                 k = to_string(k),
-                k not in reserved_param_keys,
+                k not in ignored_param_keys,
                 do: {k, v}
 
           case Conn.Query.encode(filtered_params, &to_param/1) do
-            "" -> pathname
-            query -> pathname <> "?" <> query
+            "" -> path
+            query -> path <> "?" <> query
           end
         end
-
-        defp maybe_append_slash("/", _), do: "/"
-        defp maybe_append_slash(path, true), do: path <> "/"
-        defp maybe_append_slash(path, _), do: path
       end
 
     name = Module.concat(env.module, Helpers)
@@ -290,18 +291,18 @@ defmodule Combo.Router.Helpers do
   """
   def defhelper(%Route{} = route, exprs) do
     helper = route.helper
-    opts = route.plug_opts
+    plug_opts = route.plug_opts
 
     {bins, vars} = :lists.unzip(exprs.binding)
-    segs = expand_segments(exprs.path)
+    path = expand_segments(exprs.path)
 
     quote do
       defhelper.(
         unquote(helper),
+        unquote(Macro.escape(plug_opts)),
         unquote(Macro.escape(vars)),
-        unquote(Macro.escape(opts)),
         unquote(Macro.escape(bins)),
-        unquote(Macro.escape(segs))
+        unquote(Macro.escape(path))
       )
     end
   end
