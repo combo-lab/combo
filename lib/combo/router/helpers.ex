@@ -4,8 +4,8 @@ defmodule Combo.Router.Helpers do
 
   Named routes helpers exist to avoid hardcoding routes, if you wrote
   `<a href="/login">` and then changed your router, the link would point to a
-  page that no longer exist. By using router helpers, we make sure it always
-  points to a valid URL in our router.
+  page that no longer exist. By using router helpers, you can make sure it
+  always points to a valid URL in your router.
 
   Generic url helpers exist for convenience.
 
@@ -17,20 +17,20 @@ defmodule Combo.Router.Helpers do
       end
 
   It will generated a module named `MyApp.Web.Router.Helpers`, and following
-  functions are available:
+  functions are available.
+
+  Name routes helpers:
+
+    * `*_url/_`
+    * `*_path/_`
+
+  Generic url helpers:
 
     * `url/_`
     * `path/_`
     * `static_url/_`
     * `static_path/_`
     * `static_integrity/_`
-    * `*_url/_`
-    * `*_path/_`
-
-  ## Override endpoint's URL
-
-      - `Combo.Conn.put_router_url/2` is used to override the endpoint's URL
-      - `Combo.Conn.put_static_url/2` is used to override the endpoint's static URL
 
   ## Forwarded routes
 
