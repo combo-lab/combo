@@ -116,7 +116,7 @@ defmodule Combo.Router.Route do
       path: path,
       binding: binding,
       dispatch: build_dispatch(route),
-      hosts: build_host_match(route.hosts),
+      hosts: build_hosts(route.hosts),
       path_params: build_path_params(binding),
       prepare: build_prepare(route)
     }
@@ -149,7 +149,11 @@ defmodule Combo.Router.Route do
     {segments, Enum.reverse(binding)}
   end
 
-  defp build_dispatch(%__MODULE__{kind: :match, plug: plug, plug_opts: plug_opts}) do
+  defp build_dispatch(%__MODULE__{
+         kind: :match,
+         plug: plug,
+         plug_opts: plug_opts
+       }) do
     quote do
       {unquote(plug), unquote(Macro.escape(plug_opts))}
     end
@@ -169,9 +173,9 @@ defmodule Combo.Router.Route do
     end
   end
 
-  def build_host_match([]), do: [Plug.Router.Utils.build_host_match(nil)]
+  def build_hosts([]), do: [Plug.Router.Utils.build_host_match(nil)]
 
-  def build_host_match([_ | _] = hosts) do
+  def build_hosts([_ | _] = hosts) do
     for host <- hosts, do: Plug.Router.Utils.build_host_match(host)
   end
 
@@ -194,14 +198,6 @@ defmodule Combo.Router.Route do
     end
   end
 
-  defp build_prepare_expr(_key, data) when data == %{}, do: {[], []}
-
-  defp build_prepare_expr(key, data) do
-    var = Macro.var(key, :conn)
-    merge = quote(do: Map.merge(unquote(var), unquote(Macro.escape(data))))
-    {[{key, var}], [{key, merge}]}
-  end
-
   defp build_params() do
     params = Macro.var(:params, :conn)
     path_params = Macro.var(:path_params, :conn)
@@ -213,6 +209,14 @@ defmodule Combo.Router.Route do
       [{:params, params}],
       [{:params, merge_params}, {:path_params, path_params}]
     }
+  end
+
+  defp build_prepare_expr(_key, data) when data == %{}, do: {[], []}
+
+  defp build_prepare_expr(key, data) do
+    var = Macro.var(key, :conn)
+    merge = quote(do: Map.merge(unquote(var), unquote(Macro.escape(data))))
+    {[{key, var}], [{key, merge}]}
   end
 
   @doc """
