@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.8.0
+
 - remove the support of debug annotation for HEEx templates.
 - remove verified routes, and un-deprecate router helpers.
 - remove trailing_slash support of router helpers.
