@@ -154,27 +154,27 @@ defmodule Combo.Router.Helpers do
     quote generated: true, unquote: false do
       def_helper = fn helper, plug_opts, vars, bins, path ->
         def unquote(:"#{helper}_path")(
-              conn_or_endpoint,
-              unquote(Macro.escape(plug_opts)),
+              endpoint_or_conn_or_socket,
+              unquote(Macro.escape(plug_opts)) = action,
               unquote_splicing(vars)
             ) do
           unquote(:"#{helper}_path")(
-            conn_or_endpoint,
-            unquote(Macro.escape(plug_opts)),
+            endpoint_or_conn_or_socket,
+            action,
             unquote_splicing(vars),
             []
           )
         end
 
         def unquote(:"#{helper}_path")(
-              conn_or_endpoint,
-              unquote(Macro.escape(plug_opts)),
+              endpoint_or_conn_or_socket,
+              unquote(Macro.escape(plug_opts)) = _action,
               unquote_splicing(vars),
               params
             )
             when is_list(params) or is_map(params) do
           path(
-            conn_or_endpoint,
+            endpoint_or_conn_or_socket,
             append_params(
               unquote(path),
               params,
@@ -184,29 +184,29 @@ defmodule Combo.Router.Helpers do
         end
 
         def unquote(:"#{helper}_url")(
-              conn_or_endpoint,
-              unquote(Macro.escape(plug_opts)),
+              endpoint_or_conn_or_socket,
+              unquote(Macro.escape(plug_opts)) = action,
               unquote_splicing(vars)
             ) do
           unquote(:"#{helper}_url")(
-            conn_or_endpoint,
-            unquote(Macro.escape(plug_opts)),
+            endpoint_or_conn_or_socket,
+            action,
             unquote_splicing(vars),
             []
           )
         end
 
         def unquote(:"#{helper}_url")(
-              conn_or_endpoint,
-              unquote(Macro.escape(plug_opts)),
+              endpoint_or_conn_or_socket,
+              unquote(Macro.escape(plug_opts)) = action,
               unquote_splicing(vars),
               params
             )
             when is_list(params) or is_map(params) do
-          url(conn_or_endpoint, "") <>
+          url(endpoint_or_conn_or_socket, "") <>
             unquote(:"#{helper}_path")(
-              conn_or_endpoint,
-              unquote(Macro.escape(plug_opts)),
+              endpoint_or_conn_or_socket,
+              action,
               unquote_splicing(vars),
               params
             )
