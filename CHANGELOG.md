@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- remove catch-all functions in route helpers, because we can find the type violation by using Elixir compiler.
+
 ## v0.8.0
 
 - remove the support of debug annotation for HEEx templates.

@@ -146,15 +146,13 @@ defmodule Combo.Router.HelpersTest do
   end
 
   test "url helper shows an error if an id is accidentally passed" do
-    error_suggestion = ~r/bottom_path\(conn, :bottom, order, count, page: 5, per_page: 10\)/
+    message = ~r/no function clause matching/
 
-    assert_raise ArgumentError, error_suggestion, fn ->
+    assert_raise FunctionClauseError, message, fn ->
       Helpers.bottom_path(Endpoint, :bottom, :asc, 8, {:not, :enumerable})
     end
 
-    error_suggestion = ~r/top_path\(conn, :top, page: 5, per_page: 10\)/
-
-    assert_raise ArgumentError, error_suggestion, fn ->
+    assert_raise FunctionClauseError, message, fn ->
       Helpers.top_path(Endpoint, :top, "invalid")
     end
   end
@@ -179,30 +177,21 @@ defmodule Combo.Router.HelpersTest do
     assert Helpers.top_path(Endpoint, :top, %{"id" => "foo"}) == "/posts/top?id=foo"
     assert Helpers.top_path(Endpoint, :top, %{"id" => "foo bar"}) == "/posts/top?id=foo+bar"
 
-    error_message = fn helper, arity ->
-      """
-      no action :skip for #{inspect(Helpers)}.#{helper}/#{arity}. The following actions/clauses are supported:
+    message = ~r/no function clause matching/
 
-          #{helper}(conn_or_endpoint, :file, file, params \\\\ [])
-          #{helper}(conn_or_endpoint, :show, id, params \\\\ [])
-
-      """
-      |> String.trim()
-    end
-
-    assert_raise ArgumentError, error_message.("post_path", 3), fn ->
+    assert_raise FunctionClauseError, message, fn ->
       Helpers.post_path(Endpoint, :skip, 5)
     end
 
-    assert_raise ArgumentError, error_message.("post_url", 3), fn ->
+    assert_raise FunctionClauseError, message, fn ->
       Helpers.post_url(Endpoint, :skip, 5)
     end
 
-    assert_raise ArgumentError, error_message.("post_path", 4), fn ->
+    assert_raise FunctionClauseError, message, fn ->
       Helpers.post_path(Endpoint, :skip, 5, foo: "bar", other: "param")
     end
 
-    assert_raise ArgumentError, error_message.("post_url", 4), fn ->
+    assert_raise FunctionClauseError, message, fn ->
       Helpers.post_url(Endpoint, :skip, 5, foo: "bar", other: "param")
     end
   end
@@ -276,19 +265,19 @@ defmodule Combo.Router.HelpersTest do
     assert Helpers.user_comment_path(Endpoint, :new, 88, []) == "/users/88/comments/new"
     assert Helpers.user_comment_path(Endpoint, :new, 88) == "/users/88/comments/new"
 
-    assert_raise ArgumentError, ~r/no action :skip/, fn ->
+    message = ~r/no function clause matching/
+
+    assert_raise FunctionClauseError, message, fn ->
       Helpers.user_comment_file_path(Endpoint, :skip, 123, 456)
     end
 
-    assert_raise ArgumentError, ~r/no action :skip/, fn ->
+    assert_raise FunctionClauseError, message, fn ->
       Helpers.user_comment_file_path(Endpoint, :skip, 123, 456, foo: "bar")
     end
 
-    assert_raise ArgumentError,
-                 ~r/no function clause for Combo.Router.HelpersTest.Router.Helpers.user_comment_path\/3 and action :show/,
-                 fn ->
-                   Helpers.user_comment_path(Endpoint, :show, 123)
-                 end
+    assert_raise FunctionClauseError, message, fn ->
+      Helpers.user_comment_path(Endpoint, :show, 123)
+    end
   end
 
   test "multi-level nested resources generated named routes with complex ids" do

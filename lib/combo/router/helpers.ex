@@ -72,8 +72,6 @@ defmodule Combo.Router.Helpers do
             |> Enum.sort(),
           do: def_helper(route, exprs)
 
-    helpers_catch_all = Enum.map(groups, &def_helper_catch_all/1)
-
     # It is in general bad practice to generate large chunks of code inside
     # quoted expressions. However, we can get away with this here for two
     # reasons:
@@ -87,7 +85,6 @@ defmodule Combo.Router.Helpers do
         @moduledoc false
         unquote(defs())
         unquote_splicing(helpers)
-        unquote_splicing(helpers_catch_all)
 
         @doc """
         See `Combo.URLBuilder.url/3` for more information.
@@ -215,59 +212,6 @@ defmodule Combo.Router.Helpers do
             )
         end
       end
-
-      def_helper_catch_all = fn helper, binding_lengths, params_lengths, routes ->
-        for length <- binding_lengths do
-          binding = List.duplicate({:_, [], nil}, length)
-          arity = length + 2
-
-          def unquote(:"#{helper}_path")(conn_or_endpoint, action, unquote_splicing(binding)) do
-            path(conn_or_endpoint, "/")
-            raise_route_error(unquote(helper), :path, unquote(arity), action, [])
-          end
-
-          def unquote(:"#{helper}_url")(conn_or_endpoint, action, unquote_splicing(binding)) do
-            url(conn_or_endpoint, "/")
-            raise_route_error(unquote(helper), :url, unquote(arity), action, [])
-          end
-        end
-
-        for length <- params_lengths do
-          binding = List.duplicate({:_, [], nil}, length)
-          arity = length + 2
-
-          def unquote(:"#{helper}_path")(
-                conn_or_endpoint,
-                action,
-                unquote_splicing(binding),
-                params
-              ) do
-            path(conn_or_endpoint, "/")
-            raise_route_error(unquote(helper), :path, unquote(arity + 1), action, params)
-          end
-
-          def unquote(:"#{helper}_url")(
-                conn_or_endpoint,
-                action,
-                unquote_splicing(binding),
-                params
-              ) do
-            url(conn_or_endpoint, "/")
-            raise_route_error(unquote(helper), :url, unquote(arity + 1), action, params)
-          end
-        end
-
-        defp raise_route_error(unquote(helper), suffix, arity, action, params) do
-          Combo.Router.Helpers.raise_route_error(
-            __MODULE__,
-            "#{unquote(helper)}_#{suffix}",
-            arity,
-            action,
-            unquote(Macro.escape(routes)),
-            params
-          )
-        end
-      end
     end
   end
 
@@ -292,83 +236,6 @@ defmodule Combo.Router.Helpers do
         unquote(Macro.escape(path))
       )
     end
-  end
-
-  def def_helper_catch_all({helper, routes_and_exprs}) do
-    routes =
-      routes_and_exprs
-      |> Enum.map(fn {routes, exprs} ->
-        {routes.plug_opts, Enum.map(exprs.binding, &elem(&1, 0))}
-      end)
-      |> Enum.sort()
-
-    params_lengths =
-      routes
-      |> Enum.map(fn {_, bindings} -> length(bindings) end)
-      |> Enum.uniq()
-
-    # Each helper defines catch all like this:
-    #
-    #     def helper_path(context, action, ...binding)
-    #     def helper_path(context, action, ...binding, params)
-    #
-    # Given the helpers are ordered by binding length, the additional
-    # helper with param for a helper_path/n will always override the
-    # binding for helper_path/n+1, so we skip those here to avoid warnings.
-    binding_lengths = Enum.reject(params_lengths, &((&1 - 1) in params_lengths))
-
-    quote do
-      def_helper_catch_all.(
-        unquote(helper),
-        unquote(binding_lengths),
-        unquote(params_lengths),
-        unquote(Macro.escape(routes))
-      )
-    end
-  end
-
-  @doc """
-  Callback for generate router catch all.
-  """
-  def raise_route_error(mod, fun, arity, action, routes, params) do
-    cond do
-      is_atom(action) and not Keyword.has_key?(routes, action) ->
-        "no action #{inspect(action)} for #{inspect(mod)}.#{fun}/#{arity}"
-        |> invalid_route_error(fun, routes)
-
-      is_list(params) or is_map(params) ->
-        "no function clause for #{inspect(mod)}.#{fun}/#{arity} and action #{inspect(action)}"
-        |> invalid_route_error(fun, routes)
-
-      true ->
-        invalid_param_error(mod, fun, arity, action, routes)
-    end
-  end
-
-  defp invalid_route_error(prelude, fun, routes) do
-    suggestions =
-      for {action, bindings} <- routes do
-        bindings = Enum.join([inspect(action) | bindings], ", ")
-        "\n    #{fun}(conn_or_endpoint, #{bindings}, params \\\\ [])"
-      end
-
-    raise ArgumentError,
-          "#{prelude}. The following actions/clauses are supported:\n#{suggestions}"
-  end
-
-  defp invalid_param_error(mod, fun, arity, action, routes) do
-    call_vars = Keyword.fetch!(routes, action)
-
-    raise ArgumentError, """
-    #{inspect(mod)}.#{fun}/#{arity} called with invalid params.
-    The last argument to this function should be a keyword list or a map.
-    For example:
-
-        #{fun}(#{Enum.join(["conn", ":#{action}" | call_vars], ", ")}, page: 5, per_page: 10)
-
-    It is possible you have called this function without defining the proper
-    number of path segments in your router.
-    """
   end
 
   def expand_segments([]), do: "/"
