@@ -450,9 +450,6 @@ defmodule Combo.Router do
         quote line: line, do: _ = &(unquote(module).unquote(function) / unquote(arity))
       end)
 
-    keys = [:verb, :path, :plug, :plug_opts, :helper, :metadata]
-    routes = Enum.map(routes, &Map.take(&1, keys))
-
     quote do
       @doc false
       def __routes__, do: unquote(Macro.escape(routes))
