@@ -108,7 +108,7 @@ defmodule Combo.Router.Route do
   @doc """
   Builds the compiled expressions of route.
   """
-  def exprs(route) do
+  def build_exprs(route) do
     {path, binding} = build_path_and_binding(route)
 
     %{

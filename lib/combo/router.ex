@@ -419,7 +419,7 @@ defmodule Combo.Router do
   @doc false
   defmacro __before_compile__(env) do
     routes = env.module |> Module.get_attribute(:combo_routes) |> Enum.reverse()
-    routes_with_exprs = Enum.map(routes, &{&1, Route.exprs(&1)})
+    routes_with_exprs = Enum.map(routes, &{&1, Route.build_exprs(&1)})
 
     helpers = Helpers.define(env, routes_with_exprs)
 
