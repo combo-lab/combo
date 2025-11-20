@@ -55,20 +55,20 @@ defmodule Combo.Router.Helpers do
   @doc """
   Generates the helper module for the given environment and routes.
   """
-  def define(env, routes) do
+  def define(env, routes_with_exprs) do
     # Ignore any route without helper or forwards.
-    routes =
-      Enum.reject(routes, fn {route, _exprs} ->
+    routes_with_exprs =
+      Enum.reject(routes_with_exprs, fn {route, _exprs} ->
         is_nil(route.helper) or route.kind == :forward
       end)
 
-    groups = Enum.group_by(routes, fn {route, _exprs} -> route.helper end)
+    groups = Enum.group_by(routes_with_exprs, fn {route, _exprs} -> route.helper end)
 
     helpers =
-      for {_helper, helper_routes} <- groups,
+      for {_helper, routes_with_exprs} <- groups,
           {_, [{route, exprs} | _]} <-
-            helper_routes
-            |> Enum.group_by(fn {route, exprs} -> [length(exprs.binding) | route.plug_opts] end)
+            routes_with_exprs
+            |> Enum.group_by(fn {route, exprs} -> {length(exprs.binding), route.plug_opts} end)
             |> Enum.sort(),
           do: def_helper(route, exprs)
 
