@@ -46,17 +46,16 @@ defmodule Combo.Router do
   `get/3`, `post/3`, `put/3`, and other macros named after HTTP verbs are used
   to create routes.
 
-  The route:
-
       get "/pages", PageController, :index
 
-  matches a `GET` request to `/pages` and dispatches it to the `index` action
-  in `PageController`.
+  creates a route matches a `GET` request to `/pages` and dispatches the request
+  to the `index` action in `PageController`.
 
       get "/pages/:page", PageController, :show
 
-  matches `/pages/hello` and dispatches to the `show` action in `PageController`
-  with `%{"page" => "hello"}` in `params`.
+  create a route matches a `GET` request to `/pages/hello` and dispatches the
+  request to the `show` action in `PageController` with `%{"page" => "hello"}`
+  in `params`.
 
       defmodule PageController do
         def show(conn, params) do
@@ -101,15 +100,9 @@ defmodule Combo.Router do
 
   > #### Why the macros? {: .info}
   >
-  > Combo does its best to keep the usage of macros low. You may have noticed,
-  > however, that the `Combo.Router` relies heavily on macros. Why is that?
+  > `Combo.Router` compiles all the routes to a single case-statement with
+  > pattern matching rules, which is heavily optimized by the Erlang VM.
   >
-  > We use macros for one purposes:
-  >
-  > * To be faster. They define the routing engine, used on every request, to
-  >   choose which controller to dispatch the request to. Thanks to macros,
-  >   Combo compiles all of your routes to a single case-statement with pattern
-  >   matching rules, which is heavily optimized by the Erlang VM.
 
   ### Route helpers
 
@@ -209,7 +202,7 @@ defmodule Combo.Router do
       defmodule MyApp.Web.Router do
         use Combo.Router
 
-        import Combo.Controller
+        import Combo.Conn
         import Plug.Conn
 
         pipeline :browser do
@@ -225,15 +218,15 @@ defmodule Combo.Router do
         end
       end
 
-  In the example above, we also imports `Combo.Controller` and `Plug.Conn` to
-  help defining plugins. `accepts/2` comes from `Combo.Controller`, while
+  In the example above, we also imports `Combo.Conn` and `Plug.Conn` to
+  help defining plugins. `accepts/2` comes from `Combo.Conn`, while
   `fetch_session/2` comes from `Plug.Conn`.
 
   Note that router pipelines are only invoked after a route is found.
   No plug is invoked in case no matches were found.
   """
 
-  alias Combo.Router.{Resource, Scope, Route, Helpers}
+  alias Combo.Router.{Route, Scope, Resource, Helpers}
 
   @http_methods [:get, :post, :put, :patch, :delete, :options, :connect, :trace, :head]
 
@@ -252,18 +245,16 @@ defmodule Combo.Router do
 
       import Combo.Router
 
-      # Set up initial scope
+      # Set up the initial scope
       @combo_pipeline nil
       Combo.Router.Scope.init(__MODULE__)
       @before_compile unquote(__MODULE__)
     end
   end
 
-  # Because those macros are executed multiple times,
-  # we end-up generating a huge scope that drastically
-  # affects compilation. We work around it by defining
-  # those functions only once and calling it over and
-  # over again.
+  # Because those macros are executed multiple times, we end-up generating a
+  # huge scope that drastically affects compilation. We work around it by
+  # defining those functions only once and calling it over and over again.
   defp defs do
     quote unquote: false do
       var!(add_resources, Combo.Router) = fn resource ->

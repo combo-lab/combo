@@ -139,8 +139,8 @@ defmodule Combo.Router.Route do
           var = Macro.var(name, __MODULE__)
           {var, [{Atom.to_string(name), var} | binding]}
 
-        other, acc ->
-          {other, acc}
+        other, binding ->
+          {other, binding}
       end)
 
     {segments, Enum.reverse(binding)}
