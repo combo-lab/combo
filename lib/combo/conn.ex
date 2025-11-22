@@ -1510,4 +1510,36 @@ defmodule Combo.Conn do
   def current_url(%Plug.Conn{} = conn, %{} = params) do
     Combo.URLBuilder.url(conn, current_path(conn, params))
   end
+
+  ## Assigns
+
+  @doc """
+  Adds key-value pairs to the connection's `assigns`.
+
+  Accepts a keyword list, a map, or a single-argument function.
+
+  When a keyword list or map is given as the second argument, it merges the
+  keyword list or map into the connection's `assigns`. It is equivalent to
+  calling `Plug.Conn.assign/3` multiple times.
+
+  When a function is given as the second argument, it takes the current
+  `assigns` as an argument and its return value will be merged into the
+  connection's `assigns`.
+
+  ## Examples
+
+      iex> assign(conn, name: "Combo", lang: "Elixir")
+      iex> assign(conn, %{name: "Combo", lang: "Elixir"})
+      iex> assign(conn, fn %{name: name, lang: lang} ->
+      ...>   %{title: Enum.join([name, lang], " | ")}
+      ...> end)
+
+  """
+  def assign(conn, keyword_or_map_or_fun)
+
+  def assign(conn, fun) when is_function(fun, 1) do
+    assign(conn, fun.(conn.assigns))
+  end
+
+  defdelegate assign(conn, assigns), to: Plug.Conn, as: :merge_assigns
 end
