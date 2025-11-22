@@ -1,10 +1,10 @@
-import { jest } from '@jest/globals'
-import { LongPoll } from '../../src/socket'
-import { Socket } from '../../src/socket'
-import { AUTH_TOKEN_PREFIX } from '../../src/socket/constants'
-import Ajax from '../../src/socket/ajax'
+import { jest } from "@jest/globals"
+import { LongPoll } from "../../src/socket"
+import { Socket } from "../../src/socket"
+import { AUTH_TOKEN_PREFIX } from "../../src/socket/constants"
+import Ajax from "../../src/socket/ajax"
 
-describe('LongPoll', () => {
+describe("LongPoll", () => {
   let originalXHR
 
   beforeEach(() => {
@@ -23,12 +23,12 @@ describe('LongPoll', () => {
       setRequestHeader: mockSetRequestHeader,
       readyState: 4,
       status: 200,
-      responseText: JSON.stringify({ status: 200, token: 'token123', messages: [] }),
+      responseText: JSON.stringify({ status: 200, token: "token123", messages: [] }),
       onreadystatechange: null,
     }))
 
     // Spy on Ajax.request
-    jest.spyOn(Ajax, 'request').mockImplementation(() => {
+    jest.spyOn(Ajax, "request").mockImplementation(() => {
       return { abort: jest.fn() }
     })
   })
@@ -38,61 +38,61 @@ describe('LongPoll', () => {
     jest.restoreAllMocks()
   })
 
-  describe('constructor', () => {
-    it('should handle undefined protocols', () => {
-      const longpoll = new LongPoll('http://localhost/socket/longpoll', undefined)
+  describe("constructor", () => {
+    it("should handle undefined protocols", () => {
+      const longpoll = new LongPoll("http://localhost/socket/longpoll", undefined)
 
       // Verify longpoll was initialized correctly without error
-      expect(longpoll.pollEndpoint).toBe('http://localhost/socket/longpoll')
+      expect(longpoll.pollEndpoint).toBe("http://localhost/socket/longpoll")
       expect(longpoll.authToken).toBeUndefined()
       expect(longpoll.readyState).toBe(0) // connecting
     })
 
-    it('should handle null protocols', () => {
-      const longpoll = new LongPoll('http://localhost/socket/longpoll', null)
+    it("should handle null protocols", () => {
+      const longpoll = new LongPoll("http://localhost/socket/longpoll", null)
 
       // Verify longpoll was initialized correctly without error
-      expect(longpoll.pollEndpoint).toBe('http://localhost/socket/longpoll')
+      expect(longpoll.pollEndpoint).toBe("http://localhost/socket/longpoll")
       expect(longpoll.authToken).toBeUndefined()
       expect(longpoll.readyState).toBe(0) // connecting
     })
 
-    it('should handle empty array protocols', () => {
-      const longpoll = new LongPoll('http://localhost/socket/longpoll', [])
+    it("should handle empty array protocols", () => {
+      const longpoll = new LongPoll("http://localhost/socket/longpoll", [])
 
       // Verify longpoll was initialized correctly without error
-      expect(longpoll.pollEndpoint).toBe('http://localhost/socket/longpoll')
+      expect(longpoll.pollEndpoint).toBe("http://localhost/socket/longpoll")
       expect(longpoll.authToken).toBeUndefined()
       expect(longpoll.readyState).toBe(0) // connecting
     })
 
-    it('should extract authToken when valid protocols are provided', () => {
-      const authToken = 'my-auth-token'
+    it("should extract authToken when valid protocols are provided", () => {
+      const authToken = "my-auth-token"
       const encodedToken = btoa(authToken)
-      const protocols = ['combo', `${AUTH_TOKEN_PREFIX}${encodedToken}`]
+      const protocols = ["combo", `${AUTH_TOKEN_PREFIX}${encodedToken}`]
 
-      const longpoll = new LongPoll('http://localhost/socket/longpoll', protocols)
+      const longpoll = new LongPoll("http://localhost/socket/longpoll", protocols)
 
       // Verify auth token was extracted correctly
       expect(longpoll.authToken).toBe(authToken)
     })
   })
 
-  describe('poll', () => {
-    it('should include auth token in headers when present', () => {
-      const authToken = 'my-auth-token'
+  describe("poll", () => {
+    it("should include auth token in headers when present", () => {
+      const authToken = "my-auth-token"
       const encodedToken = btoa(authToken)
-      const protocols = ['combo', `${AUTH_TOKEN_PREFIX}${encodedToken}`]
+      const protocols = ["combo", `${AUTH_TOKEN_PREFIX}${encodedToken}`]
 
-      const longpoll = new LongPoll('http://localhost/socket/longpoll', protocols)
+      const longpoll = new LongPoll("http://localhost/socket/longpoll", protocols)
       longpoll.timeout = 1000
       longpoll.poll()
 
       // Verify Ajax.request was called with the correct headers
       expect(Ajax.request).toHaveBeenCalledWith(
-        'GET',
+        "GET",
         expect.any(String),
-        { 'Accept': 'application/json', 'X-Combo-AuthToken': authToken },
+        { "Accept": "application/json", "X-Combo-AuthToken": authToken },
         null,
         expect.any(Number),
         expect.any(Function),
@@ -100,16 +100,16 @@ describe('LongPoll', () => {
       )
     })
 
-    it('should not include auth token in headers when not present', () => {
-      const longpoll = new LongPoll('http://localhost/socket/longpoll', undefined)
+    it("should not include auth token in headers when not present", () => {
+      const longpoll = new LongPoll("http://localhost/socket/longpoll", undefined)
       longpoll.timeout = 1000
       longpoll.poll()
 
       // Verify Ajax.request was called without auth token header
       expect(Ajax.request).toHaveBeenCalledWith(
-        'GET',
+        "GET",
         expect.any(String),
-        { Accept: 'application/json' },
+        { Accept: "application/json" },
         null,
         expect.any(Number),
         expect.any(Function),
@@ -118,20 +118,20 @@ describe('LongPoll', () => {
     })
   })
 
-  describe('batchSend', () => {
-    it('should send with correct content-type header format', () => {
-      const longpoll = new LongPoll('http://localhost/socket/longpoll', undefined)
+  describe("batchSend", () => {
+    it("should send with correct content-type header format", () => {
+      const longpoll = new LongPoll("http://localhost/socket/longpoll", undefined)
       longpoll.timeout = 1000
-      const messages = ['message1', 'message2']
+      const messages = ["message1", "message2"]
 
       longpoll.batchSend(messages)
 
       // Verify Ajax.request was called with correct headers format
       expect(Ajax.request).toHaveBeenCalledWith(
-        'POST',
+        "POST",
         expect.any(String),
-        { 'Content-Type': 'application/x-ndjson' },
-        'message1\nmessage2',
+        { "Content-Type": "application/x-ndjson" },
+        "message1\nmessage2",
         expect.any(Number),
         expect.any(Function),
         expect.any(Function),
@@ -140,10 +140,10 @@ describe('LongPoll', () => {
   })
 })
 
-describe('Socket with LongPoll', () => {
-  describe('transportConnect', () => {
-    it('should initialize with undefined protocols when no auth token', () => {
-      const socket = new Socket('/socket', { transport: LongPoll })
+describe("Socket with LongPoll", () => {
+  describe("transportConnect", () => {
+    it("should initialize with undefined protocols when no auth token", () => {
+      const socket = new Socket("/socket", { transport: LongPoll })
 
       // Mock the transport to capture the protocols argument
       socket.transport = jest.fn(() => ({
@@ -159,9 +159,9 @@ describe('Socket with LongPoll', () => {
       expect(socket.transport).toHaveBeenCalledWith(expect.any(String), undefined)
     })
 
-    it('should only set protocols array when auth token is present', () => {
-      const authToken = 'my-auth-token'
-      const socket = new Socket('/socket', {
+    it("should only set protocols array when auth token is present", () => {
+      const authToken = "my-auth-token"
+      const socket = new Socket("/socket", {
         transport: LongPoll,
         params: { token: authToken },
       })
@@ -181,14 +181,14 @@ describe('Socket with LongPoll', () => {
 
       // Verify that the transport was called with correct protocols array
       expect(socket.transport).toHaveBeenCalledWith(expect.any(String), [
-        'combo',
-        `${AUTH_TOKEN_PREFIX}${btoa(authToken).replace(/=/g, '')}`,
+        "combo",
+        `${AUTH_TOKEN_PREFIX}${btoa(authToken).replace(/=/g, "")}`,
       ])
     })
   })
 })
 
-describe('Ajax.request', () => {
+describe("Ajax.request", () => {
   let originalXMLHttpRequest, originalFetch, originalAbortController
 
   beforeEach(() => {
@@ -228,24 +228,24 @@ describe('Ajax.request', () => {
     jest.restoreAllMocks()
   })
 
-  it('should use XMLHttpRequest by default', () => {
-    Ajax.request('GET', '/test-endpoint', {}, null, 0, null, (response) => {
+  it("should use XMLHttpRequest by default", () => {
+    Ajax.request("GET", "/test-endpoint", {}, null, 0, null, (response) => {
       expect(response).toEqual({ success: true })
     })
 
     expect(global.XMLHttpRequest).toHaveBeenCalled()
   })
 
-  it('should use fetch when XMLHttpRequest is not availble', () => {
+  it("should use fetch when XMLHttpRequest is not availble", () => {
     global.XMLHttpRequest = undefined // Simulate it being unavailable
-    Ajax.request('GET', '/test-endpoint', {}, null, 0, null, (response) => {
+    Ajax.request("GET", "/test-endpoint", {}, null, 0, null, (response) => {
       expect(response).toEqual({ success: true })
     })
 
     expect(global.fetch).toHaveBeenCalledWith(
-      '/test-endpoint',
+      "/test-endpoint",
       expect.objectContaining({
-        method: 'GET',
+        method: "GET",
       }),
     )
   })

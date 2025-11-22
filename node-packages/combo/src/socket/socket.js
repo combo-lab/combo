@@ -8,15 +8,15 @@ import {
   TRANSPORTS,
   WS_CLOSE_NORMAL,
   AUTH_TOKEN_PREFIX,
-} from './constants'
+} from "./constants"
 
-import { closure } from './utils'
+import { closure } from "./utils"
 
-import Ajax from './ajax'
-import Channel from './channel'
-import LongPoll from './longpoll'
-import Serializer from './serializer'
-import Timer from './timer'
+import Ajax from "./ajax"
+import Channel from "./channel"
+import LongPoll from "./longpoll"
+import Serializer from "./serializer"
+import Timer from "./timer"
 
 /** Initializes the Socket *
  *
@@ -125,7 +125,7 @@ export default class Socket {
     this.defaultDecoder = Serializer.decode.bind(Serializer)
     this.closeWasClean = false
     this.disconnecting = false
-    this.binaryType = opts.binaryType || 'arraybuffer'
+    this.binaryType = opts.binaryType || "arraybuffer"
     this.connectClock = 1
     if (this.transport !== LongPoll) {
       this.encode = opts.encode || this.defaultEncoder
@@ -136,13 +136,13 @@ export default class Socket {
     }
     let awaitingConnectionOnPageShow = null
     if (comboWindow && comboWindow.addEventListener) {
-      comboWindow.addEventListener('pagehide', (_e) => {
+      comboWindow.addEventListener("pagehide", (_e) => {
         if (this.conn) {
           this.disconnect()
           awaitingConnectionOnPageShow = this.connectClock
         }
       })
-      comboWindow.addEventListener('pageshow', (_e) => {
+      comboWindow.addEventListener("pageshow", (_e) => {
         if (awaitingConnectionOnPageShow === this.connectClock) {
           awaitingConnectionOnPageShow = null
           this.connect()
@@ -214,7 +214,7 @@ export default class Socket {
    * @returns {string}
    */
   protocol() {
-    return location.protocol.match(/^https/) ? 'wss' : 'ws'
+    return location.protocol.match(/^https/) ? "wss" : "ws"
   }
 
   /**
@@ -226,10 +226,10 @@ export default class Socket {
     let uri = Ajax.appendParams(Ajax.appendParams(this.endPoint, this.params()), {
       vsn: this.vsn,
     })
-    if (uri.charAt(0) !== '/') {
+    if (uri.charAt(0) !== "/") {
       return uri
     }
-    if (uri.charAt(1) === '/') {
+    if (uri.charAt(1) === "/") {
       return `${this.protocol()}:${uri}`
     }
 
@@ -270,10 +270,10 @@ export default class Socket {
    */
   connect(params) {
     if (params) {
-      console
-      && console.log(
-        'passing params to connect is deprecated. Instead pass :params to the Socket constructor',
-      )
+      console &&
+        console.log(
+          "passing params to connect is deprecated. Instead pass :params to the Socket constructor",
+        )
       this.params = closure(params)
     }
     if (this.conn && !this.disconnecting) {
@@ -361,7 +361,7 @@ export default class Socket {
     }
     let ref = this.makeRef()
     let startTime = Date.now()
-    this.push({ topic: 'combo', event: 'heartbeat', payload: {}, ref: ref })
+    this.push({ topic: "combo", event: "heartbeat", payload: {}, ref: ref })
     let onMsgRef = this.onMessage((msg) => {
       if (msg.ref === ref) {
         this.off([onMsgRef])
@@ -382,15 +382,15 @@ export default class Socket {
     // Sec-WebSocket-Protocol based token
     // (longpoll uses Authorization header instead)
     if (this.authToken) {
-      protocols = ['combo', `${AUTH_TOKEN_PREFIX}${btoa(this.authToken).replace(/=/g, '')}`]
+      protocols = ["combo", `${AUTH_TOKEN_PREFIX}${btoa(this.authToken).replace(/=/g, "")}`]
     }
     this.conn = new this.transport(this.endPointURL(), protocols)
     this.conn.binaryType = this.binaryType
     this.conn.timeout = this.longpollerTimeout
     this.conn.onopen = () => this.onConnOpen()
-    this.conn.onerror = error => this.onConnError(error)
-    this.conn.onmessage = event => this.onConnMessage(event)
-    this.conn.onclose = event => this.onConnClose(event)
+    this.conn.onerror = (error) => this.onConnError(error)
+    this.conn.onmessage = (event) => this.onConnMessage(event)
+    this.conn.onclose = (event) => this.onConnClose(event)
   }
 
   getSession(key) {
@@ -407,20 +407,20 @@ export default class Socket {
     let primaryTransport = true
     let openRef, errorRef
     let fallback = (reason) => {
-      this.log('transport', `falling back to ${fallbackTransport.name}...`, reason)
+      this.log("transport", `falling back to ${fallbackTransport.name}...`, reason)
       this.off([openRef, errorRef])
       primaryTransport = false
       this.replaceTransport(fallbackTransport)
       this.transportConnect()
     }
     if (this.getSession(`combo:fallback:${fallbackTransport.name}`)) {
-      return fallback('memorized')
+      return fallback("memorized")
     }
 
     this.fallbackTimer = setTimeout(fallback, fallbackThreshold)
 
     errorRef = this.onError((reason) => {
-      this.log('transport', 'error', reason)
+      this.log("transport", "error", reason)
       if (primaryTransport && !established) {
         clearTimeout(this.fallbackTimer)
         fallback(reason)
@@ -431,15 +431,15 @@ export default class Socket {
       if (!primaryTransport) {
         // only memorize LP if we never connected to primary
         if (!this.primaryPassedHealthCheck) {
-          this.storeSession(`combo:fallback:${fallbackTransport.name}`, 'true')
+          this.storeSession(`combo:fallback:${fallbackTransport.name}`, "true")
         }
-        return this.log('transport', `established ${fallbackTransport.name} fallback`)
+        return this.log("transport", `established ${fallbackTransport.name} fallback`)
       }
       // if we've established primary, give the fallback a new period to attempt ping
       clearTimeout(this.fallbackTimer)
       this.fallbackTimer = setTimeout(fallback, fallbackThreshold)
       this.ping((rtt) => {
-        this.log('transport', 'connected to primary after', rtt)
+        this.log("transport", "connected to primary after", rtt)
         this.primaryPassedHealthCheck = true
         clearTimeout(this.fallbackTimer)
       })
@@ -454,7 +454,7 @@ export default class Socket {
 
   onConnOpen() {
     if (this.hasLogger())
-      this.log('transport', `${this.transport.name} connected to ${this.endPointURL()}`)
+      this.log("transport", `${this.transport.name} connected to ${this.endPointURL()}`)
     this.closeWasClean = false
     this.disconnecting = false
     this.establishedConnections++
@@ -472,14 +472,14 @@ export default class Socket {
     if (this.pendingHeartbeatRef) {
       this.pendingHeartbeatRef = null
       if (this.hasLogger()) {
-        this.log('transport', 'heartbeat timeout. Attempting to re-establish connection')
+        this.log("transport", "heartbeat timeout. Attempting to re-establish connection")
       }
       this.triggerChanError()
       this.closeWasClean = false
       this.teardown(
         () => this.reconnectTimer.scheduleTimeout(),
         WS_CLOSE_NORMAL,
-        'heartbeat timeout',
+        "heartbeat timeout",
       )
     }
   }
@@ -505,7 +505,7 @@ export default class Socket {
       }
       if (this.conn) {
         if (code) {
-          this.conn.close(code, reason || '')
+          this.conn.close(code, reason || "")
         } else {
           this.conn.close()
         }
@@ -552,7 +552,7 @@ export default class Socket {
 
   onConnClose(event) {
     let closeCode = event && event.code
-    if (this.hasLogger()) this.log('transport', 'close', event)
+    if (this.hasLogger()) this.log("transport", "close", event)
     this.triggerChanError()
     this.clearHeartbeats()
     if (!this.closeWasClean && closeCode !== 1000) {
@@ -565,7 +565,7 @@ export default class Socket {
    * @private
    */
   onConnError(error) {
-    if (this.hasLogger()) this.log('transport', error)
+    if (this.hasLogger()) this.log("transport", error)
     let transportBefore = this.transport
     let establishedBefore = this.establishedConnections
     this.stateChangeCallbacks.error.forEach(([, callback]) => {
@@ -593,13 +593,13 @@ export default class Socket {
   connectionState() {
     switch (this.conn && this.conn.readyState) {
       case SOCKET_STATES.connecting:
-        return 'connecting'
+        return "connecting"
       case SOCKET_STATES.open:
-        return 'open'
+        return "open"
       case SOCKET_STATES.closing:
-        return 'closing'
+        return "closing"
       default:
-        return 'closed'
+        return "closed"
     }
   }
 
@@ -607,7 +607,7 @@ export default class Socket {
    * @returns {boolean}
    */
   isConnected() {
-    return this.connectionState() === 'open'
+    return this.connectionState() === "open"
   }
 
   /**
@@ -617,7 +617,7 @@ export default class Socket {
    */
   remove(channel) {
     this.off(channel.stateChangeRefs)
-    this.channels = this.channels.filter(c => c !== channel)
+    this.channels = this.channels.filter((c) => c !== channel)
   }
 
   /**
@@ -653,13 +653,13 @@ export default class Socket {
   push(data) {
     if (this.hasLogger()) {
       let { topic, event, payload, ref, join_ref } = data
-      this.log('push', `${topic} ${event} (${join_ref}, ${ref})`, payload)
+      this.log("push", `${topic} ${event} (${join_ref}, ${ref})`, payload)
     }
 
     if (this.isConnected()) {
-      this.encode(data, result => this.conn.send(result))
+      this.encode(data, (result) => this.conn.send(result))
     } else {
-      this.sendBuffer.push(() => this.encode(data, result => this.conn.send(result)))
+      this.sendBuffer.push(() => this.encode(data, (result) => this.conn.send(result)))
     }
   }
 
@@ -684,8 +684,8 @@ export default class Socket {
     }
     this.pendingHeartbeatRef = this.makeRef()
     this.push({
-      topic: 'combo',
-      event: 'heartbeat',
+      topic: "combo",
+      event: "heartbeat",
       payload: {},
       ref: this.pendingHeartbeatRef,
     })
@@ -697,7 +697,7 @@ export default class Socket {
 
   flushSendBuffer() {
     if (this.isConnected() && this.sendBuffer.length > 0) {
-      this.sendBuffer.forEach(callback => callback())
+      this.sendBuffer.forEach((callback) => callback())
       this.sendBuffer = []
     }
   }
@@ -713,8 +713,8 @@ export default class Socket {
 
       if (this.hasLogger())
         this.log(
-          'receive',
-          `${payload.status || ''} ${topic} ${event} ${(ref && '(' + ref + ')') || ''}`,
+          "receive",
+          `${payload.status || ""} ${topic} ${event} ${(ref && "(" + ref + ")") || ""}`,
           payload,
         )
 
@@ -735,10 +735,10 @@ export default class Socket {
 
   leaveOpenTopic(topic) {
     let dupChannel = this.channels.find(
-      c => c.topic === topic && (c.isJoined() || c.isJoining()),
+      (c) => c.topic === topic && (c.isJoined() || c.isJoining()),
     )
     if (dupChannel) {
-      if (this.hasLogger()) this.log('transport', `leaving duplicate topic "${topic}"`)
+      if (this.hasLogger()) this.log("transport", `leaving duplicate topic "${topic}"`)
       dupChannel.leave()
     }
   }

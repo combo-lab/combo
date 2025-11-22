@@ -108,11 +108,11 @@ function init() {
   var PolyfillEvent = eventConstructor()
 
   function eventConstructor() {
-    if (typeof window.CustomEvent === 'function') return window.CustomEvent
+    if (typeof window.CustomEvent === "function") return window.CustomEvent
     // IE<=9 Support
     function CustomEvent(event, params) {
       params = params || { bubbles: false, cancelable: false, detail: undefined }
-      var evt = document.createEvent('CustomEvent')
+      var evt = document.createEvent("CustomEvent")
       evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail)
       return evt
     }
@@ -121,27 +121,27 @@ function init() {
   }
 
   function buildHiddenInput(name, value) {
-    var input = document.createElement('input')
-    input.type = 'hidden'
+    var input = document.createElement("input")
+    input.type = "hidden"
     input.name = name
     input.value = value
     return input
   }
 
   function handleClick(element, targetModifierKey) {
-    var to = element.getAttribute('data-to'),
-      method = buildHiddenInput('_method', element.getAttribute('data-method')),
-      csrf = buildHiddenInput('_csrf_token', element.getAttribute('data-csrf')),
-      form = document.createElement('form'),
-      submit = document.createElement('input'),
-      target = element.getAttribute('target')
+    var to = element.getAttribute("data-to"),
+      method = buildHiddenInput("_method", element.getAttribute("data-method")),
+      csrf = buildHiddenInput("_csrf_token", element.getAttribute("data-csrf")),
+      form = document.createElement("form"),
+      submit = document.createElement("input"),
+      target = element.getAttribute("target")
 
-    form.method = element.getAttribute('data-method') === 'get' ? 'get' : 'post'
+    form.method = element.getAttribute("data-method") === "get" ? "get" : "post"
     form.action = to
-    form.style.display = 'none'
+    form.style.display = "none"
 
     if (target) form.target = target
-    else if (targetModifierKey) form.target = '_blank'
+    else if (targetModifierKey) form.target = "_blank"
 
     form.appendChild(csrf)
     form.appendChild(method)
@@ -149,19 +149,19 @@ function init() {
 
     // Insert a button and click it instead of using `form.submit`
     // because the `submit` function does not emit a `submit` event.
-    submit.type = 'submit'
+    submit.type = "submit"
     form.appendChild(submit)
     submit.click()
   }
 
   window.addEventListener(
-    'click',
+    "click",
     function (e) {
       var element = e.target
       if (e.defaultPrevented) return
 
       while (element && element.getAttribute) {
-        var comboLinkEvent = new PolyfillEvent('combo.link.click', {
+        var comboLinkEvent = new PolyfillEvent("combo.link.click", {
           bubbles: true,
           cancelable: true,
         })
@@ -172,7 +172,7 @@ function init() {
           return false
         }
 
-        if (element.getAttribute('data-method') && element.getAttribute('data-to')) {
+        if (element.getAttribute("data-method") && element.getAttribute("data-to")) {
           handleClick(element, e.metaKey || e.shiftKey)
           e.preventDefault()
           return false
@@ -185,9 +185,9 @@ function init() {
   )
 
   window.addEventListener(
-    'combo.link.click',
+    "combo.link.click",
     function (e) {
-      var message = e.target.getAttribute('data-confirm')
+      var message = e.target.getAttribute("data-confirm")
       if (message && !window.confirm(message)) {
         e.preventDefault()
       }

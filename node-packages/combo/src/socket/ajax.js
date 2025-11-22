@@ -1,4 +1,4 @@
-import { global, XHR_STATES } from './constants'
+import { global, XHR_STATES } from "./constants"
 
 export default class Ajax {
   static request(method, endPoint, headers, body, timeout, ontimeout, callback) {
@@ -12,7 +12,7 @@ export default class Ajax {
       // Fetch with AbortController for modern browsers
       return this.fetchRequest(method, endPoint, headers, body, timeout, ontimeout, callback)
     } else {
-      throw new Error('No suitable XMLHttpRequest implementation found')
+      throw new Error("No suitable XMLHttpRequest implementation found")
     }
   }
 
@@ -30,11 +30,11 @@ export default class Ajax {
     }
     global
       .fetch(endPoint, options)
-      .then(response => response.text())
-      .then(data => this.parseJSON(data))
-      .then(data => callback && callback(data))
+      .then((response) => response.text())
+      .then((data) => this.parseJSON(data))
+      .then((data) => callback && callback(data))
       .catch((err) => {
-        if (err.name === 'AbortError' && ontimeout) {
+        if (err.name === "AbortError" && ontimeout) {
           ontimeout()
         } else {
           callback && callback(null)
@@ -83,14 +83,14 @@ export default class Ajax {
   }
 
   static parseJSON(resp) {
-    if (!resp || resp === '') {
+    if (!resp || resp === "") {
       return null
     }
 
     try {
       return JSON.parse(resp)
     } catch {
-      console && console.log('failed to parse JSON response', resp)
+      console && console.log("failed to parse JSON response", resp)
       return null
     }
   }
@@ -103,13 +103,13 @@ export default class Ajax {
       }
       let paramKey = parentKey ? `${parentKey}[${key}]` : key
       let paramVal = obj[key]
-      if (typeof paramVal === 'object') {
+      if (typeof paramVal === "object") {
         queryStr.push(this.serialize(paramVal, paramKey))
       } else {
-        queryStr.push(encodeURIComponent(paramKey) + '=' + encodeURIComponent(paramVal))
+        queryStr.push(encodeURIComponent(paramKey) + "=" + encodeURIComponent(paramVal))
       }
     }
-    return queryStr.join('&')
+    return queryStr.join("&")
   }
 
   static appendParams(url, params) {
@@ -117,7 +117,7 @@ export default class Ajax {
       return url
     }
 
-    let prefix = url.match(/\?/) ? '&' : '?'
+    let prefix = url.match(/\?/) ? "&" : "?"
     return `${url}${prefix}${this.serialize(params)}`
   }
 }

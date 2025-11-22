@@ -1,30 +1,30 @@
-export const globalSelf = typeof self !== 'undefined' ? self : null
-export const comboWindow = typeof window !== 'undefined' ? window : null
+export const globalSelf = typeof self !== "undefined" ? self : null
+export const comboWindow = typeof window !== "undefined" ? window : null
 export const global = globalSelf || comboWindow || globalThis
-export const DEFAULT_VSN = '2.0.0'
+export const DEFAULT_VSN = "2.0.0"
 export const SOCKET_STATES = { connecting: 0, open: 1, closing: 2, closed: 3 }
 export const DEFAULT_TIMEOUT = 10000
 export const WS_CLOSE_NORMAL = 1000
 export const CHANNEL_STATES = {
-  closed: 'closed',
-  errored: 'errored',
-  joined: 'joined',
-  joining: 'joining',
-  leaving: 'leaving',
+  closed: "closed",
+  errored: "errored",
+  joined: "joined",
+  joining: "joining",
+  leaving: "leaving",
 }
 export const CHANNEL_EVENTS = {
-  close: 'combo_close',
-  error: 'combo_error',
-  join: 'combo_join',
-  reply: 'combo_reply',
-  leave: 'combo_leave',
+  close: "combo_close",
+  error: "combo_error",
+  join: "combo_join",
+  reply: "combo_reply",
+  leave: "combo_leave",
 }
 
 export const TRANSPORTS = {
-  longpoll: 'longpoll',
-  websocket: 'websocket',
+  longpoll: "longpoll",
+  websocket: "websocket",
 }
 export const XHR_STATES = {
   complete: 4,
 }
-export const AUTH_TOKEN_PREFIX = 'base64url.bearer.combo.'
+export const AUTH_TOKEN_PREFIX = "base64url.bearer.combo."

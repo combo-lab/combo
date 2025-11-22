@@ -193,10 +193,10 @@
  * @module socket
  */
 
-import Socket from './socket'
-import Channel from './channel'
-import LongPoll from './longpoll'
-import Presence from './presence'
-import Serializer from './serializer'
+import Socket from "./socket"
+import Channel from "./channel"
+import LongPoll from "./longpoll"
+import Presence from "./presence"
+import Serializer from "./serializer"
 
 export { Socket, Channel, LongPoll, Presence, Serializer }

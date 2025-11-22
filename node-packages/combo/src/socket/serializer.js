@@ -1,5 +1,5 @@
 /* The default serializer for encoding and decoding messages */
-import { CHANNEL_EVENTS } from './constants'
+import { CHANNEL_EVENTS } from "./constants"
 
 export default {
   HEADER_LENGTH: 1,
@@ -38,10 +38,10 @@ export default {
     view.setUint8(offset++, ref.length)
     view.setUint8(offset++, topic.length)
     view.setUint8(offset++, event.length)
-    Array.from(join_ref, char => view.setUint8(offset++, char.charCodeAt(0)))
-    Array.from(ref, char => view.setUint8(offset++, char.charCodeAt(0)))
-    Array.from(topic, char => view.setUint8(offset++, char.charCodeAt(0)))
-    Array.from(event, char => view.setUint8(offset++, char.charCodeAt(0)))
+    Array.from(join_ref, (char) => view.setUint8(offset++, char.charCodeAt(0)))
+    Array.from(ref, (char) => view.setUint8(offset++, char.charCodeAt(0)))
+    Array.from(topic, (char) => view.setUint8(offset++, char.charCodeAt(0)))
+    Array.from(event, (char) => view.setUint8(offset++, char.charCodeAt(0)))
 
     var combined = new Uint8Array(header.byteLength + payload.byteLength)
     combined.set(new Uint8Array(header), 0)
