@@ -1,7 +1,7 @@
 defmodule Mix.Tasks.Combo.Test do
   use ExUnit.Case
 
-  test "provide a list of available phx mix tasks" do
+  test "provide a list of available combo mix tasks" do
     Mix.Tasks.Combo.run([])
     assert_received {:mix_shell, :info, ["mix combo.serve" <> _]}
     assert_received {:mix_shell, :info, ["mix combo.routes" <> _]}
