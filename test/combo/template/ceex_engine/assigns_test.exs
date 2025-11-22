@@ -22,6 +22,11 @@ defmodule Combo.Template.CEExEngine.AssignsTest do
     test "works" do
       assert assign(@assigns, k1: "v1-new", k2: "v2") == %{k1: "v1-new", k2: "v2"}
       assert assign(@assigns, %{k1: "v1-new", k2: "v2"}) == %{k1: "v1-new", k2: "v2"}
+
+      assert assign(@assigns, fn %{k1: v} -> %{k1_pro: "#{v}-pro"} end) == %{
+               k1: "v1",
+               k1_pro: "v1-pro"
+             }
     end
 
     test "raises error when the key is not an atom" do
