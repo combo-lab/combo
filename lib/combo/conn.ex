@@ -1518,13 +1518,13 @@ defmodule Combo.Conn do
 
   Accepts a keyword list, a map, or a single-argument function.
 
-  When a keyword list or map is given as the second argument, it merges the
-  keyword list or map into the connection's `assigns`. It is equivalent to
-  calling `Plug.Conn.assign/3` multiple times.
+  When a keyword list or map is given as the second argument, it merges into
+  the connection's `assigns`. It is equivalent to calling `Plug.Conn.assign/3`
+  multiple times.
 
   When a function is given as the second argument, it takes the current
-  `assigns` as an argument and its return value will be merged into the
-  connection's `assigns`.
+  `assigns` as an argument and merges its return value into the connection's
+  `assigns`.
 
   ## Examples
 
@@ -1537,9 +1537,12 @@ defmodule Combo.Conn do
   """
   def assign(conn, keyword_or_map_or_fun)
 
+  def assign(conn, keyword_or_map)
+      when is_map(keyword_or_map) or is_list(keyword_or_map) do
+    Plug.Conn.merge_assigns(conn, keyword_or_map)
+  end
+
   def assign(conn, fun) when is_function(fun, 1) do
     assign(conn, fun.(conn.assigns))
   end
-
-  defdelegate assign(conn, assigns), to: Plug.Conn, as: :merge_assigns
 end

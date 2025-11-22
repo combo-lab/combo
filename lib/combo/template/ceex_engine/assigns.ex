@@ -25,21 +25,26 @@ defmodule Combo.Template.CEExEngine.Assigns do
   @doc """
   Adds key-value pairs to `assigns`.
 
-  When a keyword list or map is provided as the second argument, it will be
-  merged into the existing assigns.
+  Accepts a keyword list, a map, or a single-argument function.
 
-  If a function is given, it takes the current assigns as an argument and its
-  return value will be merged into the current assigns.
+  When a keyword list or map is given as the second argument, it merges into
+  the existing `assigns`.
+
+  When a function is given as the second argument, it takes the current
+  `assigns` as an argument and merges its return value into the existing
+  `assigns`.
 
   ## Examples
 
       iex> assign(assigns, name: "Combo", lang: "Elixir")
       iex> assign(assigns, %{name: "Combo", lang: "Elixir"})
-      iex> assign(assigns, fn %{name: name, lang: logo} ->
+      iex> assign(assigns, fn %{name: name, lang: lang} ->
       ...>   %{title: Enum.join([name, lang], " | ")}
       ...> end)
 
   """
+  def assign(conn, keyword_or_map_or_fun)
+
   def assign(assigns, keyword_or_map)
       when is_map(assigns) and
              (is_list(keyword_or_map) or is_map(keyword_or_map)) do

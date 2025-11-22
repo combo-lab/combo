@@ -347,23 +347,28 @@ defmodule Combo.Socket do
   end
 
   @doc """
-  Adds key/value pairs to socket assigns.
+  Adds key-value pairs to the socket's `assigns`.
 
   Accepts a keyword list, a map, or a single-argument function.
 
-  When a keyword list or map is provided, it will be merged into the current
-  assigns.
+  When a keyword list or map is given as the second argument, it merges into
+  the socket's `assigns`.
 
-  When a function is provided, it takes the current assigns as an argument and
-  its return value will be merged into the current assigns.
+  When a function is given as the second argument, it takes the current
+  `assigns` as an argument and merges its return value into the socket's
+  `assigns`.
 
   ## Examples
 
-      iex> assign(socket, name: "Elixir", logo: "💧")
-      iex> assign(socket, %{name: "Elixir"})
-      iex> assign(socket, fn %{name: name, logo: logo} -> %{title: Enum.join([name, logo], " | ")} end)
+      iex> assign(socket, name: "Combo", lang: "Elixir")
+      iex> assign(socket, %{name: "Combo", lang: "Elixir"})
+      iex> assign(socket, fn %{name: name, lang: lang} ->
+      ...>   %{title: Enum.join([name, lang], " | ")}
+      ...> end)
 
   """
+  def assign(socket, keyword_or_map_or_fun)
+
   def assign(%Socket{} = socket, keyword_or_map)
       when is_map(keyword_or_map) or is_list(keyword_or_map) do
     %{socket | assigns: Map.merge(socket.assigns, Map.new(keyword_or_map))}
