@@ -138,6 +138,29 @@ describe("LongPoll", () => {
       )
     })
   })
+
+  it("should treat 410 as error when token already exists", () => {
+    const longpoll = new LongPoll("http://localhost/socket/longpoll", undefined)
+    longpoll.timeout = 1000
+    longpoll.token = "existing-token"
+
+    const mockOnerror = jest.fn()
+    const mockCloseAndRetry = jest.fn()
+    longpoll.onerror = mockOnerror
+    longpoll.closeAndRetry = mockCloseAndRetry
+
+    Ajax.request.mockImplementation(
+      (method, url, headers, body, timeout, ontimeout, callback) => {
+        callback({ status: 410, token: "new-token", messages: [] })
+        return { abort: jest.fn() }
+      },
+    )
+
+    longpoll.poll()
+
+    expect(mockOnerror).toHaveBeenCalledWith(410)
+    expect(mockCloseAndRetry).toHaveBeenCalledWith(3410, "session_gone", false)
+  })
 })
 
 describe("Socket with LongPoll", () => {

@@ -75,6 +75,13 @@ export default class LongPoll {
       (resp) => {
         if (resp) {
           var { status, token, messages } = resp
+          if (status === 410 && this.token !== null) {
+            // In case we already have a token, this means that our existing session
+            // is gone. We fail so that the client rejoins its channels.
+            this.onerror(410)
+            this.closeAndRetry(3410, "session_gone", false)
+            return
+          }
           this.token = token
         } else {
           status = 0
