@@ -556,7 +556,7 @@ defmodule Combo.Router do
     * `:as` - the named helper. If `nil`, does not generate a helper.
     * `:alias` - if the scope alias should be applied to the route.
       Defaults to `true`.
-    * `:log` - the level to log the route dispatching under, may be set to false.
+    * `:log` - the level to log the route dispatching under, may be set to `false`.
       Defaults to `:debug`. Route dispatching contains information about how the
       route is handled (which controller action is called, what parameters are
       available and which pipelines are used) and is separate from the plug
@@ -571,8 +571,10 @@ defmodule Combo.Router do
 
   ## Examples
 
+      # match the MOVE method, which is an extension specific to WebDAV
       match :move, "/events/:id", EventController, :move
 
+      # match all HTTP methods
       match :*, "/any", CatchAllController, :any
 
   """
