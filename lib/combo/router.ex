@@ -553,7 +553,8 @@ defmodule Combo.Router do
 
   ## Options
 
-    * `:as` - the named helper. If `nil`, does not generate a helper.
+    * `:as` - the route name. It's used for generating named route helpers.
+      If `nil`, does not generate named route helpers.
     * `:alias` - if the scope alias should be applied to the route.
       Defaults to `true`.
     * `:log` - the level to log the route dispatching under, may be set to `false`.

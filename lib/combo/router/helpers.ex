@@ -1,8 +1,8 @@
 defmodule Combo.Router.Helpers do
   @moduledoc """
-  Generates a module for named routes helpers and generic url helpers.
+  Generates a module for named route helpers and generic url helpers.
 
-  Named routes helpers exist to avoid hardcoding routes, if you wrote
+  Named route helpers exist to avoid hardcoding routes, if you wrote
   `<a href="/login">` and then changed your router, the link would point to a
   page that no longer exist. By using router helpers, you can make sure it
   always points to a valid URL in your router.
