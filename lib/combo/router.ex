@@ -553,22 +553,24 @@ defmodule Combo.Router do
 
   ## Options
 
+    * `:assigns` - the map to merge into the connection's `assigns` when a route matches.
+      Default to `%{}`.
+    * `:private` - the map to merge into the connection's `private` when a route matches.
+      Default to `%{}`.
     * `:as` - the route name. It's used for generating named route helpers.
       If `nil`, does not generate named route helpers.
-    * `:alias` - if the scope alias should be applied to the route.
+    * `:alias` - whether the scope alias should be applied to the route.
       Defaults to `true`.
-    * `:log` - the level to log the route dispatching under, may be set to `false`.
-      Defaults to `:debug`. Route dispatching contains information about how the
-      route is handled (which controller action is called, what parameters are
-      available and which pipelines are used) and is separate from the plug
-      level logging. To alter the plug log level, please see
-      https://hexdocs.pm/combo/Combo.Logger.html#module-dynamic-log-level.
-    * `:private` - a map of private data to merge into the connection when a
-      a route matches.
-    * `:assigns` - a map of data to merge into the connection when a route matches.
-    * `:metadata` - a map of metadata used by the telemetry events and returned by
-      `route_info/4`. The `:mfa` field is used by telemetry to print logs and by the
-      router to emit compile time checks. Custom fields may be added.
+    * `:log` - the level to log the route dispatching under.
+      Defaults to `:debug`. Can be set to `false` to disable the logging.
+      Route dispatching logging contains information about how the route is
+      handled (which controller action is called, what parameters are available
+      and which pipelines are used).
+      It is separated from the plug level logging. To alter the plug log level,
+      please see https://hexdocs.pm/combo/Combo.Logger.html#module-dynamic-log-level.
+    * `:metadata` - the map of metadata used by the telemetry events and returned
+      by `route_info/4`. The `:mfa` field is used by telemetry to print logs
+      and by the router to emit compile time checks. Custom fields may be added.
 
   ## Examples
 

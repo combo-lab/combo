@@ -36,10 +36,12 @@ defmodule Combo.Router.Scope do
 
     top = get_top(module)
     path = validate_path(path)
-    private = Keyword.get(opts, :private, %{})
+
     assigns = Keyword.get(opts, :assigns, %{})
+    private = Keyword.get(opts, :private, %{})
     as = Keyword.get_lazy(opts, :as, fn -> Combo.Naming.resource_name(plug, "Controller") end)
     alias? = Keyword.get(opts, :alias, true)
+    log = Keyword.get(opts, :log, top.log)
 
     if to_string(as) == "static" do
       raise ArgumentError,
@@ -51,7 +53,7 @@ defmodule Combo.Router.Scope do
     metadata =
       opts
       |> Keyword.get(:metadata, %{})
-      |> Map.put(:log, Keyword.get(opts, :log, top.log))
+      |> Map.put(:log, log)
 
     metadata =
       if kind == :forward do
