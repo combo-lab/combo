@@ -433,6 +433,17 @@ defmodule Combo.HTML.VerificationTest do
     assert warnings =~ "test/combo/html/verification_test.exs:#{line + 26}: (file)"
   end
 
+  test "validate unused components" do
+    assert capture_io(:stderr, fn ->
+             defmodule UnusedComponent do
+               use Combo.HTML
+
+               attr :name, :any, required: true
+               defp func(assigns), do: ~CE[]
+             end
+           end) =~ "function func/1 is unused"
+  end
+
   test "validate required attributes" do
     warnings =
       capture_io(:stderr, fn ->

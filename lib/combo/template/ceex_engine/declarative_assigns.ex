@@ -1001,14 +1001,17 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
             end
           end
 
-        merge =
+        # Generated function definitions do not emit unused warnings,
+        # but since we're just overriding the user function here,
+        # we delete the context to preserve the warning.
+        {remote, meta, [call, args]} =
           quote line: line do
             Kernel.unquote(kind)(unquote(name)(assigns)) do
               unquote(def_body)
             end
           end
 
-        {{name, 1}, merge}
+        {{name, 1}, {remote, meta, [delete_context(call), args]}}
       end
 
     {names, defs} = Enum.unzip(names_and_defs)
@@ -1040,6 +1043,10 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
       end
 
     {:__block__, [], [def_components_ast, def_components_calls_ast, overridable | defs]}
+  end
+
+  defp delete_context(node) do
+    Macro.update_meta(node, &Keyword.delete(&1, :context))
   end
 
   defp register_component!(kind, env, name, check_if_defined?) do
