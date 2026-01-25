@@ -37,10 +37,10 @@ defmodule Combo.Router.Scope do
     top = get_top(module)
     path = validate_path(path)
 
-    assigns = Keyword.get(opts, :assigns, %{})
-    private = Keyword.get(opts, :private, %{})
-    as = Keyword.get_lazy(opts, :as, fn -> Combo.Naming.resource_name(plug, "Controller") end)
     alias? = Keyword.get(opts, :alias, true)
+    as = Keyword.get_lazy(opts, :as, fn -> Combo.Naming.resource_name(plug, "Controller") end)
+    private = Keyword.get(opts, :private, %{})
+    assigns = Keyword.get(opts, :assigns, %{})
     log = Keyword.get(opts, :log, top.log)
 
     if to_string(as) == "static" do
@@ -48,7 +48,7 @@ defmodule Combo.Router.Scope do
             "`static` is a reserved route prefix generated from #{inspect(plug)} or `:as` option"
     end
 
-    {path, alias, as, private, assigns} = join(top, path, plug, alias?, as, private, assigns)
+    {path, plug, as, private, assigns} = join(top, path, plug, alias?, as, private, assigns)
 
     metadata =
       opts
@@ -57,7 +57,7 @@ defmodule Combo.Router.Scope do
 
     metadata =
       if kind == :forward do
-        Map.put(metadata, :forward, validate_forward!(path, plug))
+        Map.put(metadata, :forward, validate_forward_path!(path))
       else
         metadata
       end
@@ -68,7 +68,7 @@ defmodule Combo.Router.Scope do
       verb,
       path,
       top.hosts,
-      alias,
+      plug,
       plug_opts,
       as,
       top.pipes,
@@ -78,7 +78,7 @@ defmodule Combo.Router.Scope do
     )
   end
 
-  defp validate_forward!(path, plug) when is_atom(plug) do
+  defp validate_forward_path!(path) do
     case Plug.Router.Utils.build_path_match(path) do
       {[], path_segments} ->
         path_segments
@@ -87,10 +87,6 @@ defmodule Combo.Router.Scope do
         raise ArgumentError,
               "dynamic segment \"#{path}\" not allowed when forwarding. Use a static path instead"
     end
-  end
-
-  defp validate_forward!(_, plug) do
-    raise ArgumentError, "forward expects a module as the second argument, #{inspect(plug)} given"
   end
 
   @doc """
@@ -230,26 +226,23 @@ defmodule Combo.Router.Scope do
     end
   end
 
-  defp join(top, path, alias, alias?, as, private, assigns) do
-    joined_alias =
-      if alias? do
-        join_alias(top, alias)
-      else
-        alias
-      end
-
-    {join_path(top, path), joined_alias, join_as(top, as), Map.merge(top.private, private),
-     Map.merge(top.assigns, assigns)}
+  defp join(top, path, plug, alias?, as, private, assigns) do
+    path = join_path(top, path)
+    plug = if alias?, do: join_alias(top, plug), else: plug
+    as = join_as(top, as)
+    private = Map.merge(top.private, private)
+    assigns = Map.merge(top.assigns, assigns)
+    {path, plug, as, private, assigns}
   end
 
   defp join_path(top, path) do
     "/" <> Enum.join(top.path ++ String.split(path, "/", trim: true), "/")
   end
 
-  defp join_alias(top, alias) when is_atom(alias) do
-    case Atom.to_string(alias) do
-      <<head, _::binary>> when head in ?a..?z -> alias
-      alias -> Module.concat(top.alias ++ [alias])
+  defp join_alias(top, plug) when is_atom(plug) do
+    case Atom.to_string(plug) do
+      <<head, _::binary>> when head in ?a..?z -> plug
+      plug -> Module.concat(top.alias ++ [plug])
     end
   end
 

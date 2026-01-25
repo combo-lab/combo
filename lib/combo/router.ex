@@ -553,14 +553,17 @@ defmodule Combo.Router do
 
   ## Options
 
-    * `:assigns` - the map to merge into the connection's `assigns` when a route matches.
-      Default to `%{}`.
-    * `:private` - the map to merge into the connection's `private` when a route matches.
-      Default to `%{}`.
-    * `:as` - the route name. It's used for generating named route helpers.
-      If `nil`, does not generate named route helpers.
-    * `:alias` - whether the scope alias should be applied to the route.
+    * `:alias` - whether to apply the scope alias to the route.
       Defaults to `true`.
+    * `:as` - the route name as an atom or a string.
+      It's used for generating named route helpers. If `nil`, it does not generate
+      named route helpers.
+    * `:private` - the private data as a map to merge into the connection when
+      a route matches.
+      Default to `%{}`.
+    * `:assigns` - the data as a map to merge into the connection when a route
+      matches.
+      Default to `%{}`.
     * `:log` - the level to log the route dispatching under.
       Defaults to `:debug`. Can be set to `false` to disable the logging.
       Route dispatching logging contains information about how the route is
