@@ -380,15 +380,14 @@ defmodule Combo.Router do
       @behaviour Plug
 
       @doc """
-      Callback required by Plug that initializes the router
-      for serving web requests.
+      Callback required by Plug that initializes the router.
       """
       def init(opts) do
         opts
       end
 
       @doc """
-      Callback invoked by Plug on every request.
+      Callback invoked by Plug on every request for matching routes.
       """
       def call(conn, _opts) do
         %{method: method, path_info: path_info, host: host} = conn = prepare(conn)
