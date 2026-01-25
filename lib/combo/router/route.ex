@@ -6,7 +6,7 @@ defmodule Combo.Router.Route do
 
     * `:line` - the line the route was defined.
     * `:kind` - the kind of route as an atom, either `:match` or `:forward`.
-    * `:verb` - the HTTP verb as an atom, such as `:get` or `:post`.
+    * `:verb` - the HTTP verb as an atom, such as `:get`, `:post` or `:*`.
     * `:path` - the normalized path as a string.
     * `:hosts` - the list of request hosts or host prefixes.
     * `:plug` - the plug module.
@@ -48,8 +48,7 @@ defmodule Combo.Router.Route do
   end
 
   @doc """
-  Receives the verb, path, plug, options and helper and returns a
-  `Combo.Router.Route` struct.
+  Build a `Combo.Router.Route` struct.
   """
   @spec build(
           line :: non_neg_integer(),
