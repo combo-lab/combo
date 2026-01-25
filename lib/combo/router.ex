@@ -411,6 +411,16 @@ defmodule Combo.Router do
     routes = env.module |> Module.get_attribute(:combo_routes) |> Enum.reverse()
     routes_with_exprs = Enum.map(routes, &{&1, Route.build_exprs(&1)})
 
+    checks =
+      routes
+      |> Enum.map(fn %{line: line, metadata: metadata, plug: plug} ->
+        {line, Map.get(metadata, :mfa, {plug, :init, 1})}
+      end)
+      |> Enum.uniq()
+      |> Enum.map(fn {line, {module, function, arity}} ->
+        quote line: line, do: _ = &(unquote(module).unquote(function) / unquote(arity))
+      end)
+
     helpers = Helpers.define(env, routes_with_exprs)
 
     {matches, {pipelines, _}} =
@@ -429,16 +439,6 @@ defmodule Combo.Router do
         @doc false
         def __forward__(_), do: nil
       end
-
-    checks =
-      routes
-      |> Enum.map(fn %{line: line, metadata: metadata, plug: plug} ->
-        {line, Map.get(metadata, :mfa, {plug, :init, 1})}
-      end)
-      |> Enum.uniq()
-      |> Enum.map(fn {line, {module, function, arity}} ->
-        quote line: line, do: _ = &(unquote(module).unquote(function) / unquote(arity))
-      end)
 
     quote do
       @doc false
