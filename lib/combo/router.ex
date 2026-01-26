@@ -411,6 +411,7 @@ defmodule Combo.Router do
     routes = env.module |> Module.get_attribute(:combo_routes) |> Enum.reverse()
     routes_with_exprs = Enum.map(routes, &{&1, Route.build_exprs(&1)})
 
+    # check all controller modules and functions referenced by routes exist.
     checks =
       routes
       |> Enum.map(fn %{line: line, metadata: metadata, plug: plug} ->
