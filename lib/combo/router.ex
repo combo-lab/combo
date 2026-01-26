@@ -910,7 +910,7 @@ defmodule Combo.Router do
   end
 
   @doc """
-  Defines a scope in which routes can be nested.
+  Defines a scope that groups routes.
 
   ## Examples
 
@@ -918,9 +918,9 @@ defmodule Combo.Router do
         get "/pages/:id", PageController, :show
       end
 
-  The generated route above will match on the path `"/api/v1/pages/:id"`
-  and will dispatch to `:show` action in `API.V1.PageController`. A named
-  helper `api_v1_page_path` will also be generated.
+  The generated route above will match on the path `"/api/v1/pages/:id"` and
+  will dispatch to `:show` action in `API.V1.PageController`. A named helper
+  `api_v1_page_path` will also be generated.
 
   ## Options
 
