@@ -924,105 +924,86 @@ defmodule Combo.Router do
 
   ## Options
 
-  The supported options are:
-
-    * `:path` - a string containing the path scope.
-    * `:as` - a string or atom containing the named helper scope. When set to
-      false, it resets the nested helper scopes. Has no effect when using verified
-      routes exclusively
-    * `:alias` - an alias (atom) containing the controller scope. When set to
-      false, it resets all nested aliases.
-    * `:host` - a string or list of strings containing the host scope, or prefix host scope,
-      ie `"foo.bar.com"`, `"foo."`
-    * `:private` - a map of private data to merge into the connection when a route matches
-    * `:assigns` - a map of data to merge into the connection when a route matches
-    * `:log` - the level to log the route dispatching under, may be set to false. Defaults to
-      `:debug`. Route dispatching contains information about how the route is handled (which controller
-      action is called, what parameters are available and which pipelines are used) and is separate from
-      the plug level logging. To alter the plug log level, please see
+    * `:path` - the path scope as a string.
+    * `:alias` - the controller scope as an alias. When set to `false`, it
+      resets all nested `:alias` options.
+    * `:as` - the named helper scope as a string or an atom. When set to
+      `false`, it resets all nested `:as` options.
+    * `:host` - the host scope or prefix host scope as a string or a list
+      of strings, such as `"foo.bar.com"`, `"foo."`.
+    * `:private` - the private data as a map to merge into the connection when
+      a route matches.
+    * `:assigns` - the data as a map to merge into the connection when a route
+      matches.
+    * `:log` - the level to log the route dispatching under, may be set to
+      `false`.
+      Defaults to `:debug`. Route dispatching contains information about how
+      the route is handled (which controller action is called, what parameters
+      are available and which pipelines are used) and is separate from the plug
+      level logging. To alter the plug log level, please see
       https://hexdocs.pm/combo/Combo.Logger.html#module-dynamic-log-level.
 
-  """
-  defmacro scope(options, do: context) do
-    options =
-      if Macro.quoted_literal?(options) do
-        Macro.prewalk(options, &expand_alias(&1, __CALLER__))
-      else
-        options
+  ## Shortcuts
+
+  A scope can also be defined with shortcuts.
+
+      # specify path and alias
+      scope "/api/v1", API.V1 do
+        get "/pages/:id", PageController, :show
       end
 
-    do_scope(options, context)
-  end
-
-  @doc """
-  Define a scope with the given path.
-
-  This function is a shortcut for:
-
-      scope path: path do
-        ...
+      # specify path, alias and options
+      scope "/api/v1", API.V1, host: "api." do
+        get "/pages/:id", PageController, :show
       end
 
-  ## Examples
+      # specify path only
+      scope "/api/v1" do
+        get "/pages/:id", API.V1.PageController, :show
+      end
 
-      scope "/v1", host: "api." do
+      # specify path and options
+      scope "/api/v1", host: "api." do
+        get "/pages/:id", API.V1.PageController, :show
+      end
+
+      # specify alias only
+      scope API.V1 do
+        get "/pages/:id", PageController, :show
+      end
+
+      # specify alias and options
+      scope API.V1, host: "api." do
         get "/pages/:id", PageController, :show
       end
 
   """
-  defmacro scope(path, options, do: context) do
-    options =
-      if Macro.quoted_literal?(options) do
-        Macro.prewalk(options, &expand_alias(&1, __CALLER__))
-      else
-        options
-      end
-
-    options =
-      quote do
-        path = unquote(path)
-
-        case unquote(options) do
-          alias when is_atom(alias) -> [path: path, alias: alias]
-          options when is_list(options) -> Keyword.put(options, :path, path)
-        end
-      end
-
-    do_scope(options, context)
+  defmacro scope(arg, [do: context] = _do_block) do
+    build_scope([arg], context)
   end
 
   @doc """
-  Defines a scope with the given path and alias.
-
-  This function is a shortcut for:
-
-      scope path: path, alias: alias do
-        ...
-      end
-
-  ## Examples
-
-      scope "/v1", API.V1, host: "api." do
-        get "/pages/:id", PageController, :show
-      end
-
+  See the shortcuts section of `#{inspect(__MODULE__)}.scope/2`.
   """
-  defmacro scope(path, alias, options, do: context) do
-    alias = expand_alias(alias, __CALLER__)
-
-    options =
-      quote do
-        unquote(options)
-        |> Keyword.put(:path, unquote(path))
-        |> Keyword.put(:alias, unquote(alias))
-      end
-
-    do_scope(options, context)
+  defmacro scope(arg1, arg2, [do: context] = _do_block) do
+    build_scope([arg1, arg2], context)
   end
 
-  defp do_scope(options, context) do
+  @doc """
+  See the shortcuts section of `#{inspect(__MODULE__)}.scope/2`.
+  """
+  defmacro scope(arg1, arg2, arg3, [do: context] = _do_block) do
+    build_scope([arg1, arg2, arg3], context)
+  end
+
+  defp build_scope(args, context) do
+    opts =
+      quote do
+        unquote(__MODULE__).normalize_scope_opts(unquote(args))
+      end
+
     quote do
-      Scope.push(__MODULE__, unquote(options))
+      Scope.push(__MODULE__, unquote(opts))
 
       try do
         unquote(context)
@@ -1030,6 +1011,38 @@ defmodule Combo.Router do
         Scope.pop(__MODULE__)
       end
     end
+  end
+
+  @doc false
+  def normalize_scope_opts([path]) when is_binary(path) do
+    [path: path]
+  end
+
+  def normalize_scope_opts([alias]) when is_atom(alias) do
+    [alias: alias]
+  end
+
+  def normalize_scope_opts([opts]) when is_list(opts) do
+    opts
+  end
+
+  def normalize_scope_opts([path, alias]) when is_binary(path) and is_atom(alias) do
+    [path: path, alias: alias]
+  end
+
+  def normalize_scope_opts([path, opts]) when is_binary(path) and is_list(opts) do
+    Keyword.put(opts, :path, path)
+  end
+
+  def normalize_scope_opts([alias, opts]) when is_atom(alias) and is_list(opts) do
+    Keyword.put(opts, :alias, alias)
+  end
+
+  def normalize_scope_opts([path, alias, opts])
+      when is_binary(path) and is_atom(alias) and is_list(opts) do
+    opts
+    |> Keyword.put(:path, path)
+    |> Keyword.put(:alias, alias)
   end
 
   @doc """

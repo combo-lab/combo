@@ -129,10 +129,6 @@ defmodule Combo.Router.Scope do
   @doc """
   Pushes a scope into the module stack.
   """
-  def push(module, path) when is_binary(path) do
-    push(module, path: path)
-  end
-
   def push(module, opts) when is_list(opts) do
     top = get_top(module)
 
