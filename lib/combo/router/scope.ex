@@ -35,7 +35,7 @@ defmodule Combo.Router.Scope do
     end
 
     top = get_top(module)
-    path = validate_path(path)
+    path = validate_path!(path)
 
     alias? = Keyword.get(opts, :alias, true)
     as = Keyword.get_lazy(opts, :as, fn -> Combo.Naming.resource_name(plug, "Controller") end)
@@ -92,14 +92,14 @@ defmodule Combo.Router.Scope do
   @doc """
   Validates a path is a string and contains a leading prefix.
   """
-  def validate_path("/" <> _ = path), do: path
+  def validate_path!("/" <> _ = path), do: path
 
-  def validate_path(path) when is_binary(path) do
+  def validate_path!(path) when is_binary(path) do
     IO.warn("router paths should begin with a forward slash, got: #{inspect(path)}")
     "/" <> path
   end
 
-  def validate_path(path) do
+  def validate_path!(path) do
     raise ArgumentError, "router paths must be strings, got: #{inspect(path)}"
   end
 
@@ -134,7 +134,7 @@ defmodule Combo.Router.Scope do
 
     path =
       if path = Keyword.get(opts, :path) do
-        path |> validate_path() |> String.split("/", trim: true)
+        path |> validate_path!() |> String.split("/", trim: true)
       else
         []
       end
