@@ -3,8 +3,7 @@ defmodule Combo.Router.Scope do
 
   alias Combo.Router.Scope
 
-  @stack :combo_router_scopes
-  @top :combo_router_top_scopes
+  @stack :combo_router_scope_stack
   @pipes :combo_router_pipeline_scopes
 
   defstruct path: [],
@@ -20,8 +19,7 @@ defmodule Combo.Router.Scope do
   Initializes the scope.
   """
   def init(module) do
-    Module.put_attribute(module, @stack, [])
-    Module.put_attribute(module, @top, %Scope{})
+    Module.put_attribute(module, @stack, [%Scope{}])
     Module.put_attribute(module, @pipes, MapSet.new())
   end
 
@@ -34,7 +32,7 @@ defmodule Combo.Router.Scope do
             "routes expect a module plug as second argument, got: #{inspect(plug)}"
     end
 
-    top = get_top(module)
+    top = get_stack_top(module)
     path = validate_path!(path)
 
     alias? = Keyword.get(opts, :alias, true)
@@ -114,8 +112,8 @@ defmodule Combo.Router.Scope do
   Appends the given pipes to the current scope pipe through.
   """
   def pipe_through(module, new_pipes) do
+    %{pipes: pipes} = get_stack_top(module)
     new_pipes = List.wrap(new_pipes)
-    %{pipes: pipes} = top = get_top(module)
 
     if pipe = Enum.find(new_pipes, &(&1 in pipes)) do
       raise ArgumentError,
@@ -123,14 +121,16 @@ defmodule Combo.Router.Scope do
               "A plug may only be used once inside a scoped pipe_through"
     end
 
-    put_top(module, %{top | pipes: pipes ++ new_pipes})
+    update_stack(module, fn [top | rest] ->
+      [%{top | pipes: pipes ++ new_pipes} | rest]
+    end)
   end
 
   @doc """
   Pushes a scope into the module stack.
   """
   def push(module, opts) when is_list(opts) do
-    top = get_top(module)
+    top = get_stack_top(module)
 
     path =
       if path = Keyword.get(opts, :path) do
@@ -139,8 +139,9 @@ defmodule Combo.Router.Scope do
         []
       end
 
-    alias = append_unless_false(top, opts, :alias, &Atom.to_string(&1))
-    as = append_unless_false(top, opts, :as, & &1)
+    path = top.path ++ path
+    alias = append_if_not_false(top, opts, :alias, &Atom.to_string(&1))
+    as = append_if_not_false(top, opts, :as, & &1)
 
     hosts =
       case Keyword.fetch(opts, :host) do
@@ -148,21 +149,23 @@ defmodule Combo.Router.Scope do
         :error -> top.hosts
       end
 
-    private = Keyword.get(opts, :private, %{})
-    assigns = Keyword.get(opts, :assigns, %{})
+    pipes = top.pipes
+    private = Map.merge(top.private, Keyword.get(opts, :private, %{}))
+    assigns = Map.merge(top.assigns, Keyword.get(opts, :assigns, %{}))
+    log = Keyword.get(opts, :log, top.log)
 
-    update_stack(module, fn stack -> [top | stack] end)
-
-    put_top(module, %Scope{
-      path: top.path ++ path,
+    new_top = %Scope{
+      path: path,
       alias: alias,
       as: as,
       hosts: hosts,
-      pipes: top.pipes,
-      private: Map.merge(top.private, private),
-      assigns: Map.merge(top.assigns, assigns),
-      log: Keyword.get(opts, :log, top.log)
-    })
+      pipes: pipes,
+      private: private,
+      assigns: assigns,
+      log: log
+    }
+
+    update_stack(module, fn stack -> [new_top | stack] end)
   end
 
   defp validate_hosts!(nil), do: []
@@ -170,20 +173,19 @@ defmodule Combo.Router.Scope do
 
   defp validate_hosts!(hosts) when is_list(hosts) do
     for host <- hosts do
-      unless is_binary(host), do: raise_invalid_host(host)
-
+      if not is_binary(host), do: raise_invalid_host!(host)
       host
     end
   end
 
-  defp validate_hosts!(invalid), do: raise_invalid_host(invalid)
+  defp validate_hosts!(invalid), do: raise_invalid_host!(invalid)
 
-  defp raise_invalid_host(host) do
+  defp raise_invalid_host!(host) do
     raise ArgumentError,
           "expected router scope :host to be compile-time string or list of strings, got: #{inspect(host)}"
   end
 
-  defp append_unless_false(top, opts, key, fun) do
+  defp append_if_not_false(top, opts, key, fun) do
     case opts[key] do
       false -> []
       nil -> Map.fetch!(top, key)
@@ -195,17 +197,14 @@ defmodule Combo.Router.Scope do
   Pops a scope from the module stack.
   """
   def pop(module) do
-    update_stack(module, fn [top | stack] ->
-      put_top(module, top)
-      stack
-    end)
+    update_stack(module, fn [_top | rest] -> rest end)
   end
 
   @doc """
   Expands the alias in the current router scope.
   """
   def expand_alias(module, alias) do
-    join_alias(get_top(module), alias)
+    join_alias(get_stack_top(module), alias)
   end
 
   @doc """
@@ -213,12 +212,12 @@ defmodule Combo.Router.Scope do
   """
   def full_path(module, path) do
     split_path = String.split(path, "/", trim: true)
-    prefix = get_top(module).path
+    prefix = get_stack_top(module).path
 
     cond do
       prefix == [] -> path
       split_path == [] -> "/" <> Enum.join(prefix, "/")
-      true -> "/" <> Path.join(get_top(module).path ++ split_path)
+      true -> "/" <> Path.join(get_stack_top(module).path ++ split_path)
     end
   end
 
@@ -245,8 +244,10 @@ defmodule Combo.Router.Scope do
   defp join_as(_top, nil), do: nil
   defp join_as(top, as) when is_atom(as) or is_binary(as), do: Enum.join(top.as ++ [as], "_")
 
-  defp get_top(module) do
-    get_attribute(module, @top)
+  defp get_stack_top(module) do
+    module
+    |> get_attribute(@stack)
+    |> hd()
   end
 
   defp update_stack(module, fun) do
@@ -257,14 +258,9 @@ defmodule Combo.Router.Scope do
     update_attribute(module, @pipes, fun)
   end
 
-  defp put_top(module, value) do
-    Module.put_attribute(module, @top, value)
-    value
-  end
-
   defp get_attribute(module, attr) do
     Module.get_attribute(module, attr) ||
-      raise "Combo router scope was not initialized"
+      raise "#{inspect(__MODULE__)} was not initialized"
   end
 
   defp update_attribute(module, attr, fun) do
