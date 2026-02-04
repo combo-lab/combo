@@ -2,6 +2,7 @@ defmodule Combo.Router.Scope do
   @moduledoc false
 
   alias Combo.Router.ModuleAttr
+  alias Combo.Router.Util
 
   defstruct path: [],
             alias: [],
@@ -164,7 +165,7 @@ defmodule Combo.Router.Scope do
 
     path =
       if path = Keyword.get(opts, :path) do
-        path |> validate_path!() |> String.split("/", trim: true)
+        path |> Util.validate_route_path!() |> String.split("/", trim: true)
       else
         []
       end
@@ -289,7 +290,7 @@ defmodule Combo.Router.Scope do
     end
 
     top = get_top_scope(module)
-    path = validate_path!(path)
+    path = Util.validate_route_path!(path)
 
     alias? = Keyword.get(opts, :alias, true)
     as = Keyword.get_lazy(opts, :as, fn -> Combo.Naming.resource_name(plug, "Controller") end)
@@ -341,20 +342,6 @@ defmodule Combo.Router.Scope do
         raise ArgumentError,
               "dynamic segment \"#{path}\" not allowed when forwarding. Use a static path instead"
     end
-  end
-
-  @doc """
-  Validates a path is a string and contains a leading prefix.
-  """
-  def validate_path!("/" <> _ = path), do: path
-
-  def validate_path!(path) when is_binary(path) do
-    IO.warn("router paths should begin with a forward slash, got: #{inspect(path)}")
-    "/" <> path
-  end
-
-  def validate_path!(path) do
-    raise ArgumentError, "router paths must be strings, got: #{inspect(path)}"
   end
 
   defp validate_hosts!(nil), do: []
@@ -426,7 +413,8 @@ defmodule Combo.Router.Scope do
   defp join_as(_top, nil), do: nil
   defp join_as(top, as) when is_atom(as) or is_binary(as), do: Enum.join(top.as ++ [as], "_")
 
-  defp get_top_scope(module) do
+  @doc false
+  def get_top_scope(module) do
     module
     |> ModuleAttr.get(:scopes)
     |> hd()

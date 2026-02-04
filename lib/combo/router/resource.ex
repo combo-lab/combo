@@ -1,6 +1,8 @@
 defmodule Combo.Router.Resource do
   @moduledoc false
 
+  alias Combo.Router.Util
+
   @default_param_key "id"
   @actions [:index, :new, :create, :show, :edit, :update, :delete]
 
@@ -25,7 +27,7 @@ defmodule Combo.Router.Resource do
   """
   def build(path, controller, opts) when is_atom(controller) and is_list(opts) do
     singleton = Keyword.get(opts, :singleton, false)
-    path = Combo.Router.Scope.validate_path!(path)
+    path = Util.validate_route_path!(path)
     param = Keyword.get(opts, :param, @default_param_key)
     actions = build_actions(opts, singleton)
 

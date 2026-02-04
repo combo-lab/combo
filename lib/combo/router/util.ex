@@ -25,4 +25,18 @@ defmodule Combo.Router.Util do
     do: Macro.expand(alias, %{env | function: {:init, 1}})
 
   defp expand_alias(other, _env), do: other
+
+  ## Validations
+
+  # Validates a route path, which should be a string and have a leading "/".
+  def validate_route_path!("/" <> _ = path), do: path
+
+  def validate_route_path!(path) when is_binary(path) do
+    IO.warn("router paths should begin with a forward slash, got: #{inspect(path)}")
+    "/" <> path
+  end
+
+  def validate_route_path!(path) do
+    raise ArgumentError, "router paths must be strings, got: #{inspect(path)}"
+  end
 end
