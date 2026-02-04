@@ -4,7 +4,6 @@ defmodule Combo.Router.Scope do
   alias Combo.Router.Scope
 
   @stack :combo_router_scope_stack
-  @pipes :combo_router_pipeline_scopes
 
   defstruct path: [],
             alias: [],
@@ -20,7 +19,6 @@ defmodule Combo.Router.Scope do
   """
   def init(module) do
     Module.put_attribute(module, @stack, [%Scope{}])
-    Module.put_attribute(module, @pipes, MapSet.new())
   end
 
   @doc """
@@ -99,13 +97,6 @@ defmodule Combo.Router.Scope do
 
   def validate_path!(path) do
     raise ArgumentError, "router paths must be strings, got: #{inspect(path)}"
-  end
-
-  @doc """
-  Defines the given pipeline.
-  """
-  def pipeline(module, pipe) when is_atom(pipe) do
-    update_pipes(module, &MapSet.put(&1, pipe))
   end
 
   @doc """
@@ -252,10 +243,6 @@ defmodule Combo.Router.Scope do
 
   defp update_stack(module, fun) do
     update_attribute(module, @stack, fun)
-  end
-
-  defp update_pipes(module, fun) do
-    update_attribute(module, @pipes, fun)
   end
 
   defp get_attribute(module, attr) do

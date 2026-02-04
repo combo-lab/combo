@@ -2,10 +2,10 @@ defmodule Combo.Router.Pipeline do
   @moduledoc false
 
   alias Combo.Router.Context
-  alias Combo.Router.Scope
   alias Combo.Router.Util
 
   def init(module) do
+    Context.put(module, :pipelines, MapSet.new())
     Context.put(module, :pipeline_plugs, nil)
   end
 
@@ -48,7 +48,7 @@ defmodule Combo.Router.Pipeline do
 
     compiler =
       quote unquote: false do
-        Scope.pipeline(__MODULE__, name)
+        Context.put(__MODULE__, :pipelines, &MapSet.put(&1, name))
 
         {conn, body} =
           Plug.Builder.compile(__ENV__, Context.get(__MODULE__, :pipeline_plugs),

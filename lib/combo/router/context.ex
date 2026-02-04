@@ -2,6 +2,7 @@ defmodule Combo.Router.Context do
   @moduledoc false
 
   @available_names [
+    :pipelines,
     :pipeline_plugs
   ]
 
