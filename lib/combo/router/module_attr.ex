@@ -1,13 +1,18 @@
-defmodule Combo.Router.Context do
+defmodule Combo.Router.ModuleAttr do
   @moduledoc false
 
   @available_names [
     :pipelines,
     :pipeline_plugs,
-    :scopes
+    :scopes,
+    :routes
   ]
 
   @attr_prefix :combo_router
+
+  def register(module, name, opts \\ []) do
+    Module.register_attribute(__MODULE__, build_attr(name), opts)
+  end
 
   def get(module, name) when name in @available_names do
     Module.get_attribute(module, build_attr(name))

@@ -1,7 +1,7 @@
 defmodule Combo.Router.Scope do
   @moduledoc false
 
-  alias Combo.Router.Context
+  alias Combo.Router.ModuleAttr
 
   defstruct path: [],
             alias: [],
@@ -14,7 +14,7 @@ defmodule Combo.Router.Scope do
 
   @doc false
   def init(module) do
-    Context.put(module, :scopes, [%__MODULE__{}])
+    ModuleAttr.put(module, :scopes, [%__MODULE__{}])
   end
 
   @doc """
@@ -197,11 +197,11 @@ defmodule Combo.Router.Scope do
   end
 
   def push_scope(module, scope) do
-    Context.update(module, :scopes, fn scopes -> [scope | scopes] end)
+    ModuleAttr.update(module, :scopes, fn scopes -> [scope | scopes] end)
   end
 
   def pop_scope(module) do
-    Context.update(module, :scopes, fn [_top | scopes] -> scopes end)
+    ModuleAttr.update(module, :scopes, fn [_top | scopes] -> scopes end)
   end
 
   @doc """
@@ -255,7 +255,7 @@ defmodule Combo.Router.Scope do
       end
 
     quote do
-      if pipeline = Context.get(__MODULE__, :pipeline_plugs) do
+      if pipeline = ModuleAttr.get(__MODULE__, :pipeline_plugs) do
         raise "cannot pipe_through inside a pipeline"
       else
         unquote(__MODULE__).do_pipe_through(__MODULE__, unquote(pipes))
@@ -274,7 +274,7 @@ defmodule Combo.Router.Scope do
               "A plug may only be used once inside a scoped pipe_through"
     end
 
-    Context.update(module, :scopes, fn [top | rest] ->
+    ModuleAttr.update(module, :scopes, fn [top | rest] ->
       [%{top | pipes: pipes ++ new_pipes} | rest]
     end)
   end
@@ -428,7 +428,7 @@ defmodule Combo.Router.Scope do
 
   defp get_top_scope(module) do
     module
-    |> Context.get(:scopes)
+    |> ModuleAttr.get(:scopes)
     |> hd()
   end
 end

@@ -1,12 +1,12 @@
 defmodule Combo.Router.Pipeline do
   @moduledoc false
 
-  alias Combo.Router.Context
+  alias Combo.Router.ModuleAttr
   alias Combo.Router.Util
 
   def init(module) do
-    Context.put(module, :pipelines, MapSet.new())
-    Context.put(module, :pipeline_plugs, nil)
+    ModuleAttr.put(module, :pipelines, MapSet.new())
+    ModuleAttr.put(module, :pipeline_plugs, nil)
   end
 
   @doc """
@@ -42,16 +42,16 @@ defmodule Combo.Router.Pipeline do
     block =
       quote do
         name = unquote(name)
-        Context.put(__MODULE__, :pipeline_plugs, [])
+        ModuleAttr.put(__MODULE__, :pipeline_plugs, [])
         unquote(block)
       end
 
     compiler =
       quote unquote: false do
-        Context.put(__MODULE__, :pipelines, &MapSet.put(&1, name))
+        ModuleAttr.put(__MODULE__, :pipelines, &MapSet.put(&1, name))
 
         {conn, body} =
-          Plug.Builder.compile(__ENV__, Context.get(__MODULE__, :pipeline_plugs),
+          Plug.Builder.compile(__ENV__, ModuleAttr.get(__MODULE__, :pipeline_plugs),
             init_mode: Combo.plug_init_mode()
           )
 
@@ -67,7 +67,7 @@ defmodule Combo.Router.Pipeline do
           end
         end
 
-        Context.put(__MODULE__, :pipeline_plugs, nil)
+        ModuleAttr.put(__MODULE__, :pipeline_plugs, nil)
       end
 
     quote do
@@ -89,8 +89,8 @@ defmodule Combo.Router.Pipeline do
     {plug, opts} = Util.expand_plug_and_opts(plug, opts, __CALLER__)
 
     quote do
-      if plugs = Context.get(__MODULE__, :pipeline_plugs) do
-        Context.put(__MODULE__, :pipeline_plugs, [{unquote(plug), unquote(opts), true} | plugs])
+      if plugs = ModuleAttr.get(__MODULE__, :pipeline_plugs) do
+        ModuleAttr.put(__MODULE__, :pipeline_plugs, [{unquote(plug), unquote(opts), true} | plugs])
       else
         raise "cannot define plug at the router level, plug must be defined inside a pipeline"
       end
