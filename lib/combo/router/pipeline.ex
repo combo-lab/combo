@@ -6,7 +6,7 @@ defmodule Combo.Router.Pipeline do
   alias Combo.Router.Util
 
   def init(module) do
-    Context.init(module, :pipeline_plugs)
+    Context.put(module, :pipeline_plugs, nil)
   end
 
   @doc """
