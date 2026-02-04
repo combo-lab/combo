@@ -226,7 +226,7 @@ defmodule Combo.Router do
   No plug is invoked in case no matches were found.
   """
 
-  alias Combo.Router.{Route, Scope, Resource, Helpers}
+  alias Combo.Router.{Context, Route, Scope, Resource, Helpers, Util}
 
   @http_methods [:get, :post, :put, :patch, :delete, :options, :connect, :trace, :head]
 
@@ -244,10 +244,11 @@ defmodule Combo.Router do
       Module.register_attribute(__MODULE__, :combo_routes, accumulate: true)
 
       import Combo.Router
+      import Combo.Router.Pipeline, only: [pipeline: 2, plug: 1, plug: 2]
 
-      # Set up the initial scope
-      @combo_pipeline nil
+      Combo.Router.Pipeline.init(__MODULE__)
       Combo.Router.Scope.init(__MODULE__)
+
       @before_compile unquote(__MODULE__)
     end
   end
@@ -627,112 +628,6 @@ defmodule Combo.Router do
     end
   end
 
-  @doc """
-  Defines a plug pipeline.
-
-  Pipelines are defined at the router root and can be used from any scope.
-
-  ## Examples
-
-      pipeline :api do
-        plug :token_authentication
-        plug :dispatch
-      end
-
-  A scope may then use this pipeline as:
-
-      scope "/" do
-        pipe_through :api
-      end
-
-  Every time `pipe_through/1` is called, the new pipelines are appended to the
-  ones previously given.
-  """
-  defmacro pipeline(name, do: block) do
-    with true <- is_atom(name),
-         imports = __CALLER__.macros ++ __CALLER__.functions,
-         {mod, _} <- Enum.find(imports, fn {_, imports} -> {name, 2} in imports end) do
-      raise ArgumentError,
-            "cannot define pipeline named #{inspect(name)} " <>
-              "because there is an import from #{inspect(mod)} with the same name"
-    end
-
-    block =
-      quote do
-        name = unquote(name)
-        @combo_pipeline []
-        unquote(block)
-      end
-
-    compiler =
-      quote unquote: false do
-        Scope.pipeline(__MODULE__, name)
-
-        {conn, body} =
-          Plug.Builder.compile(__ENV__, @combo_pipeline, init_mode: Combo.plug_init_mode())
-
-        def unquote(name)(unquote(conn), _) do
-          try do
-            unquote(body)
-          rescue
-            e in Plug.Conn.WrapperError ->
-              Plug.Conn.WrapperError.reraise(e)
-          catch
-            :error, reason ->
-              Plug.Conn.WrapperError.reraise(unquote(conn), :error, reason, __STACKTRACE__)
-          end
-        end
-
-        @combo_pipeline nil
-      end
-
-    quote do
-      try do
-        unquote(block)
-        unquote(compiler)
-      after
-        :ok
-      end
-    end
-  end
-
-  @doc """
-  Defines a plug inside a pipeline.
-
-  See `pipeline/2` for more information.
-  """
-  defmacro plug(plug, opts \\ []) do
-    {plug, opts} = expand_plug_and_opts(plug, opts, __CALLER__)
-
-    quote do
-      if pipeline = @combo_pipeline do
-        @combo_pipeline [{unquote(plug), unquote(opts), true} | pipeline]
-      else
-        raise "cannot define plug at the router level, plug must be defined inside a pipeline"
-      end
-    end
-  end
-
-  defp expand_plug_and_opts(plug, opts, caller) do
-    runtime? = Combo.plug_init_mode() == :runtime
-
-    plug =
-      if runtime? do
-        expand_alias(plug, caller)
-      else
-        plug
-      end
-
-    opts =
-      if runtime? and Macro.quoted_literal?(opts) do
-        Macro.prewalk(opts, &expand_alias(&1, caller))
-      else
-        opts
-      end
-
-    {plug, opts}
-  end
-
   defp expand_alias({:__aliases__, _, _} = alias, env),
     do: Macro.expand(alias, %{env | function: {:init, 1}})
 
@@ -786,7 +681,7 @@ defmodule Combo.Router do
       end
 
     quote do
-      if pipeline = @combo_pipeline do
+      if pipeline = Context.get(__MODULE__, :pipeline_plugs) do
         raise "cannot pipe_through inside a pipeline"
       else
         Scope.pipe_through(__MODULE__, unquote(pipes))
@@ -1103,7 +998,7 @@ defmodule Combo.Router do
 
   """
   defmacro forward(path, plug, plug_opts \\ [], router_opts \\ []) do
-    {plug, plug_opts} = expand_plug_and_opts(plug, plug_opts, __CALLER__)
+    {plug, plug_opts} = Util.expand_plug_and_opts(plug, plug_opts, __CALLER__)
     router_opts = Keyword.put(router_opts, :as, nil)
 
     quote unquote: true, bind_quoted: [path: path, plug: plug] do
