@@ -1,6 +1,13 @@
 defmodule Combo.Router.Route do
   @moduledoc false
 
+  alias Combo.Router.ModuleAttr
+
+  @doc false
+  def setup(module) do
+    ModuleAttr.register(module, :routes, accumulate: true)
+  end
+
   @doc """
   The `Combo.Router.Route` struct. It stores:
 

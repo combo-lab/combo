@@ -11,7 +11,7 @@ defmodule Combo.Router.ModuleAttr do
   @attr_prefix :combo_router
 
   def register(module, name, opts \\ []) do
-    Module.register_attribute(__MODULE__, build_attr(name), opts)
+    Module.register_attribute(module, build_attr(name), opts)
   end
 
   def get(module, name) when name in @available_names do

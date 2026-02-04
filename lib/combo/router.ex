@@ -226,7 +226,7 @@ defmodule Combo.Router do
   No plug is invoked in case no matches were found.
   """
 
-  alias Combo.Router.{Route, Scope, Resource, Helpers, Util}
+  alias Combo.Router.{Route, Scope, Resource, Helpers, Util, ModuleAttr}
 
   @http_methods [:get, :post, :put, :patch, :delete, :options, :connect, :trace, :head]
 
@@ -241,14 +241,13 @@ defmodule Combo.Router do
 
   defp prelude do
     quote do
-      Module.register_attribute(__MODULE__, :combo_routes, accumulate: true)
+      Combo.Router.Pipeline.setup(__MODULE__)
+      Combo.Router.Scope.setup(__MODULE__)
+      Combo.Router.Route.setup(__MODULE__)
 
       import Combo.Router
       import Combo.Router.Pipeline, only: [pipeline: 2, plug: 1, plug: 2]
       import Combo.Router.Scope, only: [scope: 2, scope: 3, scope: 4, pipe_through: 1]
-
-      Combo.Router.Pipeline.setup(__MODULE__)
-      Combo.Router.Scope.setup(__MODULE__)
 
       @before_compile unquote(__MODULE__)
     end
@@ -410,7 +409,7 @@ defmodule Combo.Router do
 
   @doc false
   defmacro __before_compile__(env) do
-    routes = env.module |> Module.get_attribute(:combo_routes) |> Enum.reverse()
+    routes = env.module |> ModuleAttr.get(:routes) |> Enum.reverse()
     routes_with_exprs = Enum.map(routes, &{&1, Route.build_exprs(&1)})
 
     # check all controller modules and functions referenced by routes exist.
@@ -616,16 +615,20 @@ defmodule Combo.Router do
 
   defp add_route(kind, verb, path, plug, plug_opts, options) do
     quote do
-      @combo_routes Scope.route(
-                      __ENV__.line,
-                      __ENV__.module,
-                      unquote(kind),
-                      unquote(verb),
-                      unquote(path),
-                      unquote(plug),
-                      unquote(plug_opts),
-                      unquote(options)
-                    )
+      ModuleAttr.put(
+        __MODULE__,
+        :routes,
+        Scope.route(
+          __ENV__.line,
+          __ENV__.module,
+          unquote(kind),
+          unquote(verb),
+          unquote(path),
+          unquote(plug),
+          unquote(plug_opts),
+          unquote(options)
+        )
+      )
     end
   end
 
