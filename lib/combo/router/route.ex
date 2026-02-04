@@ -40,7 +40,20 @@ defmodule Combo.Router.Route do
     :metadata
   ]
 
-  @type t :: %__MODULE__{}
+  @type t :: %__MODULE__{
+          line: non_neg_integer(),
+          kind: :match | :forward,
+          verb: atom(),
+          path: String.t(),
+          hosts: [String.t()],
+          plug: atom(),
+          plug_opts: atom(),
+          helper: binary() | nil,
+          pipe_through: [atom()],
+          private: map(),
+          assigns: map(),
+          metadata: map()
+        }
 
   @doc "Used as a plug on forwarding."
   def init(opts), do: opts
@@ -54,23 +67,6 @@ defmodule Combo.Router.Route do
     %{conn | path_info: path, script_name: script}
   end
 
-  @doc """
-  Build a `Combo.Router.Route` struct.
-  """
-  @spec build(
-          line :: non_neg_integer(),
-          kind :: :match | :forward,
-          verb :: atom(),
-          path :: String.t(),
-          hosts :: [String.t()],
-          plug :: atom(),
-          plug_opts :: atom(),
-          helper :: binary() | nil,
-          pipe_through :: [atom()],
-          private :: map(),
-          assigns :: map(),
-          metadata :: map()
-        ) :: t()
   def build(
         line,
         kind,

@@ -251,14 +251,14 @@ defmodule Combo.Router.ScopedRoutingTest do
   end
 
   test "string paths are enforced" do
-    assert_raise ArgumentError, ~r{router paths must be strings, got: :bar}, fn ->
+    assert_raise ArgumentError, ~r{route paths must be strings, got: :bar}, fn ->
       defmodule SomeRouter do
         use Support.Router, otp_app: :combo
         get :bar, Router, []
       end
     end
 
-    assert_raise ArgumentError, ~r{router paths must be strings, got: :bar}, fn ->
+    assert_raise ArgumentError, ~r{route paths must be strings, got: :bar}, fn ->
       defmodule SomeRouter do
         use Support.Router, otp_app: :combo
         get "/foo", Router, []
