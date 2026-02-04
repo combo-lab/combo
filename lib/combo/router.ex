@@ -246,6 +246,7 @@ defmodule Combo.Router do
       Combo.Router.Route.setup(__MODULE__)
 
       import Combo.Router
+
       import Combo.Router.Pipeline, only: [pipeline: 2, plug: 1, plug: 2]
       import Combo.Router.Scope, only: [scope: 2, scope: 3, scope: 4, pipe_through: 1]
 
@@ -586,7 +587,7 @@ defmodule Combo.Router do
 
   """
   defmacro match(verb, path, plug, plug_opts, options \\ []) do
-    add_route(:match, verb, path, expand_alias(plug, __CALLER__), plug_opts, options)
+    add_route(:match, verb, path, Util.expand_alias(plug, __CALLER__), plug_opts, options)
   end
 
   for verb <- @http_methods do
@@ -609,7 +610,14 @@ defmodule Combo.Router do
     end}
     """
     defmacro unquote(verb)(path, plug, plug_opts, options \\ []) do
-      add_route(:match, unquote(verb), path, expand_alias(plug, __CALLER__), plug_opts, options)
+      add_route(
+        :match,
+        unquote(verb),
+        path,
+        Util.expand_alias(plug, __CALLER__),
+        plug_opts,
+        options
+      )
     end
   end
 
@@ -631,11 +639,6 @@ defmodule Combo.Router do
       )
     end
   end
-
-  defp expand_alias({:__aliases__, _, _} = alias, env),
-    do: Macro.expand(alias, %{env | function: {:init, 1}})
-
-  defp expand_alias(other, _env), do: other
 
   @doc """
   Defines "RESTful" routes for a resource.

@@ -21,10 +21,10 @@ defmodule Combo.Router.Util do
     {plug, opts}
   end
 
-  defp expand_alias({:__aliases__, _, _} = alias, env),
+  def expand_alias({:__aliases__, _, _} = alias, env),
     do: Macro.expand(alias, %{env | function: {:init, 1}})
 
-  defp expand_alias(other, _env), do: other
+  def expand_alias(other, _env), do: other
 
   ## Validations
 
