@@ -13,7 +13,7 @@ defmodule Combo.Router.Scope do
             log: :debug
 
   @doc false
-  def init(module) do
+  def setup(module) do
     ModuleAttr.put(module, :scopes, [%__MODULE__{}])
   end
 

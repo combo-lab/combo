@@ -4,7 +4,8 @@ defmodule Combo.Router.Pipeline do
   alias Combo.Router.ModuleAttr
   alias Combo.Router.Util
 
-  def init(module) do
+  @doc false
+  def setup(module) do
     ModuleAttr.put(module, :pipelines, MapSet.new())
     ModuleAttr.put(module, :pipeline_plugs, nil)
   end

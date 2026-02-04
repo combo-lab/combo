@@ -247,8 +247,8 @@ defmodule Combo.Router do
       import Combo.Router.Pipeline, only: [pipeline: 2, plug: 1, plug: 2]
       import Combo.Router.Scope, only: [scope: 2, scope: 3, scope: 4, pipe_through: 1]
 
-      Combo.Router.Pipeline.init(__MODULE__)
-      Combo.Router.Scope.init(__MODULE__)
+      Combo.Router.Pipeline.setup(__MODULE__)
+      Combo.Router.Scope.setup(__MODULE__)
 
       @before_compile unquote(__MODULE__)
     end
