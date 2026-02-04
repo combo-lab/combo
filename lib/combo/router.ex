@@ -618,7 +618,7 @@ defmodule Combo.Router do
       ModuleAttr.put(
         __MODULE__,
         :routes,
-        Scope.route(
+        Route.build_route(
           __ENV__.line,
           __ENV__.module,
           unquote(kind),

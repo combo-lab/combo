@@ -2,6 +2,10 @@ defmodule Combo.Router.Route do
   @moduledoc false
 
   alias Combo.Router.ModuleAttr
+  alias Combo.Router.Scope
+  alias Combo.Router.Util
+
+  @http_methods [:get, :post, :put, :patch, :delete, :options, :connect, :trace, :head]
 
   @doc false
   def setup(module) do
@@ -39,6 +43,58 @@ defmodule Combo.Router.Route do
     :assigns,
     :metadata
   ]
+
+  def build_route(line, module, kind, verb, path, plug, plug_opts, opts) do
+    if not is_atom(plug) do
+      raise ArgumentError,
+            "routes expect a module plug as second argument, got: #{inspect(plug)}"
+    end
+
+    top = Scope.get_top_scope(module)
+    path = Util.validate_route_path!(path)
+
+    alias? = Keyword.get(opts, :alias, true)
+    as = Keyword.get_lazy(opts, :as, fn -> Combo.Naming.resource_name(plug, "Controller") end)
+    private = Keyword.get(opts, :private, %{})
+    assigns = Keyword.get(opts, :assigns, %{})
+    log = Keyword.get(opts, :log, top.log)
+
+    if to_string(as) == "static" do
+      raise ArgumentError,
+            "`static` is a reserved route prefix generated from #{inspect(plug)} or `:as` option"
+    end
+
+    {path, plug, as, private, assigns} = join(top, path, plug, alias?, as, private, assigns)
+
+    metadata =
+      opts
+      |> Keyword.get(:metadata, %{})
+      |> Map.put(:log, log)
+
+    metadata =
+      if kind == :forward do
+        Map.put(metadata, :forward, validate_forward_path!(path))
+      else
+        metadata
+      end
+
+    Combo.Router.Route.build(
+      line,
+      kind,
+      verb,
+      path,
+      top.hosts,
+      plug,
+      plug_opts,
+      as,
+      top.pipes,
+      private,
+      assigns,
+      metadata
+    )
+  end
+
+  # ====================
 
   @type t :: %__MODULE__{
           line: non_neg_integer(),
@@ -223,4 +279,39 @@ defmodule Combo.Router.Route do
   """
   def merge_params(%Plug.Conn.Unfetched{}, path_params), do: path_params
   def merge_params(params, path_params), do: Map.merge(params, path_params)
+
+  # ========
+  defp validate_forward_path!(path) do
+    case Plug.Router.Utils.build_path_match(path) do
+      {[], path_segments} ->
+        path_segments
+
+      _ ->
+        raise ArgumentError,
+              "dynamic segment \"#{path}\" not allowed when forwarding. Use a static path instead"
+    end
+  end
+
+  defp join(top, path, plug, alias?, as, private, assigns) do
+    path = join_path(top, path)
+    plug = if alias?, do: join_alias(top, plug), else: plug
+    as = join_as(top, as)
+    private = Map.merge(top.private, private)
+    assigns = Map.merge(top.assigns, assigns)
+    {path, plug, as, private, assigns}
+  end
+
+  defp join_alias(top, plug) when is_atom(plug) do
+    case Atom.to_string(plug) do
+      <<head, _::binary>> when head in ?a..?z -> plug
+      plug -> Module.concat(top.alias ++ [plug])
+    end
+  end
+
+  defp join_as(_top, nil), do: nil
+  defp join_as(top, as) when is_atom(as) or is_binary(as), do: Enum.join(top.as ++ [as], "_")
+
+  defp join_path(top, path) do
+    "/" <> Enum.join(top.path ++ String.split(path, "/", trim: true), "/")
+  end
 end

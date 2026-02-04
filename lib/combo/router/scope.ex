@@ -280,70 +280,6 @@ defmodule Combo.Router.Scope do
     end)
   end
 
-  @doc """
-  Builds a route based on the top of the stack.
-  """
-  def route(line, module, kind, verb, path, plug, plug_opts, opts) do
-    if not is_atom(plug) do
-      raise ArgumentError,
-            "routes expect a module plug as second argument, got: #{inspect(plug)}"
-    end
-
-    top = get_top_scope(module)
-    path = Util.validate_route_path!(path)
-
-    alias? = Keyword.get(opts, :alias, true)
-    as = Keyword.get_lazy(opts, :as, fn -> Combo.Naming.resource_name(plug, "Controller") end)
-    private = Keyword.get(opts, :private, %{})
-    assigns = Keyword.get(opts, :assigns, %{})
-    log = Keyword.get(opts, :log, top.log)
-
-    if to_string(as) == "static" do
-      raise ArgumentError,
-            "`static` is a reserved route prefix generated from #{inspect(plug)} or `:as` option"
-    end
-
-    {path, plug, as, private, assigns} = join(top, path, plug, alias?, as, private, assigns)
-
-    metadata =
-      opts
-      |> Keyword.get(:metadata, %{})
-      |> Map.put(:log, log)
-
-    metadata =
-      if kind == :forward do
-        Map.put(metadata, :forward, validate_forward_path!(path))
-      else
-        metadata
-      end
-
-    Combo.Router.Route.build(
-      line,
-      kind,
-      verb,
-      path,
-      top.hosts,
-      plug,
-      plug_opts,
-      as,
-      top.pipes,
-      private,
-      assigns,
-      metadata
-    )
-  end
-
-  defp validate_forward_path!(path) do
-    case Plug.Router.Utils.build_path_match(path) do
-      {[], path_segments} ->
-        path_segments
-
-      _ ->
-        raise ArgumentError,
-              "dynamic segment \"#{path}\" not allowed when forwarding. Use a static path instead"
-    end
-  end
-
   defp validate_hosts!(nil), do: []
   defp validate_hosts!(host) when is_binary(host), do: [host]
 
@@ -390,28 +326,12 @@ defmodule Combo.Router.Scope do
     end
   end
 
-  defp join(top, path, plug, alias?, as, private, assigns) do
-    path = join_path(top, path)
-    plug = if alias?, do: join_alias(top, plug), else: plug
-    as = join_as(top, as)
-    private = Map.merge(top.private, private)
-    assigns = Map.merge(top.assigns, assigns)
-    {path, plug, as, private, assigns}
-  end
-
-  defp join_path(top, path) do
-    "/" <> Enum.join(top.path ++ String.split(path, "/", trim: true), "/")
-  end
-
   defp join_alias(top, plug) when is_atom(plug) do
     case Atom.to_string(plug) do
       <<head, _::binary>> when head in ?a..?z -> plug
       plug -> Module.concat(top.alias ++ [plug])
     end
   end
-
-  defp join_as(_top, nil), do: nil
-  defp join_as(top, as) when is_atom(as) or is_binary(as), do: Enum.join(top.as ++ [as], "_")
 
   @doc false
   def get_top_scope(module) do
