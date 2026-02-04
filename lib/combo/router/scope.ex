@@ -1,9 +1,7 @@
 defmodule Combo.Router.Scope do
   @moduledoc false
 
-  alias Combo.Router.Scope
-
-  @stack :combo_router_scopes
+  alias Combo.Router.Context
 
   defstruct path: [],
             alias: [],
@@ -16,7 +14,7 @@ defmodule Combo.Router.Scope do
 
   @doc false
   def init(module) do
-    Module.put_attribute(module, @stack, [%Scope{}])
+    Context.put(module, :scopes, [%__MODULE__{}])
   end
 
   @doc """
@@ -91,36 +89,39 @@ defmodule Combo.Router.Scope do
 
   """
   defmacro scope(arg, [do: context] = _do_block) do
-    build_scope([arg], context)
+    do_scope([arg], context)
   end
 
   @doc """
   See the shortcuts section of `#{inspect(__MODULE__)}.scope/2`.
   """
   defmacro scope(arg1, arg2, [do: context] = _do_block) do
-    build_scope([arg1, arg2], context)
+    do_scope([arg1, arg2], context)
   end
 
   @doc """
   See the shortcuts section of `#{inspect(__MODULE__)}.scope/2`.
   """
   defmacro scope(arg1, arg2, arg3, [do: context] = _do_block) do
-    build_scope([arg1, arg2, arg3], context)
+    do_scope([arg1, arg2, arg3], context)
   end
 
-  defp build_scope(args, context) do
-    opts =
+  defp do_scope(args, context) do
+    scope =
       quote do
-        unquote(__MODULE__).normalize_scope_opts(unquote(args))
+        unquote(__MODULE__).build_scope(
+          __MODULE__,
+          unquote(__MODULE__).normalize_scope_opts(unquote(args))
+        )
       end
 
     quote do
-      Scope.push(__MODULE__, unquote(opts))
+      unquote(__MODULE__).push_scope(__MODULE__, unquote(scope))
 
       try do
         unquote(context)
       after
-        Scope.pop(__MODULE__)
+        unquote(__MODULE__).pop_scope(__MODULE__)
       end
     end
   end
@@ -157,6 +158,127 @@ defmodule Combo.Router.Scope do
     |> Keyword.put(:alias, alias)
   end
 
+  @doc false
+  def build_scope(module, opts) do
+    top = get_top_scope(module)
+
+    path =
+      if path = Keyword.get(opts, :path) do
+        path |> validate_path!() |> String.split("/", trim: true)
+      else
+        []
+      end
+
+    path = top.path ++ path
+    alias = append_if_not_false(top, opts, :alias, &Atom.to_string(&1))
+    as = append_if_not_false(top, opts, :as, & &1)
+
+    hosts =
+      case Keyword.fetch(opts, :host) do
+        {:ok, val} -> validate_hosts!(val)
+        :error -> top.hosts
+      end
+
+    pipes = top.pipes
+    private = Map.merge(top.private, Keyword.get(opts, :private, %{}))
+    assigns = Map.merge(top.assigns, Keyword.get(opts, :assigns, %{}))
+    log = Keyword.get(opts, :log, top.log)
+
+    %__MODULE__{
+      path: path,
+      alias: alias,
+      as: as,
+      hosts: hosts,
+      pipes: pipes,
+      private: private,
+      assigns: assigns,
+      log: log
+    }
+  end
+
+  def push_scope(module, scope) do
+    Context.update(module, :scopes, fn scopes -> [scope | scopes] end)
+  end
+
+  def pop_scope(module) do
+    Context.update(module, :scopes, fn [_top | scopes] -> scopes end)
+  end
+
+  @doc """
+  Defines a list of plugs (and pipelines) to send the connection through.
+
+  Plugs are specified using the atom name of any imported 2-arity function
+  which takes a `Plug.Conn` struct and options and returns a `Plug.Conn` struct.
+  For example, `:require_authenticated_user`.
+
+  Pipelines are defined in the router, see `pipeline/2` for more information.
+
+  ## Examples
+
+      pipe_through [:require_authenticated_user, :my_browser_pipeline]
+
+  ## Multiple invocations
+
+  `pipe_through/1` can be invoked multiple times within the same scope. Each
+  invocation appends new plugs and pipelines to run, which are applied to all
+  routes **after** the `pipe_through/1` invocation. For example:
+
+      scope "/" do
+        pipe_through [:browser]
+        get "/", HomeController, :index
+
+        pipe_through [:require_authenticated_user]
+        get "/settings", UserController, :edit
+      end
+
+  In the example above, `/` pipes through `browser` only, while `/settings` pipes
+  through both `browser` and `require_authenticated_user`. Therefore, to avoid
+  confusion, we recommend a single `pipe_through` at the top of each scope:
+
+      scope "/" do
+        pipe_through [:browser]
+        get "/", HomeController, :index
+      end
+
+      scope "/" do
+        pipe_through [:browser, :require_authenticated_user]
+        get "/settings", UserController, :edit
+      end
+
+  """
+  defmacro pipe_through(pipes) do
+    pipes =
+      if Combo.plug_init_mode() == :runtime and Macro.quoted_literal?(pipes) do
+        Macro.prewalk(pipes, &expand_alias(&1, __CALLER__))
+      else
+        pipes
+      end
+
+    quote do
+      if pipeline = Context.get(__MODULE__, :pipeline_plugs) do
+        raise "cannot pipe_through inside a pipeline"
+      else
+        unquote(__MODULE__).do_pipe_through(__MODULE__, unquote(pipes))
+      end
+    end
+  end
+
+  @doc false
+  def do_pipe_through(module, new_pipes) do
+    %{pipes: pipes} = get_top_scope(module)
+    new_pipes = List.wrap(new_pipes)
+
+    if pipe = Enum.find(new_pipes, &(&1 in pipes)) do
+      raise ArgumentError,
+            "duplicate pipe_through for #{inspect(pipe)}. " <>
+              "A plug may only be used once inside a scoped pipe_through"
+    end
+
+    Context.update(module, :scopes, fn [top | rest] ->
+      [%{top | pipes: pipes ++ new_pipes} | rest]
+    end)
+  end
+
   @doc """
   Builds a route based on the top of the stack.
   """
@@ -166,7 +288,7 @@ defmodule Combo.Router.Scope do
             "routes expect a module plug as second argument, got: #{inspect(plug)}"
     end
 
-    top = get_stack_top(module)
+    top = get_top_scope(module)
     path = validate_path!(path)
 
     alias? = Keyword.get(opts, :alias, true)
@@ -235,66 +357,6 @@ defmodule Combo.Router.Scope do
     raise ArgumentError, "router paths must be strings, got: #{inspect(path)}"
   end
 
-  @doc """
-  Appends the given pipes to the current scope pipe through.
-  """
-  def pipe_through(module, new_pipes) do
-    %{pipes: pipes} = get_stack_top(module)
-    new_pipes = List.wrap(new_pipes)
-
-    if pipe = Enum.find(new_pipes, &(&1 in pipes)) do
-      raise ArgumentError,
-            "duplicate pipe_through for #{inspect(pipe)}. " <>
-              "A plug may only be used once inside a scoped pipe_through"
-    end
-
-    update_stack(module, fn [top | rest] ->
-      [%{top | pipes: pipes ++ new_pipes} | rest]
-    end)
-  end
-
-  @doc """
-  Pushes a scope into the module stack.
-  """
-  def push(module, opts) when is_list(opts) do
-    top = get_stack_top(module)
-
-    path =
-      if path = Keyword.get(opts, :path) do
-        path |> validate_path!() |> String.split("/", trim: true)
-      else
-        []
-      end
-
-    path = top.path ++ path
-    alias = append_if_not_false(top, opts, :alias, &Atom.to_string(&1))
-    as = append_if_not_false(top, opts, :as, & &1)
-
-    hosts =
-      case Keyword.fetch(opts, :host) do
-        {:ok, val} -> validate_hosts!(val)
-        :error -> top.hosts
-      end
-
-    pipes = top.pipes
-    private = Map.merge(top.private, Keyword.get(opts, :private, %{}))
-    assigns = Map.merge(top.assigns, Keyword.get(opts, :assigns, %{}))
-    log = Keyword.get(opts, :log, top.log)
-
-    new_top = %Scope{
-      path: path,
-      alias: alias,
-      as: as,
-      hosts: hosts,
-      pipes: pipes,
-      private: private,
-      assigns: assigns,
-      log: log
-    }
-
-    update_stack(module, fn stack -> [new_top | stack] end)
-  end
-
   defp validate_hosts!(nil), do: []
   defp validate_hosts!(host) when is_binary(host), do: [host]
 
@@ -321,17 +383,10 @@ defmodule Combo.Router.Scope do
   end
 
   @doc """
-  Pops a scope from the module stack.
-  """
-  def pop(module) do
-    update_stack(module, fn [_top | rest] -> rest end)
-  end
-
-  @doc """
   Expands the alias in the current router scope.
   """
   def expand_alias(module, alias) do
-    join_alias(get_stack_top(module), alias)
+    join_alias(get_top_scope(module), alias)
   end
 
   @doc """
@@ -339,12 +394,12 @@ defmodule Combo.Router.Scope do
   """
   def full_path(module, path) do
     split_path = String.split(path, "/", trim: true)
-    prefix = get_stack_top(module).path
+    prefix = get_top_scope(module).path
 
     cond do
       prefix == [] -> path
       split_path == [] -> "/" <> Enum.join(prefix, "/")
-      true -> "/" <> Path.join(get_stack_top(module).path ++ split_path)
+      true -> "/" <> Path.join(get_top_scope(module).path ++ split_path)
     end
   end
 
@@ -371,22 +426,9 @@ defmodule Combo.Router.Scope do
   defp join_as(_top, nil), do: nil
   defp join_as(top, as) when is_atom(as) or is_binary(as), do: Enum.join(top.as ++ [as], "_")
 
-  defp get_stack_top(module) do
+  defp get_top_scope(module) do
     module
-    |> get_attribute(@stack)
+    |> Context.get(:scopes)
     |> hd()
-  end
-
-  defp update_stack(module, fun) do
-    update_attribute(module, @stack, fun)
-  end
-
-  defp get_attribute(module, attr) do
-    Module.get_attribute(module, attr) ||
-      raise "#{inspect(__MODULE__)} was not initialized"
-  end
-
-  defp update_attribute(module, attr, fun) do
-    Module.put_attribute(module, attr, fun.(get_attribute(module, attr)))
   end
 end

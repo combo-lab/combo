@@ -3,7 +3,8 @@ defmodule Combo.Router.Context do
 
   @available_names [
     :pipelines,
-    :pipeline_plugs
+    :pipeline_plugs,
+    :scopes
   ]
 
   @attr_prefix :combo_router

@@ -226,7 +226,7 @@ defmodule Combo.Router do
   No plug is invoked in case no matches were found.
   """
 
-  alias Combo.Router.{Context, Route, Scope, Resource, Helpers, Util}
+  alias Combo.Router.{Route, Scope, Resource, Helpers, Util}
 
   @http_methods [:get, :post, :put, :patch, :delete, :options, :connect, :trace, :head]
 
@@ -245,7 +245,7 @@ defmodule Combo.Router do
 
       import Combo.Router
       import Combo.Router.Pipeline, only: [pipeline: 2, plug: 1, plug: 2]
-      import Combo.Router.Scope, only: [scope: 2, scope: 3, scope: 4]
+      import Combo.Router.Scope, only: [scope: 2, scope: 3, scope: 4, pipe_through: 1]
 
       Combo.Router.Pipeline.init(__MODULE__)
       Combo.Router.Scope.init(__MODULE__)
@@ -633,62 +633,6 @@ defmodule Combo.Router do
     do: Macro.expand(alias, %{env | function: {:init, 1}})
 
   defp expand_alias(other, _env), do: other
-
-  @doc """
-  Defines a list of plugs (and pipelines) to send the connection through.
-
-  Plugs are specified using the atom name of any imported 2-arity function
-  which takes a `Plug.Conn` struct and options and returns a `Plug.Conn` struct.
-  For example, `:require_authenticated_user`.
-
-  Pipelines are defined in the router, see `pipeline/2` for more information.
-
-      pipe_through [:require_authenticated_user, :my_browser_pipeline]
-
-  ## Multiple invocations
-
-  `pipe_through/1` can be invoked multiple times within the same scope. Each
-  invocation appends new plugs and pipelines to run, which are applied to all
-  routes **after** the `pipe_through/1` invocation. For example:
-
-      scope "/" do
-        pipe_through [:browser]
-        get "/", HomeController, :index
-
-        pipe_through [:require_authenticated_user]
-        get "/settings", UserController, :edit
-      end
-
-  In the example above, `/` pipes through `browser` only, while `/settings` pipes
-  through both `browser` and `require_authenticated_user`. Therefore, to avoid
-  confusion, we recommend a single `pipe_through` at the top of each scope:
-
-      scope "/" do
-        pipe_through [:browser]
-        get "/", HomeController, :index
-      end
-
-      scope "/" do
-        pipe_through [:browser, :require_authenticated_user]
-        get "/settings", UserController, :edit
-      end
-  """
-  defmacro pipe_through(pipes) do
-    pipes =
-      if Combo.plug_init_mode() == :runtime and Macro.quoted_literal?(pipes) do
-        Macro.prewalk(pipes, &expand_alias(&1, __CALLER__))
-      else
-        pipes
-      end
-
-    quote do
-      if pipeline = Context.get(__MODULE__, :pipeline_plugs) do
-        raise "cannot pipe_through inside a pipeline"
-      else
-        Scope.pipe_through(__MODULE__, unquote(pipes))
-      end
-    end
-  end
 
   @doc """
   Defines "RESTful" routes for a resource.
