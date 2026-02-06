@@ -298,11 +298,8 @@ defmodule Combo.Router.Route do
     {path, plug, as, private, assigns}
   end
 
-  defp join_alias(top, plug) when is_atom(plug) do
-    case Atom.to_string(plug) do
-      <<head, _::binary>> when head in ?a..?z -> plug
-      plug -> Module.concat(top.alias ++ [plug])
-    end
+  defp join_alias(scope, alias) when is_atom(alias) do
+    Module.concat(scope.alias ++ [alias])
   end
 
   defp join_as(_top, nil), do: nil

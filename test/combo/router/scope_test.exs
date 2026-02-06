@@ -27,11 +27,6 @@ defmodule Combo.Router.ScopedRoutingTest do
     def call(conn, _opts), do: conn
   end
 
-  defmodule :erlang_like do
-    def init(action), do: action
-    def call(conn, action), do: Plug.Conn.send_resp(conn, 200, "Erlang like #{action}")
-  end
-
   defmodule Router do
     use Support.Router
 
@@ -46,7 +41,6 @@ defmodule Combo.Router.ScopedRoutingTest do
     end
 
     scope "/admin" do
-      get "/erlang/like", :erlang_like, :action, as: :erlang_like
       get "/users/:id", Api.V1.UserController, :show
     end
 
@@ -127,12 +121,6 @@ defmodule Combo.Router.ScopedRoutingTest do
     assert conn.status == 200
     assert conn.resp_body == "api v1 users show"
     assert conn.params["id"] == "13"
-  end
-
-  test "single scope with Erlang like route" do
-    conn = call(Router, :get, "/admin/erlang/like")
-    assert conn.status == 200
-    assert conn.resp_body == "Erlang like action"
   end
 
   test "double scope for single routes" do

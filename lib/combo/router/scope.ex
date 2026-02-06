@@ -177,11 +177,8 @@ defmodule Combo.Router.Scope do
     end
   end
 
-  defp join_alias(scope, plug) when is_atom(plug) do
-    case Atom.to_string(plug) do
-      <<head, _::binary>> when head in ?a..?z -> plug
-      plug -> Module.concat(scope.alias ++ [plug])
-    end
+  defp join_alias(scope, alias) when is_atom(alias) do
+    Module.concat(scope.alias ++ [alias])
   end
 
   @doc false
