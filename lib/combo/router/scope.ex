@@ -13,8 +13,8 @@ defmodule Combo.Router.Scope do
             assigns: %{},
             log: :debug
 
-  def setup(module) do
-    ModuleAttr.put(module, :scopes, [%__MODULE__{}])
+  def setup(router) do
+    ModuleAttr.put(router, :scopes, [%__MODULE__{}])
   end
 
   def add_scope(args, block) do
@@ -34,8 +34,8 @@ defmodule Combo.Router.Scope do
     end
   end
 
-  def add_pipe_through(module, new_pipes) do
-    %{pipes: pipes} = get_top_scope(module)
+  def add_pipe_through(router, new_pipes) do
+    %{pipes: pipes} = get_top_scope(router)
     new_pipes = List.wrap(new_pipes)
 
     if pipe = Enum.find(new_pipes, &(&1 in pipes)) do
@@ -44,14 +44,14 @@ defmodule Combo.Router.Scope do
               "A plug can only be used once inside a scoped pipe_through"
     end
 
-    ModuleAttr.update(module, :scopes, fn [top | rest] ->
+    ModuleAttr.update(router, :scopes, fn [top | rest] ->
       [%{top | pipes: pipes ++ new_pipes} | rest]
     end)
   end
 
   @doc false
-  def build_scope(module, args) do
-    scope = get_top_scope(module)
+  def build_scope(router, args) do
+    scope = get_top_scope(router)
     opts = normalize_scope_args(args)
 
     path =
@@ -149,18 +149,18 @@ defmodule Combo.Router.Scope do
   end
 
   @doc false
-  def push_scope(module, scope) do
-    ModuleAttr.update(module, :scopes, fn scopes -> [scope | scopes] end)
+  def push_scope(router, scope) do
+    ModuleAttr.update(router, :scopes, fn scopes -> [scope | scopes] end)
   end
 
   @doc false
-  def pop_scope(module) do
-    ModuleAttr.update(module, :scopes, fn [_top | scopes] -> scopes end)
+  def pop_scope(router) do
+    ModuleAttr.update(router, :scopes, fn [_top | scopes] -> scopes end)
   end
 
   @doc false
-  def expand_alias(module, alias) do
-    join_alias(get_top_scope(module), alias)
+  def expand_alias(router, alias) do
+    join_alias(get_top_scope(router), alias)
   end
 
   defp join_alias(scope, alias) when is_atom(alias) do
@@ -168,8 +168,8 @@ defmodule Combo.Router.Scope do
   end
 
   @doc false
-  def get_top_scope(module) do
-    module
+  def get_top_scope(router) do
+    router
     |> ModuleAttr.get(:scopes)
     |> hd()
   end
