@@ -160,10 +160,7 @@ defmodule Combo.Router.Scope do
 
   @doc false
   def expand_alias(router, alias) do
-    join_alias(get_top_scope(router), alias)
-  end
-
-  defp join_alias(scope, alias) when is_atom(alias) do
+    scope = get_top_scope(router)
     Module.concat(scope.alias ++ [alias])
   end
 
