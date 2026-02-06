@@ -226,7 +226,7 @@ defmodule Combo.Router do
   No plug is invoked in case no matches were found.
   """
 
-  alias Combo.Router.{Route, Scope, Resource, Helpers, Util, ModuleAttr}
+  alias Combo.Router.{Pipeline, Scope, Route, Resource, Helpers, Util, ModuleAttr}
 
   @http_methods [:get, :post, :put, :patch, :delete, :options, :connect, :trace, :head]
 
@@ -246,10 +246,6 @@ defmodule Combo.Router do
       Combo.Router.Route.setup(__MODULE__)
 
       import Combo.Router
-
-      import Combo.Router.Pipeline, only: [pipeline: 2, plug: 1, plug: 2]
-      import Combo.Router.Scope, only: [scope: 2, scope: 3, scope: 4, pipe_through: 1]
-      import Combo.Router.Route, only: [match: 4, match: 5, forward: 2, forward: 3, forward: 4]
 
       @before_compile unquote(__MODULE__)
     end
@@ -547,6 +543,244 @@ defmodule Combo.Router do
     end
   end
 
+  @doc """
+  Defines a pipeline.
+
+  Pipelines are defined at the router root and can be used from any scope.
+
+  ## Examples
+
+      pipeline :api do
+        plug :put_current_user
+        plug :dispatch
+      end
+
+  A scope can use this pipeline as:
+
+      scope "/" do
+        pipe_through :api
+      end
+
+  See `pipe_through/1` for more information.
+  """
+  defmacro pipeline(name, [do: block] = _do_block) when is_atom(name) do
+    with imports = __CALLER__.macros ++ __CALLER__.functions,
+         {mod, _} <- Enum.find(imports, fn {_, imports} -> {name, 2} in imports end) do
+      raise ArgumentError,
+            "cannot define pipeline named #{inspect(name)} " <>
+              "because there is an import from #{inspect(mod)} with the same name"
+    end
+
+    Pipeline.add_pipeline(name, block)
+  end
+
+  @doc """
+  Defines a plug inside a pipeline.
+
+  See `pipeline/2` for more information.
+  """
+  defmacro plug(plug, opts \\ []) do
+    {plug, opts} = Util.expand_plug_and_opts(plug, opts, __CALLER__)
+    Pipeline.add_plug(plug, opts)
+  end
+
+  @doc """
+  Defines a scope.
+
+  Scopes are for grouping routes.
+
+  ## Examples
+
+      scope path: "/api/v1", alias: API.V1 do
+        get "/pages/:id", PageController, :show
+      end
+
+  The generated route above will match on the path `"/api/v1/pages/:id"` and
+  will dispatch to `:show` action in `API.V1.PageController`. A named helper
+  `api_v1_page_path` will also be generated.
+
+  ## Options
+
+    * `:path` - the path scope as a string.
+    * `:alias` - the controller scope as an alias. When set to `false`, it
+      resets all nested `:alias` options.
+    * `:as` - the named helper scope as a string or an atom. When set to
+      `false`, it resets all nested `:as` options.
+    * `:host` - the host scope or prefix host scope as a string or a list
+      of strings, such as `"foo.bar.com"`, `"foo."`.
+    * `:private` - the private data as a map to merge into the connection when
+      a route matches.
+    * `:assigns` - the data as a map to merge into the connection when a route
+      matches.
+    * `:log` - the level to log the route dispatching under, may be set to
+      `false`.
+      Defaults to `:debug`. Route dispatching contains information about how
+      the route is handled (which controller action is called, what parameters
+      are available and which pipelines are used) and is separate from the plug
+      level logging. To alter the plug log level, please see
+      https://hexdocs.pm/combo/Combo.Logger.html#module-dynamic-log-level.
+
+  ## Shortcuts
+
+  A scope can also be defined with shortcuts.
+
+      # specify path and alias
+      scope "/api/v1", API.V1 do
+        get "/pages/:id", PageController, :show
+      end
+
+      # specify path, alias and options
+      scope "/api/v1", API.V1, host: "api." do
+        get "/pages/:id", PageController, :show
+      end
+
+      # specify path only
+      scope "/api/v1" do
+        get "/pages/:id", API.V1.PageController, :show
+      end
+
+      # specify path and options
+      scope "/api/v1", host: "api." do
+        get "/pages/:id", API.V1.PageController, :show
+      end
+
+      # specify alias only
+      scope API.V1 do
+        get "/pages/:id", PageController, :show
+      end
+
+      # specify alias and options
+      scope API.V1, host: "api." do
+        get "/pages/:id", PageController, :show
+      end
+
+  """
+  defmacro scope(arg, [do: block] = _do_block) do
+    Scope.add_scope([arg], block)
+  end
+
+  @doc """
+  See `scope/2` for more information.
+  """
+  defmacro scope(arg1, arg2, [do: block] = _do_block) do
+    Scope.add_scope([arg1, arg2], block)
+  end
+
+  @doc """
+  See `scope/2` for more information.
+  """
+  defmacro scope(arg1, arg2, arg3, [do: block] = _do_block) do
+    Scope.add_scope([arg1, arg2, arg3], block)
+  end
+
+  @doc """
+  Defines a list of plugs and pipelines to apply to the connection.
+
+  Plugs are specified using the atom name of function plugs.
+  Pipelines are specified using the atom name of pipelines. See `pipeline/2`
+  for more information.
+
+  ## Examples
+
+      pipe_through [:browser, :require_authenticated_user]
+
+  ## Multiple invocations
+
+  `pipe_through/1` can be invoked multiple times within the same scope. Each
+  invocation appends new plugs and pipelines, which are applied to all routes
+  **after** the `pipe_through/1` invocation. For example:
+
+      scope "/" do
+        pipe_through [:browser]
+        get "/", HomeController, :index
+
+        pipe_through [:require_authenticated_user]
+        get "/settings", UserController, :edit
+      end
+
+  In the example above, `/` applies `:browser` only, while `/settings` applies
+  both `:browser` and `:require_authenticated_user`. To avoid confusion, we
+  recommend to use a single `pipe_through` at the top of each scope:
+
+      scope "/" do
+        pipe_through [:browser]
+        get "/", HomeController, :index
+      end
+
+      scope "/" do
+        pipe_through [:browser, :require_authenticated_user]
+        get "/settings", UserController, :edit
+      end
+
+  """
+  defmacro pipe_through(pipes) do
+    pipes =
+      if Combo.plug_init_mode() == :runtime and Macro.quoted_literal?(pipes) do
+        Macro.prewalk(pipes, &Scope.expand_alias(&1, __CALLER__))
+      else
+        pipes
+      end
+
+    quote do
+      if pipeline = ModuleAttr.get(__MODULE__, :pipeline_plugs) do
+        raise "cannot pipe_through inside a pipeline"
+      else
+        Scope.add_pipe_through(__MODULE__, unquote(pipes))
+      end
+    end
+  end
+
+  @doc """
+  Defines a route based on an arbitrary HTTP method.
+
+  Useful for defining routes not included in the built-in macros.
+
+  The catch-all verb, `:*`, may also be used to match all HTTP methods.
+
+  ## Options
+
+    * `:alias` - whether to apply the scope alias to the route.
+      Defaults to `true`.
+    * `:as` - the route name as an atom or a string.
+      It's used for generating named route helpers. If `nil`, it does not generate
+      named route helpers.
+    * `:private` - the private data as a map to merge into the connection when
+      a route matches.
+      Default to `%{}`.
+    * `:assigns` - the data as a map to merge into the connection when a route
+      matches.
+      Default to `%{}`.
+    * `:log` - the level to log the route dispatching under.
+      Defaults to `:debug`. Can be set to `false` to disable the logging.
+      Route dispatching logging contains information about how the route is
+      handled (which controller action is called, what parameters are available
+      and which pipelines are used).
+      It is separated from the plug level logging. To alter the plug log level,
+      please see https://hexdocs.pm/combo/Combo.Logger.html#module-dynamic-log-level.
+    * `:metadata` - the map of metadata used by the telemetry events and returned
+      by `route_info/4`. The `:mfa` field is used by telemetry to print logs
+      and by the router to emit compile time checks. Custom fields may be added.
+
+  ## Examples
+
+      # match the GET method
+      match :get, "/events/:id", EventController, :get
+
+      # match all methods
+      match :*, "/any", CatchAllController, :any
+
+  """
+  defmacro match(verb, path, plug, plug_opts, options \\ []) do
+    Route.add_route(
+      :match,
+      verb,
+      path,
+      Util.expand_alias(plug, __CALLER__),
+      plug_opts,
+      options
+    )
+  end
+
   for verb <- @http_methods do
     @doc """
     Defines a route to handle a #{verb} request to the given path.
@@ -575,6 +809,47 @@ defmodule Combo.Router do
         plug_opts,
         options
       )
+    end
+  end
+
+  @doc """
+  Forwards a request at the given path to a plug.
+
+  This is commonly used to forward all subroutes to another Plug.
+  For example:
+
+      forward "/admin", SomeLib.AdminDashboard
+
+  The above will allow `SomeLib.AdminDashboard` to handle `/admin`,
+  `/admin/foo`, `/admin/bar/baz`, and so on. Furthermore,
+  `SomeLib.AdminDashboard` does not to be aware of the prefix it
+  is mounted in. From its point of view, the routes above are simply
+  handled as `/`, `/foo`, and `/bar/baz`.
+
+  A common use case for `forward` is for sharing a router between
+  applications or breaking a big router into smaller ones.
+  However, in other for route generation to route accordingly, you
+  can only forward to a given `Combo.Router` once.
+
+  The router pipelines will be invoked prior to forwarding the
+  connection.
+
+  ## Examples
+
+      scope "/", MyApp do
+        pipe_through [:browser, :admin]
+
+        forward "/admin", SomeLib.AdminDashboard
+        forward "/api", ApiRouter
+      end
+
+  """
+  defmacro forward(path, plug, plug_opts \\ [], router_opts \\ []) do
+    {plug, plug_opts} = Util.expand_plug_and_opts(plug, plug_opts, __CALLER__)
+    router_opts = Keyword.put(router_opts, :as, nil)
+
+    quote unquote: true, bind_quoted: [path: path, plug: plug] do
+      unquote(Route.add_route(:forward, :*, path, plug, plug_opts, router_opts))
     end
   end
 
