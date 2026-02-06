@@ -986,14 +986,6 @@ defmodule Combo.Router do
   end
 
   @doc """
-  Returns the full path with the current scope's path prefix.
-  """
-  @doc type: :reflection
-  def scoped_path(router_module, path) do
-    Scope.full_path(router_module, path)
-  end
-
-  @doc """
   Returns all routes information from the given router.
   """
   def routes(router) do

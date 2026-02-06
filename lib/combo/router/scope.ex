@@ -163,20 +163,6 @@ defmodule Combo.Router.Scope do
     join_alias(get_top_scope(module), alias)
   end
 
-  @doc """
-  Returns the full path in the current router scope.
-  """
-  def full_path(module, path) do
-    split_path = String.split(path, "/", trim: true)
-    prefix = get_top_scope(module).path
-
-    cond do
-      prefix == [] -> path
-      split_path == [] -> "/" <> Enum.join(prefix, "/")
-      true -> "/" <> Path.join(get_top_scope(module).path ++ split_path)
-    end
-  end
-
   defp join_alias(scope, alias) when is_atom(alias) do
     Module.concat(scope.alias ++ [alias])
   end
