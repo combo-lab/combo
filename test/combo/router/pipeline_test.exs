@@ -15,11 +15,11 @@ defmodule Combo.Router.PipelineTest.Router do
   import SampleController, only: [noop_plug: 2]
 
   pipeline :browser do
-    plug :put_assign, "browser"
+    plug :push_stack, "browser"
   end
 
   pipeline :api do
-    plug :put_assign, "api"
+    plug :push_stack, "api"
   end
 
   pipeline :params do
@@ -67,7 +67,7 @@ defmodule Combo.Router.PipelineTest.Router do
     conn |> send_resp(200, "stop") |> halt
   end
 
-  defp put_assign(conn, value) do
+  defp push_stack(conn, value) do
     assign(conn, :stack, [value | conn.assigns[:stack] || []])
   end
 
