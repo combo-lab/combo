@@ -22,9 +22,6 @@ defmodule Combo.Router.Resource do
   defstruct [:singleton, :path, :param, :controller, :actions, :route, :collection, :member]
   @type t :: %__MODULE__{}
 
-  @doc """
-  Builds a resource struct.
-  """
   def build(path, controller, opts) when is_atom(controller) and is_list(opts) do
     singleton = Keyword.get(opts, :singleton, false)
     path = Util.validate_route_path!(path)

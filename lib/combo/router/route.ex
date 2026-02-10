@@ -289,12 +289,12 @@ defmodule Combo.Router.Route do
     end
   end
 
-  defp join(top, path, plug, alias?, as, private, assigns) do
-    path = join_path(top, path)
-    plug = if alias?, do: join_alias(top, plug), else: plug
-    as = join_as(top, as)
-    private = Map.merge(top.private, private)
-    assigns = Map.merge(top.assigns, assigns)
+  defp join(scope, path, plug, alias?, as, private, assigns) do
+    path = join_path(scope, path)
+    plug = if alias?, do: join_alias(scope, plug), else: plug
+    as = join_as(scope, as)
+    private = Map.merge(scope.private, private)
+    assigns = Map.merge(scope.assigns, assigns)
     {path, plug, as, private, assigns}
   end
 
@@ -302,10 +302,10 @@ defmodule Combo.Router.Route do
     Module.concat(scope.alias ++ [alias])
   end
 
-  defp join_as(_top, nil), do: nil
-  defp join_as(top, as) when is_atom(as) or is_binary(as), do: Enum.join(top.as ++ [as], "_")
+  defp join_as(_scope, nil), do: nil
+  defp join_as(scope, as) when is_atom(as) or is_binary(as), do: Enum.join(scope.as ++ [as], "_")
 
-  defp join_path(top, path) do
-    "/" <> Enum.join(top.path ++ String.split(path, "/", trim: true), "/")
+  defp join_path(scope, path) do
+    "/" <> Enum.join(scope.path ++ String.split(path, "/", trim: true), "/")
   end
 end

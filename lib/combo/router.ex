@@ -591,7 +591,7 @@ defmodule Combo.Router do
 
   ## Examples
 
-      scope path: "/api/v1", alias: API.V1 do
+      scope path: "/api/v1", module: API.V1 do
         get "/pages/:id", PageController, :show
       end
 
@@ -602,10 +602,10 @@ defmodule Combo.Router do
   ## Options
 
     * `:path` - the path scope as a string.
-    * `:alias` - the controller scope as an alias. When set to `false`, it
-      resets all nested `:alias` options.
-    * `:as` - the named helper scope as a string or an atom. When set to
-      `false`, it resets all nested `:as` options.
+    * `:module` - the module scope as an atom.
+      When set to `false`, it resets all nested `:module` options.
+    * `:as` - the naming scope as a string or an atom.
+      When set to `false`, it resets all nested `:as` options.
     * `:host` - the host scope or prefix host scope as a string or a list
       of strings, such as `"foo.bar.com"`, `"foo."`.
     * `:private` - the private data as a map to merge into the connection when
@@ -624,12 +624,12 @@ defmodule Combo.Router do
 
   A scope can also be defined with shortcuts.
 
-      # specify path and alias
+      # specify path and module
       scope "/api/v1", API.V1 do
         get "/pages/:id", PageController, :show
       end
 
-      # specify path, alias and options
+      # specify path, module and options
       scope "/api/v1", API.V1, host: "api." do
         get "/pages/:id", PageController, :show
       end
@@ -644,12 +644,12 @@ defmodule Combo.Router do
         get "/pages/:id", API.V1.PageController, :show
       end
 
-      # specify alias only
+      # specify module only
       scope API.V1 do
         get "/pages/:id", PageController, :show
       end
 
-      # specify alias and options
+      # specify module and options
       scope API.V1, host: "api." do
         get "/pages/:id", PageController, :show
       end
@@ -739,11 +739,11 @@ defmodule Combo.Router do
 
   ## Options
 
-    * `:alias` - whether to apply the scope alias to the route.
+    * `:scoped_module` - whether to apply the scoped module to the route.
       Defaults to `true`.
-    * `:as` - the route name as an atom or a string.
-      It's used for generating named route helpers. If `nil`, it does not generate
-      named route helpers.
+    * `:as` - the name as an atom or a string, to override the default naming
+      for the named route helpers.
+      If `nil`, it will not generate named route helpers for this route.
     * `:private` - the private data as a map to merge into the connection when
       a route matches.
       Default to `%{}`.
