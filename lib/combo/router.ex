@@ -146,7 +146,7 @@ defmodule Combo.Router do
 
   See the `Combo.Router.Helpers` for more information.
 
-  ## Scopes and Resources
+  ## Scopes
 
   It is very common to namespace routes under a scope. For example:
 
@@ -169,17 +169,33 @@ defmodule Combo.Router do
   controller the `params` argument be a map like
   `%{"version" => "v1", "id" => "1"}`.
 
-  Combo also provides a `resources/4` macro that allows to generate "RESTful"
-  routes to a given resource:
+  Check `scope/2` for more information.
 
-      defmodule MyApp.Web.Router do
-        use Combo.Router
+  ## Resources
 
-        resources "/pages", PageController, only: [:show]
-        resources "/users", UserController, except: [:delete]
-      end
+  Combo doesn't provide resources related macro that allows to generate "RESTful"
+  routes to a given resource. For clarity, we recommend defining routes explicitly.
 
-  Check `scope/2` and `resources/4` for more information.
+  An example for resources:
+
+      get "/users", UserController, :index
+      get "/users/new", UserController, :new
+      post "/users", UserController, :create
+      get "/users/:id", UserController, :show
+      get "/users/:id/edit", UserController, :edit
+      patch "/users/:id", UserController, :update
+      put "/users/:id", UserController, :update
+      delete "/users/:id", UserController, :delete
+
+  An example for singleton resources:
+
+      get "/user/new", UserController, :new
+      post "/user", UserController, :create
+      get "/user", UserController, :show
+      get "/user/edit", UserController, :edit
+      patch "/user", UserController, :update
+      put "/user", UserController, :update
+      delete "/user", UserController, :delete
 
   ## Listing routes
 
@@ -226,7 +242,7 @@ defmodule Combo.Router do
   No plug is invoked in case no matches were found.
   """
 
-  alias Combo.Router.{Pipeline, Scope, Route, Resource, Helpers, Util, ModuleAttr}
+  alias Combo.Router.{Pipeline, Scope, Route, Helpers, Util, ModuleAttr}
 
   @http_methods [:get, :post, :put, :patch, :delete, :options, :connect, :trace, :head]
 
@@ -234,7 +250,6 @@ defmodule Combo.Router do
   defmacro __using__(_) do
     quote do
       unquote(prelude())
-      unquote(defs())
       unquote(match_dispatch())
     end
   end
@@ -248,68 +263,6 @@ defmodule Combo.Router do
       import Combo.Router
 
       @before_compile unquote(__MODULE__)
-    end
-  end
-
-  # Because those macros are executed multiple times, we end-up generating a
-  # huge scope that drastically affects compilation. We work around it by
-  # defining those functions only once and calling it over and over again.
-  defp defs do
-    quote unquote: false do
-      var!(add_resources, Combo.Router) = fn resource ->
-        path = resource.path
-        controller = resource.controller
-        opts = resource.route
-
-        if resource.singleton do
-          Enum.each(resource.actions, fn
-            :new ->
-              get path <> "/new", controller, :new, opts
-
-            :create ->
-              post path, controller, :create, opts
-
-            :show ->
-              get path, controller, :show, opts
-
-            :edit ->
-              get path <> "/edit", controller, :edit, opts
-
-            :update ->
-              patch path, controller, :update, opts
-              put path, controller, :update, Keyword.put(opts, :as, nil)
-
-            :delete ->
-              delete path, controller, :delete, opts
-          end)
-        else
-          param = resource.param
-
-          Enum.each(resource.actions, fn
-            :index ->
-              get path, controller, :index, opts
-
-            :new ->
-              get path <> "/new", controller, :new, opts
-
-            :create ->
-              post path, controller, :create, opts
-
-            :show ->
-              get path <> "/:" <> param, controller, :show, opts
-
-            :edit ->
-              get path <> "/:" <> param <> "/edit", controller, :edit, opts
-
-            :update ->
-              patch path <> "/:" <> param, controller, :update, opts
-              put path <> "/:" <> param, controller, :update, Keyword.put(opts, :as, nil)
-
-            :delete ->
-              delete path <> "/:" <> param, controller, :delete, opts
-          end)
-        end
-      end
     end
   end
 
@@ -850,121 +803,6 @@ defmodule Combo.Router do
 
     quote unquote: true, bind_quoted: [path: path, plug: plug] do
       unquote(Route.add_route(:forward, :*, path, plug, plug_opts, router_opts))
-    end
-  end
-
-  @doc """
-  Defines "RESTful" routes for a resource.
-
-  The given definition:
-
-      resources "/users", UserController
-
-  will include routes to the following actions:
-
-    * `GET /users` => `:index`
-    * `GET /users/new` => `:new`
-    * `POST /users` => `:create`
-    * `GET /users/:id` => `:show`
-    * `GET /users/:id/edit` => `:edit`
-    * `PATCH /users/:id` => `:update`
-    * `PUT /users/:id` => `:update`
-    * `DELETE /users/:id` => `:delete`
-
-  ## Options
-
-  This macro accepts a set of options:
-
-    * `:only` - a list of actions to generate routes for, for example: `[:show, :edit]`
-    * `:except` - a list of actions to exclude generated routes from, for example: `[:delete]`
-    * `:param` - the name of the parameter for this resource, defaults to `"id"`
-    * `:name` - the prefix for this resource. This is used for the named helper
-      and as the prefix for the parameter in nested resources. The default value
-      is automatically derived from the controller name, i.e. `UserController`
-       will have name `"user"`.
-    * `:as` - configures the named helper. If `nil`, does not generate
-      a helper.
-    * `:singleton` - defines routes for a singleton resource.
-      Read below for more information.
-
-  ## Singleton resources
-
-  When a resource needs to be looked up without referencing an ID, because
-  it contains only a single entry in the given context, the `:singleton`
-  option can be used to generate a set of routes that are specific to
-  such single resource:
-
-    * `GET /user/new` => `:new`
-    * `POST /user` => `:create`
-    * `GET /user` => `:show`
-    * `GET /user/edit` => `:edit`
-    * `PATCH /user` => `:update`
-    * `PUT /user` => `:update`
-    * `DELETE /user` => `:delete`
-
-  Usage example:
-
-      resources "/account", AccountController, only: [:show], singleton: true
-
-  ## Nested Resources
-
-  This macro also supports passing a nested block of route definitions.
-  This is helpful for nesting children resources within their parents to
-  generate nested routes.
-
-  The given definition:
-
-      resources "/users", UserController do
-        resources "/posts", PostController
-      end
-
-  will include the following routes:
-
-  ```console
-  user_post_path  GET     /users/:user_id/posts           PostController :index
-  user_post_path  GET     /users/:user_id/posts/new       PostController :new
-  user_post_path  POST    /users/:user_id/posts           PostController :create
-  user_post_path  GET     /users/:user_id/posts/:id       PostController :show
-  user_post_path  GET     /users/:user_id/posts/:id/edit  PostController :edit
-  user_post_path  PATCH   /users/:user_id/posts/:id       PostController :update
-                  PUT     /users/:user_id/posts/:id       PostController :update
-  user_post_path  DELETE  /users/:user_id/posts/:id       PostController :delete
-  ```
-  """
-  defmacro resources(path, controller, opts, do: nested_context) do
-    add_resources(path, controller, opts, do: nested_context)
-  end
-
-  @doc """
-  See `resources/4`.
-  """
-  defmacro resources(path, controller, do: nested_context) do
-    add_resources(path, controller, [], do: nested_context)
-  end
-
-  defmacro resources(path, controller, opts) do
-    add_resources(path, controller, opts, do: nil)
-  end
-
-  @doc """
-  See `resources/4`.
-  """
-  defmacro resources(path, controller) do
-    add_resources(path, controller, [], do: nil)
-  end
-
-  defp add_resources(path, controller, options, do: context) do
-    scope =
-      if context do
-        quote do
-          scope(resource.member, do: unquote(context))
-        end
-      end
-
-    quote do
-      resource = Resource.build(unquote(path), unquote(controller), unquote(options))
-      var!(add_resources, Combo.Router).(resource)
-      unquote(scope)
     end
   end
 

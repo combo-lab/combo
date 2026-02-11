@@ -55,7 +55,7 @@ defmodule Combo.Router.ScopedRoutingTest do
       get "/users/:id", V1.UserController, :show, private: %{private_token: "bar"}
 
       scope "/v1", alias: V1 do
-        resources "/users", UserController, only: [:delete], private: %{private_token: "baz"}
+        delete "/users/:id", UserController, :delete, private: %{private_token: "baz"}
 
         get "/noalias", Api.V1.UserController, :proxy,
           private: %{proxy_to: {scoped_alias(__MODULE__, UserController), :show}},
@@ -73,7 +73,7 @@ defmodule Combo.Router.ScopedRoutingTest do
       get "/users/:id", V1.UserController, :show, assigns: %{assigns_token: "bar"}
 
       scope "/v1", alias: V1 do
-        resources "/users", UserController, only: [:delete], assigns: %{assigns_token: "baz"}
+        delete "/users/:id", UserController, :delete, assigns: %{assigns_token: "baz"}
       end
     end
 
@@ -84,14 +84,6 @@ defmodule Combo.Router.ScopedRoutingTest do
     scope host: "foobar.com" do
       scope "/host" do
         get "/users/:id", Api.V1.UserController, :foo_host
-      end
-    end
-
-    scope "/api" do
-      scope "/v1", Api do
-        resources "/venues", V1.VenueController, only: [:show], alias: V1 do
-          resources "/users", UserController, only: [:edit]
-        end
       end
     end
 
@@ -128,21 +120,6 @@ defmodule Combo.Router.ScopedRoutingTest do
     assert conn.status == 200
     assert conn.resp_body == "api v1 users show"
     assert conn.params["id"] == "1"
-  end
-
-  test "scope for resources" do
-    conn = call(Router, :delete, "/api/v1/users/12")
-    assert conn.status == 200
-    assert conn.resp_body == "api v1 users delete"
-    assert conn.params["id"] == "12"
-  end
-
-  test "scope for double nested resources" do
-    conn = call(Router, :get, "/api/v1/venues/12/users/13/edit")
-    assert conn.status == 200
-    assert conn.resp_body == "api v1 users edit"
-    assert conn.params["venue_id"] == "12"
-    assert conn.params["id"] == "13"
   end
 
   test "host scopes routes based on conn.host" do
@@ -252,7 +229,7 @@ defmodule Combo.Router.ScopedRoutingTest do
         get "/foo", Router, []
 
         scope "/another" do
-          resources :bar, Router, []
+          get :bar, Router, []
         end
       end
     end

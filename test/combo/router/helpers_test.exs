@@ -28,31 +28,22 @@ defmodule Combo.Router.HelpersTest do
     get "/posts/file/*file", PostController, :file
     get "/posts/skip", PostController, :skip, as: nil
 
-    resources "/users", UserController do
-      resources "/comments", CommentController do
-        resources "/files", FileController
-      end
-    end
-
     scope "/", host: "users." do
       post "/host_users/:id/info", UserController, :create
     end
 
-    resources "/files", FileController
-
-    resources "/account", UserController, as: :account, singleton: true do
-      resources "/page", PostController, as: :page, only: [:show], singleton: true
-    end
-
     scope "/admin", alias: Admin do
-      resources "/messages", MessageController
+      get "/messages", MessageController, :index
+      get "/messages/:id", MessageController, :show
     end
 
     scope "/admin/new", alias: Admin, as: "admin" do
-      resources "/messages", MessageController
+      get "/messages", MessageController, :index
+      get "/messages/:id", MessageController, :show
 
       scope "/unscoped", as: false do
-        resources "/messages", MessageController, as: :my_admin_message
+        get "/messages", MessageController, :index, as: :my_admin_message
+        get "/messages/:id", MessageController, :show, as: :my_admin_message
       end
     end
 
@@ -214,157 +205,6 @@ defmodule Combo.Router.HelpersTest do
 
     assert Helpers.post_path(Endpoint, :file, ["==d--+", ":O.jpg"], xx: "/=+/") ==
              "/posts/file/%3D%3Dd--%2B/%3AO.jpg?xx=%2F%3D%2B%2F"
-  end
-
-  test "resources generates named routes for :index, :edit, :show, :new" do
-    assert Helpers.user_path(Endpoint, :index, []) == "/users"
-    assert Helpers.user_path(Endpoint, :index) == "/users"
-    assert Helpers.user_path(Endpoint, :edit, 123, []) == "/users/123/edit"
-    assert Helpers.user_path(Endpoint, :edit, 123) == "/users/123/edit"
-    assert Helpers.user_path(Endpoint, :show, 123, []) == "/users/123"
-    assert Helpers.user_path(Endpoint, :show, 123) == "/users/123"
-    assert Helpers.user_path(Endpoint, :new, []) == "/users/new"
-    assert Helpers.user_path(Endpoint, :new) == "/users/new"
-  end
-
-  test "resources generated named routes with complex ids" do
-    assert Helpers.user_path(Endpoint, :edit, "1a+/31d", []) == "/users/1a%2B%2F31d/edit"
-    assert Helpers.user_path(Endpoint, :edit, "1a+/31d") == "/users/1a%2B%2F31d/edit"
-    assert Helpers.user_path(Endpoint, :show, "1a+/31d", []) == "/users/1a%2B%2F31d"
-    assert Helpers.user_path(Endpoint, :show, "1a+/31d") == "/users/1a%2B%2F31d"
-
-    assert Helpers.message_path(Endpoint, :update, "8=/=d", []) == "/admin/messages/8%3D%2F%3Dd"
-    assert Helpers.message_path(Endpoint, :update, "8=/=d") == "/admin/messages/8%3D%2F%3Dd"
-    assert Helpers.message_path(Endpoint, :delete, "8=/=d", []) == "/admin/messages/8%3D%2F%3Dd"
-    assert Helpers.message_path(Endpoint, :delete, "8=/=d") == "/admin/messages/8%3D%2F%3Dd"
-
-    assert Helpers.user_path(Endpoint, :show, "1a+/31d", dog: "8d=") ==
-             "/users/1a%2B%2F31d?dog=8d%3D"
-
-    assert Helpers.user_path(Endpoint, :index, cat: "=8+/&") == "/users?cat=%3D8%2B%2F%26"
-  end
-
-  test "resources generates named routes for :create, :update, :delete" do
-    assert Helpers.message_path(Endpoint, :create, []) == "/admin/messages"
-    assert Helpers.message_path(Endpoint, :create) == "/admin/messages"
-
-    assert Helpers.message_path(Endpoint, :update, 1, []) == "/admin/messages/1"
-    assert Helpers.message_path(Endpoint, :update, 1) == "/admin/messages/1"
-
-    assert Helpers.message_path(Endpoint, :delete, 1, []) == "/admin/messages/1"
-    assert Helpers.message_path(Endpoint, :delete, 1) == "/admin/messages/1"
-  end
-
-  test "1-Level nested resources generates nested named routes for :index, :edit, :show, :new" do
-    assert Helpers.user_comment_path(Endpoint, :index, 99, []) == "/users/99/comments"
-    assert Helpers.user_comment_path(Endpoint, :index, 99) == "/users/99/comments"
-    assert Helpers.user_comment_path(Endpoint, :edit, 88, 2, []) == "/users/88/comments/2/edit"
-    assert Helpers.user_comment_path(Endpoint, :edit, 88, 2) == "/users/88/comments/2/edit"
-    assert Helpers.user_comment_path(Endpoint, :show, 123, 2, []) == "/users/123/comments/2"
-    assert Helpers.user_comment_path(Endpoint, :show, 123, 2) == "/users/123/comments/2"
-    assert Helpers.user_comment_path(Endpoint, :new, 88, []) == "/users/88/comments/new"
-    assert Helpers.user_comment_path(Endpoint, :new, 88) == "/users/88/comments/new"
-
-    message = ~r/no function clause matching/
-
-    assert_raise FunctionClauseError, message, fn ->
-      Helpers.user_comment_file_path(Endpoint, :skip, 123, 456)
-    end
-
-    assert_raise FunctionClauseError, message, fn ->
-      Helpers.user_comment_file_path(Endpoint, :skip, 123, 456, foo: "bar")
-    end
-
-    assert_raise FunctionClauseError, message, fn ->
-      Helpers.user_comment_path(Endpoint, :show, 123)
-    end
-  end
-
-  test "multi-level nested resources generated named routes with complex ids" do
-    assert Helpers.user_comment_path(Endpoint, :index, "f4/d+~=", []) ==
-             "/users/f4%2Fd%2B~%3D/comments"
-
-    assert Helpers.user_comment_path(Endpoint, :index, "f4/d+~=") ==
-             "/users/f4%2Fd%2B~%3D/comments"
-
-    assert Helpers.user_comment_path(Endpoint, :edit, "f4/d+~=", "x-+=/", []) ==
-             "/users/f4%2Fd%2B~%3D/comments/x-%2B%3D%2F/edit"
-
-    assert Helpers.user_comment_path(Endpoint, :edit, "f4/d+~=", "x-+=/") ==
-             "/users/f4%2Fd%2B~%3D/comments/x-%2B%3D%2F/edit"
-
-    assert Helpers.user_comment_path(Endpoint, :show, "f4/d+~=", "x-+=/", []) ==
-             "/users/f4%2Fd%2B~%3D/comments/x-%2B%3D%2F"
-
-    assert Helpers.user_comment_path(Endpoint, :show, "f4/d+~=", "x-+=/") ==
-             "/users/f4%2Fd%2B~%3D/comments/x-%2B%3D%2F"
-
-    assert Helpers.user_comment_path(Endpoint, :new, "/==/", []) ==
-             "/users/%2F%3D%3D%2F/comments/new"
-
-    assert Helpers.user_comment_path(Endpoint, :new, "/==/") ==
-             "/users/%2F%3D%3D%2F/comments/new"
-
-    assert Helpers.user_comment_file_path(Endpoint, :show, "f4/d+~=", "/==/", "x-+=/", []) ==
-             "/users/f4%2Fd%2B~%3D/comments/%2F%3D%3D%2F/files/x-%2B%3D%2F"
-
-    assert Helpers.user_comment_file_path(Endpoint, :show, "f4/d+~=", "/==/", "x-+=/") ==
-             "/users/f4%2Fd%2B~%3D/comments/%2F%3D%3D%2F/files/x-%2B%3D%2F"
-  end
-
-  test "2-Level nested resources generates nested named routes for :index, :edit, :show, :new" do
-    assert Helpers.user_comment_file_path(Endpoint, :index, 99, 1, []) ==
-             "/users/99/comments/1/files"
-
-    assert Helpers.user_comment_file_path(Endpoint, :index, 99, 1) ==
-             "/users/99/comments/1/files"
-
-    assert Helpers.user_comment_file_path(Endpoint, :edit, 88, 1, 2, []) ==
-             "/users/88/comments/1/files/2/edit"
-
-    assert Helpers.user_comment_file_path(Endpoint, :edit, 88, 1, 2) ==
-             "/users/88/comments/1/files/2/edit"
-
-    assert Helpers.user_comment_file_path(Endpoint, :show, 123, 1, 2, []) ==
-             "/users/123/comments/1/files/2"
-
-    assert Helpers.user_comment_file_path(Endpoint, :show, 123, 1, 2) ==
-             "/users/123/comments/1/files/2"
-
-    assert Helpers.user_comment_file_path(Endpoint, :new, 88, 1, []) ==
-             "/users/88/comments/1/files/new"
-
-    assert Helpers.user_comment_file_path(Endpoint, :new, 88, 1) ==
-             "/users/88/comments/1/files/new"
-  end
-
-  test "resources without block generates named routes for :index, :edit, :show, :new" do
-    assert Helpers.file_path(Endpoint, :index, []) == "/files"
-    assert Helpers.file_path(Endpoint, :index) == "/files"
-    assert Helpers.file_path(Endpoint, :edit, 123, []) == "/files/123/edit"
-    assert Helpers.file_path(Endpoint, :edit, 123) == "/files/123/edit"
-    assert Helpers.file_path(Endpoint, :show, 123, []) == "/files/123"
-    assert Helpers.file_path(Endpoint, :show, 123) == "/files/123"
-    assert Helpers.file_path(Endpoint, :new, []) == "/files/new"
-    assert Helpers.file_path(Endpoint, :new) == "/files/new"
-  end
-
-  test "resource generates named routes for :show, :edit, :new, :update, :delete" do
-    assert Helpers.account_path(Endpoint, :show, []) == "/account"
-    assert Helpers.account_path(Endpoint, :show) == "/account"
-    assert Helpers.account_path(Endpoint, :edit, []) == "/account/edit"
-    assert Helpers.account_path(Endpoint, :edit) == "/account/edit"
-    assert Helpers.account_path(Endpoint, :new, []) == "/account/new"
-    assert Helpers.account_path(Endpoint, :new) == "/account/new"
-    assert Helpers.account_path(Endpoint, :update, []) == "/account"
-    assert Helpers.account_path(Endpoint, :update) == "/account"
-    assert Helpers.account_path(Endpoint, :delete, []) == "/account"
-    assert Helpers.account_path(Endpoint, :delete) == "/account"
-  end
-
-  test "2-Level nested resource generates nested named routes for :show" do
-    assert Helpers.account_page_path(Endpoint, :show, []) == "/account/page"
-    assert Helpers.account_page_path(Endpoint, :show) == "/account/page"
   end
 
   test "scoped route helpers generated named routes with :path, and :alias options" do
