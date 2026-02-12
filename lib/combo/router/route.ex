@@ -109,18 +109,6 @@ defmodule Combo.Router.Route do
     )
   end
 
-  @doc "Used as a plug on forwarding."
-  def init(opts), do: opts
-
-  @doc "Used as a plug on forwarding."
-  def call(%{path_info: path, script_name: script} = conn, {fwd_segments, plug, opts}) do
-    new_path = path -- fwd_segments
-    {base, ^new_path} = Enum.split(path, length(path) - length(new_path))
-    conn = %{conn | path_info: new_path, script_name: script ++ base}
-    conn = plug.call(conn, plug.init(opts))
-    %{conn | path_info: path, script_name: script}
-  end
-
   def build(
         line,
         kind,
@@ -220,7 +208,7 @@ defmodule Combo.Router.Route do
        }) do
     quote do
       {
-        Combo.Router.Route,
+        Combo.Router.Forward,
         {unquote(metadata.forward), unquote(plug), unquote(Macro.escape(plug_opts))}
       }
     end

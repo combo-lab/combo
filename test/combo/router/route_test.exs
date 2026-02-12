@@ -165,14 +165,4 @@ defmodule Combo.Router.RouteTest do
     assert route.kind == :forward
     assert build_exprs(route).verb == {:_verb, [], nil}
   end
-
-  test "as a plug, it forwards and sets path_info and script_name for target, then resumes" do
-    conn = %Plug.Conn{path_info: ["admin", "stats"], script_name: ["my_app"]}
-    conn = call(conn, {["admin"], AdminRouter, []})
-    fwd_conn = conn.assigns[:fwd_conn]
-    assert fwd_conn.path_info == ["stats"]
-    assert fwd_conn.script_name == ["my_app", "admin"]
-    assert conn.path_info == ["admin", "stats"]
-    assert conn.script_name == ["my_app"]
-  end
 end

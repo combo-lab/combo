@@ -3,6 +3,26 @@ defmodule Combo.Router.HealthController do
   def health(conn, _params), do: text(conn, "health")
 end
 
+defmodule Combo.Router.ForwardAsPlugTest do
+  use ExUnit.Case, async: true
+  import Combo.Router.Forward
+
+  defmodule AdminRouter do
+    def init(opts), do: opts
+    def call(conn, _), do: Plug.Conn.assign(conn, :fwd_conn, conn)
+  end
+
+  test "as a plug, it forwards and sets path_info and script_name for target, then resumes" do
+    conn = %Plug.Conn{path_info: ["admin", "stats"], script_name: ["my_app"]}
+    conn = call(conn, {["admin"], AdminRouter, []})
+    fwd_conn = conn.assigns[:fwd_conn]
+    assert fwd_conn.path_info == ["stats"]
+    assert fwd_conn.script_name == ["my_app", "admin"]
+    assert conn.path_info == ["admin", "stats"]
+    assert conn.script_name == ["my_app"]
+  end
+end
+
 defmodule Combo.Router.ForwardTest do
   use ExUnit.Case, async: true
   use Support.RouterHelper
