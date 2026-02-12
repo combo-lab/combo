@@ -28,9 +28,13 @@ defmodule Combo.Router do
   @moduledoc """
   Defines a router.
 
-  The router provides a set of macros for generating routes that dispatch to
-  specific controllers and actions. Those macros are named after HTTP verbs.
-  For example:
+  The router provides a set of macros for defining routes which dispatch
+  requests to specific controllers and actions.
+
+  > Combo's router is extremely efficient, as it relies on pattern matching
+  > for matching routes.
+
+  ## Examples
 
       defmodule MyApp.Web.Router do
         use Combo.Router
@@ -38,26 +42,23 @@ defmodule Combo.Router do
         get "/pages/:page", MyApp.Web.PageController, :show
       end
 
-  Combo's router is extremely efficient, as it relies on pattern matching for
-  matching routes.
-
   ## Routing
 
   `get/3`, `post/3`, `put/3`, and other macros named after HTTP verbs are used
-  to create routes.
+  to define routes.
 
-      get "/pages", PageController, :index
+      get "/pages", MyApp.Web.PageController, :index
 
-  creates a route matches a `GET` request to `/pages` and dispatches the request
-  to the `index` action in `PageController`.
+  defines a route matches a `GET` request to `/pages` and dispatches the request
+  to the `index` action in `MyApp.Web.PageController`.
 
-      get "/pages/:page", PageController, :show
+      get "/pages/:page", MyApp.Web.PageController, :show
 
-  create a route matches a `GET` request to `/pages/hello` and dispatches the
-  request to the `show` action in `PageController` with `%{"page" => "hello"}`
-  in `params`.
+  defines a route matches a `GET` request to `/pages/hello` and dispatches the
+  request to the `show` action in `MyApp.Web.PageController` with
+  `%{"page" => "hello"}` in `params`.
 
-      defmodule PageController do
+      defmodule MyApp.Web.PageController do
         def show(conn, params) do
           # %{"page" => "hello"} == params
         end
@@ -65,7 +66,7 @@ defmodule Combo.Router do
 
   Partial and multiple segments can be matched. For example:
 
-      get "/api/v:version/pages/:id", PageController, :show
+      get "/api/v:version/pages/:id", MyApp.Web.PageController, :show
 
   matches `/api/v1/pages/2` and puts `%{"version" => "1", "id" => "2"}` in
   `params`. Only the trailing part of a segment can be captured.
@@ -171,37 +172,6 @@ defmodule Combo.Router do
 
   Check `scope/2` for more information.
 
-  ## Resources
-
-  Combo doesn't provide resources related macro that allows to generate "RESTful"
-  routes to a given resource. For clarity, we recommend defining routes explicitly.
-
-  An example for resources:
-
-      get "/users", UserController, :index
-      get "/users/new", UserController, :new
-      post "/users", UserController, :create
-      get "/users/:id", UserController, :show
-      get "/users/:id/edit", UserController, :edit
-      patch "/users/:id", UserController, :update
-      put "/users/:id", UserController, :update
-      delete "/users/:id", UserController, :delete
-
-  An example for singleton resources:
-
-      get "/user/new", UserController, :new
-      post "/user", UserController, :create
-      get "/user", UserController, :show
-      get "/user/edit", UserController, :edit
-      patch "/user", UserController, :update
-      put "/user", UserController, :update
-      delete "/user", UserController, :delete
-
-  ## Listing routes
-
-  Combo ships with a `mix combo.routes` task that formats all routes in a given
-  router. We can use it to verify all routes included in the router.
-
   ## Pipelines and plugs
 
   Once a request arrives at the Combo router, it performs a series of
@@ -240,6 +210,37 @@ defmodule Combo.Router do
 
   Note that router pipelines are only invoked after a route is found.
   No plug is invoked in case no matches were found.
+
+  ## Resources
+
+  Combo doesn't provide resources related macro that allows to generate "RESTful"
+  routes to a given resource. For clarity, we recommend defining routes explicitly.
+
+  An example for resources:
+
+      get "/users", UserController, :index
+      get "/users/new", UserController, :new
+      post "/users", UserController, :create
+      get "/users/:id", UserController, :show
+      get "/users/:id/edit", UserController, :edit
+      patch "/users/:id", UserController, :update
+      put "/users/:id", UserController, :update
+      delete "/users/:id", UserController, :delete
+
+  An example for singleton resources:
+
+      get "/user/new", UserController, :new
+      post "/user", UserController, :create
+      get "/user", UserController, :show
+      get "/user/edit", UserController, :edit
+      patch "/user", UserController, :update
+      put "/user", UserController, :update
+      delete "/user", UserController, :delete
+
+  ## Listing routes
+
+  Combo ships with a `mix combo.routes` task that formats all routes in a given
+  router. We can use it to verify all routes included in the router.
   """
 
   alias Combo.Router.{Pipeline, Scope, Route, Helpers, Util, ModuleAttr}
