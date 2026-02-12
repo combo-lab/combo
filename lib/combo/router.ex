@@ -685,6 +685,26 @@ defmodule Combo.Router do
   end
 
   @doc """
+  Expands a module with the current scope's module.
+
+  It's useful when you need to reference scoped modules in other contexts,
+  such as passing them as options.
+
+  ## Examples
+
+    scope "/admin", Admin do
+      # UserController is expanded to Admin.UserController
+      get "/users", ProxyPlug, handler: scoped_module(UserController)
+    end
+
+  """
+  defmacro scoped_module(module) do
+    quote do
+      Scope.expand_alias(__MODULE__, unquote(module))
+    end
+  end
+
+  @doc """
   Defines a route based on an arbitrary HTTP method.
 
   Useful for defining routes not included in the built-in macros.
@@ -805,23 +825,6 @@ defmodule Combo.Router do
     quote unquote: true, bind_quoted: [path: path, plug: plug] do
       unquote(Route.add_route(:forward, :*, path, plug, plug_opts, router_opts))
     end
-  end
-
-  @doc """
-  Returns the full alias with the current scope's aliased prefix.
-
-  Useful for applying the same short-hand alias handling to
-  other values besides the second argument in route definitions.
-
-  ## Examples
-
-      scope "/", MyPrefix do
-        get "/", ProxyPlug, controller: scoped_alias(__MODULE__, MyController)
-      end
-  """
-  @doc type: :reflection
-  def scoped_alias(router_module, alias) do
-    Scope.expand_alias(router_module, alias)
   end
 
   @doc """

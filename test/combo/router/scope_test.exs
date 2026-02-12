@@ -58,12 +58,12 @@ defmodule Combo.Router.ScopedRoutingTest do
         delete "/users/:id", UserController, :delete, private: %{private_token: "baz"}
 
         get "/noalias", Api.V1.UserController, :proxy,
-          private: %{proxy_to: {scoped_alias(__MODULE__, UserController), :show}},
+          private: %{proxy_to: {scoped_module(UserController), :show}},
           alias: false
 
         scope "/scoped", alias: false do
           get "/noalias", Api.V1.UserController, :proxy,
-            private: %{proxy_to: {scoped_alias(__MODULE__, Api.V1.UserController), :show}}
+            private: %{proxy_to: {scoped_module(Api.V1.UserController), :show}}
         end
       end
     end
