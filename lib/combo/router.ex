@@ -332,16 +332,12 @@ defmodule Combo.Router do
     quote location: :keep, generated: true do
       @behaviour Plug
 
-      @doc """
-      Callback required by Plug that initializes the router.
-      """
+      @impl true
       def init(opts) do
         opts
       end
 
-      @doc """
-      Callback invoked by Plug on every request for matching routes.
-      """
+      @impl true
       def call(conn, _opts) do
         %{method: method, path_info: path_info, host: host} = conn = prepare(conn)
         decoded = Enum.map(path_info, &URI.decode/1)
