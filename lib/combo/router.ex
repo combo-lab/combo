@@ -379,7 +379,7 @@ defmodule Combo.Router do
     match_catch_all =
       quote generated: true do
         @doc false
-        def __match_route__(_verb, _path_info, _host) do
+        def __match_route__(_method, _path_info, _host) do
           :error
         end
       end
@@ -420,7 +420,7 @@ defmodule Combo.Router do
     %{
       prepare: prepare,
       dispatch: dispatch,
-      verb: verb,
+      verb: method,
       path_params: path_params,
       hosts: hosts,
       path: path
@@ -429,7 +429,7 @@ defmodule Combo.Router do
     clauses =
       for host <- hosts do
         quote line: route.line do
-          def __match_route__(unquote(verb), unquote(path), unquote(host)) do
+          def __match_route__(unquote(method), unquote(path), unquote(host)) do
             {unquote(build_metadata(route, path_params)),
              fn var!(conn, :conn), %{path_params: var!(path_params, :conn)} ->
                unquote(prepare)
