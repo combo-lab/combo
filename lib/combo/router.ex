@@ -257,13 +257,13 @@ defmodule Combo.Router do
 
   defp prelude do
     quote do
-      Combo.Router.Pipeline.setup(__MODULE__)
-      Combo.Router.Scope.setup(__MODULE__)
-      Combo.Router.Route.setup(__MODULE__)
+      Pipeline.setup(__MODULE__)
+      Scope.setup(__MODULE__)
+      Route.setup(__MODULE__)
 
       import Combo.Router
 
-      @before_compile unquote(__MODULE__)
+      @before_compile Combo.Router
     end
   end
 
@@ -558,7 +558,7 @@ defmodule Combo.Router do
     * `:path` - the path scope as a string.
     * `:module` - the module scope as an atom.
       When set to `false`, it resets all nested `:module` options.
-    * `:as` - the naming scope as a string or an atom.
+    * `:as` - the route naming scope as a string or an atom.
       When set to `false`, it resets all nested `:as` options.
     * `:host` - the host scope or prefix host scope as a string or a list
       of strings, such as `"foo.bar.com"`, `"foo."`.
