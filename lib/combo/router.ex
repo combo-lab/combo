@@ -342,7 +342,7 @@ defmodule Combo.Router do
         %{method: method, path_info: path_info, host: host} = conn = prepare(conn)
         decoded = Enum.map(path_info, &URI.decode/1)
 
-        case __match_route__(decoded, method, host) do
+        case __match_route__(method, decoded, host) do
           {metadata, prepare, pipeline, plug_opts} ->
             Combo.Router.__call__(conn, metadata, prepare, pipeline, plug_opts)
 
@@ -379,7 +379,7 @@ defmodule Combo.Router do
     match_catch_all =
       quote generated: true do
         @doc false
-        def __match_route__(_path_info, _verb, _host) do
+        def __match_route__(_verb, _path_info, _host) do
           :error
         end
       end
@@ -429,7 +429,7 @@ defmodule Combo.Router do
     clauses =
       for host <- hosts do
         quote line: route.line do
-          def __match_route__(unquote(path), unquote(verb), unquote(host)) do
+          def __match_route__(unquote(verb), unquote(path), unquote(host)) do
             {unquote(build_metadata(route, path_params)),
              fn var!(conn, :conn), %{path_params: var!(path_params, :conn)} ->
                unquote(prepare)
@@ -867,7 +867,7 @@ defmodule Combo.Router do
 
   def route_info(router, method, split_path, host) when is_list(split_path) do
     with {metadata, _prepare, _pipeline, {_plug, _opts}} <-
-           router.__match_route__(split_path, method, host) do
+           router.__match_route__(method, split_path, host) do
       Map.delete(metadata, :conn)
     end
   end
