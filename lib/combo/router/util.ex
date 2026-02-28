@@ -32,8 +32,7 @@ defmodule Combo.Router.Util do
   def validate_route_path!("/" <> _ = path), do: path
 
   def validate_route_path!(path) when is_binary(path) do
-    IO.warn("route paths should begin with a forward slash, got: #{inspect(path)}")
-    "/" <> path
+    raise ArgumentError, "route path must begin with a slash, got: #{inspect(path)}"
   end
 
   def validate_route_path!(path) do
