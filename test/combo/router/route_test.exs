@@ -56,8 +56,8 @@ defmodule Combo.Router.RouteTest do
       )
       |> build_exprs()
 
-    assert exprs.verb == "GET"
-    assert exprs.path == ["foo", {:bar, [], Combo.Router.Route}]
+    assert exprs.method_match == "GET"
+    assert exprs.path_match == ["foo", {:bar, [], Combo.Router.Route}]
     assert exprs.binding == [{"bar", {:bar, [], Combo.Router.Route}}]
   end
 
@@ -79,7 +79,7 @@ defmodule Combo.Router.RouteTest do
 
     assert route.verb == :*
     assert route.kind == :match
-    assert build_exprs(route).verb == {:_verb, [], nil}
+    assert build_exprs(route).method_match == {:_method, [], nil}
   end
 
   test "builds a catch-all verb for forwarded routes" do
@@ -100,6 +100,6 @@ defmodule Combo.Router.RouteTest do
 
     assert route.verb == :*
     assert route.kind == :forward
-    assert build_exprs(route).verb == {:_verb, [], nil}
+    assert build_exprs(route).method_match == {:_method, [], nil}
   end
 end

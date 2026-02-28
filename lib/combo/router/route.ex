@@ -147,19 +147,23 @@ defmodule Combo.Router.Route do
   Builds the compiled expressions of route.
   """
   def build_exprs(route) do
-    {path, binding} = build_path_and_binding(route)
+    method_match = build_method_match(route.verb)
+    {path_match, path_binding} = build_path_match_and_binding(route)
 
     %{
-      verb: build_verb(route.verb),
-      path: path,
-      binding: binding,
+      method_match: method_match,
+      path_match: path_match,
+      binding: path_binding,
       dispatch: build_dispatch(route),
-      path_params: build_path_params(binding),
+      path_params: build_path_params(path_binding),
       prepare: build_prepare(route)
     }
   end
 
-  defp build_path_and_binding(%__MODULE__{path: path} = route) do
+  defp build_method_match(:*), do: Macro.var(:_method, nil)
+  defp build_method_match(verb), do: verb |> to_string() |> String.upcase()
+
+  defp build_path_match_and_binding(%__MODULE__{path: path} = route) do
     {_params, segments} =
       case route.kind do
         :match -> Plug.Router.Utils.build_path_match(path)
@@ -207,9 +211,6 @@ defmodule Combo.Router.Route do
     end
   end
 
-  defp build_verb(:*), do: Macro.var(:_verb, nil)
-  defp build_verb(verb), do: verb |> to_string() |> String.upcase()
-
   defp build_path_params(binding), do: {:%{}, [], binding}
 
   defp build_prepare(route) do
@@ -231,7 +232,9 @@ defmodule Combo.Router.Route do
     path_params = Macro.var(:path_params, :conn)
 
     merge_params =
-      quote(do: Combo.Router.Route.merge_params(unquote(params), unquote(path_params)))
+      quote do
+        Combo.Router.Route.merge_params(unquote(params), unquote(path_params))
+      end
 
     {
       [{:params, params}],
@@ -247,9 +250,7 @@ defmodule Combo.Router.Route do
     {[{key, var}], [{key, merge}]}
   end
 
-  @doc """
-  Merges params from router.
-  """
+  @doc false
   def merge_params(%Plug.Conn.Unfetched{}, path_params), do: path_params
   def merge_params(params, path_params), do: Map.merge(params, path_params)
 

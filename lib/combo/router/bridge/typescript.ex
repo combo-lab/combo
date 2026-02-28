@@ -176,7 +176,7 @@ defmodule Combo.RouterBridge.TypeScript do
       |> List.flatten()
       |> Enum.join(", ")
 
-    path_template = build_path_template(exprs.path)
+    path_template = build_path_template(exprs.path_match)
 
     reserved_param_keys =
       binding

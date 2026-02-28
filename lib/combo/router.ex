@@ -418,16 +418,16 @@ defmodule Combo.Router do
     {pipe_name, acc_pipes, known_pipes} = build_match_pipes(route, acc_pipes, known_pipes)
 
     %{
+      method_match: method_match,
+      path_match: path_match,
       prepare: prepare,
       dispatch: dispatch,
-      verb: method,
-      path_params: path_params,
-      path: path
+      path_params: path_params
     } = expr
 
     clauses =
       quote line: route.line do
-        def __match_route__(unquote(method), unquote(path)) do
+        def __match_route__(unquote(method_match), unquote(path_match)) do
           {unquote(build_metadata(route, path_params)),
            fn var!(conn, :conn), %{path_params: var!(path_params, :conn)} ->
              unquote(prepare)
