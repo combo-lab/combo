@@ -8,7 +8,6 @@ defmodule Combo.Router.Scope do
             alias: [],
             as: [],
             pipes: [],
-            hosts: [],
             private: %{},
             assigns: %{},
             log: :debug
@@ -65,12 +64,6 @@ defmodule Combo.Router.Scope do
     alias = append_if_not_false(scope, opts, :alias, &Atom.to_string(&1))
     as = append_if_not_false(scope, opts, :as, & &1)
 
-    hosts =
-      case Keyword.fetch(opts, :host) do
-        {:ok, val} -> validate_hosts!(val)
-        :error -> scope.hosts
-      end
-
     pipes = scope.pipes
     private = Map.merge(scope.private, Keyword.get(opts, :private, %{}))
     assigns = Map.merge(scope.assigns, Keyword.get(opts, :assigns, %{}))
@@ -80,7 +73,6 @@ defmodule Combo.Router.Scope do
       path: path,
       alias: alias,
       as: as,
-      hosts: hosts,
       pipes: pipes,
       private: private,
       assigns: assigns,
@@ -117,27 +109,6 @@ defmodule Combo.Router.Scope do
     opts
     |> Keyword.put(:path, path)
     |> Keyword.put(:alias, alias)
-  end
-
-  defp validate_hosts!(nil), do: []
-
-  defp validate_hosts!(host) when is_binary(host), do: [host]
-
-  defp validate_hosts!(hosts) when is_list(hosts) do
-    for host <- hosts do
-      if not is_binary(host), do: raise_invalid_host!(host)
-      host
-    end
-  end
-
-  defp validate_hosts!(invalid), do: raise_invalid_host!(invalid)
-
-  defp raise_invalid_host!(value) do
-    raise ArgumentError,
-          """
-          expected router scope :host to be compile-time string or list of strings, \
-          got: #{inspect(value)}\
-          """
   end
 
   defp append_if_not_false(scope, opts, key, fun) do

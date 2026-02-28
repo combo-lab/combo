@@ -491,7 +491,7 @@ defmodule Combo.Router.RoutingTest do
 
   describe "route_info" do
     test " returns route string, path params, and more" do
-      assert Combo.Router.route_info(Router, "GET", "foo/bar/baz", nil) == %{
+      assert Combo.Router.route_info(Router, "GET", "foo/bar/baz") == %{
                log: :debug,
                path_params: %{"path" => ["foo", "bar", "baz"]},
                pipe_through: [],
@@ -500,7 +500,7 @@ defmodule Combo.Router.RoutingTest do
                route: "/*path"
              }
 
-      assert Combo.Router.route_info(Router, "GET", "users/1", nil) == %{
+      assert Combo.Router.route_info(Router, "GET", "users/1") == %{
                log: :debug,
                path_params: %{"id" => "1"},
                pipe_through: [],
@@ -510,7 +510,7 @@ defmodule Combo.Router.RoutingTest do
                access: :user
              }
 
-      assert Combo.Router.route_info(Router, "GET", "/", "host") == %{
+      assert Combo.Router.route_info(Router, "GET", "/") == %{
                log: :debug,
                path_params: %{},
                pipe_through: [],
@@ -519,11 +519,11 @@ defmodule Combo.Router.RoutingTest do
                route: "/"
              }
 
-      assert Combo.Router.route_info(Router, "POST", "/not-exists", "host") == :error
+      assert Combo.Router.route_info(Router, "POST", "/not-exists") == :error
     end
 
     test "returns route string, path params and more for split path" do
-      assert Combo.Router.route_info(Router, "GET", ~w(foo bar baz), nil) == %{
+      assert Combo.Router.route_info(Router, "GET", ~w(foo bar baz)) == %{
                log: :debug,
                path_params: %{"path" => ["foo", "bar", "baz"]},
                pipe_through: [],
@@ -534,7 +534,7 @@ defmodule Combo.Router.RoutingTest do
     end
 
     test "returns accumulated pipe_through metadata" do
-      assert Combo.Router.route_info(Router, "GET", "/info", nil) == %{
+      assert Combo.Router.route_info(Router, "GET", "/info") == %{
                log: :info,
                path_params: %{},
                pipe_through: [:noop, :halt],

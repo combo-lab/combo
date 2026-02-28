@@ -339,10 +339,10 @@ defmodule Combo.Router do
 
       @impl true
       def call(conn, _opts) do
-        %{method: method, path_info: path_info, host: host} = conn = prepare(conn)
+        %{method: method, path_info: path_info} = conn = prepare(conn)
         decoded = Enum.map(path_info, &URI.decode/1)
 
-        case __match_route__(method, decoded, host) do
+        case __match_route__(method, decoded) do
           {metadata, prepare, pipeline, plug_opts} ->
             Combo.Router.__call__(conn, metadata, prepare, pipeline, plug_opts)
 
@@ -379,7 +379,7 @@ defmodule Combo.Router do
     match_catch_all =
       quote generated: true do
         @doc false
-        def __match_route__(_method, _path_info, _host) do
+        def __match_route__(_method, _path_info) do
           :error
         end
       end
@@ -422,19 +422,16 @@ defmodule Combo.Router do
       dispatch: dispatch,
       verb: method,
       path_params: path_params,
-      hosts: hosts,
       path: path
     } = expr
 
     clauses =
-      for host <- hosts do
-        quote line: route.line do
-          def __match_route__(unquote(method), unquote(path), unquote(host)) do
-            {unquote(build_metadata(route, path_params)),
-             fn var!(conn, :conn), %{path_params: var!(path_params, :conn)} ->
-               unquote(prepare)
-             end, &(unquote(Macro.var(pipe_name, __MODULE__)) / 1), unquote(dispatch)}
-          end
+      quote line: route.line do
+        def __match_route__(unquote(method), unquote(path)) do
+          {unquote(build_metadata(route, path_params)),
+           fn var!(conn, :conn), %{path_params: var!(path_params, :conn)} ->
+             unquote(prepare)
+           end, &(unquote(Macro.var(pipe_name, __MODULE__)) / 1), unquote(dispatch)}
         end
       end
 
@@ -556,8 +553,6 @@ defmodule Combo.Router do
       When set to `false`, it resets all nested `:module` options.
     * `:as` - the route naming scope as a string or an atom.
       When set to `false`, it resets all nested `:as` options.
-    * `:host` - the host scope or prefix host scope as a string or a list
-      of strings, such as `"foo.bar.com"`, `"foo."`.
     * `:private` - the private data as a map to merge into the connection when
       a route matches.
     * `:assigns` - the data as a map to merge into the connection when a route
@@ -580,7 +575,7 @@ defmodule Combo.Router do
       end
 
       # specify path, module and options
-      scope "/api/v1", API.V1, host: "api." do
+      scope "/api/v1", API.V1, as: :api, do
         get "/pages/:id", PageController, :show
       end
 
@@ -590,7 +585,7 @@ defmodule Combo.Router do
       end
 
       # specify path and options
-      scope "/api/v1", host: "api." do
+      scope "/api/v1", as: :api, do
         get "/pages/:id", API.V1.PageController, :show
       end
 
@@ -600,7 +595,7 @@ defmodule Combo.Router do
       end
 
       # specify module and options
-      scope API.V1, host: "api." do
+      scope API.V1, as: :api, do
         get "/pages/:id", PageController, :show
       end
 
@@ -846,7 +841,7 @@ defmodule Combo.Router do
 
   ## Examples
 
-      iex> Combo.Router.route_info(MyApp.Web.Router, "GET", "/posts/123", "myhost")
+      iex> Combo.Router.route_info(MyApp.Web.Router, "GET", "/posts/123")
       %{
         log: :debug,
         path_params: %{"id" => "123"},
@@ -856,18 +851,19 @@ defmodule Combo.Router do
         route: "/posts/:id",
       }
 
-      iex> Combo.Router.route_info(MyRouter, "GET", "/not-exists", "myhost")
+      iex> Combo.Router.route_info(MyRouter, "GET", "/not-exists")
       :error
+
   """
   @doc type: :reflection
-  def route_info(router, method, path, host) when is_binary(path) do
+  def route_info(router, method, path) when is_binary(path) do
     split_path = for segment <- String.split(path, "/"), segment != "", do: segment
-    route_info(router, method, split_path, host)
+    route_info(router, method, split_path)
   end
 
-  def route_info(router, method, split_path, host) when is_list(split_path) do
+  def route_info(router, method, split_path) when is_list(split_path) do
     with {metadata, _prepare, _pipeline, {_plug, _opts}} <-
-           router.__match_route__(method, split_path, host) do
+           router.__match_route__(method, split_path) do
       Map.delete(metadata, :conn)
     end
   end

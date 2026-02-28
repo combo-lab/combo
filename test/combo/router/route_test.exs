@@ -17,7 +17,6 @@ defmodule Combo.Router.RouteTest do
         :match,
         :get,
         "/foo/:bar",
-        [],
         Hello,
         :world,
         "hello_world",
@@ -30,7 +29,6 @@ defmodule Combo.Router.RouteTest do
     assert route.kind == :match
     assert route.verb == :get
     assert route.path == "/foo/:bar"
-    assert route.hosts == []
     assert route.line == 1
     assert route.plug == Hello
     assert route.plug_opts == :world
@@ -48,7 +46,6 @@ defmodule Combo.Router.RouteTest do
         :match,
         :get,
         "/foo/:bar",
-        [],
         Hello,
         :world,
         "hello_world",
@@ -62,64 +59,6 @@ defmodule Combo.Router.RouteTest do
     assert exprs.verb == "GET"
     assert exprs.path == ["foo", {:bar, [], Combo.Router.Route}]
     assert exprs.binding == [{"bar", {:bar, [], Combo.Router.Route}}]
-    assert Macro.to_string(exprs.hosts) == "[_]"
-
-    exprs =
-      build(
-        1,
-        :match,
-        :get,
-        "/",
-        ["foo."],
-        Hello,
-        :world,
-        "hello_world",
-        [:foo, :bar],
-        %{foo: "bar"},
-        %{bar: "baz"},
-        %{}
-      )
-      |> build_exprs()
-
-    assert Macro.to_string(exprs.hosts) == "[\"foo.\" <> _]"
-
-    exprs =
-      build(
-        1,
-        :match,
-        :get,
-        "/",
-        ["foo.", "example.com"],
-        Hello,
-        :world,
-        "hello_world",
-        [:foo, :bar],
-        %{foo: "bar"},
-        %{bar: "baz"},
-        %{}
-      )
-      |> build_exprs()
-
-    assert Macro.to_string(exprs.hosts) == "[\"foo.\" <> _, \"example.com\"]"
-
-    exprs =
-      build(
-        1,
-        :match,
-        :get,
-        "/",
-        ["foo.com"],
-        Hello,
-        :world,
-        "hello_world",
-        [],
-        %{foo: "bar"},
-        %{bar: "baz"},
-        %{}
-      )
-      |> build_exprs()
-
-    assert Macro.to_string(exprs.hosts) == "[\"foo.com\"]"
   end
 
   test "builds a catch-all verb for match routes" do
@@ -129,7 +68,6 @@ defmodule Combo.Router.RouteTest do
         :match,
         :*,
         "/foo/:bar",
-        [],
         __MODULE__,
         :world,
         "hello_world",
@@ -151,7 +89,6 @@ defmodule Combo.Router.RouteTest do
         :forward,
         :*,
         "/foo",
-        [],
         __MODULE__,
         :world,
         "hello_world",

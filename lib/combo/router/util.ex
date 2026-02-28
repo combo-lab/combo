@@ -37,6 +37,6 @@ defmodule Combo.Router.Util do
   end
 
   def validate_route_path!(path) do
-    raise ArgumentError, "route paths must be strings, got: #{inspect(path)}"
+    raise ArgumentError, "route path must be a string, got: #{inspect(path)}"
   end
 end

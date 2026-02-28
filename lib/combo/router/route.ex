@@ -10,7 +10,6 @@ defmodule Combo.Router.Route do
     :kind,
     :verb,
     :path,
-    :hosts,
     :plug,
     :plug_opts,
     :helper,
@@ -25,7 +24,6 @@ defmodule Combo.Router.Route do
           kind: :match | :forward,
           verb: atom(),
           path: String.t(),
-          hosts: [String.t()],
           plug: atom(),
           plug_opts: atom(),
           helper: binary() | nil,
@@ -76,7 +74,7 @@ defmodule Combo.Router.Route do
 
     if to_string(as) == "static" do
       raise ArgumentError,
-            "`static` is a reserved route prefix generated from #{inspect(plug)} or `:as` option"
+            "`static` is a reserved route name derived from #{inspect(plug)} or `:as` option"
     end
 
     {path, plug, as, private, assigns} = join(scope, path, plug, alias?, as, private, assigns)
@@ -98,7 +96,6 @@ defmodule Combo.Router.Route do
       kind,
       verb,
       path,
-      scope.hosts,
       plug,
       plug_opts,
       as,
@@ -114,7 +111,6 @@ defmodule Combo.Router.Route do
         kind,
         verb,
         path,
-        hosts,
         plug,
         plug_opts,
         helper,
@@ -126,7 +122,6 @@ defmodule Combo.Router.Route do
       when kind in [:match, :forward] and
              is_atom(verb) and
              is_binary(path) and
-             is_list(hosts) and
              is_atom(plug) and
              (is_binary(helper) or is_nil(helper)) and
              is_list(pipe_through) and
@@ -138,7 +133,6 @@ defmodule Combo.Router.Route do
       kind: kind,
       verb: verb,
       path: path,
-      hosts: hosts,
       plug: plug,
       plug_opts: plug_opts,
       helper: helper,
@@ -160,7 +154,6 @@ defmodule Combo.Router.Route do
       path: path,
       binding: binding,
       dispatch: build_dispatch(route),
-      hosts: build_hosts(route.hosts),
       path_params: build_path_params(binding),
       prepare: build_prepare(route)
     }
@@ -212,12 +205,6 @@ defmodule Combo.Router.Route do
         {unquote(metadata.forward), unquote(plug), unquote(Macro.escape(plug_opts))}
       }
     end
-  end
-
-  def build_hosts([]), do: [Plug.Router.Utils.build_host_match(nil)]
-
-  def build_hosts([_ | _] = hosts) do
-    for host <- hosts, do: Plug.Router.Utils.build_host_match(host)
   end
 
   defp build_verb(:*), do: Macro.var(:_verb, nil)

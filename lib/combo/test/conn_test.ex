@@ -591,10 +591,10 @@ defmodule Combo.ConnTest do
   @spec redirected_params(Conn.t(), status :: non_neg_integer) :: map
   def redirected_params(%Plug.Conn{} = conn, status \\ 302) do
     router = router_module!(conn)
-    %URI{path: path, host: host} = conn |> redirected_to(status) |> URI.parse()
+    %URI{path: path} = conn |> redirected_to(status) |> URI.parse()
     path = remove_script_name(conn, router, path)
 
-    case Combo.Router.route_info(router, "GET", path, host || conn.host) do
+    case Combo.Router.route_info(router, "GET", path) do
       :error ->
         raise Combo.Router.NoRouteError, conn: conn, router: router
 
@@ -629,7 +629,7 @@ defmodule Combo.ConnTest do
   def path_params(%Plug.Conn{} = conn, to) when is_binary(to) do
     router = router_module!(conn)
 
-    case Combo.Router.route_info(router, "GET", to, conn.host) do
+    case Combo.Router.route_info(router, "GET", to) do
       %{path_params: path_params} ->
         Enum.into(path_params, %{}, fn {key, val} -> {String.to_atom(key), val} end)
 
