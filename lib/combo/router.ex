@@ -351,6 +351,13 @@ defmodule Combo.Router do
         end
       end
 
+      defp prepare(conn) do
+        Plug.Conn.merge_private(conn, [
+          {:combo_router, __MODULE__},
+          {__MODULE__, conn.script_name}
+        ])
+      end
+
       defoverridable init: 1, call: 2
     end
   end
@@ -399,13 +406,6 @@ defmodule Combo.Router do
 
       @doc false
       def __helpers__, do: unquote(helpers)
-
-      defp prepare(conn) do
-        Plug.Conn.merge_private(conn, [
-          {:combo_router, __MODULE__},
-          {__MODULE__, conn.script_name}
-        ])
-      end
 
       unquote(pipelines)
       unquote(matches)
