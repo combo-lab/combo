@@ -340,9 +340,9 @@ defmodule Combo.Router do
       @impl true
       def call(conn, _opts) do
         %{method: method, path_info: path_info} = conn = prepare(conn)
-        decoded = Enum.map(path_info, &URI.decode/1)
+        path_info = Enum.map(path_info, &URI.decode/1)
 
-        case __match_route__(method, decoded) do
+        case __match_route__(method, path_info) do
           {metadata, prepare, pipeline, plug_opts} ->
             Combo.Router.__call__(conn, metadata, prepare, pipeline, plug_opts)
 
@@ -857,13 +857,13 @@ defmodule Combo.Router do
   """
   @doc type: :reflection
   def route_info(router, method, path) when is_binary(path) do
-    split_path = for segment <- String.split(path, "/"), segment != "", do: segment
-    route_info(router, method, split_path)
+    path_info = for segment <- String.split(path, "/"), segment != "", do: segment
+    route_info(router, method, path_info)
   end
 
-  def route_info(router, method, split_path) when is_list(split_path) do
+  def route_info(router, method, path_info) when is_list(path_info) do
     with {metadata, _prepare, _pipeline, {_plug, _opts}} <-
-           router.__match_route__(method, split_path) do
+           router.__match_route__(method, path_info) do
       Map.delete(metadata, :conn)
     end
   end
