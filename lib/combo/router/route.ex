@@ -154,9 +154,9 @@ defmodule Combo.Router.Route do
       method_match: method_match,
       path_match: path_match,
       binding: path_binding,
+      prepare: build_prepare(route),
       dispatch: build_dispatch(route),
-      path_params: build_path_params(path_binding),
-      prepare: build_prepare(route)
+      path_params: build_path_params(path_binding)
     }
   end
 
@@ -214,45 +214,52 @@ defmodule Combo.Router.Route do
   defp build_path_params(binding), do: {:%{}, [], binding}
 
   defp build_prepare(route) do
-    {match_params, merge_params} = build_params()
-    {match_private, merge_private} = build_prepare_expr(:private, route.private)
-    {match_assigns, merge_assigns} = build_prepare_expr(:assigns, route.assigns)
+    {match_params, merged_params} = build_params_expr()
+    {match_private, merged_private} = build_map_data_expr(:private, route.private)
+    {match_assigns, merged_assigns} = build_map_data_expr(:assigns, route.assigns)
 
     match_all = match_params ++ match_private ++ match_assigns
-    merge_all = merge_params ++ merge_private ++ merge_assigns
+    merged_all = merged_params ++ merged_private ++ merged_assigns
 
     quote do
-      %{unquote_splicing(match_all)} = var!(conn, :conn)
-      %{var!(conn, :conn) | unquote_splicing(merge_all)}
+      fn var!(conn, :conn), %{path_params: var!(path_params, :conn)} ->
+        %{unquote_splicing(match_all)} = var!(conn, :conn)
+        %{var!(conn, :conn) | unquote_splicing(merged_all)}
+      end
     end
   end
 
-  defp build_params() do
+  defp build_params_expr do
     params = Macro.var(:params, :conn)
     path_params = Macro.var(:path_params, :conn)
 
-    merge_params =
+    merged_params =
       quote do
-        Combo.Router.Route.merge_params(unquote(params), unquote(path_params))
+        unquote(__MODULE__).__merge_params__(
+          unquote(params),
+          unquote(path_params)
+        )
       end
 
     {
       [{:params, params}],
-      [{:params, merge_params}, {:path_params, path_params}]
+      [{:params, merged_params}, {:path_params, path_params}]
     }
   end
 
-  defp build_prepare_expr(_key, data) when data == %{}, do: {[], []}
+  @doc false
+  def __merge_params__(%Plug.Conn.Unfetched{}, path_params), do: path_params
+  def __merge_params__(params, path_params), do: Map.merge(params, path_params)
 
-  defp build_prepare_expr(key, data) do
+  defp build_map_data_expr(_key, data) when data == %{} do
+    {[], []}
+  end
+
+  defp build_map_data_expr(key, data) do
     var = Macro.var(key, :conn)
     merge = quote(do: Map.merge(unquote(var), unquote(Macro.escape(data))))
     {[{key, var}], [{key, merge}]}
   end
-
-  @doc false
-  def merge_params(%Plug.Conn.Unfetched{}, path_params), do: path_params
-  def merge_params(params, path_params), do: Map.merge(params, path_params)
 
   defp validate_forward_path!(path) do
     case Plug.Router.Utils.build_path_match(path) do

@@ -428,10 +428,12 @@ defmodule Combo.Router do
     clauses =
       quote line: route.line do
         def __match_route__(unquote(method_match), unquote(path_match)) do
-          {unquote(build_metadata(route, path_params)),
-           fn var!(conn, :conn), %{path_params: var!(path_params, :conn)} ->
-             unquote(prepare)
-           end, &(unquote(Macro.var(pipe_name, __MODULE__)) / 1), unquote(dispatch)}
+          {
+            unquote(build_metadata(route, path_params)),
+            unquote(prepare),
+            &(unquote(Macro.var(pipe_name, __MODULE__)) / 1),
+            unquote(dispatch)
+          }
         end
       end
 
