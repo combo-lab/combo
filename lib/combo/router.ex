@@ -378,10 +378,10 @@ defmodule Combo.Router do
         quote line: line, do: _ = &(unquote(module).unquote(function) / unquote(arity))
       end)
 
-    helpers = Helpers.define(env, routes_with_exprs)
-
     {matches, {pipelines, _}} =
       Enum.map_reduce(routes_with_exprs, {[], %{}}, &build_match/2)
+
+    helpers = Helpers.define(env, routes_with_exprs)
 
     match_catch_all =
       quote generated: true do

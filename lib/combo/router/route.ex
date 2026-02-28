@@ -143,9 +143,7 @@ defmodule Combo.Router.Route do
     }
   end
 
-  @doc """
-  Builds the compiled expressions of route.
-  """
+  @doc false
   def build_exprs(route) do
     method_match = build_method_match(route.verb)
     {path_match, path_binding} = build_path_match_and_binding(route)
@@ -153,10 +151,10 @@ defmodule Combo.Router.Route do
     %{
       method_match: method_match,
       path_match: path_match,
-      binding: path_binding,
       prepare: build_prepare(route),
       dispatch: build_dispatch(route),
-      path_params: build_path_params(path_binding)
+      path_params: build_path_params(path_binding),
+      binding: path_binding
     }
   end
 
@@ -186,32 +184,6 @@ defmodule Combo.Router.Route do
 
     {segments, Enum.reverse(binding)}
   end
-
-  defp build_dispatch(%__MODULE__{
-         kind: :match,
-         plug: plug,
-         plug_opts: plug_opts
-       }) do
-    quote do
-      {unquote(plug), unquote(Macro.escape(plug_opts))}
-    end
-  end
-
-  defp build_dispatch(%__MODULE__{
-         kind: :forward,
-         plug: plug,
-         plug_opts: plug_opts,
-         metadata: metadata
-       }) do
-    quote do
-      {
-        Combo.Router.Forward,
-        {unquote(metadata.forward), unquote(plug), unquote(Macro.escape(plug_opts))}
-      }
-    end
-  end
-
-  defp build_path_params(binding), do: {:%{}, [], binding}
 
   defp build_prepare(route) do
     {match_params, merged_params} = build_params_expr()
@@ -260,6 +232,32 @@ defmodule Combo.Router.Route do
     merge = quote(do: Map.merge(unquote(var), unquote(Macro.escape(data))))
     {[{key, var}], [{key, merge}]}
   end
+
+  defp build_dispatch(%__MODULE__{
+         kind: :match,
+         plug: plug,
+         plug_opts: plug_opts
+       }) do
+    quote do
+      {unquote(plug), unquote(Macro.escape(plug_opts))}
+    end
+  end
+
+  defp build_dispatch(%__MODULE__{
+         kind: :forward,
+         plug: plug,
+         plug_opts: plug_opts,
+         metadata: metadata
+       }) do
+    quote do
+      {
+        Combo.Router.Forward,
+        {unquote(metadata.forward), unquote(plug), unquote(Macro.escape(plug_opts))}
+      }
+    end
+  end
+
+  defp build_path_params(binding), do: {:%{}, [], binding}
 
   defp validate_forward_path!(path) do
     case Plug.Router.Utils.build_path_match(path) do
