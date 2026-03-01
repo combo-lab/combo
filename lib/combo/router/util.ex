@@ -26,16 +26,19 @@ defmodule Combo.Router.Util do
 
   def expand_alias(other, _env), do: other
 
-  ## Validations
+  def validate_path!("/" <> _ = path), do: path
 
-  # Validates a route path, which should be a string and have a leading "/".
-  def validate_route_path!("/" <> _ = path), do: path
-
-  def validate_route_path!(path) when is_binary(path) do
+  def validate_path!(path) when is_binary(path) do
     raise ArgumentError, "route path must begin with a slash, got: #{inspect(path)}"
   end
 
-  def validate_route_path!(path) do
+  def validate_path!(path) do
     raise ArgumentError, "route path must be a string, got: #{inspect(path)}"
+  end
+
+  # from https://github.com/elixir-plug/plug/blob/59cf2b552d2130398e27cd192157faf12d1356f5/lib/plug/conn/adapter.ex#L54
+  def split_path(path) do
+    segments = :binary.split(path, "/", [:global])
+    for segment <- segments, segment != "", do: segment
   end
 end

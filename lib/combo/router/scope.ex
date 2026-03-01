@@ -55,7 +55,7 @@ defmodule Combo.Router.Scope do
 
     path =
       if path = Keyword.get(opts, :path) do
-        path |> Util.validate_route_path!() |> String.split("/", trim: true)
+        path |> Util.validate_path!() |> Util.split_path()
       else
         []
       end

@@ -64,7 +64,7 @@ defmodule Combo.Router.Route do
     end
 
     scope = Scope.get_top_scope(module)
-    path = Util.validate_route_path!(path)
+    path = Util.validate_path!(path)
 
     alias? = Keyword.get(opts, :alias, true)
     as = Keyword.get_lazy(opts, :as, fn -> Combo.Naming.resource_name(plug, "Controller") end)
