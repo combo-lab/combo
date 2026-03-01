@@ -261,9 +261,9 @@ defmodule Combo.Router do
       Scope.setup(__MODULE__)
       Route.setup(__MODULE__)
 
-      import Combo.Router
+      import unquote(__MODULE__)
 
-      @before_compile Combo.Router
+      @before_compile unquote(__MODULE__)
     end
   end
 
@@ -283,7 +283,7 @@ defmodule Combo.Router do
 
         case __match_route__(method, path_info) do
           {metadata, prepare, pipeline, plug_opts} ->
-            Combo.Router.__call__(conn, metadata, prepare, pipeline, plug_opts)
+            unquote(__MODULE__).__call__(conn, metadata, prepare, pipeline, plug_opts)
 
           :error ->
             raise NoRouteError, conn: conn, router: __MODULE__
