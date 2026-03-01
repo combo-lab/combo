@@ -4,7 +4,7 @@ defmodule Combo.Router.Scope do
   alias Combo.Router.ModuleAttr
   alias Combo.Router.Util
 
-  defstruct path: [],
+  defstruct path_info: [],
             alias: [],
             as: [],
             pipes: [],
@@ -48,19 +48,18 @@ defmodule Combo.Router.Scope do
     end)
   end
 
-  @doc false
   def build_scope(router, args) do
     scope = get_top_scope(router)
     opts = normalize_scope_args(args)
 
-    path =
+    path_info =
       if path = Keyword.get(opts, :path) do
         path |> Util.validate_path!() |> Util.split_path()
       else
         []
       end
 
-    path = scope.path ++ path
+    path_info = scope.path_info ++ path_info
     alias = append_if_not_false(scope, opts, :alias, &Atom.to_string(&1))
     as = append_if_not_false(scope, opts, :as, & &1)
 
@@ -70,7 +69,7 @@ defmodule Combo.Router.Scope do
     log = Keyword.get(opts, :log, scope.log)
 
     %__MODULE__{
-      path: path,
+      path_info: path_info,
       alias: alias,
       as: as,
       pipes: pipes,

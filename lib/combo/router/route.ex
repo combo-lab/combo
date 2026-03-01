@@ -287,6 +287,7 @@ defmodule Combo.Router.Route do
   defp join_as(scope, as) when is_atom(as) or is_binary(as), do: Enum.join(scope.as ++ [as], "_")
 
   defp join_path(scope, path) do
-    "/" <> Enum.join(scope.path ++ String.split(path, "/", trim: true), "/")
+    path_info = String.split(path, "/", trim: true)
+    "/" <> Enum.join(scope.path_info ++ path_info, "/")
   end
 end
