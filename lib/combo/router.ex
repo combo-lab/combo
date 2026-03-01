@@ -282,8 +282,8 @@ defmodule Combo.Router do
         path_info = Enum.map(encoded_path_info, &URI.decode/1)
 
         case __match_route__(method, path_info) do
-          {metadata, prepare, pipeline, plug_opts} ->
-            unquote(__MODULE__).__call__(conn, metadata, prepare, pipeline, plug_opts)
+          {metadata, prepare, pipeline, dispatch} ->
+            unquote(__MODULE__).__call__(conn, metadata, prepare, pipeline, dispatch)
 
           :error ->
             raise NoRouteError, conn: conn, router: __MODULE__
