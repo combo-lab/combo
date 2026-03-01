@@ -60,9 +60,8 @@ defmodule Combo.Router.Scope do
       end
 
     path_info = scope.path_info ++ path_info
-    alias = append_if_not_false(scope, opts, :alias, &Atom.to_string(&1))
-    as = append_if_not_false(scope, opts, :as, & &1)
-
+    alias = append_value(scope.alias, Keyword.get(opts, :alias))
+    as = append_value(scope.as, Keyword.get(opts, :as))
     pipes = scope.pipes
     private = Map.merge(scope.private, Keyword.get(opts, :private, %{}))
     assigns = Map.merge(scope.assigns, Keyword.get(opts, :assigns, %{}))
@@ -110,11 +109,11 @@ defmodule Combo.Router.Scope do
     |> Keyword.put(:alias, alias)
   end
 
-  defp append_if_not_false(scope, opts, key, fun) do
-    case opts[key] do
+  defp append_value(values, value) do
+    case value do
       false -> []
-      nil -> Map.fetch!(scope, key)
-      other -> Map.fetch!(scope, key) ++ [fun.(other)]
+      nil -> values
+      value -> values ++ [value]
     end
   end
 
