@@ -555,7 +555,7 @@ defmodule Combo.Router do
   ## Options
 
     * `:path` - the path scope as a string.
-    * `:module` - the module scope as an atom.
+    * `:module` - the module scope as a module name.
       When set to `false`, it resets all nested `:module` options.
     * `:as` - the route naming scope as a string or an atom.
       When set to `false`, it resets all nested `:as` options.
