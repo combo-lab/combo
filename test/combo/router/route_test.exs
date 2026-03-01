@@ -57,7 +57,7 @@ defmodule Combo.Router.RouteTest do
       |> build_exprs()
 
     assert exprs.method_match == "GET"
-    assert exprs.path_match == ["foo", {:bar, [], Combo.Router.Route}]
+    assert exprs.path_info_match == ["foo", {:bar, [], Combo.Router.Route}]
     assert exprs.binding == [{"bar", {:bar, [], Combo.Router.Route}}]
   end
 

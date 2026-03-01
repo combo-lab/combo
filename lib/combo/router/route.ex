@@ -146,22 +146,22 @@ defmodule Combo.Router.Route do
   @doc false
   def build_exprs(route) do
     method_match = build_method_match(route.verb)
-    {path_match, path_binding} = build_path_match_and_binding(route)
+    {path_info_match, path_info_binding} = build_path_info_match_and_binding(route)
 
     %{
       method_match: method_match,
-      path_match: path_match,
+      path_info_match: path_info_match,
+      path_params: build_path_params(path_info_binding),
       prepare: build_prepare(route),
       dispatch: build_dispatch(route),
-      path_params: build_path_params(path_binding),
-      binding: path_binding
+      binding: path_info_binding
     }
   end
 
   defp build_method_match(:*), do: Macro.var(:_method, nil)
   defp build_method_match(verb), do: verb |> to_string() |> String.upcase()
 
-  defp build_path_match_and_binding(%__MODULE__{path: path} = route) do
+  defp build_path_info_match_and_binding(%__MODULE__{path: path} = route) do
     {_params, segments} =
       case route.kind do
         :match -> Plug.Router.Utils.build_path_match(path)

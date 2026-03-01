@@ -225,7 +225,7 @@ defmodule Combo.Router.Helpers do
     plug_opts = route.plug_opts
 
     {bins, vars} = :lists.unzip(exprs.binding)
-    path = expand_segments(exprs.path_match)
+    path = expand_segments(exprs.path_info_match)
 
     quote do
       def_helper.(

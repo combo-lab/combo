@@ -339,8 +339,8 @@ defmodule Combo.Router do
 
       @impl true
       def call(conn, _opts) do
-        %{method: method, path_info: path_info} = conn = prepare(conn)
-        path_info = Enum.map(path_info, &URI.decode/1)
+        %{method: method, path_info: encoded_path_info} = conn = prepare(conn)
+        path_info = Enum.map(encoded_path_info, &URI.decode/1)
 
         case __match_route__(method, path_info) do
           {metadata, prepare, pipeline, plug_opts} ->
@@ -419,7 +419,7 @@ defmodule Combo.Router do
 
     %{
       method_match: method_match,
-      path_match: path_match,
+      path_info_match: path_info_match,
       prepare: prepare,
       dispatch: dispatch,
       path_params: path_params
@@ -427,7 +427,7 @@ defmodule Combo.Router do
 
     clauses =
       quote line: route.line do
-        def __match_route__(unquote(method_match), unquote(path_match)) do
+        def __match_route__(unquote(method_match), unquote(path_info_match)) do
           {
             unquote(build_metadata(route, path_params)),
             unquote(prepare),
