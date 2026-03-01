@@ -354,8 +354,6 @@ defmodule Combo.Router do
   end
 
   defp build_match({route, expr}, {acc_pipes, known_pipes}) do
-    {pipe_name, acc_pipes, known_pipes} = build_match_pipes(route, acc_pipes, known_pipes)
-
     %{
       method_match: method_match,
       path_info_match: path_info_match,
@@ -363,6 +361,8 @@ defmodule Combo.Router do
       prepare: prepare,
       dispatch: dispatch
     } = expr
+
+    {pipe_name, acc_pipes, known_pipes} = build_match_pipes(route, acc_pipes, known_pipes)
 
     clauses =
       quote line: route.line do
