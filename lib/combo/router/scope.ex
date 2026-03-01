@@ -19,16 +19,16 @@ defmodule Combo.Router.Scope do
   def add_scope(args, block) do
     scope =
       quote do
-        unquote(__MODULE__).build_scope(__MODULE__, unquote(args))
+        unquote(__MODULE__).__build_scope__(__MODULE__, unquote(args))
       end
 
     quote do
-      unquote(__MODULE__).push_scope(__MODULE__, unquote(scope))
+      unquote(__MODULE__).__push_scope__(__MODULE__, unquote(scope))
 
       try do
         unquote(block)
       after
-        unquote(__MODULE__).pop_scope(__MODULE__)
+        unquote(__MODULE__).__pop_scope__(__MODULE__)
       end
     end
   end
@@ -48,7 +48,7 @@ defmodule Combo.Router.Scope do
     end)
   end
 
-  def build_scope(router, args) do
+  def __build_scope__(router, args) do
     scope = get_top_scope(router)
     opts = normalize_scope_args(args)
 
@@ -115,13 +115,11 @@ defmodule Combo.Router.Scope do
     end
   end
 
-  @doc false
-  def push_scope(router, scope) do
+  def __push_scope__(router, scope) do
     ModuleAttr.update(router, :scopes, fn scopes -> [scope | scopes] end)
   end
 
-  @doc false
-  def pop_scope(router) do
+  def __pop_scope__(router) do
     ModuleAttr.update(router, :scopes, fn [_top | scopes] -> scopes end)
   end
 
