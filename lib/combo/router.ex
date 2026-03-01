@@ -433,25 +433,41 @@ defmodule Combo.Router do
 
   @doc false
   def __call__(
-        %{private: %{combo_router: router, combo_bypass: {router, pipes}}} = conn,
+        %{private: %{combo_bypass: {router, pipes}}} = conn,
         metadata,
         prepare,
         pipeline,
-        _
+        _dispatch
       ) do
     conn = prepare.(conn, metadata)
 
     case pipes do
-      :current -> pipeline.(conn)
-      _ -> Enum.reduce(pipes, conn, fn pipe, acc -> apply(router, pipe, [acc, []]) end)
+      :current ->
+        pipeline.(conn)
+
+      _ ->
+        %{private: %{combo_router: router}} = conn
+        Enum.reduce(pipes, conn, fn pipe, acc -> apply(router, pipe, [acc, []]) end)
     end
   end
 
-  def __call__(%{private: %{combo_bypass: :all}} = conn, metadata, prepare, _, _) do
+  def __call__(
+        %{private: %{combo_bypass: :all}} = conn,
+        metadata,
+        prepare,
+        _pipeline,
+        _dispatch
+      ) do
     prepare.(conn, metadata)
   end
 
-  def __call__(conn, metadata, prepare, pipeline, {plug, opts}) do
+  def __call__(
+        conn,
+        metadata,
+        prepare,
+        pipeline,
+        {plug, opts}
+      ) do
     conn = prepare.(conn, metadata)
     start = System.monotonic_time()
     measurements = %{system_time: System.system_time()}
