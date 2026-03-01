@@ -33,14 +33,16 @@ defmodule Combo.Router.Route do
           metadata: map()
         }
 
+  @doc false
   def setup(module) do
     ModuleAttr.register(module, :routes, accumulate: true)
   end
 
-  def add_route(kind, verb, path, plug, plug_opts, options) do
+  @doc false
+  def add_route(kind, verb, path, plug, plug_opts, opts) do
     route =
       quote do
-        unquote(__MODULE__).build_route(
+        unquote(__MODULE__).__build_route__(
           __ENV__.line,
           __ENV__.module,
           unquote(kind),
@@ -48,7 +50,7 @@ defmodule Combo.Router.Route do
           unquote(path),
           unquote(plug),
           unquote(plug_opts),
-          unquote(options)
+          unquote(opts)
         )
       end
 
@@ -57,7 +59,7 @@ defmodule Combo.Router.Route do
     end
   end
 
-  def build_route(line, module, kind, verb, path, plug, plug_opts, opts) do
+  def __build_route__(line, module, kind, verb, path, plug, plug_opts, opts) do
     if not is_atom(plug) do
       raise ArgumentError,
             "routes expect a module plug as second argument, got: #{inspect(plug)}"
@@ -106,6 +108,7 @@ defmodule Combo.Router.Route do
     )
   end
 
+  @doc false
   def build(
         line,
         kind,
@@ -231,7 +234,6 @@ defmodule Combo.Router.Route do
     {[{key, var}], [{key, merge}]}
   end
 
-  @doc false
   def __merge_params__(%Plug.Conn.Unfetched{}, path_params), do: path_params
   def __merge_params__(params, path_params), do: Map.merge(params, path_params)
 
