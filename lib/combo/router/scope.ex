@@ -2,7 +2,7 @@ defmodule Combo.Router.Scope do
   @moduledoc false
 
   alias Combo.Router.ModuleAttr
-  alias Combo.Router.Util
+  alias Combo.Router.Utils
 
   defstruct path_info: [],
             alias: [],
@@ -57,7 +57,7 @@ defmodule Combo.Router.Scope do
 
     path_info =
       if path = Keyword.get(opts, :path),
-        do: path |> Util.validate_path!() |> Util.split_path(),
+        do: path |> Utils.validate_path!() |> Utils.split_path(),
         else: []
 
     path_info = scope.path_info ++ path_info

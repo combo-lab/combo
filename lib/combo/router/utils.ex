@@ -1,4 +1,4 @@
-defmodule Combo.Router.Util do
+defmodule Combo.Router.Utils do
   @moduledoc false
 
   def expand_plug_and_opts(plug, opts, caller) do

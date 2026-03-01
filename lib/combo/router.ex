@@ -243,7 +243,7 @@ defmodule Combo.Router do
   router. We can use it to verify all routes included in the router.
   """
 
-  alias Combo.Router.{Pipeline, Scope, Route, Helpers, Util, ModuleAttr}
+  alias Combo.Router.{Pipeline, Scope, Route, Helpers, Utils, ModuleAttr}
 
   @http_methods [:get, :post, :put, :patch, :delete, :options, :connect, :trace, :head]
 
@@ -531,7 +531,7 @@ defmodule Combo.Router do
   See `pipeline/2` for more information.
   """
   defmacro plug(plug, opts \\ []) do
-    {plug, opts} = Util.expand_plug_and_opts(plug, opts, __CALLER__)
+    {plug, opts} = Utils.expand_plug_and_opts(plug, opts, __CALLER__)
     Pipeline.add_plug(plug, opts)
   end
 
@@ -748,7 +748,7 @@ defmodule Combo.Router do
       :match,
       verb,
       path,
-      Util.expand_alias(plug, __CALLER__),
+      Utils.expand_alias(plug, __CALLER__),
       plug_opts,
       options
     )
@@ -778,7 +778,7 @@ defmodule Combo.Router do
         :match,
         unquote(verb),
         path,
-        Util.expand_alias(plug, __CALLER__),
+        Utils.expand_alias(plug, __CALLER__),
         plug_opts,
         options
       )
@@ -818,7 +818,7 @@ defmodule Combo.Router do
 
   """
   defmacro forward(path, plug, plug_opts \\ [], router_opts \\ []) do
-    {plug, plug_opts} = Util.expand_plug_and_opts(plug, plug_opts, __CALLER__)
+    {plug, plug_opts} = Utils.expand_plug_and_opts(plug, plug_opts, __CALLER__)
     router_opts = Keyword.put(router_opts, :as, nil)
 
     quote unquote: true, bind_quoted: [path: path, plug: plug] do

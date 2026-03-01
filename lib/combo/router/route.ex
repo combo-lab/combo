@@ -3,7 +3,7 @@ defmodule Combo.Router.Route do
 
   alias Combo.Router.ModuleAttr
   alias Combo.Router.Scope
-  alias Combo.Router.Util
+  alias Combo.Router.Utils
 
   defstruct [
     :line,
@@ -66,7 +66,7 @@ defmodule Combo.Router.Route do
     end
 
     scope = Scope.get_top_scope(module)
-    path = Util.validate_path!(path)
+    path = Utils.validate_path!(path)
 
     alias? = Keyword.get(opts, :alias, true)
     as = Keyword.get_lazy(opts, :as, fn -> Combo.Naming.resource_name(plug, "Controller") end)
