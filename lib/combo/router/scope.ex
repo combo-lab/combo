@@ -53,11 +53,9 @@ defmodule Combo.Router.Scope do
     opts = normalize_scope_args(args)
 
     path_info =
-      if path = Keyword.get(opts, :path) do
-        path |> Util.validate_path!() |> Util.split_path()
-      else
-        []
-      end
+      if path = Keyword.get(opts, :path),
+        do: path |> Util.validate_path!() |> Util.split_path(),
+        else: []
 
     path_info = scope.path_info ++ path_info
     alias = append_value(scope.alias, Keyword.get(opts, :alias))
