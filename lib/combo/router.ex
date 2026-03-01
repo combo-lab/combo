@@ -420,9 +420,9 @@ defmodule Combo.Router do
     %{
       method_match: method_match,
       path_info_match: path_info_match,
+      path_params: path_params,
       prepare: prepare,
-      dispatch: dispatch,
-      path_params: path_params
+      dispatch: dispatch
     } = expr
 
     clauses =
@@ -492,6 +492,8 @@ defmodule Combo.Router do
     end
   end
 
+  # Pipeline #
+
   @doc """
   Defines a pipeline.
 
@@ -532,6 +534,8 @@ defmodule Combo.Router do
     {plug, opts} = Util.expand_plug_and_opts(plug, opts, __CALLER__)
     Pipeline.add_plug(plug, opts)
   end
+
+  # Scope #
 
   @doc """
   Defines a scope.
@@ -697,6 +701,8 @@ defmodule Combo.Router do
     end
   end
 
+  # Route #
+
   @doc """
   Defines a route based on an arbitrary HTTP method.
 
@@ -819,6 +825,8 @@ defmodule Combo.Router do
       unquote(Route.add_route(:forward, :*, path, plug, plug_opts, router_opts))
     end
   end
+
+  # Others #
 
   @doc """
   Returns all routes information from the given router.
