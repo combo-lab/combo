@@ -12,10 +12,12 @@ defmodule Combo.Router.Scope do
             assigns: %{},
             log: :debug
 
+  @doc false
   def setup(router) do
     ModuleAttr.put(router, :scopes, [%__MODULE__{}])
   end
 
+  @doc false
   def add_scope(args, block) do
     scope =
       quote do
@@ -33,6 +35,7 @@ defmodule Combo.Router.Scope do
     end
   end
 
+  @doc false
   def add_pipe_through(router, new_pipes) do
     %{pipes: pipes} = get_top_scope(router)
     new_pipes = List.wrap(new_pipes)

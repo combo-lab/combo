@@ -3,11 +3,13 @@ defmodule Combo.Router.Pipeline do
 
   alias Combo.Router.ModuleAttr
 
+  @doc false
   def setup(module) do
     ModuleAttr.put(module, :pipelines, MapSet.new())
     ModuleAttr.put(module, :pipeline_plugs, nil)
   end
 
+  @doc false
   def add_pipeline(name, block) do
     pre =
       quote do
@@ -53,6 +55,7 @@ defmodule Combo.Router.Pipeline do
     end
   end
 
+  @doc false
   def add_plug(plug, opts) do
     quote do
       if plugs = ModuleAttr.get(__MODULE__, :pipeline_plugs) do
