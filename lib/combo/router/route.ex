@@ -185,6 +185,8 @@ defmodule Combo.Router.Route do
     {segments, Enum.reverse(binding)}
   end
 
+  defp build_path_params(binding), do: {:%{}, [], binding}
+
   defp build_prepare(route) do
     {match_params, merged_params} = build_params_expr()
     {match_private, merged_private} = build_map_data_expr(:private, route.private)
@@ -219,10 +221,6 @@ defmodule Combo.Router.Route do
     }
   end
 
-  @doc false
-  def __merge_params__(%Plug.Conn.Unfetched{}, path_params), do: path_params
-  def __merge_params__(params, path_params), do: Map.merge(params, path_params)
-
   defp build_map_data_expr(_key, data) when data == %{} do
     {[], []}
   end
@@ -232,6 +230,10 @@ defmodule Combo.Router.Route do
     merge = quote(do: Map.merge(unquote(var), unquote(Macro.escape(data))))
     {[{key, var}], [{key, merge}]}
   end
+
+  @doc false
+  def __merge_params__(%Plug.Conn.Unfetched{}, path_params), do: path_params
+  def __merge_params__(params, path_params), do: Map.merge(params, path_params)
 
   defp build_dispatch(%__MODULE__{
          kind: :match,
@@ -256,8 +258,6 @@ defmodule Combo.Router.Route do
       }
     end
   end
-
-  defp build_path_params(binding), do: {:%{}, [], binding}
 
   defp validate_forward_path!(path) do
     case Plug.Router.Utils.build_path_match(path) do
