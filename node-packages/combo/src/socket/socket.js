@@ -124,7 +124,9 @@ export default class Socket {
     this.establishedConnections = 0
     this.defaultEncoder = Serializer.encode.bind(Serializer)
     this.defaultDecoder = Serializer.decode.bind(Serializer)
-    this.closeWasClean = false
+    // Set to true to avoid the visibility change logic from connecting if the
+    // socket was never connected in the first place.
+    this.closeWasClean = true
     this.disconnecting = false
     this.binaryType = opts.binaryType || "arraybuffer"
     this.connectClock = 1
