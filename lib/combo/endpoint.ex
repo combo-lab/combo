@@ -368,7 +368,7 @@ defmodule Combo.Endpoint do
   end
 
   defp pubsub do
-    quote do
+    quote generated: true do
       def subscribe(topic, opts \\ []) when is_binary(topic) do
         Combo.PubSub.subscribe(pubsub_server!(), topic, opts)
       end
