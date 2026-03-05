@@ -9,7 +9,7 @@ defmodule Combo.Router.Route do
     :line,
     :kind,
     :verb,
-    :path,
+    :path_info,
     :plug,
     :plug_opts,
     :helper,
@@ -23,7 +23,7 @@ defmodule Combo.Router.Route do
           line: non_neg_integer(),
           kind: :match | :forward,
           verb: atom(),
-          path: String.t(),
+          path_info: [String.t()],
           plug: atom(),
           plug_opts: atom(),
           helper: binary() | nil,
@@ -66,8 +66,7 @@ defmodule Combo.Router.Route do
     end
 
     scope = Scope.get_top_scope(module)
-    path = Utils.validate_path!(path)
-
+    path_info = path |> Utils.validate_path!() |> Utils.split_path()
     alias? = Keyword.get(opts, :alias, true)
     as = Keyword.get_lazy(opts, :as, fn -> Combo.Naming.resource_name(plug, "Controller") end)
     private = Keyword.get(opts, :private, %{})
@@ -79,7 +78,11 @@ defmodule Combo.Router.Route do
             "`static` is a reserved route name derived from #{inspect(plug)} or `:as` option"
     end
 
-    {path, plug, as, private, assigns} = join(scope, path, plug, alias?, as, private, assigns)
+    path_info = join_path_info(scope, path_info)
+    plug = if alias?, do: join_alias(scope, plug), else: plug
+    as = join_as(scope, as)
+    private = Map.merge(scope.private, private)
+    assigns = Map.merge(scope.assigns, assigns)
 
     metadata =
       opts
@@ -88,7 +91,7 @@ defmodule Combo.Router.Route do
 
     metadata =
       if kind == :forward do
-        Map.put(metadata, :forward, validate_forward_path!(path))
+        Map.put(metadata, :forward, validate_forward_path_info!(path_info))
       else
         metadata
       end
@@ -97,7 +100,7 @@ defmodule Combo.Router.Route do
       line,
       kind,
       verb,
-      path,
+      path_info,
       plug,
       plug_opts,
       as,
@@ -108,12 +111,23 @@ defmodule Combo.Router.Route do
     )
   end
 
+  defp join_path_info(scope, path_info) do
+    scope.path_info ++ path_info
+  end
+
+  defp join_alias(scope, alias) when is_atom(alias) do
+    Module.concat(scope.alias ++ [alias])
+  end
+
+  defp join_as(_scope, nil), do: nil
+  defp join_as(scope, as) when is_atom(as) or is_binary(as), do: Enum.join(scope.as ++ [as], "_")
+
   @doc false
   def build(
         line,
         kind,
         verb,
-        path,
+        path_info,
         plug,
         plug_opts,
         helper,
@@ -124,7 +138,7 @@ defmodule Combo.Router.Route do
       )
       when kind in [:match, :forward] and
              is_atom(verb) and
-             is_binary(path) and
+             is_list(path_info) and
              is_atom(plug) and
              (is_binary(helper) or is_nil(helper)) and
              is_list(pipe_through) and
@@ -135,7 +149,7 @@ defmodule Combo.Router.Route do
       line: line,
       kind: kind,
       verb: verb,
-      path: path,
+      path_info: path_info,
       plug: plug,
       plug_opts: plug_opts,
       helper: helper,
@@ -164,11 +178,13 @@ defmodule Combo.Router.Route do
   defp build_method_match(:*), do: Macro.var(:_method, nil)
   defp build_method_match(verb), do: verb |> to_string() |> String.upcase()
 
-  defp build_path_info_match_and_binding(%__MODULE__{path: path} = route) do
+  defp build_path_info_match_and_binding(route) do
+    %{path_info: path_info} = route
+
     {_params, segments} =
       case route.kind do
-        :match -> Plug.Router.Utils.build_path_match(path)
-        :forward -> Plug.Router.Utils.build_path_match(path <> "/*_forward_path_info")
+        :match -> Utils.build_path_info_match(path_info)
+        :forward -> Utils.build_path_info_match(path_info ++ ["*_forward_path_info"])
       end
 
     rewrite_segments(segments)
@@ -261,35 +277,16 @@ defmodule Combo.Router.Route do
     end
   end
 
-  defp validate_forward_path!(path) do
-    case Plug.Router.Utils.build_path_match(path) do
+  defp validate_forward_path_info!(path_info) do
+    case Utils.build_path_info_match(path_info) do
       {[], path_segments} ->
         path_segments
 
       _ ->
+        path = Utils.build_path(path_info)
+
         raise ArgumentError,
               "dynamic segment \"#{path}\" not allowed when forwarding. Use a static path instead"
     end
-  end
-
-  defp join(scope, path, plug, alias?, as, private, assigns) do
-    path = join_path(scope, path)
-    plug = if alias?, do: join_alias(scope, plug), else: plug
-    as = join_as(scope, as)
-    private = Map.merge(scope.private, private)
-    assigns = Map.merge(scope.assigns, assigns)
-    {path, plug, as, private, assigns}
-  end
-
-  defp join_alias(scope, alias) when is_atom(alias) do
-    Module.concat(scope.alias ++ [alias])
-  end
-
-  defp join_as(_scope, nil), do: nil
-  defp join_as(scope, as) when is_atom(as) or is_binary(as), do: Enum.join(scope.as ++ [as], "_")
-
-  defp join_path(scope, path) do
-    path_info = String.split(path, "/", trim: true)
-    "/" <> Enum.join(scope.path_info ++ path_info, "/")
   end
 end

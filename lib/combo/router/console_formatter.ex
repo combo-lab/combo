@@ -1,6 +1,8 @@
 defmodule Combo.Router.ConsoleFormatter do
   @moduledoc false
 
+  alias Combo.Router.Utils
+
   @socket_verb "WS"
   @longpoll_verbs ["GET", "POST"]
 
@@ -76,8 +78,9 @@ defmodule Combo.Router.ConsoleFormatter do
 
     widths =
       Enum.reduce(routes, {0, 0, 0}, fn route, acc ->
-        %{verb: verb, path: path, helper: helper} = route
+        %{verb: verb, path_info: path_info, helper: helper} = route
         verb = verb_name(verb)
+        path = Utils.build_path(path_info)
         {verb_len, path_len, route_name_len} = acc
         route_name = route_name(router, helper)
 
@@ -102,11 +105,12 @@ defmodule Combo.Router.ConsoleFormatter do
     %{
       helper: helper,
       verb: verb,
-      path: path,
+      path_info: path_info,
       label: label
     } = route
 
     verb = verb_name(verb)
+    path = Utils.build_path(path_info)
     route_name = route_name(router, helper)
     {verb_len, path_len, route_name_len} = column_widths
 

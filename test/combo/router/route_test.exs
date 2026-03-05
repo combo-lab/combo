@@ -16,7 +16,7 @@ defmodule Combo.Router.RouteTest do
         1,
         :match,
         :get,
-        "/foo/:bar",
+        ["foo", ":bar"],
         Hello,
         :world,
         "hello_world",
@@ -28,7 +28,7 @@ defmodule Combo.Router.RouteTest do
 
     assert route.kind == :match
     assert route.verb == :get
-    assert route.path == "/foo/:bar"
+    assert route.path_info == ["foo", ":bar"]
     assert route.line == 1
     assert route.plug == Hello
     assert route.plug_opts == :world
@@ -45,7 +45,7 @@ defmodule Combo.Router.RouteTest do
         1,
         :match,
         :get,
-        "/foo/:bar",
+        ["foo", ":bar"],
         Hello,
         :world,
         "hello_world",
@@ -67,7 +67,7 @@ defmodule Combo.Router.RouteTest do
         1,
         :match,
         :*,
-        "/foo/:bar",
+        ["foo", ":bar"],
         __MODULE__,
         :world,
         "hello_world",
@@ -88,7 +88,7 @@ defmodule Combo.Router.RouteTest do
         1,
         :forward,
         :*,
-        "/foo",
+        ["foo"],
         __MODULE__,
         :world,
         "hello_world",

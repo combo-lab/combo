@@ -396,12 +396,14 @@ defmodule Combo.Router do
 
   defp build_metadata(route, path_params) do
     %{
-      path: path,
+      path_info: path_info,
       plug: plug,
       plug_opts: plug_opts,
       pipe_through: pipe_through,
       metadata: metadata
     } = route
+
+    path = Utils.build_path(path_info)
 
     pairs = [
       conn: nil,
@@ -446,7 +448,6 @@ defmodule Combo.Router do
         pipeline.(conn)
 
       _ ->
-        %{private: %{combo_router: router}} = conn
         Enum.reduce(pipes, conn, fn pipe, acc -> apply(router, pipe, [acc, []]) end)
     end
   end
@@ -883,7 +884,7 @@ defmodule Combo.Router do
   """
   @doc type: :reflection
   def route_info(router, method, path) when is_binary(path) do
-    path_info = for segment <- String.split(path, "/"), segment != "", do: segment
+    path_info = Utils.split_path(path)
     route_info(router, method, path_info)
   end
 
@@ -905,8 +906,8 @@ defmodule Combo.Router do
         |> Enum.map(fn nested_route ->
           route = %{
             route
-            | path: Path.join(route.path, nested_route.path),
-              verb: nested_route.verb
+            | verb: nested_route.verb,
+              path_info: route.path_info ++ nested_route.path_info
           }
 
           Map.put(route, :label, nested_route.label)
@@ -924,7 +925,7 @@ defmodule Combo.Router do
           %{
             helper: route.helper,
             verb: route.verb,
-            path: route.path,
+            path_info: route.path_info,
             label: label
           }
         ]

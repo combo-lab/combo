@@ -26,6 +26,8 @@ defmodule Combo.Router.Utils do
 
   def expand_alias(other, _env), do: other
 
+  # Path
+
   def validate_path!("/" <> _ = path), do: path
 
   def validate_path!(path) when is_binary(path) do
@@ -37,8 +39,18 @@ defmodule Combo.Router.Utils do
   end
 
   # from https://github.com/elixir-plug/plug/blob/59cf2b552d2130398e27cd192157faf12d1356f5/lib/plug/conn/adapter.ex#L54
-  def split_path(path) do
+  def split_path(path) when is_binary(path) do
     segments = :binary.split(path, "/", [:global])
     for segment <- segments, segment != "", do: segment
+  end
+
+  def build_path(path_info) when is_list(path_info) do
+    "/" <> Enum.join(path_info, "/")
+  end
+
+  def build_path_info_match(path_info) when is_list(path_info) do
+    path_info
+    |> build_path()
+    |> Plug.Router.Utils.build_path_match()
   end
 end
