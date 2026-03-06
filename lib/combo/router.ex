@@ -889,7 +889,7 @@ defmodule Combo.Router do
   end
 
   def route_info(router, method, path_info) when is_list(path_info) do
-    with {metadata, _prepare, _pipeline, {_plug, _opts}} <-
+    with {metadata, _prepare, _pipeline, _dispatch} <-
            router.__match_route__(method, path_info) do
       Map.delete(metadata, :conn)
     end
