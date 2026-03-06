@@ -4,17 +4,35 @@ defmodule Combo.Router.Scope do
   alias Combo.Router.ModuleAttr
   alias Combo.Router.Utils
 
-  defstruct path_info: [],
-            alias: [],
-            as: [],
-            pipes: [],
-            private: %{},
-            assigns: %{},
-            log: :debug
+  @struct_keys [:path, :path_info, :alias, :as, :pipes, :private, :assigns, :log]
+  @enforce_keys @struct_keys
+  defstruct @struct_keys
+
+  @type t :: %__MODULE__{
+          path: String.t(),
+          path_info: [String.t()],
+          alias: [module()],
+          as: [atom() | String.t()],
+          pipes: [atom()],
+          private: map(),
+          assigns: map(),
+          log: Logger.level()
+        }
 
   @doc false
   def setup(router) do
-    ModuleAttr.put(router, :scopes, [%__MODULE__{}])
+    scope = %__MODULE__{
+      path: "/",
+      path_info: [],
+      alias: [],
+      as: [],
+      pipes: [],
+      private: %{},
+      assigns: %{},
+      log: :debug
+    }
+
+    ModuleAttr.put(router, :scopes, [scope])
   end
 
   @doc false
@@ -56,11 +74,13 @@ defmodule Combo.Router.Scope do
     opts = normalize_scope_args(args)
 
     path_info =
-      if path = Keyword.get(opts, :path),
-        do: path |> Utils.validate_path!() |> Utils.split_path(),
-        else: []
+      opts
+      |> Keyword.get(:path, "/")
+      |> Utils.validate_path!()
+      |> Utils.split_path()
+      |> then(&Kernel.++(scope.path_info, &1))
 
-    path_info = scope.path_info ++ path_info
+    path = Utils.build_path(path_info)
     alias = append_value(scope.alias, Keyword.get(opts, :alias))
     as = append_value(scope.as, Keyword.get(opts, :as))
     pipes = scope.pipes
@@ -69,6 +89,7 @@ defmodule Combo.Router.Scope do
     log = Keyword.get(opts, :log, scope.log)
 
     %__MODULE__{
+      path: path,
       path_info: path_info,
       alias: alias,
       as: as,
