@@ -5,10 +5,11 @@ defmodule Combo.Router.Route do
   alias Combo.Router.Scope
   alias Combo.Router.Utils
 
-  defstruct [
+  @struct_keys [
     :line,
     :kind,
     :verb,
+    :path,
     :path_info,
     :plug,
     :plug_opts,
@@ -18,11 +19,14 @@ defmodule Combo.Router.Route do
     :assigns,
     :metadata
   ]
+  @enforce_keys @struct_keys
+  defstruct @struct_keys
 
   @type t :: %__MODULE__{
           line: non_neg_integer(),
           kind: :match | :forward,
           verb: atom(),
+          path: String.t(),
           path_info: [String.t()],
           plug: atom(),
           plug_opts: atom(),
@@ -79,6 +83,7 @@ defmodule Combo.Router.Route do
     end
 
     path_info = join_path_info(scope, path_info)
+    path = Utils.build_path(path_info)
     plug = if alias?, do: join_alias(scope, plug), else: plug
     as = join_as(scope, as)
     private = Map.merge(scope.private, private)
@@ -100,6 +105,7 @@ defmodule Combo.Router.Route do
       line,
       kind,
       verb,
+      path,
       path_info,
       plug,
       plug_opts,
@@ -127,6 +133,7 @@ defmodule Combo.Router.Route do
         line,
         kind,
         verb,
+        path,
         path_info,
         plug,
         plug_opts,
@@ -138,6 +145,7 @@ defmodule Combo.Router.Route do
       )
       when kind in [:match, :forward] and
              is_atom(verb) and
+             is_binary(path) and
              is_list(path_info) and
              is_atom(plug) and
              (is_binary(helper) or is_nil(helper)) and
@@ -149,6 +157,7 @@ defmodule Combo.Router.Route do
       line: line,
       kind: kind,
       verb: verb,
+      path: path,
       path_info: path_info,
       plug: plug,
       plug_opts: plug_opts,
