@@ -894,42 +894,4 @@ defmodule Combo.Router do
       Map.delete(metadata, :conn)
     end
   end
-
-  @doc false
-  def __formatted_routes__(router) do
-    Enum.flat_map(router.__routes__(), fn route ->
-      Code.ensure_loaded(route.plug)
-
-      if function_exported?(route.plug, :formatted_routes, 1) do
-        route.plug_opts
-        |> route.plug.formatted_routes()
-        |> Enum.map(fn nested_route ->
-          route = %{
-            route
-            | verb: nested_route.verb,
-              path_info: route.path_info ++ nested_route.path_info
-          }
-
-          Map.put(route, :label, nested_route.label)
-        end)
-      else
-        plug =
-          case route.metadata[:mfa] do
-            {module, _, _} -> module
-            _ -> route.plug
-          end
-
-        label = "#{inspect(plug)} #{inspect(route.plug_opts)}"
-
-        [
-          %{
-            helper: route.helper,
-            verb: route.verb,
-            path_info: route.path_info,
-            label: label
-          }
-        ]
-      end
-    end)
-  end
 end
