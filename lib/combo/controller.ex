@@ -3,9 +3,9 @@ defmodule Combo.Controller do
   Defines a controller.
 
   A controller is a module that contains actions. And, actions are regular
-  functions that receive a`Plug.Conn` struct and params. For example:
+  functions that receive a `%Plug.Conn{}` and params. For example:
 
-      defmodule Demo.Web.UserController do
+      defmodule MyApp.Web.UserController do
         use Combo.Controller, formats: [:html]
 
         def show(conn, %{"id" => id}) do
@@ -16,7 +16,7 @@ defmodule Combo.Controller do
 
   If we mount the controller and action to a route, like:
 
-      get "/users/:id", Demo.Web.UserController, :show
+      get "/users/:id", MyApp.Web.UserController, :show
 
   Then, when a request matching the route arrives, the action will run.
 
@@ -42,8 +42,8 @@ defmodule Combo.Controller do
 
       use Combo.Controller, formats: [:html, :json]
 
-   Now, when invoking `render/3`, a controller named `Demo.Web.UserController`
-   will invoke `Demo.Web.UserHTML` and `Demo.Web.UserJSON` respectively
+   Now, when invoking `render/3`, a controller named `MyApp.Web.UserController`
+   will invoke `MyApp.Web.UserHTML` and `MyApp.Web.UserJSON` respectively
    when rendering each format:
 
       def show(conn, %{"id" => id}) do
@@ -55,23 +55,23 @@ defmodule Combo.Controller do
       end
 
   You can also specify formats to render by calling `put_view/2` directly with
-  a connection. For example, instead of inferring the the view names from the
-  controller, as done in:
+  a `%Plug.Conn{}`. For example, instead of inferring the the view names from
+  the controller, as done in:
 
       use Combo.Controller, formats: [:html, :json]
 
   You can write the above explicitly in your actions as:
 
-      put_view(conn, html: Demo.Web.UserHTML, json: Demo.Web.UserJSON)
+      put_view(conn, html: MyApp.Web.UserHTML, json: MyApp.Web.UserJSON)
 
-  Or as a plug:
+  Or, as a plug:
 
-      plug :put_view, html: Demo.Web.UserHTML, json: Demo.Web.UserJSON
+      plug :put_view, html: MyApp.Web.UserHTML, json: MyApp.Web.UserJSON
 
   ## Layouts
 
   Many applications have shared content, most often the `<head>` tag and its
-  contents. In Combo, this is done via the `put_layout/2`:
+  contents. You can use `put_layout/2`: in your actions as:
 
       put_layout(conn, html: {Demo.Web.Layouts, :root})
 
@@ -84,8 +84,8 @@ defmodule Combo.Controller do
   As with routers, controllers also have their own plug pipeline.
   However, different from routers, controllers have a single pipeline:
 
-      defmodule MyAppWeb.UserController do
-        use MyAppWeb, :controller
+      defmodule MyApp.Web.UserController do
+        use MyApp.Web, :controller
 
         plug :authenticate, usernames: ["jose", "eric", "sonny"]
 
@@ -108,8 +108,8 @@ defmodule Combo.Controller do
 
   ### Guards
 
-  `plug/2` in controllers supports guards, allowing a developer to configure
-  a plug to only run in some particular action.
+  `plug/2` in controllers supports guards, allowing to configure a plug to only
+  run in some particular actions.
 
       plug :do_something when action in [:show, :edit]
 
@@ -128,8 +128,8 @@ defmodule Combo.Controller do
 
   ## Controllers are plugs
 
-  Like routers, controllers are plugs, but they are wired to dispatch
-  to a particular function which is called an action.
+  Like routers, controllers are plugs, but they are wired to dispatch to a
+  particular function which is called an action.
 
   For example, the route:
 
