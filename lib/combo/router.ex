@@ -251,7 +251,7 @@ defmodule Combo.Router do
   defmacro __using__(_) do
     quote do
       unquote(prelude())
-      unquote(match_dispatch())
+      unquote(plug_impl())
     end
   end
 
@@ -267,7 +267,7 @@ defmodule Combo.Router do
     end
   end
 
-  defp match_dispatch do
+  defp plug_impl do
     quote location: :keep, generated: true do
       @behaviour Plug
 
