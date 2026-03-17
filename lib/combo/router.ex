@@ -306,11 +306,11 @@ defmodule Combo.Router do
     routes = env.module |> ModuleAttr.get(:routes) |> Enum.reverse()
     routes_with_exprs = Enum.map(routes, &{&1, Route.build_exprs(&1)})
 
-    # check all controller modules and functions referenced by routes exist.
+    # check all plugs referenced by routes.
     checks =
       routes
-      |> Enum.map(fn %{line: line, metadata: metadata, plug: plug} ->
-        {line, Map.get(metadata, :mfa, {plug, :init, 1})}
+      |> Enum.map(fn %{line: line, plug: plug} ->
+        {line, {plug, :init, 1}}
       end)
       |> Enum.uniq()
       |> Enum.map(fn {line, {module, function, arity}} ->
@@ -583,10 +583,10 @@ defmodule Combo.Router do
     * `:log` - the level to log the route dispatching under, may be set to
       `false`.
       Defaults to `:debug`. Route dispatching contains information about how
-      the route is handled (which controller action is called, what parameters
-      are available and which pipelines are used) and is separate from the plug
-      level logging. To alter the plug log level, please see
-      https://hexdocs.pm/combo/Combo.Logger.html#module-dynamic-log-level.
+      the route is handled (which plug is called, what plug_opts are given,
+      what parameters are available and which pipelines are used) and is
+      separate from the plug level logging. To alter the plug log level, please
+      see https://hexdocs.pm/combo/Combo.Logger.html#module-dynamic-log-level.
 
   ## Shortcuts
 
@@ -748,8 +748,7 @@ defmodule Combo.Router do
       It is separated from the plug level logging. To alter the plug log level,
       please see https://hexdocs.pm/combo/Combo.Logger.html#module-dynamic-log-level.
     * `:metadata` - the map of metadata used by the telemetry events and returned
-      by `route_info/4`. The `:mfa` field is used by telemetry to print logs
-      and by the router to emit compile time checks. Custom fields may be added.
+      by `route_info/4`. Custom fields can be added.
 
   ## Examples
 

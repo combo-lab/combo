@@ -214,25 +214,22 @@ defmodule Combo.Logger do
   def combo_router_dispatch_start(_, _, %{log: false}, _), do: :ok
 
   def combo_router_dispatch_start(_, _, metadata, _) do
-    %{log: level, conn: conn, plug: plug} = metadata
+    %{
+      conn: conn,
+      pipe_through: pipe_through,
+      plug: plug,
+      plug_opts: plug_opts,
+      log: level
+    } = metadata
+
     level = log_level(level, conn)
 
     Logger.log(level, fn ->
-      %{
-        pipe_through: pipe_through,
-        plug_opts: plug_opts
-      } = metadata
-
-      log_mfa =
-        case metadata[:mfa] do
-          {mod, fun, arity} -> mfa(mod, fun, arity)
-          _ when is_atom(plug_opts) -> mfa(plug, plug_opts, 2)
-          _ -> inspect(plug)
-        end
-
       [
-        "Processing with ",
-        log_mfa,
+        "Dispatching to plug ",
+        inspect(plug),
+        " with opts ",
+        inspect(plug_opts),
         ?\n,
         "  Parameters: ",
         params(conn.params),
@@ -242,9 +239,6 @@ defmodule Combo.Logger do
       ]
     end)
   end
-
-  defp mfa(mod, fun, arity),
-    do: [inspect(mod), ?., Atom.to_string(fun), ?/, arity + ?0]
 
   defp params(%Plug.Conn.Unfetched{}), do: "[UNFETCHED]"
   defp params(params), do: params |> FilteredParams.filter() |> inspect()

@@ -69,7 +69,6 @@ defmodule Combo.Router.RoutingTest do
 
     get "/no_log", SomePlug, [], log: false
     get "/fun_log", SomePlug, [], log: {LogLevel, :log_level, []}
-    get "/override-plug-name", SomePlug, :action, metadata: %{mfa: {LogLevel, :log_level, 1}}
     get "/users/:user_id/files/:id", UserController, :image
 
     scope "/halt-plug" do
@@ -256,7 +255,7 @@ defmodule Combo.Router.RoutingTest do
 
     test "logs controller and action with (path) parameters" do
       assert capture_log(fn -> call(Router, :get, "/users/1", foo: "bar") end) =~ """
-             [debug] Processing with Combo.Router.RoutingTest.UserController.show/2
+             [debug] Dispatching to plug Combo.Router.RoutingTest.UserController with opts :show
                Parameters: %{"foo" => "bar", "id" => "1"}
                Pipelines: []
              """
@@ -264,7 +263,7 @@ defmodule Combo.Router.RoutingTest do
 
     test "logs controller and action with filtered parameters" do
       assert capture_log(fn -> call(Router, :get, "/users/1", password: "bar") end) =~ """
-             [debug] Processing with Combo.Router.RoutingTest.UserController.show/2
+             [debug] Dispatching to plug Combo.Router.RoutingTest.UserController with opts :show
                Parameters: %{"id" => "1", "password" => "[FILTERED]"}
                Pipelines: []
              """
@@ -272,7 +271,7 @@ defmodule Combo.Router.RoutingTest do
 
     test "logs plug with pipeline and custom level" do
       assert capture_log(fn -> call(Router, :get, "/plug") end) =~ """
-             [info] Processing with Combo.Router.RoutingTest.SomePlug
+             [info] Dispatching to plug Combo.Router.RoutingTest.SomePlug with opts []
                Parameters: %{}
                Pipelines: [:noop]
              """
@@ -283,23 +282,18 @@ defmodule Combo.Router.RoutingTest do
                "Processing with Combo.Router.RoutingTest.SomePlug"
     end
 
-    test "overrides plug name that processes the route when set in metadata" do
-      assert capture_log(fn -> call(Router, :get, "/override-plug-name") end) =~
-               "Processing with Combo.Router.RoutingTest.LogLevel.log_level/1"
-    end
-
     test "logs custom level when log is set to a 1-arity function" do
       assert capture_log(fn -> call(Router, :get, "/fun_log", level: "info") end) =~
-               "[info] Processing with Combo.Router.RoutingTest.SomePlug"
+               "[info] Dispatching to plug Combo.Router.RoutingTest.SomePlug with opts []"
 
       assert capture_log(fn -> call(Router, :get, "/fun_log", level: "error") end) =~
-               "[error] Processing with Combo.Router.RoutingTest.SomePlug"
+               "[error] Dispatching to plug Combo.Router.RoutingTest.SomePlug with opts []"
 
       assert capture_log(fn -> call(Router, :get, "/fun_log", level: "yelling") end) =~
-               "[debug] Processing with Combo.Router.RoutingTest.SomePlug"
+               "[debug] Dispatching to plug Combo.Router.RoutingTest.SomePlug with opts []"
 
       assert capture_log(fn -> call(Router, :get, "/fun_log") end) =~
-               "[debug] Processing with Combo.Router.RoutingTest.SomePlug"
+               "[debug] Dispatching to plug Combo.Router.RoutingTest.SomePlug with opts []"
     end
   end
 

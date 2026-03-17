@@ -104,19 +104,12 @@ defmodule Combo.Router.ConsoleFormatter do
       path: path,
       helper: helper,
       plug: plug,
-      plug_opts: plug_opts,
-      metadata: metadata
+      plug_opts: plug_opts
     } = route
 
     verb = verb_name(verb)
     route_name = route_name(router, helper)
     {verb_len, path_len, route_name_len} = column_widths
-
-    log_module =
-      case metadata[:mfa] do
-        {mod, _fun, _arity} -> mod
-        _ -> plug
-      end
 
     String.pad_leading(route_name, route_name_len) <>
       "  " <>
@@ -124,7 +117,7 @@ defmodule Combo.Router.ConsoleFormatter do
       "  " <>
       String.pad_trailing(path, path_len) <>
       "  " <>
-      "#{inspect(log_module)} #{inspect(plug_opts)}\n"
+      "#{inspect(plug)} #{inspect(plug_opts)}\n"
   end
 
   defp route_name(_router, nil), do: ""
