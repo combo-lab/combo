@@ -18,13 +18,6 @@ defmodule Combo.Router do
     end
   end
 
-  defmodule MalformedURIError do
-    @moduledoc """
-    Exception raised when the URI is malformed on matching.
-    """
-    defexception [:message, plug_status: 400]
-  end
-
   @moduledoc """
   Defines a router.
 
