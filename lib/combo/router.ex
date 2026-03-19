@@ -8,7 +8,7 @@ defmodule Combo.Router do
     def exception(opts) do
       conn = Keyword.fetch!(opts, :conn)
       router = Keyword.fetch!(opts, :router)
-      path = "/" <> Enum.join(conn.path_info, "/")
+      path = conn.request_path
 
       %NoRouteError{
         message: "no route found for #{conn.method} #{path} (#{inspect(router)})",
