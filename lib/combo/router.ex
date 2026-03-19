@@ -22,10 +22,7 @@ defmodule Combo.Router do
   Defines a router.
 
   The router provides a set of macros for defining routes which dispatch
-  requests to specific controllers and actions.
-
-  > Combo's router is extremely efficient, as it relies on pattern matching
-  > for matching routes.
+  requests to specific plugs.
 
   ## Examples
 
@@ -35,80 +32,105 @@ defmodule Combo.Router do
         get "/pages/:page", MyApp.Web.PageController, :show
       end
 
-  ## Routing
+  ## Routes
 
   `get/3`, `post/3`, `put/3`, and other macros named after HTTP verbs are used
-  to define routes.
+  to define routes. For example:
 
-      get "/pages", MyApp.Web.PageController, :index
+      get "/", MyApp.Web.PageController, :home
 
-  defines a route matches a `GET` request to `/pages` and dispatches the request
-  to the `index` action in `MyApp.Web.PageController`.
+  defines a route matches a `GET` request to `/` and dispatches the request to
+  the `:home` action in `MyApp.Web.PageController`.
+
+  ## Path parameters
+
+  Path parameters capture values from the URL. And, there're several types of
+  them:
+
+    * segment parameters
+    * partial segment parameters
+    * catch-all parameters
+
+  ### Segment parameters
+
+  Segment parameters capture an entire path segment.
+
+  Define them in the route path with `:` followed by a name. And, the captured
+  values are strings, cast them yourself if you need other data types.
+
+  For example:
 
       get "/pages/:page", MyApp.Web.PageController, :show
 
-  defines a route matches a `GET` request to `/pages/hello` and dispatches the
-  request to the `show` action in `MyApp.Web.PageController` with
-  `%{"page" => "hello"}` in `params`.
+  When a request hits the route with the URL `"/pages/hello"`, the router
+  populates `conn.params["page"]` with `"hello"`.
+
+  ### Partial segment parameters
+
+  Partial segment parameters capture a trailing portion from within a single
+  path segment.
+
+  Define them in the route path with `:` followed by a name. And, the captured
+  values are strings, cast them yourself if you need other data types.
+
+  For example:
+
+      get "/user-:name", MyApp.Web.UserController, :show
+
+  When a request hits the route with the URL `"/user-john"`, the router
+  populates `conn.params["name"]` with `"john"`.
+
+  ### Catch-all parameters
+
+  Catch-all parameters capture one or more remaining path segments.
+
+  Define them in the route path with `*` followed by a name. And, the captured
+  values are a list of strings - one per path segment, cast them yourself if
+  you need other data types.
+
+  For example:
+
+      get "/files/*path", MyApp.Web.FileController, :show
+
+  When a request hits the route with the URL `"/files/images/logo.png"`, the
+  router populates `conn.params["path"]` with `["images", "logo.png"]`.
+
+  ### Accessing path parameters
+
+  To access path parameters, pattern match directly in the controller action:
 
       defmodule MyApp.Web.PageController do
-        def show(conn, params) do
-          # %{"page" => "hello"} == params
+        def show(conn, %{"page" => page}) do
+          # ...
         end
       end
 
-  Partial and multiple segments can be matched. For example:
+  ### Combining different types of path paramaters
 
-      get "/api/v:version/pages/:id", MyApp.Web.PageController, :show
+  All these types of path parameters can be combined, with the only restriction
+  being that catch-all parameters must appear at the end.
 
-  matches `/api/v1/pages/2` and puts `%{"version" => "1", "id" => "2"}` in
-  `params`. Only the trailing part of a segment can be captured.
+  ## Route ordering
 
-  Routes are matched from top to bottom. The second route here:
+  Routes are matched from top to bottom.
 
-      get "/pages/:page", PageController, :show
-      get "/pages/hello", PageController, :hello
+  For example, the request with the URL "/pages/hello" will never hit the
+  second route, because it always hits the first route.
 
-  will never match `/pages/hello` because `/pages/:page` matches that first.
+      get "/pages/:page", MyApp.Web.PageController, :show
+      get "/pages/hello", MyApp.Web.PageController, :hello
 
-  Routes can use glob-like patterns to match trailing segments.
+  ## Route helpers
 
-      get "/pages/*page", PageController, :show
-
-  matches `/pages/hello/world` and puts the globbed segments in `params["page"]`.
-
-      GET /pages/hello/world
-      %{"page" => ["hello", "world"]} = params
-
-  Globs cannot have prefixes nor suffixes, but can be mixed with variables:
-
-      get "/pages/he:page/*rest", PageController, :show
-
-  matches
-
-      GET /pages/hello
-      %{"page" => "llo", "rest" => []} = params
-
-      GET /pages/hey/there/world
-      %{"page" => "y", "rest" => ["there" "world"]} = params
-
-  > #### Why the macros? {: .info}
-  >
-  > `Combo.Router` compiles all the routes to a single case-statement with
-  > pattern matching rules, which is heavily optimized by the Erlang VM.
-  >
-
-  ### Route helpers
-
-  Combo generates a module `Helpers` for your routes, which contains named
-  helpers to help you generate and keep your routes up to date.
+  Combo generates a `Helpers` module that provides helper functions for building
+  paths or URLs from your routes.
 
   Helpers are automatically generated based on the controller name.
   For example, the route:
 
       get "/pages/:page", PageController, :show
 
-  will generate the following named helper:
+  will generate the following helper:
 
       MyApp.Web.Router.Helpers.page_path(conn, :show, "hello")
       "/pages/hello"
@@ -122,18 +144,17 @@ defmodule Combo.Router do
       MyApp.Web.Router.Helpers.page_url(conn, :show, "hello", some: "query")
       "http://example.com/pages/hello?some=query"
 
-  If the route contains glob-like patterns, parameters for those have to be
-  given as list:
+  If the route contains catch-all paramaters, parameters for those should be
+  given as a list:
 
-      MyApp.Web.Router.Helpers.page_path(conn, :show, ["hello", "world"])
-      "/pages/hello/world"
+      MyApp.Web.Router.Helpers.file_path(conn, :show, ["images", "logo.png"])
+      "/file/images/logo.png"
 
-  The named helper can also be customized with the `:as` option. Given
-  the route:
+  The helper can also be customized with the `:as` option. Given the route:
 
       get "/pages/:page", PageController, :show, as: :special_page
 
-  the named helper will be:
+  the helper will be:
 
       MyApp.Web.Router.Helpers.special_page_path(conn, :show, "hello")
       "/pages/hello"
@@ -152,16 +173,12 @@ defmodule Combo.Router do
   convenient to use, since you don't have to repeat `MyApp.Web.` prefix on all
   routes.
 
-  Like all paths, you can define dynamic segments that will be applied as
-  parameters in the controller. For example:
+  Like all paths, you can define path parameters that will be applied
+  in controllers. For example:
 
       scope "/api/:version", MyApp.Web do
         get "/pages/:id", PageController, :show
       end
-
-  The route above will match on the path `"/api/v1/pages/1"` and in the
-  controller the `params` argument be a map like
-  `%{"version" => "v1", "id" => "1"}`.
 
   Check `scope/2` for more information.
 
@@ -725,8 +742,8 @@ defmodule Combo.Router do
     * `:scoped_module` - whether to apply the scoped module to the route.
       Defaults to `true`.
     * `:as` - the name as an atom or a string, to override the default naming
-      for the named route helpers.
-      If `nil`, it will not generate named route helpers for this route.
+      for the route helpers.
+      If `nil`, it will not generate route helpers for this route.
     * `:private` - the private data as a map to merge into the connection when
       a route matches.
       Default to `%{}`.
