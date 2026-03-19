@@ -900,7 +900,7 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     aliases = rest |> Enum.reverse() |> Enum.map(&String.to_atom/1)
     %{line: line, column: column} = t_meta
     mod_ast = {:__aliases__, [line: line, column: column], aliases}
-    mod_size = Enum.sum(Enum.map(rest, &byte_size/1)) + length(rest) + 1
+    mod_size = byte_size(t_name) - byte_size(fun_name) + 1
     fun = String.to_atom(fun_name)
     {mod_ast, mod_size, fun}
   end
