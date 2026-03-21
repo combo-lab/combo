@@ -406,14 +406,12 @@ defmodule Combo.Router do
 
   defp build_metadata(route, path_params) do
     %{
-      path_info: path_info,
+      path: path,
       plug: plug,
       plug_opts: plug_opts,
       pipe_through: pipe_through,
       metadata: metadata
     } = route
-
-    path = Utils.build_path(path_info)
 
     pairs = [
       conn: nil,
