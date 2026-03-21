@@ -17,6 +17,7 @@ defmodule Combo.Router.Route do
     :pipe_through,
     :private,
     :assigns,
+    :log,
     :metadata
   ]
   @enforce_keys @struct_keys
@@ -34,6 +35,7 @@ defmodule Combo.Router.Route do
           pipe_through: [atom()],
           private: map(),
           assigns: map(),
+          log: Logger.level() | false,
           metadata: map()
         }
 
@@ -89,10 +91,7 @@ defmodule Combo.Router.Route do
     private = Map.merge(scope.private, private)
     assigns = Map.merge(scope.assigns, assigns)
 
-    metadata =
-      opts
-      |> Keyword.get(:metadata, %{})
-      |> Map.put(:log, log)
+    metadata = Keyword.get(opts, :metadata, %{})
 
     metadata =
       if kind == :forward do
@@ -113,6 +112,7 @@ defmodule Combo.Router.Route do
       scope.pipes,
       private,
       assigns,
+      log,
       metadata
     )
   end
@@ -141,6 +141,7 @@ defmodule Combo.Router.Route do
         pipe_through,
         private,
         assigns,
+        log,
         metadata
       )
       when kind in [:match, :forward] and
@@ -165,6 +166,7 @@ defmodule Combo.Router.Route do
       pipe_through: pipe_through,
       private: private,
       assigns: assigns,
+      log: log,
       metadata: metadata
     }
   end

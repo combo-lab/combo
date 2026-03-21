@@ -16,7 +16,7 @@ defmodule Combo.Router.Scope do
           pipes: [atom()],
           private: map(),
           assigns: map(),
-          log: Logger.level()
+          log: Logger.level() | false
         }
 
   @doc false

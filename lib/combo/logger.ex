@@ -211,15 +211,19 @@ defmodule Combo.Logger do
   ## Event: [:combo, :router_dispatch, :start]
 
   @doc false
-  def combo_router_dispatch_start(_, _, %{log: false}, _), do: :ok
+  def combo_router_dispatch_start(_, _, %{route: %{log: false}} = _metadata, _) do
+    :ok
+  end
 
   def combo_router_dispatch_start(_, _, metadata, _) do
     %{
-      conn: conn,
-      pipe_through: pipe_through,
-      plug: plug,
-      plug_opts: plug_opts,
-      log: level
+      route: %{
+        pipe_through: pipe_through,
+        plug: plug,
+        plug_opts: plug_opts,
+        log: level
+      },
+      conn: conn
     } = metadata
 
     level = log_level(level, conn)

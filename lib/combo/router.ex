@@ -410,24 +410,27 @@ defmodule Combo.Router do
   end
 
   defp build_metadata(route, path_params) do
-    %{
-      path: path,
-      plug: plug,
-      plug_opts: plug_opts,
-      pipe_through: pipe_through,
-      metadata: metadata
-    } = route
+    route =
+      Map.take(route, [
+        :kind,
+        :verb,
+        :path,
+        :path_info,
+        :plug,
+        :plug_opts,
+        :pipe_through,
+        :private,
+        :assigns,
+        :log,
+        :metadata
+      ])
 
-    pairs = [
-      conn: nil,
-      route: path,
-      plug: plug,
-      plug_opts: Macro.escape(plug_opts),
-      path_params: path_params,
-      pipe_through: pipe_through
-    ]
-
-    {:%{}, [], pairs ++ Macro.escape(Map.to_list(metadata))}
+    {:%{}, [],
+     [
+       conn: nil,
+       route: Macro.escape(route),
+       path_params: path_params
+     ]}
   end
 
   defp build_pipes(name, []) do
