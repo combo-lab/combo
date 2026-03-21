@@ -510,14 +510,16 @@ defmodule Combo.Router do
         rescue
           e in Plug.Conn.WrapperError ->
             measurements = %{duration: System.monotonic_time() - start}
-            new_metadata = %{conn: conn, kind: :error, reason: e, stacktrace: __STACKTRACE__}
+            exception = %{kind: :error, reason: e, stacktrace: __STACKTRACE__}
+            new_metadata = %{conn: conn, exception: exception}
             metadata = Map.merge(metadata, new_metadata)
             :telemetry.execute([:combo, :router_dispatch, :exception], measurements, metadata)
             Plug.Conn.WrapperError.reraise(e)
         catch
           kind, reason ->
             measurements = %{duration: System.monotonic_time() - start}
-            new_metadata = %{conn: conn, kind: kind, reason: reason, stacktrace: __STACKTRACE__}
+            exception = %{kind: kind, reason: reason, stacktrace: __STACKTRACE__}
+            new_metadata = %{conn: conn, exception: exception}
             metadata = Map.merge(metadata, new_metadata)
             :telemetry.execute([:combo, :router_dispatch, :exception], measurements, metadata)
             Plug.Conn.WrapperError.reraise(piped_conn, kind, reason, __STACKTRACE__)

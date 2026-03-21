@@ -398,7 +398,7 @@ defmodule Combo.Router.RoutingTest do
       call(Router, :get, "/users/123")
 
       assert_received {:telemetry_event, @router_start_event,
-                       {measures, %{route: %{path: "/users/:id"}} = meta, _config}}
+                       {measures, %{route: %{path: "/users/:id"}} = metadata, _config}}
 
       assert is_integer(measures.system_time)
 
@@ -413,17 +413,19 @@ defmodule Combo.Router.RoutingTest do
                  pipe_through: [],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :show,
+                 private: %{},
+                 assigns: %{},
                  log: :debug,
                  metadata: %{access: :user}
                }
-             } = meta
+             } = metadata
     end
 
     test "combo.router_dispatch.stop has supported measurements and metadata" do
       call(Router, :get, "/users/123")
 
       assert_received {:telemetry_event, @router_stop_event,
-                       {measures, %{route: %{path: "/users/:id"}} = meta, _config}}
+                       {measures, %{route: %{path: "/users/:id"}} = metadata, _config}}
 
       assert is_integer(measures.duration)
 
@@ -438,10 +440,12 @@ defmodule Combo.Router.RoutingTest do
                  pipe_through: [],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :show,
+                 private: %{},
+                 assigns: %{},
                  log: :debug,
                  metadata: %{access: :user}
                }
-             } = meta
+             } = metadata
     end
 
     test "combo.router_dispatch.exception has supported measurements and metadata on crash" do
@@ -450,7 +454,7 @@ defmodule Combo.Router.RoutingTest do
       end
 
       assert_received {:telemetry_event, @router_exception_event,
-                       {measures, %{route: %{path: "/users/:id/raise"}} = meta, _config}}
+                       {measures, %{route: %{path: "/users/:id/raise"}} = metadata, _config}}
 
       assert is_integer(measures.duration)
 
@@ -465,18 +469,22 @@ defmodule Combo.Router.RoutingTest do
                  pipe_through: [:noop],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :raise,
+                 private: %{},
+                 assigns: %{},
                  log: :info,
                  metadata: %{}
                },
-               kind: :error,
-               reason: %Plug.Conn.WrapperError{
-                 conn: %Plug.Conn{state: :unset},
+               exception: %{
                  kind: :error,
-                 reason: %RuntimeError{message: "boom"},
-                 stack: wrapped_stacktrace
-               },
-               stacktrace: stacktrace
-             } = meta
+                 reason: %Plug.Conn.WrapperError{
+                   conn: %Plug.Conn{state: :unset},
+                   kind: :error,
+                   reason: %RuntimeError{message: "boom"},
+                   stack: wrapped_stacktrace
+                 },
+                 stacktrace: stacktrace
+               }
+             } = metadata
 
       assert is_list(wrapped_stacktrace) && length(wrapped_stacktrace) > 0
       assert is_list(stacktrace) && length(stacktrace) > 0
@@ -486,7 +494,7 @@ defmodule Combo.Router.RoutingTest do
       catch_exit(call(Router, :get, "/exit"))
 
       assert_received {:telemetry_event, @router_exception_event,
-                       {measures, %{route: %{path: "/exit"}} = meta, _config}}
+                       {measures, %{route: %{path: "/exit"}} = metadata, _config}}
 
       assert is_integer(measures.duration)
 
@@ -502,12 +510,16 @@ defmodule Combo.Router.RoutingTest do
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :exit,
                  log: :debug,
+                 private: %{},
+                 assigns: %{},
                  metadata: %{}
                },
-               kind: :exit,
-               reason: :boom,
-               stacktrace: stacktrace
-             } = meta
+               exception: %{
+                 kind: :exit,
+                 reason: :boom,
+                 stacktrace: stacktrace
+               }
+             } = metadata
 
       assert is_list(stacktrace) && length(stacktrace) > 0
     end
