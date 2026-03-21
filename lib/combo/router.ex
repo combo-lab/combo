@@ -261,6 +261,7 @@ defmodule Combo.Router do
     quote do
       unquote(prelude())
       unquote(plug_impl())
+      unquote(imports())
     end
   end
 
@@ -269,8 +270,6 @@ defmodule Combo.Router do
       Pipeline.setup(__MODULE__)
       Scope.setup(__MODULE__)
       Route.setup(__MODULE__)
-
-      import unquote(__MODULE__)
 
       @before_compile unquote(__MODULE__)
     end
@@ -307,6 +306,12 @@ defmodule Combo.Router do
       end
 
       defoverridable init: 1, call: 2
+    end
+  end
+
+  defp imports do
+    quote do
+      import unquote(__MODULE__)
     end
   end
 
@@ -349,6 +354,7 @@ defmodule Combo.Router do
       @doc false
       def __routes__, do: unquote(Macro.escape(routes))
 
+      # It exists solely for compile-time checks. And, it is not meant to be called.
       @doc false
       def __checks__, do: unquote({:__block__, [], checks})
 
