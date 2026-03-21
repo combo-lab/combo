@@ -44,8 +44,7 @@ defmodule Combo.Router do
 
   ## Path parameters
 
-  Path parameters capture values from the URL. And, there're several types of
-  them:
+  Path parameters capture values from the URL. There're several types of them:
 
     * segment parameters
     * partial segment parameters
@@ -110,7 +109,7 @@ defmodule Combo.Router do
   All these types of path parameters can be combined, with the only restriction
   being that catch-all parameters must appear at the end.
 
-  ## Route ordering
+  ## Ordering routes
 
   Routes are matched from top to bottom.
 
@@ -250,7 +249,7 @@ defmodule Combo.Router do
   ## Listing routes
 
   Combo ships with a `mix combo.routes` task that formats all routes in a given
-  router. We can use it to verify all routes included in the router.
+  router. We can use it to list all routes included in the router.
   """
 
   alias Combo.Router.{Pipeline, Scope, Route, Helpers, Utils, ModuleAttr}
