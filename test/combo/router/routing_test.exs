@@ -413,8 +413,6 @@ defmodule Combo.Router.RoutingTest do
                  pipe_through: [],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :show,
-                 private: %{},
-                 assigns: %{},
                  log: :debug,
                  metadata: %{access: :user}
                }
@@ -440,8 +438,6 @@ defmodule Combo.Router.RoutingTest do
                  pipe_through: [],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :show,
-                 private: %{},
-                 assigns: %{},
                  log: :debug,
                  metadata: %{access: :user}
                }
@@ -469,8 +465,6 @@ defmodule Combo.Router.RoutingTest do
                  pipe_through: [:noop],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :raise,
-                 private: %{},
-                 assigns: %{},
                  log: :info,
                  metadata: %{}
                },
@@ -510,8 +504,6 @@ defmodule Combo.Router.RoutingTest do
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :exit,
                  log: :debug,
-                 private: %{},
-                 assigns: %{},
                  metadata: %{}
                },
                exception: %{
@@ -537,8 +529,6 @@ defmodule Combo.Router.RoutingTest do
                  pipe_through: [],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :not_found,
-                 private: %{},
-                 assigns: %{},
                  log: :debug,
                  metadata: %{}
                }
@@ -554,8 +544,6 @@ defmodule Combo.Router.RoutingTest do
                  pipe_through: [],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :show,
-                 private: %{},
-                 assigns: %{},
                  log: :debug,
                  metadata: %{access: :user}
                }
@@ -571,8 +559,6 @@ defmodule Combo.Router.RoutingTest do
                  pipe_through: [],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :index,
-                 private: %{},
-                 assigns: %{},
                  log: :debug,
                  metadata: %{}
                }
@@ -592,8 +578,6 @@ defmodule Combo.Router.RoutingTest do
                  pipe_through: [],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :not_found,
-                 private: %{},
-                 assigns: %{},
                  log: :debug,
                  metadata: %{}
                }
@@ -611,8 +595,6 @@ defmodule Combo.Router.RoutingTest do
                  pipe_through: [:noop, :halt],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :raise,
-                 private: %{},
-                 assigns: %{},
                  log: :info,
                  metadata: %{}
                }

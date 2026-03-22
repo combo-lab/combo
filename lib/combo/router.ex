@@ -416,11 +416,9 @@ defmodule Combo.Router do
         :verb,
         :path,
         :path_info,
+        :pipe_through,
         :plug,
         :plug_opts,
-        :pipe_through,
-        :private,
-        :assigns,
         :log,
         :metadata
       ])
