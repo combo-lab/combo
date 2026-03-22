@@ -32,14 +32,14 @@ defmodule Combo.Logger do
     * `[:combo, :router_dispatch, :start]` - dispatched by `Combo.Router`
       before dispatching to a matched route:
       * Measurement: `%{system_time: System.system_time}`
-      * Metadata: `%{conn: Plug.Conn.t, route: binary, plug: module, plug_opts: term, path_params: map, pipe_through: [atom], log: Logger.level | false}`
-      * Disable logging: Pass `log: false` to the router macro, for example: `get("/page", PageController, :index, log: false)`
-      * Configure log level dynamically: `get("/page", PageController, :index, log: {Mod, Fun, Args})`
+      * Metadata: `%{conn: Plug.Conn.t, route: map(), path_params: map()}`
+      * Disable logging: Pass `log: false` to the router macro, for example: `get "/page", PageController, :index, log: false`
+      * Configure log level dynamically: `get "/page", PageController, :index, log: {Mod, Fun, Args}`
 
     * `[:combo, :router_dispatch, :exception]` - dispatched by `Combo.Router`
       after exceptions on dispatching a route:
       * Measurement: `%{duration: native_time}`
-      * Metadata: `%{conn: Plug.Conn.t, kind: :throw | :error | :exit, reason: term(), stacktrace: Exception.stacktrace()}`
+      * Metadata: `%{conn: Plug.Conn.t(), exception: %{kind: :error | :exit | :throw , reason: term(), stacktrace: Exception.stacktrace()}}`
       * Disable logging: This event is not logged
 
     * `[:combo, :router_dispatch, :stop]` - dispatched by `Combo.Router`
