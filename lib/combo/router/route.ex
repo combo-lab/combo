@@ -98,13 +98,6 @@ defmodule Combo.Router.Route do
 
     metadata = Keyword.get(opts, :metadata, %{})
 
-    metadata =
-      if kind == :forward do
-        Map.put(metadata, :forward, path_info)
-      else
-        metadata
-      end
-
     build(
       line,
       kind,
@@ -281,14 +274,14 @@ defmodule Combo.Router.Route do
 
   defp build_dispatch(%__MODULE__{
          kind: :forward,
+         path_info: path_info,
          plug: plug,
-         plug_opts: plug_opts,
-         metadata: metadata
+         plug_opts: plug_opts
        }) do
     quote do
       {
         Combo.Router.Forward,
-        {unquote(metadata.forward), unquote(plug), unquote(Macro.escape(plug_opts))}
+        {unquote(path_info), unquote(plug), unquote(Macro.escape(plug_opts))}
       }
     end
   end
