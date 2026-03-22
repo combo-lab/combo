@@ -79,6 +79,11 @@ defmodule Combo.Router.Route do
     assigns = Keyword.get(opts, :assigns, %{})
     log = Keyword.get(opts, :log, scope.log)
 
+    if kind == :forward && Utils.dynamic_path?(path) do
+      raise ArgumentError,
+            "dynamic segment \"#{path}\" not allowed when forwarding. Use a static path instead"
+    end
+
     if to_string(as) == "static" do
       raise ArgumentError,
             "`static` is a reserved route name derived from #{inspect(plug)} or `:as` option"
@@ -95,7 +100,7 @@ defmodule Combo.Router.Route do
 
     metadata =
       if kind == :forward do
-        Map.put(metadata, :forward, validate_forward_path_info!(path_info))
+        Map.put(metadata, :forward, path_info)
       else
         metadata
       end
@@ -285,19 +290,6 @@ defmodule Combo.Router.Route do
         Combo.Router.Forward,
         {unquote(metadata.forward), unquote(plug), unquote(Macro.escape(plug_opts))}
       }
-    end
-  end
-
-  defp validate_forward_path_info!(path_info) do
-    case Utils.build_path_info_match(path_info) do
-      {[], path_segments} ->
-        path_segments
-
-      _ ->
-        path = Utils.build_path(path_info)
-
-        raise ArgumentError,
-              "dynamic segment \"#{path}\" not allowed when forwarding. Use a static path instead"
     end
   end
 end
