@@ -7,12 +7,13 @@ defmodule Combo.Router.Forward do
   def init(opts), do: opts
 
   @impl true
-  def call(%{path_info: path, script_name: script} = conn, {forward_segments, plug, opts}) do
-    new_path = path -- forward_segments
-    {base, ^new_path} = Enum.split(path, length(path) - length(new_path))
-    conn = %{conn | path_info: new_path, script_name: script ++ base}
+  def call(%{path_info: path_info, script_name: script_name} = conn, {base_path_info, plug, opts}) do
+    new_path_info = path_info -- base_path_info
+    new_script_name = script_name ++ base_path_info
+    conn = %{conn | path_info: new_path_info, script_name: new_script_name}
     opts = plug.init(opts)
     conn = plug.call(conn, opts)
-    %{conn | path_info: path, script_name: script}
+
+    %{conn | path_info: path_info, script_name: script_name}
   end
 end
