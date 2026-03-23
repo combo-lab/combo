@@ -2,15 +2,16 @@ defmodule Combo.Controller do
   @moduledoc """
   Defines a controller.
 
-  A controller is a module that contains actions. And, actions are regular
-  functions that receive a `%Plug.Conn{}` and params. For example:
+  A controller is a plug that dispatches conn to actions based on the plug opts.
+  An action is a regular function that receive a `%Plug.Conn{}` and params.
+
+  For example:
 
       defmodule MyApp.Web.UserController do
         use Combo.Controller, formats: [:html]
 
         def show(conn, %{"id" => id}) do
-          # user = ...
-          render(conn, :show, user: user)
+          # ...
         end
       end
 
