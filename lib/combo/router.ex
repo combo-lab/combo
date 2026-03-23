@@ -301,8 +301,7 @@ defmodule Combo.Router do
       defp prepare(conn) do
         Plug.Conn.merge_private(conn, [
           {:combo_router, __MODULE__},
-          # TODO: can I remove it?
-          {__MODULE__, conn.script_name}
+          {{__MODULE__, :script_name}, conn.script_name}
         ])
       end
 
