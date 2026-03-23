@@ -279,10 +279,8 @@ defmodule Combo.Router.Route do
          plug_opts: plug_opts
        }) do
     quote do
-      {
-        Combo.Router.Forward,
-        {unquote(path_info), unquote(plug), unquote(Macro.escape(plug_opts))}
-      }
+      {Combo.Router.Forward,
+       {unquote(path_info), {unquote(plug), unquote(Macro.escape(plug_opts))}}}
     end
   end
 end
