@@ -69,18 +69,20 @@ defmodule Combo.Router.Route do
             "route plug must be a module, got: #{inspect(plug)}"
     end
 
-    scope = Scope.get_top_scope(module)
-    path_info = path |> Utils.validate_path!() |> Utils.split_path()
-    alias? = Keyword.get(opts, :alias, true)
-    as = Keyword.get_lazy(opts, :as, fn -> Combo.Naming.resource_name(plug, "Controller") end)
-    private = Keyword.get(opts, :private, %{})
-    assigns = Keyword.get(opts, :assigns, %{})
-    log = Keyword.get(opts, :log, scope.log)
+    Utils.validate_path!(path)
 
     if kind == :forward && Utils.dynamic_path?(path) do
       raise ArgumentError,
             "dynamic path \"#{path}\" is not allowed when forwarding. Use a static path instead"
     end
+
+    scope = Scope.get_top_scope(module)
+    path_info = Utils.split_path(path)
+    alias? = Keyword.get(opts, :alias, true)
+    as = Keyword.get_lazy(opts, :as, fn -> Combo.Naming.resource_name(plug, "Controller") end)
+    private = Keyword.get(opts, :private, %{})
+    assigns = Keyword.get(opts, :assigns, %{})
+    log = Keyword.get(opts, :log, scope.log)
 
     if to_string(as) == "static" do
       raise ArgumentError,
