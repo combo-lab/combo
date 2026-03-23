@@ -66,7 +66,7 @@ defmodule Combo.Router.Route do
   def __build_route__(line, module, kind, verb, path, plug, plug_opts, opts) do
     if not is_atom(plug) do
       raise ArgumentError,
-            "routes expect a module plug as second argument, got: #{inspect(plug)}"
+            "route plug must be a module, got: #{inspect(plug)}"
     end
 
     scope = Scope.get_top_scope(module)
