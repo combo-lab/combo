@@ -10,7 +10,12 @@ defmodule Combo.RouterTest do
 
   setup do
     Logger.disable(self())
-    :ok
+    router = build_router()
+    %{router: router}
+  end
+
+  defp build_router do
+    Module.concat(__MODULE__, "Router#{System.unique_integer([:positive])}")
   end
 
   # scope
@@ -222,6 +227,77 @@ defmodule Combo.RouterTest do
         defmodule BadRouter do
           use Support.Router
           get "/", DummyController, :show, as: :static
+        end
+      end
+    end
+  end
+
+  describe "forward/4" do
+    test "forwards requests whose path is the base path", %{router: router} do
+      defmodule router do
+        use Support.Router
+
+        defmodule Assign do
+          def init(opts), do: opts
+          def call(conn, _opts), do: conn |> assign(:conn, conn) |> text("ok")
+        end
+
+        forward "/base", Assign
+      end
+
+      conn = call(router, :get, "/base")
+      assert conn.path_info == ["base"]
+      assert conn.script_name == []
+      assert conn.assigns.conn.path_info == []
+      assert conn.assigns.conn.script_name == ["base"]
+      assert conn.status == 200
+      assert conn.resp_body == "ok"
+    end
+
+    test "forwards requests whose path starts with base path", %{router: router} do
+      defmodule router do
+        use Support.Router
+
+        defmodule Assign do
+          def init(opts), do: opts
+          def call(conn, _opts), do: conn |> assign(:conn, conn) |> text("ok")
+        end
+
+        forward "/base", Assign
+      end
+
+      conn = call(router, :get, "/base/example")
+      assert conn.path_info == ["base", "example"]
+      assert conn.script_name == []
+      assert conn.assigns.conn.path_info == ["example"]
+      assert conn.assigns.conn.script_name == ["base"]
+      assert conn.status == 200
+      assert conn.resp_body == "ok"
+    end
+
+    test "handles plugs with opts", %{router: router} do
+      defmodule router do
+        use Support.Router
+
+        defmodule Assign do
+          def init(opts), do: opts
+          def call(conn, opts), do: conn |> assign(:opts, opts) |> text("ok")
+        end
+
+        forward "/base", Assign, %{foo: "bar"}
+      end
+
+      conn = call(router, :get, "/base/example")
+      assert conn.assigns.opts == %{foo: "bar"}
+      assert conn.status == 200
+      assert conn.resp_body == "ok"
+    end
+
+    test "raises on dynamic path prefix", %{router: router} do
+      assert_raise ArgumentError, ~r{dynamic segment "/api/:version" not allowed}, fn ->
+        defmodule router do
+          use Support.Router
+          forward "/api/:version", FakePlug
         end
       end
     end
