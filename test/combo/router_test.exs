@@ -294,7 +294,7 @@ defmodule Combo.RouterTest do
     end
 
     test "raises on dynamic path prefix", %{router: router} do
-      assert_raise ArgumentError, ~r{dynamic segment "/api/:version" not allowed}, fn ->
+      assert_raise ArgumentError, ~r{dynamic path "/api/:version" is not allowed}, fn ->
         defmodule router do
           use Support.Router
           forward "/api/:version", FakePlug

@@ -79,7 +79,7 @@ defmodule Combo.Router.Route do
 
     if kind == :forward && Utils.dynamic_path?(path) do
       raise ArgumentError,
-            "dynamic segment \"#{path}\" not allowed when forwarding. Use a static path instead"
+            "dynamic path \"#{path}\" is not allowed when forwarding. Use a static path instead"
     end
 
     if to_string(as) == "static" do
