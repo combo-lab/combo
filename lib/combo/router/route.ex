@@ -73,7 +73,7 @@ defmodule Combo.Router.Route do
 
     if kind == :forward && Utils.dynamic_path?(path) do
       raise ArgumentError,
-            "dynamic path \"#{path}\" is not allowed when forwarding. Use a static path instead"
+            "route path must be static when forwarding, got: #{inspect(path)}"
     end
 
     scope = Scope.get_top_scope(module)
