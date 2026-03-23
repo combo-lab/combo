@@ -17,8 +17,7 @@ defmodule Combo.Router.Route do
     :pipe_through,
     :private,
     :assigns,
-    :log,
-    :metadata
+    :log
   ]
   @enforce_keys @struct_keys
   defstruct @struct_keys
@@ -35,8 +34,7 @@ defmodule Combo.Router.Route do
           pipe_through: [atom()],
           private: map(),
           assigns: map(),
-          log: Logger.level() | false,
-          metadata: map()
+          log: Logger.level() | false
         }
 
   @doc false
@@ -96,8 +94,6 @@ defmodule Combo.Router.Route do
     private = Map.merge(scope.private, private)
     assigns = Map.merge(scope.assigns, assigns)
 
-    metadata = Keyword.get(opts, :metadata, %{})
-
     build(
       line,
       kind,
@@ -110,8 +106,7 @@ defmodule Combo.Router.Route do
       scope.pipes,
       private,
       assigns,
-      log,
-      metadata
+      log
     )
   end
 
@@ -139,8 +134,7 @@ defmodule Combo.Router.Route do
         pipe_through,
         private,
         assigns,
-        log,
-        metadata
+        log
       )
       when kind in [:match, :forward] and
              is_atom(verb) and
@@ -150,8 +144,7 @@ defmodule Combo.Router.Route do
              (is_binary(helper) or is_nil(helper)) and
              is_list(pipe_through) and
              is_map(private) and
-             is_map(assigns) and
-             is_map(metadata) do
+             is_map(assigns) do
     %__MODULE__{
       line: line,
       kind: kind,
@@ -164,8 +157,7 @@ defmodule Combo.Router.Route do
       pipe_through: pipe_through,
       private: private,
       assigns: assigns,
-      log: log,
-      metadata: metadata
+      log: log
     }
   end
 

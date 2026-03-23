@@ -301,6 +301,7 @@ defmodule Combo.Router do
       defp prepare(conn) do
         Plug.Conn.merge_private(conn, [
           {:combo_router, __MODULE__},
+          # TODO: can I remove it?
           {__MODULE__, conn.script_name}
         ])
       end
@@ -763,8 +764,6 @@ defmodule Combo.Router do
       and which pipelines are used).
       It is separated from the plug level logging. To alter the plug log level,
       please see https://hexdocs.pm/combo/Combo.Logger.html#module-dynamic-log-level.
-    * `:metadata` - the map of metadata used by the telemetry events and returned
-      by `route_info/4`. Custom fields can be added.
 
   ## Examples
 

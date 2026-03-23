@@ -42,7 +42,7 @@ defmodule Combo.Router.RoutingTest do
 
     get "/", UserController, :index, as: :users
     get "/users/top", UserController, :top, as: :top
-    get "/users/:id", UserController, :show, as: :users, metadata: %{access: :user}
+    get "/users/:id", UserController, :show, as: :users
     match :*, "/users/fallback", UserController, :any
     get "/spaced users/:id", UserController, :show
     get "/profiles/profile-:id", UserController, :show
@@ -413,8 +413,7 @@ defmodule Combo.Router.RoutingTest do
                  pipe_through: [],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :show,
-                 log: :debug,
-                 metadata: %{access: :user}
+                 log: :debug
                }
              } = metadata
     end
@@ -438,8 +437,7 @@ defmodule Combo.Router.RoutingTest do
                  pipe_through: [],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :show,
-                 log: :debug,
-                 metadata: %{access: :user}
+                 log: :debug
                }
              } = metadata
     end
@@ -465,8 +463,7 @@ defmodule Combo.Router.RoutingTest do
                  pipe_through: [:noop],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :raise,
-                 log: :info,
-                 metadata: %{}
+                 log: :info
                },
                exception: %{
                  kind: :error,
@@ -503,8 +500,7 @@ defmodule Combo.Router.RoutingTest do
                  pipe_through: [],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :exit,
-                 log: :debug,
-                 metadata: %{}
+                 log: :debug
                },
                exception: %{
                  kind: :exit,
@@ -529,8 +525,7 @@ defmodule Combo.Router.RoutingTest do
                  pipe_through: [],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :not_found,
-                 log: :debug,
-                 metadata: %{}
+                 log: :debug
                }
              }
 
@@ -544,8 +539,7 @@ defmodule Combo.Router.RoutingTest do
                  pipe_through: [],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :show,
-                 log: :debug,
-                 metadata: %{access: :user}
+                 log: :debug
                }
              }
 
@@ -559,8 +553,7 @@ defmodule Combo.Router.RoutingTest do
                  pipe_through: [],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :index,
-                 log: :debug,
-                 metadata: %{}
+                 log: :debug
                }
              }
 
@@ -578,8 +571,7 @@ defmodule Combo.Router.RoutingTest do
                  pipe_through: [],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :not_found,
-                 log: :debug,
-                 metadata: %{}
+                 log: :debug
                }
              }
     end
@@ -595,8 +587,7 @@ defmodule Combo.Router.RoutingTest do
                  pipe_through: [:noop, :halt],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :raise,
-                 log: :info,
-                 metadata: %{}
+                 log: :info
                }
              }
     end
