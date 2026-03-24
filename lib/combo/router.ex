@@ -127,7 +127,7 @@ defmodule Combo.Router do
   Combo generates a `Helpers` module that provides helper functions for building
   paths or URLs from your routes.
 
-  Helpers are automatically generated based on the controller name.
+  Helpers are automatically generated based on the module name of plug.
   For example, the route:
 
       get "/pages/:page", PageController, :show
@@ -168,15 +168,14 @@ defmodule Combo.Router do
   It is very common to namespace routes under a scope. For example:
 
       scope "/", MyApp.Web do
-        get "/pages/:id", PageController, :show
+        get "/users/:id", UserController, :show
+        get "/posts/:id", PostController, :show
       end
 
-  The route above will dispatch to `MyApp.Web.PageController`. This syntax is
-  convenient to use, since you don't have to repeat `MyApp.Web.` prefix on all
-  routes.
+  This syntax is convenient to use, since you don't have to repeat `MyApp.Web.`
+  prefix on all routes.
 
-  Like all paths, you can define path parameters that will be applied
-  in controllers. For example:
+  You can also use path parameters. For example:
 
       scope "/api/:version", MyApp.Web do
         get "/pages/:id", PageController, :show
@@ -189,6 +188,12 @@ defmodule Combo.Router do
   Once a request arrives at the Combo router, it performs a series of
   transformations through pipelines until the request is dispatched to a
   desired route.
+
+  > Pipelines are only invoked after a route is matched. If no route matches,
+  > no pipeline is invoked.
+
+  > Pipelines are only invoked after a route is match.
+  > No plug is invoked in case no matches were found.
 
   Such transformations are defined via plugs, as defined in the
   [Plug](https://github.com/elixir-plug/plug) specification.
@@ -216,12 +221,9 @@ defmodule Combo.Router do
         end
       end
 
-  In the example above, we also imports `Combo.Conn` and `Plug.Conn` to
-  help defining plugins. `accepts/2` comes from `Combo.Conn`, while
-  `fetch_session/2` comes from `Plug.Conn`.
-
-  Note that router pipelines are only invoked after a route is found.
-  No plug is invoked in case no matches were found.
+  > We also imports `Combo.Conn` and `Plug.Conn` to help defining plugins.
+  > `accepts/2` comes from `Combo.Conn`, while `fetch_session/2` comes from
+  > `Plug.Conn`.
 
   ## Resources
 
@@ -576,7 +578,8 @@ defmodule Combo.Router do
   @doc """
   Defines a scope.
 
-  Scopes are for grouping routes.
+  Scopes are for grouping routes under a common path prefix or a common module
+  prefix.
 
   ## Examples
 
@@ -585,8 +588,8 @@ defmodule Combo.Router do
       end
 
   The generated route above will match on the path `"/api/v1/pages/:id"` and
-  will dispatch to `:show` action in `API.V1.PageController`. A named helper
-  `api_v1_page_path` will also be generated.
+  will dispatch requests to plug `API.V1.PageController` with opts `:show`.
+  A named helper `api_v1_page_path` will also be generated.
 
   ## Options
 
