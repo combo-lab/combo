@@ -57,44 +57,44 @@ defmodule Combo.RouterTest do
       assert conn.params["id"] == "1"
     end
 
-    test ":alias option" do
+    test ":module option" do
       defmodule L1.L2.CatController do
         use Support.Controller
         def index(conn, _params), do: text(conn, "all cats")
       end
 
-      defmodule RouterForAliasOption do
+      defmodule RouterForModuleOption do
         use Support.Router
 
         scope "/case1/l1", L1 do
           get "/l2/cats", L2.CatController, :index
         end
 
-        scope "/case2/l1", alias: L1 do
+        scope "/case2/l1", module: L1 do
           get "/l2/cats", L2.CatController, :index
         end
 
-        scope "/case3/l1", alias: false do
+        scope "/case3/l1", module: false do
           scope "/l2", L1.L2 do
             get "/cats", CatController, :index
           end
         end
 
         scope "/case4/l1", L1 do
-          scope "/l2", alias: false do
+          scope "/l2", module: false do
             get "/cats", L1.L2.CatController, :index
           end
         end
 
         scope "/case5/l1", L1 do
           scope "/l2", L2 do
-            get "/cats", L1.L2.CatController, :index, alias: false
+            get "/cats", L1.L2.CatController, :index, scoped_module: false
           end
         end
       end
 
       for i <- 1..5 do
-        conn = call(RouterForAliasOption, :get, "/case#{i}/l1/l2/cats")
+        conn = call(RouterForModuleOption, :get, "/case#{i}/l1/l2/cats")
         assert conn.status == 200
         assert conn.resp_body == "all cats"
       end
@@ -184,7 +184,7 @@ defmodule Combo.RouterTest do
           assigns: %{module: scoped_module(DummyController)}
       end
 
-      scope "/case2/l1", alias: false do
+      scope "/case2/l1", module: false do
         get "/inspect", L1.InspectController, :show,
           assigns: %{module: scoped_module(DummyController)}
       end

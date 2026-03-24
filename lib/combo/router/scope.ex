@@ -4,14 +4,14 @@ defmodule Combo.Router.Scope do
   alias Combo.Router.ModuleAttr
   alias Combo.Router.Utils
 
-  @struct_keys [:path, :path_info, :alias, :as, :pipes, :private, :assigns, :log]
+  @struct_keys [:path, :path_info, :module, :as, :pipes, :private, :assigns, :log]
   @enforce_keys @struct_keys
   defstruct @struct_keys
 
   @type t :: %__MODULE__{
           path: String.t(),
           path_info: [String.t()],
-          alias: [module()],
+          module: [module()],
           as: [atom() | String.t()],
           pipes: [atom()],
           private: map(),
@@ -24,7 +24,7 @@ defmodule Combo.Router.Scope do
     scope = %__MODULE__{
       path: "/",
       path_info: [],
-      alias: [],
+      module: [],
       as: [],
       pipes: [],
       private: %{},
@@ -81,7 +81,7 @@ defmodule Combo.Router.Scope do
       |> then(&Kernel.++(scope.path_info, &1))
 
     path = Utils.build_path(path_info)
-    alias = append_value(scope.alias, Keyword.get(opts, :alias))
+    module = append_value(scope.module, Keyword.get(opts, :module))
     as = append_value(scope.as, Keyword.get(opts, :as))
     pipes = scope.pipes
     private = Map.merge(scope.private, Keyword.get(opts, :private, %{}))
@@ -91,7 +91,7 @@ defmodule Combo.Router.Scope do
     %__MODULE__{
       path: path,
       path_info: path_info,
-      alias: alias,
+      module: module,
       as: as,
       pipes: pipes,
       private: private,
@@ -104,31 +104,31 @@ defmodule Combo.Router.Scope do
     [path: path]
   end
 
-  defp normalize_scope_args([alias]) when is_atom(alias) do
-    [alias: alias]
+  defp normalize_scope_args([module]) when is_atom(module) do
+    [module: module]
   end
 
   defp normalize_scope_args([opts]) when is_list(opts) do
     opts
   end
 
-  defp normalize_scope_args([path, alias]) when is_binary(path) and is_atom(alias) do
-    [path: path, alias: alias]
+  defp normalize_scope_args([path, module]) when is_binary(path) and is_atom(module) do
+    [path: path, module: module]
   end
 
   defp normalize_scope_args([path, opts]) when is_binary(path) and is_list(opts) do
     Keyword.put(opts, :path, path)
   end
 
-  defp normalize_scope_args([alias, opts]) when is_atom(alias) and is_list(opts) do
-    Keyword.put(opts, :alias, alias)
+  defp normalize_scope_args([module, opts]) when is_atom(module) and is_list(opts) do
+    Keyword.put(opts, :module, module)
   end
 
-  defp normalize_scope_args([path, alias, opts])
-       when is_binary(path) and is_atom(alias) and is_list(opts) do
+  defp normalize_scope_args([path, module, opts])
+       when is_binary(path) and is_atom(module) and is_list(opts) do
     opts
     |> Keyword.put(:path, path)
-    |> Keyword.put(:alias, alias)
+    |> Keyword.put(:module, module)
   end
 
   defp append_value(values, value) do
@@ -148,9 +148,9 @@ defmodule Combo.Router.Scope do
   end
 
   @doc false
-  def expand_alias(router, alias) do
+  def expand_module(router, module) do
     scope = get_top_scope(router)
-    Module.concat(scope.alias ++ [alias])
+    Module.concat(scope.module ++ [module])
   end
 
   @doc false

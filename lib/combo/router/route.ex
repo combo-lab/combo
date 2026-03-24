@@ -78,7 +78,7 @@ defmodule Combo.Router.Route do
 
     scope = Scope.get_top_scope(module)
     path_info = Utils.split_path(path)
-    alias? = Keyword.get(opts, :alias, true)
+    scoped_module? = Keyword.get(opts, :scoped_module, true)
     as = Keyword.get_lazy(opts, :as, fn -> Combo.Naming.resource_name(plug, "Controller") end)
     private = Keyword.get(opts, :private, %{})
     assigns = Keyword.get(opts, :assigns, %{})
@@ -91,7 +91,7 @@ defmodule Combo.Router.Route do
 
     path_info = join_path_info(scope, path_info)
     path = Utils.build_path(path_info)
-    plug = if alias?, do: join_alias(scope, plug), else: plug
+    plug = if scoped_module?, do: join_module(scope, plug), else: plug
     as = join_as(scope, as)
     private = Map.merge(scope.private, private)
     assigns = Map.merge(scope.assigns, assigns)
@@ -116,8 +116,8 @@ defmodule Combo.Router.Route do
     scope.path_info ++ path_info
   end
 
-  defp join_alias(scope, alias) when is_atom(alias) do
-    Module.concat(scope.alias ++ [alias])
+  defp join_module(scope, module) when is_atom(module) do
+    Module.concat(scope.module ++ [module])
   end
 
   defp join_as(_scope, nil), do: nil

@@ -32,12 +32,12 @@ defmodule Combo.Router.HelpersTest do
       post "/host_users/:id/info", UserController, :create
     end
 
-    scope "/admin", alias: Admin do
+    scope "/admin", module: Admin do
       get "/messages", MessageController, :index
       get "/messages/:id", MessageController, :show
     end
 
-    scope "/admin/new", alias: Admin, as: "admin" do
+    scope "/admin/new", module: Admin, as: "admin" do
       get "/messages", MessageController, :index
       get "/messages/:id", MessageController, :show
 
@@ -207,14 +207,14 @@ defmodule Combo.Router.HelpersTest do
              "/posts/file/%3D%3Dd--%2B/%3AO.jpg?xx=%2F%3D%2B%2F"
   end
 
-  test "scoped route helpers generated named routes with :path, and :alias options" do
+  test "scoped route helpers generated named routes with :path, and :module options" do
     assert Helpers.message_path(Endpoint, :index, []) == "/admin/messages"
     assert Helpers.message_path(Endpoint, :index) == "/admin/messages"
     assert Helpers.message_path(Endpoint, :show, 1, []) == "/admin/messages/1"
     assert Helpers.message_path(Endpoint, :show, 1) == "/admin/messages/1"
   end
 
-  test "scoped route helpers generated named routes with :path, :alias, and :helper options" do
+  test "scoped route helpers generated named routes with :path, :module, and :as options" do
     assert Helpers.admin_message_path(Endpoint, :index, []) == "/admin/new/messages"
     assert Helpers.admin_message_path(Endpoint, :index) == "/admin/new/messages"
     assert Helpers.admin_message_path(Endpoint, :show, 1, []) == "/admin/new/messages/1"
