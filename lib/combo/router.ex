@@ -29,6 +29,7 @@ defmodule Combo.Router do
       defmodule MyApp.Web.Router do
         use Combo.Router
 
+        get "/health", MyApp.Web.HealthCheck, []
         get "/pages/:page", MyApp.Web.PageController, :show
       end
 
@@ -39,8 +40,8 @@ defmodule Combo.Router do
 
       get "/", MyApp.Web.PageController, :home
 
-  defines a route matches a `GET` request to `/` and dispatches the request to
-  the `:home` action in `MyApp.Web.PageController`.
+  defines a route that matches a `GET` request to `/` and dispatches the request
+  to plug `MyApp.Web.PageController` with opts `:home`.
 
   ## Path parameters
 
@@ -62,7 +63,7 @@ defmodule Combo.Router do
       get "/pages/:page", MyApp.Web.PageController, :show
 
   When a request hits the route with the URL `"/pages/hello"`, the router
-  populates `conn.params["page"]` with `"hello"`.
+  populates `conn.path_params["page"]` with `"hello"`.
 
   ### Partial segment parameters
 
@@ -77,7 +78,7 @@ defmodule Combo.Router do
       get "/user-:name", MyApp.Web.UserController, :show
 
   When a request hits the route with the URL `"/user-john"`, the router
-  populates `conn.params["name"]` with `"john"`.
+  populates `conn.path_params["name"]` with `"john"`.
 
   ### Catch-all parameters
 
@@ -92,11 +93,13 @@ defmodule Combo.Router do
       get "/files/*path", MyApp.Web.FileController, :show
 
   When a request hits the route with the URL `"/files/images/logo.png"`, the
-  router populates `conn.params["path"]` with `["images", "logo.png"]`.
+  router populates `conn.path_params["path"]` with `["images", "logo.png"]`.
 
   ### Accessing path parameters
 
-  To access path parameters, pattern match directly in the controller action:
+  To access path parameters, use `conn.params` or `conn.path_params`.
+
+  Or, pattern match directly in the controller's action:
 
       defmodule MyApp.Web.PageController do
         def show(conn, %{"page" => page}) do
@@ -104,7 +107,7 @@ defmodule Combo.Router do
         end
       end
 
-  ### Combining different types of path paramaters
+  ### Combining different types of path parameters
 
   All these types of path parameters can be combined, with the only restriction
   being that catch-all parameters must appear at the end.
@@ -143,7 +146,7 @@ defmodule Combo.Router do
       MyApp.Web.Router.Helpers.page_url(conn, :show, "hello", some: "query")
       "http://example.com/pages/hello?some=query"
 
-  If the route contains catch-all paramaters, parameters for those should be
+  If the route contains catch-all parameters, parameters for those should be
   given as a list:
 
       MyApp.Web.Router.Helpers.file_path(conn, :show, ["images", "logo.png"])
