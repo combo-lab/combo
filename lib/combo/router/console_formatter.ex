@@ -9,10 +9,10 @@ defmodule Combo.Router.ConsoleFormatter do
   """
   def format(router, endpoint \\ nil) do
     routes = Combo.Router.routes(router)
-    column_widths = calculate_column_widths(router, routes, endpoint)
+    column_widths = calculate_column_widths(routes, endpoint)
 
     IO.iodata_to_binary([
-      Enum.map(routes, &format_route(&1, router, column_widths)),
+      Enum.map(routes, &format_route(&1, column_widths)),
       format_endpoint(endpoint, column_widths)
     ])
   end
@@ -71,7 +71,7 @@ defmodule Combo.Router.ConsoleFormatter do
     end
   end
 
-  defp calculate_column_widths(router, routes, endpoint) do
+  defp calculate_column_widths(routes, endpoint) do
     sockets = (endpoint && endpoint.__sockets__()) || []
 
     widths =
@@ -103,7 +103,7 @@ defmodule Combo.Router.ConsoleFormatter do
     end)
   end
 
-  defp format_route(route, router, column_widths) do
+  defp format_route(route, column_widths) do
     %{
       name: name,
       verb: verb,
