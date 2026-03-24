@@ -92,7 +92,7 @@ defmodule Combo.Router.Route do
     path_info = join_path_info(scope, path_info)
     path = Utils.build_path(path_info)
     plug = if scoped_module?, do: join_module(scope, plug), else: plug
-    as = join_as(scope, as)
+    name = build_name(scope, as)
     private = Map.merge(scope.private, private)
     assigns = Map.merge(scope.assigns, assigns)
 
@@ -104,7 +104,7 @@ defmodule Combo.Router.Route do
       path_info,
       plug,
       plug_opts,
-      as,
+      name,
       scope.pipes,
       private,
       assigns,
@@ -120,8 +120,10 @@ defmodule Combo.Router.Route do
     Module.concat(scope.module ++ [module])
   end
 
-  defp join_as(_scope, nil), do: nil
-  defp join_as(scope, as) when is_atom(as) or is_binary(as), do: Enum.join(scope.as ++ [as], "_")
+  defp build_name(_scope, nil), do: nil
+
+  defp build_name(scope, as) when is_atom(as) or is_binary(as),
+    do: Enum.join(scope.as ++ [as], "_")
 
   @doc false
   def build(
