@@ -13,7 +13,7 @@ defmodule Combo.Router.Route do
     :path_info,
     :plug,
     :plug_opts,
-    :helper,
+    :name,
     :pipe_through,
     :private,
     :assigns,
@@ -30,7 +30,7 @@ defmodule Combo.Router.Route do
           path_info: [String.t()],
           plug: atom(),
           plug_opts: atom(),
-          helper: binary() | nil,
+          name: binary() | nil,
           pipe_through: [atom()],
           private: map(),
           assigns: map(),
@@ -132,7 +132,7 @@ defmodule Combo.Router.Route do
         path_info,
         plug,
         plug_opts,
-        helper,
+        name,
         pipe_through,
         private,
         assigns,
@@ -143,7 +143,7 @@ defmodule Combo.Router.Route do
              is_binary(path) and
              is_list(path_info) and
              is_atom(plug) and
-             (is_binary(helper) or is_nil(helper)) and
+             (is_binary(name) or is_nil(name)) and
              is_list(pipe_through) and
              is_map(private) and
              is_map(assigns) do
@@ -155,7 +155,7 @@ defmodule Combo.Router.Route do
       path_info: path_info,
       plug: plug,
       plug_opts: plug_opts,
-      helper: helper,
+      name: name,
       pipe_through: pipe_through,
       private: private,
       assigns: assigns,

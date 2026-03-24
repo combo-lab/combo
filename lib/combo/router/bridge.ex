@@ -90,7 +90,7 @@ defmodule Combo.RouterBridge do
     routes
     # Ignore any route without helper or with forwards.
     |> Enum.reject(fn route ->
-      is_nil(route.helper) or route.kind == :forward
+      is_nil(route.name) or route.kind == :forward
     end)
     |> Enum.map(fn route ->
       exprs = Route.build_exprs(route)

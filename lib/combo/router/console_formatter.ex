@@ -76,10 +76,10 @@ defmodule Combo.Router.ConsoleFormatter do
 
     widths =
       Enum.reduce(routes, {0, 0, 0}, fn route, acc ->
-        %{verb: verb, path: path, helper: helper} = route
+        %{verb: verb, path: path, name: name} = route
         verb = verb_name(verb)
         {verb_len, path_len, route_name_len} = acc
-        route_name = route_name(router, helper)
+        route_name = route_name(router, name)
 
         {max(verb_len, String.length(verb)), max(path_len, String.length(path)),
          max(route_name_len, String.length(route_name))}
@@ -102,13 +102,13 @@ defmodule Combo.Router.ConsoleFormatter do
     %{
       verb: verb,
       path: path,
-      helper: helper,
+      name: name,
       plug: plug,
       plug_opts: plug_opts
     } = route
 
     verb = verb_name(verb)
-    route_name = route_name(router, helper)
+    route_name = route_name(router, name)
     {verb_len, path_len, route_name_len} = column_widths
 
     String.pad_leading(route_name, route_name_len) <>

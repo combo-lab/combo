@@ -12,7 +12,7 @@ defmodule Combo.RouterBridge.TypeScript do
   defp build_route_helpers(routes_with_exprs) do
     groups =
       routes_with_exprs
-      |> Enum.group_by(fn {route, _exprs} -> route.helper end)
+      |> Enum.group_by(fn {route, _exprs} -> route.name end)
       |> Enum.map(fn {helper, routes_with_exprs} ->
         routes_with_exprs =
           routes_with_exprs
@@ -99,7 +99,7 @@ defmodule Combo.RouterBridge.TypeScript do
   end
 
   defp build_overload({route, exprs}) do
-    helper = route.helper
+    helper = route.name
     action = route.plug_opts
     binding = exprs.binding
 
@@ -153,7 +153,7 @@ defmodule Combo.RouterBridge.TypeScript do
   end
 
   defp build_implementation({route, exprs}) do
-    helper = route.helper
+    helper = route.name
     action = route.plug_opts
     binding = exprs.binding
     # IO.inspect(exprs)
