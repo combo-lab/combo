@@ -218,7 +218,7 @@ defmodule Combo.Router.Route do
     merged_all = merged_params ++ merged_private ++ merged_assigns
 
     quote do
-      fn var!(conn, :conn), %{path_params: var!(path_params, :conn)} ->
+      fn var!(conn, :conn), var!(path_params, :conn) ->
         %{unquote_splicing(match_all)} = var!(conn, :conn)
         %{var!(conn, :conn) | unquote_splicing(merged_all)}
       end

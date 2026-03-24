@@ -291,19 +291,19 @@ defmodule Combo.Router do
 
       @impl true
       def call(conn, _opts) do
-        %{method: method, path_info: encoded_path_info} = conn = prepare(conn)
+        %{method: method, path_info: encoded_path_info} = conn = put_combo_info(conn)
         path_info = Enum.map(encoded_path_info, &URI.decode/1)
 
         case __match_route__(method, path_info) do
-          {metadata, prepare, pipeline, dispatch} ->
-            unquote(__MODULE__).__call__(conn, metadata, prepare, pipeline, dispatch)
+          {prepare, path_params, metadata, pipeline, dispatch} ->
+            unquote(__MODULE__).__call__(conn, prepare, path_params, metadata, pipeline, dispatch)
 
           :error ->
             raise NoRouteError, conn: conn, router: __MODULE__
         end
       end
 
-      defp prepare(conn) do
+      defp put_combo_info(conn) do
         Plug.Conn.merge_private(conn, [
           {:combo_router, __MODULE__},
           {{__MODULE__, :script_name}, conn.script_name}
@@ -388,8 +388,9 @@ defmodule Combo.Router do
       quote line: route.line do
         def __match_route__(unquote(method_match), unquote(path_info_match)) do
           {
-            unquote(build_metadata(route, path_params)),
             unquote(prepare),
+            unquote(path_params),
+            unquote(build_metadata(route, path_params)),
             &(unquote(Macro.var(pipe_name, __MODULE__)) / 1),
             unquote(dispatch)
           }
@@ -455,12 +456,13 @@ defmodule Combo.Router do
   @doc false
   def __call__(
         %{private: %{combo_bypass: {router, pipes}}} = conn,
-        metadata,
         prepare,
+        path_params,
+        _metadata,
         pipeline,
         _dispatch
       ) do
-    conn = prepare.(conn, metadata)
+    conn = prepare.(conn, path_params)
 
     case pipes do
       :current ->
@@ -473,22 +475,24 @@ defmodule Combo.Router do
 
   def __call__(
         %{private: %{combo_bypass: :all}} = conn,
-        metadata,
         prepare,
+        path_params,
+        _metadata,
         _pipeline,
         _dispatch
       ) do
-    prepare.(conn, metadata)
+    prepare.(conn, path_params)
   end
 
   def __call__(
         conn,
-        metadata,
         prepare,
+        path_params,
+        metadata,
         pipeline,
         {plug, opts}
       ) do
-    conn = prepare.(conn, metadata)
+    conn = prepare.(conn, path_params)
     start = System.monotonic_time()
     measurements = %{system_time: System.system_time()}
     metadata = %{metadata | conn: conn}
@@ -908,7 +912,7 @@ defmodule Combo.Router do
   end
 
   def route_info(router, method, path_info) when is_list(path_info) do
-    with {metadata, _prepare, _pipeline, _dispatch} <-
+    with {_prepare, _path_params, metadata, _pipeline, _dispatch} <-
            router.__match_route__(method, path_info) do
       Map.delete(metadata, :conn)
     end
