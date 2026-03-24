@@ -35,9 +35,9 @@ defmodule Combo.Router.ConsoleFormatter do
 
   defp format_websocket({path, module, opts}, widths) do
     if opts[:websocket] != false do
-      {verb_len, path_len, route_name_len} = widths
+      {name_len, verb_len, path_len} = widths
 
-      String.duplicate(" ", route_name_len) <>
+      String.duplicate(" ", name_len) <>
         "  " <>
         String.pad_trailing(@socket_verb, verb_len) <>
         "  " <>
@@ -55,9 +55,9 @@ defmodule Combo.Router.ConsoleFormatter do
   defp format_longpoll({path, module, opts}, widths) do
     if opts[:longpoll] != false do
       for method <- @longpoll_verbs, into: "" do
-        {verb_len, path_len, route_name_len} = widths
+        {name_len, verb_len, path_len} = widths
 
-        String.duplicate(" ", route_name_len) <>
+        String.duplicate(" ", name_len) <>
           "  " <>
           String.pad_trailing(method, verb_len) <>
           "  " <>
@@ -75,43 +75,49 @@ defmodule Combo.Router.ConsoleFormatter do
     sockets = (endpoint && endpoint.__sockets__()) || []
 
     widths =
-      Enum.reduce(routes, {0, 0, 0}, fn route, acc ->
-        %{verb: verb, path: path, name: name} = route
-        verb = verb_name(verb)
-        {verb_len, path_len, route_name_len} = acc
-        route_name = route_name(router, name)
+      Enum.reduce(routes, {0, 0, 0}, fn route, {name_len, verb_len, path_len} ->
+        %{name: name, verb: verb, path: path} = route
+        name = build_name(name)
+        verb = build_verb(verb)
 
-        {max(verb_len, String.length(verb)), max(path_len, String.length(path)),
-         max(route_name_len, String.length(route_name))}
+        {
+          max(name_len, String.length(name)),
+          max(verb_len, String.length(verb)),
+          max(path_len, String.length(path))
+        }
       end)
 
-    Enum.reduce(sockets, widths, fn {path, _mod, opts}, acc ->
-      {verb_len, path_len, route_name_len} = acc
-
-      verb_length =
+    Enum.reduce(sockets, widths, fn {path, _mod, opts}, {name_len, verb_len, path_len} ->
+      current_verb_len =
         socket_verbs(opts)
         |> Enum.map(&String.length/1)
         |> Enum.max(&>=/2, fn -> 0 end)
 
-      {max(verb_len, verb_length), max(path_len, String.length(path <> "/websocket")),
-       route_name_len}
+      current_path_len = String.length(path <> "/websocket")
+
+      {
+        name_len,
+        max(verb_len, current_verb_len),
+        max(path_len, current_path_len)
+      }
     end)
   end
 
   defp format_route(route, router, column_widths) do
     %{
+      name: name,
       verb: verb,
       path: path,
       plug: plug,
-      plug_opts: plug_opts,
-      name: name
+      plug_opts: plug_opts
     } = route
 
-    verb = verb_name(verb)
-    route_name = route_name(router, name)
-    {verb_len, path_len, route_name_len} = column_widths
+    name = build_name(name)
+    verb = build_verb(verb)
 
-    String.pad_leading(route_name, route_name_len) <>
+    {name_len, verb_len, path_len} = column_widths
+
+    String.pad_leading(name, name_len) <>
       "  " <>
       String.pad_trailing(verb, verb_len) <>
       "  " <>
@@ -120,10 +126,10 @@ defmodule Combo.Router.ConsoleFormatter do
       "#{inspect(plug)} #{inspect(plug_opts)}\n"
   end
 
-  defp route_name(_router, nil), do: ""
-  defp route_name(router, name), do: name
+  defp build_name(nil), do: ""
+  defp build_name(name), do: name
 
-  defp verb_name(verb), do: verb |> to_string() |> String.upcase()
+  defp build_verb(verb), do: verb |> to_string() |> String.upcase()
 
   defp socket_verbs(socket_opts) do
     if socket_opts[:longpoll] != false do

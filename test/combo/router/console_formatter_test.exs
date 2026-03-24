@@ -1,8 +1,8 @@
-for module <- [
+for controller <- [
       Combo.Router.ConsoleFormatterTest.PageController,
       Combo.Router.ConsoleFormatterTest.ImageController
     ] do
-  defmodule module do
+  defmodule controller do
     def init(opts), do: opts
     def call(conn, _opts), do: conn
   end
@@ -10,6 +10,7 @@ end
 
 defmodule Combo.Router.ConsoleFormatterTest do
   use ExUnit.Case, async: true
+
   alias Combo.Router.ConsoleFormatter
   alias Combo.Router.ConsoleFormatterTest.PageController
   alias Combo.Router.ConsoleFormatterTest.ImageController
@@ -20,7 +21,7 @@ defmodule Combo.Router.ConsoleFormatterTest do
 
   defmodule EndpointWithSocket do
     use Combo.Endpoint, otp_app: :combo
-    socket "/socket", TestSocket, websocket: true
+    socket "/socket", __MODULE__.TestSocket, websocket: true
   end
 
   defmodule MatchRouter do
@@ -84,9 +85,9 @@ defmodule Combo.Router.ConsoleFormatterTest do
                      page  GET     /                  Combo.Router.ConsoleFormatterTest.PageController :index
              upload_image  POST    /images            Combo.Router.ConsoleFormatterTest.ImageController :upload
              remove_image  DELETE  /images            Combo.Router.ConsoleFormatterTest.ImageController :delete
-                           WS      /socket/websocket  TestSocket
-                           GET     /socket/longpoll   TestSocket
-                           POST    /socket/longpoll   TestSocket
+                           WS      /socket/websocket  Combo.Router.ConsoleFormatterTest.EndpointWithSocket.TestSocket
+                           GET     /socket/longpoll   Combo.Router.ConsoleFormatterTest.EndpointWithSocket.TestSocket
+                           POST    /socket/longpoll   Combo.Router.ConsoleFormatterTest.EndpointWithSocket.TestSocket
              """
     end
   end
