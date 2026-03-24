@@ -47,9 +47,9 @@ defmodule Combo.Router.ConsoleFormatterTest do
 
   test "format :match routes" do
     assert draw(MatchRouter, Endpoint) == """
-                   page_path  GET     /        Combo.Router.ConsoleFormatterTest.PageController :index
-           upload_image_path  POST    /images  Combo.Router.ConsoleFormatterTest.ImageController :upload
-           remove_image_path  DELETE  /images  Combo.Router.ConsoleFormatterTest.ImageController :delete
+                   page  GET     /        Combo.Router.ConsoleFormatterTest.PageController :index
+           upload_image  POST    /images  Combo.Router.ConsoleFormatterTest.ImageController :upload
+           remove_image  DELETE  /images  Combo.Router.ConsoleFormatterTest.ImageController :delete
            """
   end
 
@@ -62,31 +62,31 @@ defmodule Combo.Router.ConsoleFormatterTest do
 
   test "format mixed routes" do
     assert draw(MixedRouter, Endpoint) == """
-                   page_path  GET     /        Combo.Router.ConsoleFormatterTest.PageController :index
-           upload_image_path  POST    /images  Combo.Router.ConsoleFormatterTest.ImageController :upload
-           remove_image_path  DELETE  /images  Combo.Router.ConsoleFormatterTest.ImageController :delete
-                              *       /admin   Combo.Router.ConsoleFormatterTest.PageController []
-                              *       /f1      Combo.Router.ConsoleFormatterTest.ImageController []
+                   page  GET     /        Combo.Router.ConsoleFormatterTest.PageController :index
+           upload_image  POST    /images  Combo.Router.ConsoleFormatterTest.ImageController :upload
+           remove_image  DELETE  /images  Combo.Router.ConsoleFormatterTest.ImageController :delete
+                         *       /admin   Combo.Router.ConsoleFormatterTest.PageController []
+                         *       /f1      Combo.Router.ConsoleFormatterTest.ImageController []
            """
   end
 
   describe "format routes" do
     test "without sockets" do
       assert draw(MatchRouter, Endpoint) == """
-                     page_path  GET     /        Combo.Router.ConsoleFormatterTest.PageController :index
-             upload_image_path  POST    /images  Combo.Router.ConsoleFormatterTest.ImageController :upload
-             remove_image_path  DELETE  /images  Combo.Router.ConsoleFormatterTest.ImageController :delete
+                     page  GET     /        Combo.Router.ConsoleFormatterTest.PageController :index
+             upload_image  POST    /images  Combo.Router.ConsoleFormatterTest.ImageController :upload
+             remove_image  DELETE  /images  Combo.Router.ConsoleFormatterTest.ImageController :delete
              """
     end
 
     test "with sockets" do
       assert draw(MatchRouter, EndpointWithSocket) == """
-                     page_path  GET     /                  Combo.Router.ConsoleFormatterTest.PageController :index
-             upload_image_path  POST    /images            Combo.Router.ConsoleFormatterTest.ImageController :upload
-             remove_image_path  DELETE  /images            Combo.Router.ConsoleFormatterTest.ImageController :delete
-                                WS      /socket/websocket  TestSocket
-                                GET     /socket/longpoll   TestSocket
-                                POST    /socket/longpoll   TestSocket
+                     page  GET     /                  Combo.Router.ConsoleFormatterTest.PageController :index
+             upload_image  POST    /images            Combo.Router.ConsoleFormatterTest.ImageController :upload
+             remove_image  DELETE  /images            Combo.Router.ConsoleFormatterTest.ImageController :delete
+                           WS      /socket/websocket  TestSocket
+                           GET     /socket/longpoll   TestSocket
+                           POST    /socket/longpoll   TestSocket
              """
     end
   end

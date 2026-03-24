@@ -102,9 +102,9 @@ defmodule Combo.Router.ConsoleFormatter do
     %{
       verb: verb,
       path: path,
-      name: name,
       plug: plug,
-      plug_opts: plug_opts
+      plug_opts: plug_opts,
+      name: name
     } = route
 
     verb = verb_name(verb)
@@ -121,14 +121,7 @@ defmodule Combo.Router.ConsoleFormatter do
   end
 
   defp route_name(_router, nil), do: ""
-
-  defp route_name(router, name) do
-    if router.__helpers__() do
-      name <> "_path"
-    else
-      ""
-    end
-  end
+  defp route_name(router, name), do: name
 
   defp verb_name(verb), do: verb |> to_string() |> String.upcase()
 
