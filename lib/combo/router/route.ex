@@ -84,15 +84,19 @@ defmodule Combo.Router.Route do
     assigns = Keyword.get(opts, :assigns, %{})
     log = Keyword.get(opts, :log, scope.log)
 
-    if to_string(as) == "static" do
-      raise ArgumentError,
-            "`static` is a reserved route name derived from #{inspect(plug)} or `:as` option"
-    end
-
     path_info = join_path_info(scope, path_info)
     path = Utils.build_path(path_info)
     plug = if scoped_module?, do: join_module(scope, plug), else: plug
+
     name = build_name(scope, as)
+
+    if name == "static" do
+      raise ArgumentError, """
+      route name #{inspect(name)} is reserved, you must change it by \
+      renaming #{inspect(plug)} or specifying :as option\
+      """
+    end
+
     private = Map.merge(scope.private, private)
     assigns = Map.merge(scope.assigns, assigns)
 

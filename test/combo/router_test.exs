@@ -215,20 +215,25 @@ defmodule Combo.RouterTest do
 
     test "raises on reserved route name" do
       # derived from the name of controller
-      assert_raise ArgumentError, ~r/`static` is a reserved route name/, fn ->
-        defmodule BadRouter do
-          use Support.Router
-          get "/", StaticController, :index
-        end
-      end
+
+      assert_raise ArgumentError,
+                   "route name \"static\" is reserved, you must change it by renaming StaticController or specifying :as option",
+                   fn ->
+                     defmodule BadRouter do
+                       use Support.Router
+                       get "/", StaticController, :index
+                     end
+                   end
 
       # derived from the :as option
-      assert_raise ArgumentError, ~r/`static` is a reserved route name/, fn ->
-        defmodule BadRouter do
-          use Support.Router
-          get "/", DummyController, :show, as: :static
-        end
-      end
+      assert_raise ArgumentError,
+                   "route name \"static\" is reserved, you must change it by renaming DummyController or specifying :as option",
+                   fn ->
+                     defmodule BadRouter do
+                       use Support.Router
+                       get "/", DummyController, :show, as: :static
+                     end
+                   end
     end
   end
 
