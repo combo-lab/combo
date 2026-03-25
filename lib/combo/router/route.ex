@@ -71,7 +71,7 @@ defmodule Combo.Router.Route do
 
     Utils.validate_path!(path)
 
-    if kind == :forward && Utils.dynamic_path?(path) do
+    if kind == :forward && !Utils.static_path?(path) do
       raise ArgumentError,
             "route path must be static when forwarding, got: #{inspect(path)}"
     end

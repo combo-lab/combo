@@ -54,10 +54,10 @@ defmodule Combo.Router.Utils do
     |> Plug.Router.Utils.build_path_match()
   end
 
-  def dynamic_path?(path) when is_binary(path) do
+  def static_path?(path) when is_binary(path) do
     case Plug.Router.Utils.build_path_match(path) do
-      {[], _} -> false
-      _ -> true
+      {[], _} -> true
+      _ -> false
     end
   end
 end
