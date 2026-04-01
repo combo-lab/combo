@@ -1571,7 +1571,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
   end
 
   defp implicit_inner_block?(slot_name, slots_defs) do
-    slot_name == :inner_block and length(slots_defs) > 0
+    slot_name == :inner_block and slots_defs != []
   end
 
   defp type_mismatch(:any, _type_value), do: nil
