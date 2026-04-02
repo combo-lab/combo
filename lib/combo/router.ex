@@ -306,7 +306,7 @@ defmodule Combo.Router do
       defp put_router_info(conn) do
         Plug.Conn.merge_private(conn, [
           {:combo_router, __MODULE__},
-          {{__MODULE__, :script_name}, conn.script_name}
+          {{:combo_router, __MODULE__, :script_name}, conn.script_name}
         ])
       end
 

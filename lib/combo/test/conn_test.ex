@@ -604,7 +604,7 @@ defmodule Combo.ConnTest do
   end
 
   defp remove_script_name(conn, router, path) do
-    case conn.private[{router, :script_name}] do
+    case conn.private[{:combo_router, router, :script_name}] do
       [_ | _] = list ->
         script_name = "/" <> Enum.join(list, ",")
         String.replace_leading(path, script_name, "")
