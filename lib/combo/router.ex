@@ -291,7 +291,7 @@ defmodule Combo.Router do
 
       @impl true
       def call(conn, _opts) do
-        %{method: method, path_info: encoded_path_info} = conn = put_combo_info(conn)
+        %{method: method, path_info: encoded_path_info} = conn = put_router_info(conn)
         path_info = Enum.map(encoded_path_info, &URI.decode/1)
 
         case __match_route__(method, path_info) do
@@ -303,7 +303,7 @@ defmodule Combo.Router do
         end
       end
 
-      defp put_combo_info(conn) do
+      defp put_router_info(conn) do
         Plug.Conn.merge_private(conn, [
           {:combo_router, __MODULE__},
           {{__MODULE__, :script_name}, conn.script_name}
