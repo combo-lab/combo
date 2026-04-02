@@ -185,15 +185,11 @@ defmodule Combo.Router do
 
   ## Pipelines and plugs
 
-  Once a request arrives at the Combo router, it performs a series of
-  transformations through pipelines until the request is dispatched to a
-  desired route.
+  Once a request arrives at the router, it performs a series of transformations
+  through pipelines until the request is dispatched to a desired route.
 
   > Pipelines are only invoked after a route is matched. If no route matches,
   > no pipeline is invoked.
-
-  > Pipelines are only invoked after a route is match.
-  > No plug is invoked in case no matches were found.
 
   Such transformations are defined via plugs, as defined in the
   [Plug](https://github.com/elixir-plug/plug) specification.
