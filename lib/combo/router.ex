@@ -341,9 +341,7 @@ defmodule Combo.Router do
     match_catch_all =
       quote generated: true do
         @doc false
-        def __match_route__(_method, _path_info) do
-          :error
-        end
+        def __match_route__(_method, _path_info), do: :error
       end
 
     forward_catch_all =
