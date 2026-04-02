@@ -223,8 +223,9 @@ defmodule Combo.Router do
 
   ## Resources
 
-  Combo doesn't provide resources related macro that allows to generate "RESTful"
-  routes to a given resource. For clarity, we recommend defining routes explicitly.
+  `Combo.Router` doesn't provide resources related macro that allows to generate
+  "RESTful" routes to a given resource. For clarity, we recommend defining them
+  explicitly.
 
   An example for resources:
 
