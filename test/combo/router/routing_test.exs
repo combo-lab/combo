@@ -9,6 +9,11 @@ defmodule Combo.Router.RoutingTest do
     def call(conn, _opts), do: conn
   end
 
+  defmodule DummyController do
+    use Support.Controller
+    def ok(conn, _params), do: text(conn, "ok")
+  end
+
   defmodule UserController do
     use Support.Controller
     def index(conn, _params), do: text(conn, "users index")
@@ -87,7 +92,12 @@ defmodule Combo.Router.RoutingTest do
 
   setup do
     Logger.disable(self())
-    :ok
+    router = build_router()
+    %{router: router}
+  end
+
+  defp build_router do
+    Module.concat(__MODULE__, "Router#{System.unique_integer([:positive])}")
   end
 
   test "get root path" do
@@ -591,5 +601,16 @@ defmodule Combo.Router.RoutingTest do
                }
              }
     end
+  end
+
+  test "match on path with unicode characters", %{router: router} do
+    defmodule router do
+      use Support.Router
+      get "/ø", DummyController, :ok
+    end
+
+    conn = call(router, :get, "/%C3%B8")
+    assert conn.status == 200
+    assert conn.resp_body == "ok"
   end
 end
