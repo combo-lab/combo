@@ -19,7 +19,7 @@ defmodule Combo.Router.Helpers do
   It will generated a module named `MyApp.Web.Router.Helpers`, and following
   functions are available.
 
-  Name routes helpers:
+  Route helpers:
 
     * `*_url/_`
     * `*_path/_`
@@ -34,8 +34,8 @@ defmodule Combo.Router.Helpers do
 
   ## Forwarded routes
 
-  Forwarded routes are also resolved automatically. For example, imagine you
-  have a forward path to an admin router in your main router:
+  Forwarded routes are also resolved automatically. For example, you have a
+  a forward path to an admin router in your main router:
 
       defmodule MyApp.Web.Router do
         # ...
@@ -56,10 +56,10 @@ defmodule Combo.Router.Helpers do
   Generates the helper module for the given environment and routes.
   """
   def define(env, routes_with_exprs) do
-    # Ignore any route without name or forwards.
+    # Ignore routes without name, or routes of forward kind.
     routes_with_exprs =
-      Enum.reject(routes_with_exprs, fn {route, _exprs} ->
-        is_nil(route.name) or route.kind == :forward
+      Enum.filter(routes_with_exprs, fn {route, _exprs} ->
+        not is_nil(route.name) and route.kind != :forward
       end)
 
     groups = Enum.group_by(routes_with_exprs, fn {route, _exprs} -> route.name end)
@@ -83,6 +83,7 @@ defmodule Combo.Router.Helpers do
     code =
       quote do
         @moduledoc false
+
         unquote(defs())
         unquote_splicing(helpers)
 
@@ -150,17 +151,17 @@ defmodule Combo.Router.Helpers do
     name
   end
 
-  def defs do
+  defp defs do
     quote generated: true, unquote: false do
-      def_helper = fn helper, plug_opts, vars, bins, path ->
+      def_helper = fn helper, plug_opts, vars, var_names, path ->
         def unquote(:"#{helper}_path")(
               endpoint_or_conn_or_socket,
-              unquote(Macro.escape(plug_opts)) = action,
+              unquote(Macro.escape(plug_opts)) = plug_opts,
               unquote_splicing(vars)
             ) do
           unquote(:"#{helper}_path")(
             endpoint_or_conn_or_socket,
-            action,
+            plug_opts,
             unquote_splicing(vars),
             []
           )
@@ -168,7 +169,7 @@ defmodule Combo.Router.Helpers do
 
         def unquote(:"#{helper}_path")(
               endpoint_or_conn_or_socket,
-              unquote(Macro.escape(plug_opts)) = _action,
+              unquote(Macro.escape(plug_opts)) = _plug_opts,
               unquote_splicing(vars),
               params
             )
@@ -178,19 +179,19 @@ defmodule Combo.Router.Helpers do
             append_params(
               unquote(path),
               params,
-              unquote(bins)
+              unquote(var_names)
             )
           )
         end
 
         def unquote(:"#{helper}_url")(
               endpoint_or_conn_or_socket,
-              unquote(Macro.escape(plug_opts)) = action,
+              unquote(Macro.escape(plug_opts)) = plug_opts,
               unquote_splicing(vars)
             ) do
           unquote(:"#{helper}_url")(
             endpoint_or_conn_or_socket,
-            action,
+            plug_opts,
             unquote_splicing(vars),
             []
           )
@@ -198,7 +199,7 @@ defmodule Combo.Router.Helpers do
 
         def unquote(:"#{helper}_url")(
               endpoint_or_conn_or_socket,
-              unquote(Macro.escape(plug_opts)) = action,
+              unquote(Macro.escape(plug_opts)) = plug_opts,
               unquote_splicing(vars),
               params
             )
@@ -206,7 +207,7 @@ defmodule Combo.Router.Helpers do
           url(endpoint_or_conn_or_socket, "") <>
             unquote(:"#{helper}_path")(
               endpoint_or_conn_or_socket,
-              action,
+              plug_opts,
               unquote_splicing(vars),
               params
             )
@@ -215,16 +216,9 @@ defmodule Combo.Router.Helpers do
     end
   end
 
-  @doc """
-  Receives a route and returns the quoted definition for its helper function.
-
-  In case a helper name was not given, or route is forwarded, returns nil.
-  """
-  def def_helper(%Route{} = route, exprs) do
-    name = route.name
-    plug_opts = route.plug_opts
-
-    {bins, vars} = :lists.unzip(exprs.binding)
+  defp def_helper(%Route{} = route, exprs) do
+    %{name: name, plug_opts: plug_opts} = route
+    {var_names, vars} = :lists.unzip(exprs.binding)
     path = expand_segments(exprs.path_info_match)
 
     quote do
@@ -232,15 +226,15 @@ defmodule Combo.Router.Helpers do
         unquote(name),
         unquote(Macro.escape(plug_opts)),
         unquote(Macro.escape(vars)),
-        unquote(Macro.escape(bins)),
+        unquote(Macro.escape(var_names)),
         unquote(Macro.escape(path))
       )
     end
   end
 
-  def expand_segments([]), do: "/"
+  defp expand_segments([]), do: "/"
 
-  def expand_segments(segments) when is_list(segments) do
+  defp expand_segments(segments) when is_list(segments) do
     segments =
       segments
       |> Enum.map(&expand_segment(&1))
@@ -252,26 +246,26 @@ defmodule Combo.Router.Helpers do
     build_concat_chain(segments)
   end
 
-  def expand_segments(segment) do
+  defp expand_segments(segment) do
     expand_segments([segment])
   end
 
-  def expand_segment({:|, _, [h, t]}) do
+  defp expand_segment({:|, _, [h, t]}) do
     [
       expand_segment(h),
       quote do
-        Enum.map_join(unquote(t), "/", &unquote(__MODULE__).encode_segment/1)
+        Enum.map_join(unquote(t), "/", &unquote(__MODULE__).__encode_segment__/1)
       end
     ]
   end
 
-  def expand_segment(segment) when is_binary(segment) do
+  defp expand_segment(segment) when is_binary(segment) do
     segment
   end
 
-  def expand_segment({_, _, _} = segment) do
+  defp expand_segment({_, _, _} = segment) do
     quote do
-      unquote(__MODULE__).encode_segment(unquote(segment))
+      unquote(__MODULE__).__encode_segment__(unquote(segment))
     end
   end
 
@@ -296,7 +290,7 @@ defmodule Combo.Router.Helpers do
   end
 
   @doc false
-  def encode_segment(data) do
+  def __encode_segment__(data) do
     data
     |> Combo.URLParam.to_param()
     |> URI.encode(&URI.char_unreserved?/1)
