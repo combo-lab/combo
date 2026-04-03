@@ -325,13 +325,8 @@ defmodule Combo.Router do
     # check all plugs referenced by routes.
     checks =
       routes
-      |> Enum.map(fn %{line: line, plug: plug} ->
-        {line, {plug, :init, 1}}
-      end)
-      |> Enum.uniq()
-      |> Enum.map(fn {line, {module, function, arity}} ->
-        quote line: line, do: _ = &(unquote(module).unquote(function) / unquote(arity))
-      end)
+      |> Enum.uniq_by(fn route -> {route.line, route.plug, route.plug_opts} end)
+      |> Enum.map(&build_check/1)
 
     {matches, {pipelines, _}} =
       Enum.map_reduce(routes_with_exprs, {[], %{}}, &build_match/2)
@@ -365,6 +360,18 @@ defmodule Combo.Router do
       unquote(matches)
       unquote(match_catch_all)
       unquote(forward_catch_all)
+    end
+  end
+
+  # TODO: check MFA better
+  defp build_check(route) do
+    %{line: line, plug: plug} = route
+    module = plug
+    function = :init
+    arity = 1
+
+    quote line: line do
+      _ = &(unquote(module).unquote(function) / unquote(arity))
     end
   end
 
