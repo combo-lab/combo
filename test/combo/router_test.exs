@@ -21,8 +21,8 @@ defmodule Combo.RouterTest do
   # scope
 
   describe "scope/_ -" do
-    test "single scope" do
-      defmodule RouterForSingleScope do
+    test "single scope", %{router: router} do
+      defmodule router do
         use Support.Router
 
         scope "/admin" do
@@ -30,16 +30,14 @@ defmodule Combo.RouterTest do
         end
       end
 
-      alias RouterForSingleScope, as: Router
-
-      conn = call(Router, :get, "/admin/users/1")
+      conn = call(router, :get, "/admin/users/1")
       assert conn.status == 200
       assert conn.resp_body == "api v1 users show"
       assert conn.params["id"] == "1"
     end
 
-    test "nested scopes" do
-      defmodule RouterForNestedScopes do
+    test "nested scopes", %{router: router} do
+      defmodule router do
         use Support.Router
 
         scope "/api" do
@@ -49,21 +47,19 @@ defmodule Combo.RouterTest do
         end
       end
 
-      alias RouterForNestedScopes, as: Router
-
-      conn = call(Router, :get, "/api/v1/users/1")
+      conn = call(router, :get, "/api/v1/users/1")
       assert conn.status == 200
       assert conn.resp_body == "api v1 users show"
       assert conn.params["id"] == "1"
     end
 
-    test ":module option" do
+    test ":module option", %{router: router} do
       defmodule L1.L2.CatController do
         use Support.Controller
         def index(conn, _params), do: text(conn, "all cats")
       end
 
-      defmodule RouterForModuleOption do
+      defmodule router do
         use Support.Router
 
         scope "/case1/l1", L1 do
@@ -94,14 +90,14 @@ defmodule Combo.RouterTest do
       end
 
       for i <- 1..5 do
-        conn = call(RouterForModuleOption, :get, "/case#{i}/l1/l2/cats")
+        conn = call(router, :get, "/case#{i}/l1/l2/cats")
         assert conn.status == 200
         assert conn.resp_body == "all cats"
       end
     end
 
-    test ":private option" do
-      defmodule RouterForPrivateOption do
+    test ":private option", %{router: router} do
+      defmodule router do
         use Support.Router
 
         scope "/private", private: %{token: "foo"} do
@@ -114,23 +110,21 @@ defmodule Combo.RouterTest do
         end
       end
 
-      alias RouterForPrivateOption, as: Router
-
-      conn = call(Router, :get, "/private/token")
+      conn = call(router, :get, "/private/token")
       assert conn.status == 200
       assert conn.private[:token] == "foo"
 
-      conn = call(Router, :get, "/private/token/override")
+      conn = call(router, :get, "/private/token/override")
       assert conn.status == 200
       assert conn.private[:token] == "bar"
 
-      conn = call(Router, :get, "/private/nested/token/override")
+      conn = call(router, :get, "/private/nested/token/override")
       assert conn.status == 200
       assert conn.private[:token] == "baz"
     end
 
-    test ":assigns option" do
-      defmodule RouterForAssignsOption do
+    test ":assigns option", %{router: router} do
+      defmodule router do
         use Support.Router
 
         scope "/assigns", assigns: %{token: "foo"} do
@@ -143,24 +137,22 @@ defmodule Combo.RouterTest do
         end
       end
 
-      alias RouterForAssignsOption, as: Router
-
-      conn = call(Router, :get, "/assigns/token")
+      conn = call(router, :get, "/assigns/token")
       assert conn.status == 200
       assert conn.assigns[:token] == "foo"
 
-      conn = call(Router, :get, "/assigns/token/override")
+      conn = call(router, :get, "/assigns/token/override")
       assert conn.status == 200
       assert conn.assigns[:token] == "bar"
 
-      conn = call(Router, :get, "/assigns/nested/token/override")
+      conn = call(router, :get, "/assigns/nested/token/override")
       assert conn.status == 200
       assert conn.assigns[:token] == "baz"
     end
 
-    test "raises on bad path" do
+    test "raises on bad path", %{router: router} do
       assert_raise ArgumentError, ~r{route path must be a string, got: :bad}, fn ->
-        defmodule BadRouter do
+        defmodule router do
           use Support.Router
 
           scope path: :bad do
@@ -170,13 +162,13 @@ defmodule Combo.RouterTest do
     end
   end
 
-  test "scoped_module/1" do
+  test "scoped_module/1", %{router: router} do
     defmodule L1.InspectController do
       use Support.Controller
       def show(conn, _params), do: text(conn, inspect(conn.assigns.module))
     end
 
-    defmodule RouterForScopedModule do
+    defmodule router do
       use Support.Router
 
       scope "/case1/l1", L1 do
@@ -190,13 +182,11 @@ defmodule Combo.RouterTest do
       end
     end
 
-    alias RouterForScopedModule, as: Router
-
-    conn = call(Router, :get, "/case1/l1/inspect")
+    conn = call(router, :get, "/case1/l1/inspect")
     assert conn.status == 200
     assert conn.resp_body == "Combo.RouterTest.L1.DummyController"
 
-    conn = call(Router, :get, "/case2/l1/inspect")
+    conn = call(router, :get, "/case2/l1/inspect")
     assert conn.status == 200
     assert conn.resp_body == "DummyController"
   end
@@ -204,32 +194,31 @@ defmodule Combo.RouterTest do
   # route
 
   describe "verb/_" do
-    test "raises on bad path" do
+    test "raises on bad path", %{router: router} do
       assert_raise ArgumentError, ~r{route path must be a string, got: :/}, fn ->
-        defmodule BadRouter do
+        defmodule router do
           use Support.Router
           get :/, DummyController, :show
         end
       end
     end
 
-    test "raises on reserved route name" do
-      # derived from the name of controller
-
+    test "raises on reserved route name - derived from the name of controller", %{router: router} do
       assert_raise ArgumentError,
                    "route name \"static\" is reserved, you must change it by renaming StaticController or specifying :as option",
                    fn ->
-                     defmodule BadRouter do
+                     defmodule router do
                        use Support.Router
                        get "/", StaticController, :index
                      end
                    end
+    end
 
-      # derived from the :as option
+    test "raises on reserved route name - derived from the :as option", %{router: router} do
       assert_raise ArgumentError,
                    "route name \"static\" is reserved, you must change it by renaming DummyController or specifying :as option",
                    fn ->
-                     defmodule BadRouter do
+                     defmodule router do
                        use Support.Router
                        get "/", DummyController, :show, as: :static
                      end
