@@ -4,9 +4,6 @@ defmodule Combo.Router.ConsoleFormatter do
   @socket_verb "WS"
   @longpoll_verbs ["GET", "POST"]
 
-  @doc """
-  Format the routes for printing.
-  """
   def format(router, endpoint \\ nil) do
     routes = Combo.Router.routes(router)
     column_widths = calculate_column_widths(routes, endpoint)
