@@ -12,10 +12,10 @@ defmodule Combo.FilteredParams do
 
   ## Rules
 
-    * `{:discard, keys}`, filters paramaters specified by `keys`, and keep
+    * `{:discard, keys}`, filters parameters specified by `keys`, and keep
       other parameters. For example: `{:discard, ["password", "secret"]}`.
 
-    * `{:keep, keys}`, keeps paramaters specified by `keys`, and keep other
+    * `{:keep, keys}`, keeps parameters specified by `keys`, and keep other
       parameters. For example: `{:keep, ["id", "order"]}`.
 
   And, the matching on keys is case sensitive.

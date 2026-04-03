@@ -1,282 +1,162 @@
 defmodule Combo.Router.Scope do
   @moduledoc false
 
-  alias Combo.Router.Scope
+  alias Combo.Router.ModuleAttr
+  alias Combo.Router.Utils
 
-  @stack :combo_router_scopes
-  @top :combo_top_scopes
-  @pipes :combo_pipeline_scopes
+  @struct_keys [:path, :path_info, :module, :as, :pipes, :private, :assigns, :log]
+  @enforce_keys @struct_keys
+  defstruct @struct_keys
 
-  defstruct path: [],
-            alias: [],
-            as: [],
-            pipes: [],
-            hosts: [],
-            private: %{},
-            assigns: %{},
-            log: :debug
+  @type t :: %__MODULE__{
+          path: String.t(),
+          path_info: [String.t()],
+          module: [module()],
+          as: [atom() | String.t()],
+          pipes: [atom()],
+          private: map(),
+          assigns: map(),
+          log: Logger.level() | mfa() | false
+        }
 
-  @doc """
-  Initializes the scope.
-  """
-  def init(module) do
-    Module.put_attribute(module, @stack, [])
-    Module.put_attribute(module, @top, %Scope{})
-    Module.put_attribute(module, @pipes, MapSet.new())
+  @doc false
+  def setup(router) do
+    scope = %__MODULE__{
+      path: "/",
+      path_info: [],
+      module: [],
+      as: [],
+      pipes: [],
+      private: %{},
+      assigns: %{},
+      log: :debug
+    }
+
+    ModuleAttr.put(router, :scopes, [scope])
   end
 
-  @doc """
-  Builds a route based on the top of the stack.
-  """
-  def route(line, module, kind, verb, path, plug, plug_opts, opts) do
-    if not is_atom(plug) do
-      raise ArgumentError,
-            "routes expect a module plug as second argument, got: #{inspect(plug)}"
-    end
-
-    top = get_top(module)
-    path = validate_path(path)
-    private = Keyword.get(opts, :private, %{})
-    assigns = Keyword.get(opts, :assigns, %{})
-    as = Keyword.get_lazy(opts, :as, fn -> Combo.Naming.resource_name(plug, "Controller") end)
-    alias? = Keyword.get(opts, :alias, true)
-
-    if to_string(as) == "static" do
-      raise ArgumentError,
-            "`static` is a reserved route prefix generated from #{inspect(plug)} or `:as` option"
-    end
-
-    {path, alias, as, private, assigns} = join(top, path, plug, alias?, as, private, assigns)
-
-    metadata =
-      opts
-      |> Keyword.get(:metadata, %{})
-      |> Map.put(:log, Keyword.get(opts, :log, top.log))
-
-    metadata =
-      if kind == :forward do
-        Map.put(metadata, :forward, validate_forward!(path, plug))
-      else
-        metadata
+  @doc false
+  def add_scope(args, block) do
+    scope =
+      quote do
+        unquote(__MODULE__).__build_scope__(__MODULE__, unquote(args))
       end
 
-    Combo.Router.Route.build(
-      line,
-      kind,
-      verb,
-      path,
-      top.hosts,
-      alias,
-      plug_opts,
-      as,
-      top.pipes,
-      private,
-      assigns,
-      metadata
-    )
-  end
+    quote do
+      unquote(__MODULE__).__push_scope__(__MODULE__, unquote(scope))
 
-  defp validate_forward!(path, plug) when is_atom(plug) do
-    case Plug.Router.Utils.build_path_match(path) do
-      {[], path_segments} ->
-        path_segments
-
-      _ ->
-        raise ArgumentError,
-              "dynamic segment \"#{path}\" not allowed when forwarding. Use a static path instead"
+      try do
+        unquote(block)
+      after
+        unquote(__MODULE__).__pop_scope__(__MODULE__)
+      end
     end
   end
 
-  defp validate_forward!(_, plug) do
-    raise ArgumentError, "forward expects a module as the second argument, #{inspect(plug)} given"
-  end
-
-  @doc """
-  Validates a path is a string and contains a leading prefix.
-  """
-  def validate_path("/" <> _ = path), do: path
-
-  def validate_path(path) when is_binary(path) do
-    IO.warn("router paths should begin with a forward slash, got: #{inspect(path)}")
-    "/" <> path
-  end
-
-  def validate_path(path) do
-    raise ArgumentError, "router paths must be strings, got: #{inspect(path)}"
-  end
-
-  @doc """
-  Defines the given pipeline.
-  """
-  def pipeline(module, pipe) when is_atom(pipe) do
-    update_pipes(module, &MapSet.put(&1, pipe))
-  end
-
-  @doc """
-  Appends the given pipes to the current scope pipe through.
-  """
-  def pipe_through(module, new_pipes) do
+  @doc false
+  def add_pipe_through(router, new_pipes) do
+    %{pipes: pipes} = get_top_scope(router)
     new_pipes = List.wrap(new_pipes)
-    %{pipes: pipes} = top = get_top(module)
 
     if pipe = Enum.find(new_pipes, &(&1 in pipes)) do
       raise ArgumentError,
             "duplicate pipe_through for #{inspect(pipe)}. " <>
-              "A plug may only be used once inside a scoped pipe_through"
+              "A plug can only be used once inside a scoped pipe_through"
     end
 
-    put_top(module, %{top | pipes: pipes ++ new_pipes})
-  end
-
-  @doc """
-  Pushes a scope into the module stack.
-  """
-  def push(module, path) when is_binary(path) do
-    push(module, path: path)
-  end
-
-  def push(module, opts) when is_list(opts) do
-    top = get_top(module)
-
-    path =
-      if path = Keyword.get(opts, :path) do
-        path |> validate_path() |> String.split("/", trim: true)
-      else
-        []
-      end
-
-    alias = append_unless_false(top, opts, :alias, &Atom.to_string(&1))
-    as = append_unless_false(top, opts, :as, & &1)
-
-    hosts =
-      case Keyword.fetch(opts, :host) do
-        {:ok, val} -> validate_hosts!(val)
-        :error -> top.hosts
-      end
-
-    private = Keyword.get(opts, :private, %{})
-    assigns = Keyword.get(opts, :assigns, %{})
-
-    update_stack(module, fn stack -> [top | stack] end)
-
-    put_top(module, %Scope{
-      path: top.path ++ path,
-      alias: alias,
-      as: as,
-      hosts: hosts,
-      pipes: top.pipes,
-      private: Map.merge(top.private, private),
-      assigns: Map.merge(top.assigns, assigns),
-      log: Keyword.get(opts, :log, top.log)
-    })
-  end
-
-  defp validate_hosts!(nil), do: []
-  defp validate_hosts!(host) when is_binary(host), do: [host]
-
-  defp validate_hosts!(hosts) when is_list(hosts) do
-    for host <- hosts do
-      unless is_binary(host), do: raise_invalid_host(host)
-
-      host
-    end
-  end
-
-  defp validate_hosts!(invalid), do: raise_invalid_host(invalid)
-
-  defp raise_invalid_host(host) do
-    raise ArgumentError,
-          "expected router scope :host to be compile-time string or list of strings, got: #{inspect(host)}"
-  end
-
-  defp append_unless_false(top, opts, key, fun) do
-    case opts[key] do
-      false -> []
-      nil -> Map.fetch!(top, key)
-      other -> Map.fetch!(top, key) ++ [fun.(other)]
-    end
-  end
-
-  @doc """
-  Pops a scope from the module stack.
-  """
-  def pop(module) do
-    update_stack(module, fn [top | stack] ->
-      put_top(module, top)
-      stack
+    ModuleAttr.update(router, :scopes, fn [top | rest] ->
+      [%{top | pipes: pipes ++ new_pipes} | rest]
     end)
   end
 
-  @doc """
-  Expands the alias in the current router scope.
-  """
-  def expand_alias(module, alias) do
-    join_alias(get_top(module), alias)
+  def __build_scope__(router, args) do
+    scope = get_top_scope(router)
+    opts = normalize_scope_args(args)
+
+    path_info =
+      opts
+      |> Keyword.get(:path, "/")
+      |> Utils.validate_path!()
+      |> Utils.split_path()
+      |> then(&Kernel.++(scope.path_info, &1))
+
+    path = Utils.build_path(path_info)
+    module = append_value(scope.module, Keyword.get(opts, :module))
+    as = append_value(scope.as, Keyword.get(opts, :as))
+    pipes = scope.pipes
+    private = Map.merge(scope.private, Keyword.get(opts, :private, %{}))
+    assigns = Map.merge(scope.assigns, Keyword.get(opts, :assigns, %{}))
+    log = Keyword.get(opts, :log, scope.log)
+
+    %__MODULE__{
+      path: path,
+      path_info: path_info,
+      module: module,
+      as: as,
+      pipes: pipes,
+      private: private,
+      assigns: assigns,
+      log: log
+    }
   end
 
-  @doc """
-  Returns the full path in the current router scope.
-  """
-  def full_path(module, path) do
-    split_path = String.split(path, "/", trim: true)
-    prefix = get_top(module).path
+  defp normalize_scope_args([path]) when is_binary(path) do
+    [path: path]
+  end
 
-    cond do
-      prefix == [] -> path
-      split_path == [] -> "/" <> Enum.join(prefix, "/")
-      true -> "/" <> Path.join(get_top(module).path ++ split_path)
+  defp normalize_scope_args([module]) when is_atom(module) do
+    [module: module]
+  end
+
+  defp normalize_scope_args([opts]) when is_list(opts) do
+    opts
+  end
+
+  defp normalize_scope_args([path, module]) when is_binary(path) and is_atom(module) do
+    [path: path, module: module]
+  end
+
+  defp normalize_scope_args([path, opts]) when is_binary(path) and is_list(opts) do
+    Keyword.put(opts, :path, path)
+  end
+
+  defp normalize_scope_args([module, opts]) when is_atom(module) and is_list(opts) do
+    Keyword.put(opts, :module, module)
+  end
+
+  defp normalize_scope_args([path, module, opts])
+       when is_binary(path) and is_atom(module) and is_list(opts) do
+    opts
+    |> Keyword.put(:path, path)
+    |> Keyword.put(:module, module)
+  end
+
+  defp append_value(values, value) do
+    case value do
+      false -> []
+      nil -> values
+      value -> values ++ [value]
     end
   end
 
-  defp join(top, path, alias, alias?, as, private, assigns) do
-    joined_alias =
-      if alias? do
-        join_alias(top, alias)
-      else
-        alias
-      end
-
-    {join_path(top, path), joined_alias, join_as(top, as), Map.merge(top.private, private),
-     Map.merge(top.assigns, assigns)}
+  def __push_scope__(router, scope) do
+    ModuleAttr.update(router, :scopes, fn scopes -> [scope | scopes] end)
   end
 
-  defp join_path(top, path) do
-    "/" <> Enum.join(top.path ++ String.split(path, "/", trim: true), "/")
+  def __pop_scope__(router) do
+    ModuleAttr.update(router, :scopes, fn [_top | scopes] -> scopes end)
   end
 
-  defp join_alias(top, alias) when is_atom(alias) do
-    case Atom.to_string(alias) do
-      <<head, _::binary>> when head in ?a..?z -> alias
-      alias -> Module.concat(top.alias ++ [alias])
-    end
+  @doc false
+  def expand_module(router, module) do
+    scope = get_top_scope(router)
+    Module.concat(scope.module ++ [module])
   end
 
-  defp join_as(_top, nil), do: nil
-  defp join_as(top, as) when is_atom(as) or is_binary(as), do: Enum.join(top.as ++ [as], "_")
-
-  defp get_top(module) do
-    get_attribute(module, @top)
-  end
-
-  defp update_stack(module, fun) do
-    update_attribute(module, @stack, fun)
-  end
-
-  defp update_pipes(module, fun) do
-    update_attribute(module, @pipes, fun)
-  end
-
-  defp put_top(module, value) do
-    Module.put_attribute(module, @top, value)
-    value
-  end
-
-  defp get_attribute(module, attr) do
-    Module.get_attribute(module, attr) ||
-      raise "Combo router scope was not initialized"
-  end
-
-  defp update_attribute(module, attr, fun) do
-    Module.put_attribute(module, attr, fun.(get_attribute(module, attr)))
+  @doc false
+  def get_top_scope(router) do
+    router
+    |> ModuleAttr.get(:scopes)
+    |> hd()
   end
 end

@@ -1,132 +1,199 @@
 defmodule Combo.Router.Route do
   @moduledoc false
 
-  @doc """
-  The `Combo.Router.Route` struct. It stores:
+  alias Combo.Router.ModuleAttr
+  alias Combo.Router.Scope
+  alias Combo.Router.Utils
 
-    * `:line` - the line the route was defined.
-    * `:kind` - the kind of route as an atom, either `:match` or `:forward`.
-    * `:verb` - the HTTP verb as an atom, such as `:get` or `:post`.
-    * `:path` - the normalized path as a string.
-    * `:hosts` - the list of request hosts or host prefixes.
-    * `:plug` - the plug module.
-    * `:plug_opts` - the plug options.
-    * `:helper` - the name of the helper as a string, or `nil`.
-    * `:pipe_through` - the pipeline names as a list of atoms.
-    * `:private` - the private route info as a map.
-    * `:assigns` - the route info as a map.
-    * `:metadata` - the metadata as a map, used on telemetry events and route info.
-
-  """
-  defstruct [
+  @struct_keys [
     :line,
     :kind,
     :verb,
     :path,
-    :hosts,
+    :path_info,
     :plug,
     :plug_opts,
-    :helper,
-    :pipe_through,
+    :name,
+    :pipes,
     :private,
     :assigns,
-    :metadata
+    :log
   ]
+  @enforce_keys @struct_keys
+  defstruct @struct_keys
 
-  @type t :: %__MODULE__{}
+  @type t :: %__MODULE__{
+          line: non_neg_integer(),
+          kind: :match | :forward,
+          verb: atom(),
+          path: String.t(),
+          path_info: [String.t()],
+          plug: atom(),
+          plug_opts: atom(),
+          name: binary() | nil,
+          pipes: [atom()],
+          private: map(),
+          assigns: map(),
+          log: Logger.level() | mfa() | false
+        }
 
-  @doc "Used as a plug on forwarding."
-  def init(opts), do: opts
-
-  @doc "Used as a plug on forwarding."
-  def call(%{path_info: path, script_name: script} = conn, {fwd_segments, plug, opts}) do
-    new_path = path -- fwd_segments
-    {base, ^new_path} = Enum.split(path, length(path) - length(new_path))
-    conn = %{conn | path_info: new_path, script_name: script ++ base}
-    conn = plug.call(conn, plug.init(opts))
-    %{conn | path_info: path, script_name: script}
+  @doc false
+  def setup(module) do
+    ModuleAttr.register(module, :routes, accumulate: true)
   end
 
-  @doc """
-  Receives the verb, path, plug, options and helper and returns a
-  `Combo.Router.Route` struct.
-  """
-  @spec build(
-          line :: non_neg_integer(),
-          kind :: :match | :forward,
-          verb :: atom(),
-          path :: String.t(),
-          hosts :: [String.t()],
-          plug :: atom(),
-          plug_opts :: atom(),
-          helper :: binary() | nil,
-          pipe_through :: [atom()],
-          private :: map(),
-          assigns :: map(),
-          metadata :: map()
-        ) :: t()
+  @doc false
+  def add_route(kind, verb, path, plug, plug_opts, opts) do
+    route =
+      quote do
+        unquote(__MODULE__).__build_route__(
+          __ENV__.line,
+          __ENV__.module,
+          unquote(kind),
+          unquote(verb),
+          unquote(path),
+          unquote(plug),
+          unquote(plug_opts),
+          unquote(opts)
+        )
+      end
+
+    quote do
+      ModuleAttr.put(__MODULE__, :routes, unquote(route))
+    end
+  end
+
+  def __build_route__(line, module, kind, verb, path, plug, plug_opts, opts) do
+    if not is_atom(plug) do
+      raise ArgumentError,
+            "route plug must be a module, got: #{inspect(plug)}"
+    end
+
+    Utils.validate_path!(path)
+
+    if kind == :forward && !Utils.static_path?(path) do
+      raise ArgumentError,
+            "route path must be static when forwarding, got: #{inspect(path)}"
+    end
+
+    scope = Scope.get_top_scope(module)
+    path_info = Utils.split_path(path)
+    scoped_module? = Keyword.get(opts, :scoped_module, true)
+    as = Keyword.get_lazy(opts, :as, fn -> Combo.Naming.resource_name(plug, "Controller") end)
+    private = Keyword.get(opts, :private, %{})
+    assigns = Keyword.get(opts, :assigns, %{})
+    log = Keyword.get(opts, :log, scope.log)
+
+    path_info = join_path_info(scope, path_info)
+    path = Utils.build_path(path_info)
+    plug = if scoped_module?, do: join_module(scope, plug), else: plug
+
+    name = build_name(scope, as)
+
+    if name == "static" do
+      raise ArgumentError, """
+      route name #{inspect(name)} is reserved, you must change it by \
+      renaming #{inspect(plug)} or specifying :as option\
+      """
+    end
+
+    private = Map.merge(scope.private, private)
+    assigns = Map.merge(scope.assigns, assigns)
+
+    build(
+      line,
+      kind,
+      verb,
+      path,
+      path_info,
+      plug,
+      plug_opts,
+      name,
+      scope.pipes,
+      private,
+      assigns,
+      log
+    )
+  end
+
+  defp join_path_info(scope, path_info) do
+    scope.path_info ++ path_info
+  end
+
+  defp join_module(scope, module) when is_atom(module) do
+    Module.concat(scope.module ++ [module])
+  end
+
+  defp build_name(_scope, nil), do: nil
+
+  defp build_name(scope, as) when is_atom(as) or is_binary(as),
+    do: Enum.join(scope.as ++ [as], "_")
+
+  @doc false
   def build(
         line,
         kind,
         verb,
         path,
-        hosts,
+        path_info,
         plug,
         plug_opts,
-        helper,
-        pipe_through,
+        name,
+        pipes,
         private,
         assigns,
-        metadata
+        log
       )
       when kind in [:match, :forward] and
              is_atom(verb) and
              is_binary(path) and
-             is_list(hosts) and
+             is_list(path_info) and
              is_atom(plug) and
-             (is_binary(helper) or is_nil(helper)) and
-             is_list(pipe_through) and
+             (is_binary(name) or is_nil(name)) and
+             is_list(pipes) and
              is_map(private) and
-             is_map(assigns) and
-             is_map(metadata) do
+             is_map(assigns) do
     %__MODULE__{
       line: line,
       kind: kind,
       verb: verb,
       path: path,
-      hosts: hosts,
+      path_info: path_info,
       plug: plug,
       plug_opts: plug_opts,
-      helper: helper,
-      pipe_through: pipe_through,
+      name: name,
+      pipes: pipes,
       private: private,
       assigns: assigns,
-      metadata: metadata
+      log: log
     }
   end
 
-  @doc """
-  Builds the compiled expressions of route.
-  """
-  def exprs(route) do
-    {path, binding} = build_path_and_binding(route)
+  @doc false
+  def build_exprs(route) do
+    method_match = build_method_match(route.verb)
+    {path_info_match, path_info_binding} = build_path_info_match_and_binding(route)
 
     %{
-      verb: build_verb(route.verb),
-      path: path,
-      binding: binding,
+      method_match: method_match,
+      path_info_match: path_info_match,
+      path_params: build_path_params(path_info_binding),
+      prepare: build_prepare(route),
       dispatch: build_dispatch(route),
-      hosts: build_hosts(route.hosts),
-      path_params: build_path_params(binding),
-      prepare: build_prepare(route)
+      binding: path_info_binding
     }
   end
 
-  defp build_path_and_binding(%__MODULE__{path: path} = route) do
+  defp build_method_match(:*), do: Macro.var(:_method, nil)
+  defp build_method_match(verb), do: verb |> to_string() |> String.upcase()
+
+  defp build_path_info_match_and_binding(route) do
+    %{path_info: path_info} = route
+
     {_params, segments} =
       case route.kind do
-        :match -> Plug.Router.Utils.build_path_match(path)
-        :forward -> Plug.Router.Utils.build_path_match(path <> "/*_forward_path_info")
+        :match -> Utils.build_path_info_match(path_info)
+        :forward -> Utils.build_path_info_match(path_info ++ ["*_forward_path_info"])
       end
 
     rewrite_segments(segments)
@@ -139,12 +206,61 @@ defmodule Combo.Router.Route do
           var = Macro.var(name, __MODULE__)
           {var, [{Atom.to_string(name), var} | binding]}
 
-        other, acc ->
-          {other, acc}
+        other, binding ->
+          {other, binding}
       end)
 
     {segments, Enum.reverse(binding)}
   end
+
+  defp build_path_params(binding), do: {:%{}, [], binding}
+
+  defp build_prepare(route) do
+    {match_params, merged_params} = build_params_expr()
+    {match_private, merged_private} = build_map_data_expr(:private, route.private)
+    {match_assigns, merged_assigns} = build_map_data_expr(:assigns, route.assigns)
+
+    match_all = match_params ++ match_private ++ match_assigns
+    merged_all = merged_params ++ merged_private ++ merged_assigns
+
+    quote do
+      fn var!(conn, :conn), var!(path_params, :conn) ->
+        %{unquote_splicing(match_all)} = var!(conn, :conn)
+        %{var!(conn, :conn) | unquote_splicing(merged_all)}
+      end
+    end
+  end
+
+  defp build_params_expr do
+    params = Macro.var(:params, :conn)
+    path_params = Macro.var(:path_params, :conn)
+
+    merged_params =
+      quote do
+        unquote(__MODULE__).__merge_params__(
+          unquote(params),
+          unquote(path_params)
+        )
+      end
+
+    {
+      [{:params, params}],
+      [{:params, merged_params}, {:path_params, path_params}]
+    }
+  end
+
+  defp build_map_data_expr(_key, data) when data == %{} do
+    {[], []}
+  end
+
+  defp build_map_data_expr(key, data) do
+    var = Macro.var(key, :conn)
+    merge = quote(do: Map.merge(unquote(var), unquote(Macro.escape(data))))
+    {[{key, var}], [{key, merge}]}
+  end
+
+  def __merge_params__(%Plug.Conn.Unfetched{}, path_params), do: path_params
+  def __merge_params__(params, path_params), do: Map.merge(params, path_params)
 
   defp build_dispatch(%__MODULE__{
          kind: :match,
@@ -158,67 +274,13 @@ defmodule Combo.Router.Route do
 
   defp build_dispatch(%__MODULE__{
          kind: :forward,
+         path_info: path_info,
          plug: plug,
-         plug_opts: plug_opts,
-         metadata: metadata
+         plug_opts: plug_opts
        }) do
     quote do
-      {
-        Combo.Router.Route,
-        {unquote(metadata.forward), unquote(plug), unquote(Macro.escape(plug_opts))}
-      }
+      {Combo.Router.Forward,
+       {unquote(path_info), {unquote(plug), unquote(Macro.escape(plug_opts))}}}
     end
   end
-
-  def build_hosts([]), do: [Plug.Router.Utils.build_host_match(nil)]
-
-  def build_hosts([_ | _] = hosts) do
-    for host <- hosts, do: Plug.Router.Utils.build_host_match(host)
-  end
-
-  defp build_verb(:*), do: Macro.var(:_verb, nil)
-  defp build_verb(verb), do: verb |> to_string() |> String.upcase()
-
-  defp build_path_params(binding), do: {:%{}, [], binding}
-
-  defp build_prepare(route) do
-    {match_params, merge_params} = build_params()
-    {match_private, merge_private} = build_prepare_expr(:private, route.private)
-    {match_assigns, merge_assigns} = build_prepare_expr(:assigns, route.assigns)
-
-    match_all = match_params ++ match_private ++ match_assigns
-    merge_all = merge_params ++ merge_private ++ merge_assigns
-
-    quote do
-      %{unquote_splicing(match_all)} = var!(conn, :conn)
-      %{var!(conn, :conn) | unquote_splicing(merge_all)}
-    end
-  end
-
-  defp build_params() do
-    params = Macro.var(:params, :conn)
-    path_params = Macro.var(:path_params, :conn)
-
-    merge_params =
-      quote(do: Combo.Router.Route.merge_params(unquote(params), unquote(path_params)))
-
-    {
-      [{:params, params}],
-      [{:params, merge_params}, {:path_params, path_params}]
-    }
-  end
-
-  defp build_prepare_expr(_key, data) when data == %{}, do: {[], []}
-
-  defp build_prepare_expr(key, data) do
-    var = Macro.var(key, :conn)
-    merge = quote(do: Map.merge(unquote(var), unquote(Macro.escape(data))))
-    {[{key, var}], [{key, merge}]}
-  end
-
-  @doc """
-  Merges params from router.
-  """
-  def merge_params(%Plug.Conn.Unfetched{}, path_params), do: path_params
-  def merge_params(params, path_params), do: Map.merge(params, path_params)
 end

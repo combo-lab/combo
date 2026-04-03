@@ -1,5 +1,8 @@
-for module <- [RouteFormatter.PageController, RouteFormatter.ImageController] do
-  defmodule module do
+for controller <- [
+      Combo.Router.ConsoleFormatterTest.PageController,
+      Combo.Router.ConsoleFormatterTest.ImageController
+    ] do
+  defmodule controller do
     def init(opts), do: opts
     def call(conn, _opts), do: conn
   end
@@ -7,93 +10,87 @@ end
 
 defmodule Combo.Router.ConsoleFormatterTest do
   use ExUnit.Case, async: true
+
   alias Combo.Router.ConsoleFormatter
+  alias Combo.Router.ConsoleFormatterTest.PageController
+  alias Combo.Router.ConsoleFormatterTest.ImageController
 
-  defmodule RouterTestSingleRoutes do
-    use Combo.Router
-
-    get "/", RouteFormatter.PageController, :index, as: :page
-    post "/images", RouteFormatter.ImageController, :upload, as: :upload_image
-    delete "/images", RouteFormatter.ImageController, :delete, as: :remove_image
-  end
-
-  def __sockets__, do: []
-
-  defmodule FormatterEndpoint do
+  defmodule Endpoint do
     use Combo.Endpoint, otp_app: :combo
-
-    socket "/socket", TestSocket, websocket: true
   end
 
-  test "format multiple routes" do
-    assert draw(RouterTestSingleRoutes) == """
-                   page_path  GET     /        RouteFormatter.PageController :index
-           upload_image_path  POST    /images  RouteFormatter.ImageController :upload
-           remove_image_path  DELETE  /images  RouteFormatter.ImageController :delete
-           """
+  defmodule EndpointWithSocket do
+    use Combo.Endpoint, otp_app: :combo
+    socket "/socket", __MODULE__.TestSocket, websocket: true
   end
 
-  defmodule RouterTestResources do
+  defmodule MatchRouter do
     use Combo.Router
-    resources "/images", RouteFormatter.ImageController
+    get "/", PageController, :index, as: :page
+    post "/images", ImageController, :upload, as: :upload_image
+    delete "/images", ImageController, :delete, as: :remove_image
   end
 
-  test "format resource routes" do
-    assert draw(RouterTestResources) == """
-           image_path  GET     /images           RouteFormatter.ImageController :index
-           image_path  GET     /images/new       RouteFormatter.ImageController :new
-           image_path  POST    /images           RouteFormatter.ImageController :create
-           image_path  GET     /images/:id       RouteFormatter.ImageController :show
-           image_path  GET     /images/:id/edit  RouteFormatter.ImageController :edit
-           image_path  PATCH   /images/:id       RouteFormatter.ImageController :update
-                       PUT     /images/:id       RouteFormatter.ImageController :update
-           image_path  DELETE  /images/:id       RouteFormatter.ImageController :delete
-           """
-  end
-
-  defmodule RouterTestResource do
+  defmodule ForwardRouter do
     use Combo.Router
-    resources "/image", RouteFormatter.ImageController, singleton: true
-    forward "/admin", RouteFormatter.PageController, [], as: :admin
-    forward "/f1", RouteFormatter.ImageController
+    forward "/admin", PageController, [], as: :admin
+    forward "/f1", ImageController
   end
 
-  test "format single resource routes" do
-    assert draw(RouterTestResource) == """
-           image_path  GET     /image/new   RouteFormatter.ImageController :new
-           image_path  POST    /image       RouteFormatter.ImageController :create
-           image_path  GET     /image       RouteFormatter.ImageController :show
-           image_path  GET     /image/edit  RouteFormatter.ImageController :edit
-           image_path  PATCH   /image       RouteFormatter.ImageController :update
-                       PUT     /image       RouteFormatter.ImageController :update
-           image_path  DELETE  /image       RouteFormatter.ImageController :delete
-                       *       /admin       RouteFormatter.PageController []
-                       *       /f1          RouteFormatter.ImageController []
+  defmodule MixedRouter do
+    use Combo.Router
+    get "/", PageController, :index, as: :page
+    post "/images", ImageController, :upload, as: :upload_image
+    delete "/images", ImageController, :delete, as: :remove_image
+    forward "/admin", PageController, [], as: :admin
+    forward "/f1", ImageController
+  end
+
+  test "format :match routes" do
+    assert draw(MatchRouter, Endpoint) == """
+                   page  GET     /        Combo.Router.ConsoleFormatterTest.PageController :index
+           upload_image  POST    /images  Combo.Router.ConsoleFormatterTest.ImageController :upload
+           remove_image  DELETE  /images  Combo.Router.ConsoleFormatterTest.ImageController :delete
            """
   end
 
-  describe "endpoint sockets" do
-    test "format with sockets" do
-      assert draw(RouterTestSingleRoutes, FormatterEndpoint) == """
-                     page_path  GET     /                  RouteFormatter.PageController :index
-             upload_image_path  POST    /images            RouteFormatter.ImageController :upload
-             remove_image_path  DELETE  /images            RouteFormatter.ImageController :delete
-                                WS      /socket/websocket  TestSocket
-                                GET     /socket/longpoll   TestSocket
-                                POST    /socket/longpoll   TestSocket
+  test "format :forward routes" do
+    assert draw(ForwardRouter, Endpoint) == """
+             *  /admin  Combo.Router.ConsoleFormatterTest.PageController []
+             *  /f1     Combo.Router.ConsoleFormatterTest.ImageController []
+           """
+  end
+
+  test "format mixed routes" do
+    assert draw(MixedRouter, Endpoint) == """
+                   page  GET     /        Combo.Router.ConsoleFormatterTest.PageController :index
+           upload_image  POST    /images  Combo.Router.ConsoleFormatterTest.ImageController :upload
+           remove_image  DELETE  /images  Combo.Router.ConsoleFormatterTest.ImageController :delete
+                         *       /admin   Combo.Router.ConsoleFormatterTest.PageController []
+                         *       /f1      Combo.Router.ConsoleFormatterTest.ImageController []
+           """
+  end
+
+  describe "format routes" do
+    test "without sockets" do
+      assert draw(MatchRouter, Endpoint) == """
+                     page  GET     /        Combo.Router.ConsoleFormatterTest.PageController :index
+             upload_image  POST    /images  Combo.Router.ConsoleFormatterTest.ImageController :upload
+             remove_image  DELETE  /images  Combo.Router.ConsoleFormatterTest.ImageController :delete
              """
     end
 
-    test "format without sockets" do
-      assert draw(RouterTestSingleRoutes, __MODULE__) == """
-                     page_path  GET     /        RouteFormatter.PageController :index
-             upload_image_path  POST    /images  RouteFormatter.ImageController :upload
-             remove_image_path  DELETE  /images  RouteFormatter.ImageController :delete
+    test "with sockets" do
+      assert draw(MatchRouter, EndpointWithSocket) == """
+                     page  GET     /                  Combo.Router.ConsoleFormatterTest.PageController :index
+             upload_image  POST    /images            Combo.Router.ConsoleFormatterTest.ImageController :upload
+             remove_image  DELETE  /images            Combo.Router.ConsoleFormatterTest.ImageController :delete
+                           WS      /socket/websocket  Combo.Router.ConsoleFormatterTest.EndpointWithSocket.TestSocket
+                           GET     /socket/longpoll   Combo.Router.ConsoleFormatterTest.EndpointWithSocket.TestSocket
+                           POST    /socket/longpoll   Combo.Router.ConsoleFormatterTest.EndpointWithSocket.TestSocket
              """
     end
   end
 
-  defp draw(router, endpoint \\ nil) do
-    ConsoleFormatter.format(router, endpoint)
-  end
+  defp draw(router, endpoint), do: ConsoleFormatter.format(router, endpoint)
 end

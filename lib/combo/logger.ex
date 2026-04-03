@@ -32,20 +32,20 @@ defmodule Combo.Logger do
     * `[:combo, :router_dispatch, :start]` - dispatched by `Combo.Router`
       before dispatching to a matched route:
       * Measurement: `%{system_time: System.system_time}`
-      * Metadata: `%{conn: Plug.Conn.t, route: binary, plug: module, plug_opts: term, path_params: map, pipe_through: [atom], log: Logger.level | false}`
-      * Disable logging: Pass `log: false` to the router macro, for example: `get("/page", PageController, :index, log: false)`
-      * Configure log level dynamically: `get("/page", PageController, :index, log: {Mod, Fun, Args})`
+      * Metadata: `%{conn: Plug.Conn.t, route: map(), path_params: map()}`
+      * Disable logging: Pass `log: false` to the router macro, for example: `get "/page", PageController, :index, log: false`
+      * Configure log level dynamically: `get "/page", PageController, :index, log: {Mod, Fun, Args}`
 
     * `[:combo, :router_dispatch, :exception]` - dispatched by `Combo.Router`
       after exceptions on dispatching a route:
       * Measurement: `%{duration: native_time}`
-      * Metadata: `%{conn: Plug.Conn.t, kind: :throw | :error | :exit, reason: term(), stacktrace: Exception.stacktrace()}`
+      * Metadata: `%{conn: Plug.Conn.t(), exception: %{kind: :error | :exit | :throw , reason: term(), stacktrace: Exception.stacktrace()}}`
       * Disable logging: This event is not logged
 
     * `[:combo, :router_dispatch, :stop]` - dispatched by `Combo.Router`
       after successfully dispatching a matched route:
       * Measurement: `%{duration: native_time}`
-      * Metadata: `%{conn: Plug.Conn.t, route: binary, plug: module, plug_opts: term, path_params: map, pipe_through: [atom], log: Logger.level | false}`
+      * Metadata: `%{conn: Plug.Conn.t, route: binary, plug: module, plug_opts: term, path_params: map, pipes: [atom], log: Logger.level | false}`
       * Disable logging: This event is not logged
 
     * `[:combo, :error_rendered]` - dispatched at the end of an error view being rendered:
@@ -211,40 +211,38 @@ defmodule Combo.Logger do
   ## Event: [:combo, :router_dispatch, :start]
 
   @doc false
-  def combo_router_dispatch_start(_, _, %{log: false}, _), do: :ok
+  def combo_router_dispatch_start(_, _, %{route: %{log: false}} = _metadata, _) do
+    :ok
+  end
 
   def combo_router_dispatch_start(_, _, metadata, _) do
-    %{log: level, conn: conn, plug: plug} = metadata
+    %{
+      route: %{
+        pipes: pipes,
+        plug: plug,
+        plug_opts: plug_opts,
+        log: level
+      },
+      conn: conn
+    } = metadata
+
     level = log_level(level, conn)
 
     Logger.log(level, fn ->
-      %{
-        pipe_through: pipe_through,
-        plug_opts: plug_opts
-      } = metadata
-
-      log_mfa =
-        case metadata[:mfa] do
-          {mod, fun, arity} -> mfa(mod, fun, arity)
-          _ when is_atom(plug_opts) -> mfa(plug, plug_opts, 2)
-          _ -> inspect(plug)
-        end
-
       [
-        "Processing with ",
-        log_mfa,
+        "Dispatching to plug ",
+        inspect(plug),
+        " with opts ",
+        inspect(plug_opts),
         ?\n,
         "  Parameters: ",
         params(conn.params),
         ?\n,
-        "  Pipelines: ",
-        inspect(pipe_through)
+        "  Pipes: ",
+        inspect(pipes)
       ]
     end)
   end
-
-  defp mfa(mod, fun, arity),
-    do: [inspect(mod), ?., Atom.to_string(fun), ?/, arity + ?0]
 
   defp params(%Plug.Conn.Unfetched{}), do: "[UNFETCHED]"
   defp params(params), do: params |> FilteredParams.filter() |> inspect()

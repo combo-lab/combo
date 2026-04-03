@@ -9,6 +9,11 @@ defmodule Combo.Router.RoutingTest do
     def call(conn, _opts), do: conn
   end
 
+  defmodule DummyController do
+    use Support.Controller
+    def ok(conn, _params), do: text(conn, "ok")
+  end
+
   defmodule UserController do
     use Support.Controller
     def index(conn, _params), do: text(conn, "users index")
@@ -42,7 +47,7 @@ defmodule Combo.Router.RoutingTest do
 
     get "/", UserController, :index, as: :users
     get "/users/top", UserController, :top, as: :top
-    get "/users/:id", UserController, :show, as: :users, metadata: %{access: :user}
+    get "/users/:id", UserController, :show, as: :users
     match :*, "/users/fallback", UserController, :any
     get "/spaced users/:id", UserController, :show
     get "/profiles/profile-:id", UserController, :show
@@ -53,7 +58,7 @@ defmodule Combo.Router.RoutingTest do
     get "/exit", UserController, :exit
     get "/halt-controller", UserController, :halt
 
-    trace("/trace", UserController, :trace)
+    trace "/trace", UserController, :trace
     options "/options", UserController, :options
     connect "/connect", UserController, :connect
     match :move, "/move", UserController, :move
@@ -69,7 +74,6 @@ defmodule Combo.Router.RoutingTest do
 
     get "/no_log", SomePlug, [], log: false
     get "/fun_log", SomePlug, [], log: {LogLevel, :log_level, []}
-    get "/override-plug-name", SomePlug, :action, metadata: %{mfa: {LogLevel, :log_level, 1}}
     get "/users/:user_id/files/:id", UserController, :image
 
     scope "/halt-plug" do
@@ -88,7 +92,12 @@ defmodule Combo.Router.RoutingTest do
 
   setup do
     Logger.disable(self())
-    :ok
+    router = build_router()
+    %{router: router}
+  end
+
+  defp build_router do
+    Module.concat(__MODULE__, "Router#{System.unique_integer([:positive])}")
   end
 
   test "get root path" do
@@ -256,25 +265,25 @@ defmodule Combo.Router.RoutingTest do
 
     test "logs controller and action with (path) parameters" do
       assert capture_log(fn -> call(Router, :get, "/users/1", foo: "bar") end) =~ """
-             [debug] Processing with Combo.Router.RoutingTest.UserController.show/2
+             [debug] Dispatching to plug Combo.Router.RoutingTest.UserController with opts :show
                Parameters: %{"foo" => "bar", "id" => "1"}
-               Pipelines: []
+               Pipes: []
              """
     end
 
     test "logs controller and action with filtered parameters" do
       assert capture_log(fn -> call(Router, :get, "/users/1", password: "bar") end) =~ """
-             [debug] Processing with Combo.Router.RoutingTest.UserController.show/2
+             [debug] Dispatching to plug Combo.Router.RoutingTest.UserController with opts :show
                Parameters: %{"id" => "1", "password" => "[FILTERED]"}
-               Pipelines: []
+               Pipes: []
              """
     end
 
     test "logs plug with pipeline and custom level" do
       assert capture_log(fn -> call(Router, :get, "/plug") end) =~ """
-             [info] Processing with Combo.Router.RoutingTest.SomePlug
+             [info] Dispatching to plug Combo.Router.RoutingTest.SomePlug with opts []
                Parameters: %{}
-               Pipelines: [:noop]
+               Pipes: [:noop]
              """
     end
 
@@ -283,23 +292,18 @@ defmodule Combo.Router.RoutingTest do
                "Processing with Combo.Router.RoutingTest.SomePlug"
     end
 
-    test "overrides plug name that processes the route when set in metadata" do
-      assert capture_log(fn -> call(Router, :get, "/override-plug-name") end) =~
-               "Processing with Combo.Router.RoutingTest.LogLevel.log_level/1"
-    end
-
     test "logs custom level when log is set to a 1-arity function" do
       assert capture_log(fn -> call(Router, :get, "/fun_log", level: "info") end) =~
-               "[info] Processing with Combo.Router.RoutingTest.SomePlug"
+               "[info] Dispatching to plug Combo.Router.RoutingTest.SomePlug with opts []"
 
       assert capture_log(fn -> call(Router, :get, "/fun_log", level: "error") end) =~
-               "[error] Processing with Combo.Router.RoutingTest.SomePlug"
+               "[error] Dispatching to plug Combo.Router.RoutingTest.SomePlug with opts []"
 
       assert capture_log(fn -> call(Router, :get, "/fun_log", level: "yelling") end) =~
-               "[debug] Processing with Combo.Router.RoutingTest.SomePlug"
+               "[debug] Dispatching to plug Combo.Router.RoutingTest.SomePlug with opts []"
 
       assert capture_log(fn -> call(Router, :get, "/fun_log") end) =~
-               "[debug] Processing with Combo.Router.RoutingTest.SomePlug"
+               "[debug] Dispatching to plug Combo.Router.RoutingTest.SomePlug with opts []"
     end
   end
 
@@ -332,11 +336,14 @@ defmodule Combo.Router.RoutingTest do
     test "combo.router_dispatch.start and .stop are emitted on success" do
       call(Router, :get, "/users/123")
 
-      assert_received {:telemetry_event, @router_start_event, {_, %{route: "/users/:id"}, _}}
+      assert_received {:telemetry_event, @router_start_event,
+                       {_, %{route: %{path: "/users/:id"}}, _}}
 
-      assert_received {:telemetry_event, @router_stop_event, {_, %{route: "/users/:id"}, _}}
+      assert_received {:telemetry_event, @router_stop_event,
+                       {_, %{route: %{path: "/users/:id"}}, _}}
 
-      refute_received {:telemetry_event, @router_exception_event, {_, %{route: "/users/:id"}, _}}
+      refute_received {:telemetry_event, @router_exception_event,
+                       {_, %{route: %{path: "/users/:id"}}, _}}
     end
 
     test "combo.router_dispatch.start and .stop are emitted when conn halted in router" do
@@ -345,11 +352,14 @@ defmodule Combo.Router.RoutingTest do
       assert conn.halted
       assert conn.status == 401
 
-      assert_received {:telemetry_event, @router_start_event, {_, %{route: "/halt-plug"}, _}}
+      assert_received {:telemetry_event, @router_start_event,
+                       {_, %{route: %{path: "/halt-plug"}}, _}}
 
-      assert_received {:telemetry_event, @router_stop_event, {_, %{route: "/halt-plug"}, _}}
+      assert_received {:telemetry_event, @router_stop_event,
+                       {_, %{route: %{path: "/halt-plug"}}, _}}
 
-      refute_received {:telemetry_event, @router_exception_event, {_, %{route: "/halt-plug"}, _}}
+      refute_received {:telemetry_event, @router_exception_event,
+                       {_, %{route: %{path: "/halt-plug"}}, _}}
     end
 
     test "combo.router_dispatch.start and .stop are emitted when conn is halted in controller" do
@@ -359,12 +369,13 @@ defmodule Combo.Router.RoutingTest do
       assert conn.status == 401
 
       assert_received {:telemetry_event, @router_start_event,
-                       {_, %{route: "/halt-controller"}, _}}
+                       {_, %{route: %{path: "/halt-controller"}}, _}}
 
-      assert_received {:telemetry_event, @router_stop_event, {_, %{route: "/halt-controller"}, _}}
+      assert_received {:telemetry_event, @router_stop_event,
+                       {_, %{route: %{path: "/halt-controller"}}, _}}
 
       refute_received {:telemetry_event, @router_exception_event,
-                       {_, %{route: "/halt-controller"}, _}}
+                       {_, %{route: %{path: "/halt-controller"}}, _}}
     end
 
     test "combo.router_dispatch.start and .exception are emitted on crash" do
@@ -373,63 +384,72 @@ defmodule Combo.Router.RoutingTest do
       end
 
       assert_received {:telemetry_event, @router_start_event,
-                       {_, %{route: "/route_that_crashes"}, _}}
+                       {_, %{route: %{path: "/route_that_crashes"}}, _}}
 
       assert_received {:telemetry_event, @router_exception_event,
-                       {_, %{route: "/route_that_crashes"}, _}}
+                       {_, %{route: %{path: "/route_that_crashes"}}, _}}
 
       refute_received {:telemetry_event, @router_stop_event,
-                       {_, %{route: "/route_that_crashes"}, _}}
+                       {_, %{route: %{path: "/route_that_crashes"}}, _}}
     end
 
     test "combo.router_dispatch.start and .exception are emitted on exit" do
       catch_exit(call(Router, :get, "/exit"))
 
-      assert_received {:telemetry_event, @router_start_event, {_, %{route: "/exit"}, _}}
+      assert_received {:telemetry_event, @router_start_event, {_, %{route: %{path: "/exit"}}, _}}
 
-      assert_received {:telemetry_event, @router_exception_event, {_, %{route: "/exit"}, _}}
+      assert_received {:telemetry_event, @router_exception_event,
+                       {_, %{route: %{path: "/exit"}}, _}}
 
-      refute_received {:telemetry_event, @router_stop_event, {_, %{route: "/exit"}, _}}
+      refute_received {:telemetry_event, @router_stop_event, {_, %{route: %{path: "/exit"}}, _}}
     end
 
     test "combo.router_dispatch.start has supported measurements and metadata" do
       call(Router, :get, "/users/123")
 
       assert_received {:telemetry_event, @router_start_event,
-                       {measures, %{route: "/users/:id"} = meta, _config}}
+                       {measures, %{route: %{path: "/users/:id"}} = metadata, _config}}
 
       assert is_integer(measures.system_time)
 
       assert %{
-               access: :user,
                conn: %Plug.Conn{state: :unset},
-               log: :debug,
                path_params: %{"id" => "123"},
-               pipe_through: [],
-               plug: Combo.Router.RoutingTest.UserController,
-               plug_opts: :show,
-               route: "/users/:id"
-             } = meta
+               route: %{
+                 kind: :match,
+                 verb: :get,
+                 path: "/users/:id",
+                 path_info: ["users", ":id"],
+                 pipes: [],
+                 plug: Combo.Router.RoutingTest.UserController,
+                 plug_opts: :show,
+                 log: :debug
+               }
+             } = metadata
     end
 
     test "combo.router_dispatch.stop has supported measurements and metadata" do
       call(Router, :get, "/users/123")
 
       assert_received {:telemetry_event, @router_stop_event,
-                       {measures, %{route: "/users/:id"} = meta, _config}}
+                       {measures, %{route: %{path: "/users/:id"}} = metadata, _config}}
 
       assert is_integer(measures.duration)
 
       assert %{
-               access: :user,
                conn: %Plug.Conn{state: :sent},
-               log: :debug,
                path_params: %{"id" => "123"},
-               pipe_through: [],
-               plug: Combo.Router.RoutingTest.UserController,
-               plug_opts: :show,
-               route: "/users/:id"
-             } = meta
+               route: %{
+                 kind: :match,
+                 verb: :get,
+                 path: "/users/:id",
+                 path_info: ["users", ":id"],
+                 pipes: [],
+                 plug: Combo.Router.RoutingTest.UserController,
+                 plug_opts: :show,
+                 log: :debug
+               }
+             } = metadata
     end
 
     test "combo.router_dispatch.exception has supported measurements and metadata on crash" do
@@ -438,27 +458,34 @@ defmodule Combo.Router.RoutingTest do
       end
 
       assert_received {:telemetry_event, @router_exception_event,
-                       {measures, %{route: "/users/:id/raise"} = meta, _config}}
+                       {measures, %{route: %{path: "/users/:id/raise"}} = metadata, _config}}
 
       assert is_integer(measures.duration)
 
       assert %{
                conn: %Plug.Conn{state: :unset},
-               kind: :error,
-               log: :info,
                path_params: %{"id" => "123"},
-               pipe_through: [:noop],
-               plug: Combo.Router.RoutingTest.UserController,
-               plug_opts: :raise,
-               reason: %Plug.Conn.WrapperError{
-                 conn: %Plug.Conn{state: :unset},
-                 kind: :error,
-                 reason: %RuntimeError{message: "boom"},
-                 stack: wrapped_stacktrace
+               route: %{
+                 kind: :match,
+                 verb: :get,
+                 path: "/users/:id/raise",
+                 path_info: ["users", ":id", "raise"],
+                 pipes: [:noop],
+                 plug: Combo.Router.RoutingTest.UserController,
+                 plug_opts: :raise,
+                 log: :info
                },
-               route: "/users/:id/raise",
-               stacktrace: stacktrace
-             } = meta
+               exception: %{
+                 kind: :error,
+                 reason: %Plug.Conn.WrapperError{
+                   conn: %Plug.Conn{state: :unset},
+                   kind: :error,
+                   reason: %RuntimeError{message: "boom"},
+                   stack: wrapped_stacktrace
+                 },
+                 stacktrace: stacktrace
+               }
+             } = metadata
 
       assert is_list(wrapped_stacktrace) && length(wrapped_stacktrace) > 0
       assert is_list(stacktrace) && length(stacktrace) > 0
@@ -468,22 +495,29 @@ defmodule Combo.Router.RoutingTest do
       catch_exit(call(Router, :get, "/exit"))
 
       assert_received {:telemetry_event, @router_exception_event,
-                       {measures, %{route: "/exit"} = meta, _config}}
+                       {measures, %{route: %{path: "/exit"}} = metadata, _config}}
 
       assert is_integer(measures.duration)
 
       assert %{
                conn: %Plug.Conn{state: :unset},
-               kind: :exit,
-               log: :debug,
                path_params: %{},
-               pipe_through: [],
-               plug: Combo.Router.RoutingTest.UserController,
-               plug_opts: :exit,
-               reason: :boom,
-               route: "/exit",
-               stacktrace: stacktrace
-             } = meta
+               route: %{
+                 kind: :match,
+                 verb: :get,
+                 path: "/exit",
+                 path_info: ["exit"],
+                 pipes: [],
+                 plug: Combo.Router.RoutingTest.UserController,
+                 plug_opts: :exit,
+                 log: :debug
+               },
+               exception: %{
+                 kind: :exit,
+                 reason: :boom,
+                 stacktrace: stacktrace
+               }
+             } = metadata
 
       assert is_list(stacktrace) && length(stacktrace) > 0
     end
@@ -491,57 +525,92 @@ defmodule Combo.Router.RoutingTest do
 
   describe "route_info" do
     test " returns route string, path params, and more" do
-      assert Combo.Router.route_info(Router, "GET", "foo/bar/baz", nil) == %{
-               log: :debug,
+      assert Combo.Router.route_info(Router, "GET", "foo/bar/baz") == %{
                path_params: %{"path" => ["foo", "bar", "baz"]},
-               pipe_through: [],
-               plug: Combo.Router.RoutingTest.UserController,
-               plug_opts: :not_found,
-               route: "/*path"
+               route: %{
+                 kind: :match,
+                 verb: :get,
+                 path: "/*path",
+                 path_info: ["*path"],
+                 pipes: [],
+                 plug: Combo.Router.RoutingTest.UserController,
+                 plug_opts: :not_found,
+                 log: :debug
+               }
              }
 
-      assert Combo.Router.route_info(Router, "GET", "users/1", nil) == %{
-               log: :debug,
+      assert Combo.Router.route_info(Router, "GET", "users/1") == %{
                path_params: %{"id" => "1"},
-               pipe_through: [],
-               plug: Combo.Router.RoutingTest.UserController,
-               plug_opts: :show,
-               route: "/users/:id",
-               access: :user
+               route: %{
+                 kind: :match,
+                 verb: :get,
+                 path: "/users/:id",
+                 path_info: ["users", ":id"],
+                 pipes: [],
+                 plug: Combo.Router.RoutingTest.UserController,
+                 plug_opts: :show,
+                 log: :debug
+               }
              }
 
-      assert Combo.Router.route_info(Router, "GET", "/", "host") == %{
-               log: :debug,
+      assert Combo.Router.route_info(Router, "GET", "/") == %{
                path_params: %{},
-               pipe_through: [],
-               plug: Combo.Router.RoutingTest.UserController,
-               plug_opts: :index,
-               route: "/"
+               route: %{
+                 kind: :match,
+                 verb: :get,
+                 path: "/",
+                 path_info: [],
+                 pipes: [],
+                 plug: Combo.Router.RoutingTest.UserController,
+                 plug_opts: :index,
+                 log: :debug
+               }
              }
 
-      assert Combo.Router.route_info(Router, "POST", "/not-exists", "host") == :error
+      assert Combo.Router.route_info(Router, "POST", "/not-exists") == :error
     end
 
     test "returns route string, path params and more for split path" do
-      assert Combo.Router.route_info(Router, "GET", ~w(foo bar baz), nil) == %{
-               log: :debug,
+      assert Combo.Router.route_info(Router, "GET", ~w(foo bar baz)) == %{
                path_params: %{"path" => ["foo", "bar", "baz"]},
-               pipe_through: [],
-               plug: Combo.Router.RoutingTest.UserController,
-               plug_opts: :not_found,
-               route: "/*path"
+               route: %{
+                 kind: :match,
+                 verb: :get,
+                 path: "/*path",
+                 path_info: ["*path"],
+                 pipes: [],
+                 plug: Combo.Router.RoutingTest.UserController,
+                 plug_opts: :not_found,
+                 log: :debug
+               }
              }
     end
 
     test "returns accumulated pipe_through metadata" do
-      assert Combo.Router.route_info(Router, "GET", "/info", nil) == %{
-               log: :info,
+      assert Combo.Router.route_info(Router, "GET", "/info") == %{
                path_params: %{},
-               pipe_through: [:noop, :halt],
-               plug: Combo.Router.RoutingTest.UserController,
-               plug_opts: :raise,
-               route: "/info"
+               route: %{
+                 kind: :match,
+                 verb: :get,
+                 path: "/info",
+                 path_info: ["info"],
+                 pipes: [:noop, :halt],
+                 plug: Combo.Router.RoutingTest.UserController,
+                 plug_opts: :raise,
+                 log: :info
+               }
              }
     end
+  end
+
+  test "match on path with unicode characters", %{router: router} do
+    defmodule router do
+      use Support.Router
+      get "/ø", DummyController, :ok
+    end
+
+    conn = call(router, :get, "/%C3%B8")
+    assert conn.status == 200
+    assert conn.resp_body == "ok"
   end
 end
