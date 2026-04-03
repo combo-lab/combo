@@ -238,7 +238,7 @@ defmodule Combo.Logger do
         "  Parameters: ",
         params(conn.params),
         ?\n,
-        "  Pipelines: ",
+        "  Pipes: ",
         inspect(pipes)
       ]
     end)

@@ -53,7 +53,7 @@ defmodule Combo.Router.RoutingTest do
     get "/exit", UserController, :exit
     get "/halt-controller", UserController, :halt
 
-    trace("/trace", UserController, :trace)
+    trace "/trace", UserController, :trace
     options "/options", UserController, :options
     connect "/connect", UserController, :connect
     match :move, "/move", UserController, :move
@@ -257,7 +257,7 @@ defmodule Combo.Router.RoutingTest do
       assert capture_log(fn -> call(Router, :get, "/users/1", foo: "bar") end) =~ """
              [debug] Dispatching to plug Combo.Router.RoutingTest.UserController with opts :show
                Parameters: %{"foo" => "bar", "id" => "1"}
-               Pipelines: []
+               Pipes: []
              """
     end
 
@@ -265,7 +265,7 @@ defmodule Combo.Router.RoutingTest do
       assert capture_log(fn -> call(Router, :get, "/users/1", password: "bar") end) =~ """
              [debug] Dispatching to plug Combo.Router.RoutingTest.UserController with opts :show
                Parameters: %{"id" => "1", "password" => "[FILTERED]"}
-               Pipelines: []
+               Pipes: []
              """
     end
 
@@ -273,7 +273,7 @@ defmodule Combo.Router.RoutingTest do
       assert capture_log(fn -> call(Router, :get, "/plug") end) =~ """
              [info] Dispatching to plug Combo.Router.RoutingTest.SomePlug with opts []
                Parameters: %{}
-               Pipelines: [:noop]
+               Pipes: [:noop]
              """
     end
 
