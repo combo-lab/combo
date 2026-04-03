@@ -203,7 +203,7 @@ defmodule Combo.RouterTest do
 
   # route
 
-  describe "" do
+  describe "verb/_" do
     test "raises on bad path" do
       assert_raise ArgumentError, ~r{route path must be a string, got: :/}, fn ->
         defmodule BadRouter do
