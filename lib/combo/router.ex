@@ -593,13 +593,13 @@ defmodule Combo.Router do
       a route matches.
     * `:assigns` - the data as a map to merge into the connection when a route
       matches.
-    * `:log` - the level to log the route dispatching under, may be set to
-      `false`.
-      Defaults to `:debug`. Route dispatching contains information about how
-      the route is handled (which plug is called, what plug_opts are given,
-      what parameters are available and which pipes are used) and is
-      separate from the plug level logging. To alter the plug log level, please
-      see https://hexdocs.pm/combo/Combo.Logger.html#module-dynamic-log-level.
+    * `:log` - the level to log the route dispatching under.
+      Defaults to `:debug`. Can be set to `false` to disable the logging.
+      Route dispatching logging contains information about how the route is
+      handled (which plug is called, what plug_opts are given, what parameters
+      are available and which pipes are used).
+      It is separate from the plug level logging. To alter the plug log level,
+      please see https://hexdocs.pm/combo/Combo.Logger.html#module-dynamic-log-level.
 
   ## Shortcuts
 
@@ -754,8 +754,8 @@ defmodule Combo.Router do
     * `:log` - the level to log the route dispatching under.
       Defaults to `:debug`. Can be set to `false` to disable the logging.
       Route dispatching logging contains information about how the route is
-      handled (which controller action is called, what parameters are available
-      and which pipes are used).
+      handled (which plug is called, what plug_opts are given, what parameters
+      are available and which pipes are used).
       It is separated from the plug level logging. To alter the plug log level,
       please see https://hexdocs.pm/combo/Combo.Logger.html#module-dynamic-log-level.
 
