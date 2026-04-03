@@ -14,7 +14,7 @@ defmodule Combo.Router.Route do
     :plug,
     :plug_opts,
     :name,
-    :pipe_through,
+    :pipes,
     :private,
     :assigns,
     :log
@@ -31,7 +31,7 @@ defmodule Combo.Router.Route do
           plug: atom(),
           plug_opts: atom(),
           name: binary() | nil,
-          pipe_through: [atom()],
+          pipes: [atom()],
           private: map(),
           assigns: map(),
           log: Logger.level() | mfa() | false
@@ -139,7 +139,7 @@ defmodule Combo.Router.Route do
         plug,
         plug_opts,
         name,
-        pipe_through,
+        pipes,
         private,
         assigns,
         log
@@ -150,7 +150,7 @@ defmodule Combo.Router.Route do
              is_list(path_info) and
              is_atom(plug) and
              (is_binary(name) or is_nil(name)) and
-             is_list(pipe_through) and
+             is_list(pipes) and
              is_map(private) and
              is_map(assigns) do
     %__MODULE__{
@@ -162,7 +162,7 @@ defmodule Combo.Router.Route do
       plug: plug,
       plug_opts: plug_opts,
       name: name,
-      pipe_through: pipe_through,
+      pipes: pipes,
       private: private,
       assigns: assigns,
       log: log

@@ -410,7 +410,7 @@ defmodule Combo.Router.RoutingTest do
                  verb: :get,
                  path: "/users/:id",
                  path_info: ["users", ":id"],
-                 pipe_through: [],
+                 pipes: [],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :show,
                  log: :debug
@@ -434,7 +434,7 @@ defmodule Combo.Router.RoutingTest do
                  verb: :get,
                  path: "/users/:id",
                  path_info: ["users", ":id"],
-                 pipe_through: [],
+                 pipes: [],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :show,
                  log: :debug
@@ -460,7 +460,7 @@ defmodule Combo.Router.RoutingTest do
                  verb: :get,
                  path: "/users/:id/raise",
                  path_info: ["users", ":id", "raise"],
-                 pipe_through: [:noop],
+                 pipes: [:noop],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :raise,
                  log: :info
@@ -497,7 +497,7 @@ defmodule Combo.Router.RoutingTest do
                  verb: :get,
                  path: "/exit",
                  path_info: ["exit"],
-                 pipe_through: [],
+                 pipes: [],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :exit,
                  log: :debug
@@ -522,7 +522,7 @@ defmodule Combo.Router.RoutingTest do
                  verb: :get,
                  path: "/*path",
                  path_info: ["*path"],
-                 pipe_through: [],
+                 pipes: [],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :not_found,
                  log: :debug
@@ -536,7 +536,7 @@ defmodule Combo.Router.RoutingTest do
                  verb: :get,
                  path: "/users/:id",
                  path_info: ["users", ":id"],
-                 pipe_through: [],
+                 pipes: [],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :show,
                  log: :debug
@@ -550,7 +550,7 @@ defmodule Combo.Router.RoutingTest do
                  verb: :get,
                  path: "/",
                  path_info: [],
-                 pipe_through: [],
+                 pipes: [],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :index,
                  log: :debug
@@ -568,7 +568,7 @@ defmodule Combo.Router.RoutingTest do
                  verb: :get,
                  path: "/*path",
                  path_info: ["*path"],
-                 pipe_through: [],
+                 pipes: [],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :not_found,
                  log: :debug
@@ -584,7 +584,7 @@ defmodule Combo.Router.RoutingTest do
                  verb: :get,
                  path: "/info",
                  path_info: ["info"],
-                 pipe_through: [:noop, :halt],
+                 pipes: [:noop, :halt],
                  plug: Combo.Router.RoutingTest.UserController,
                  plug_opts: :raise,
                  log: :info

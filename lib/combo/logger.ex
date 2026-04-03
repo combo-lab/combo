@@ -45,7 +45,7 @@ defmodule Combo.Logger do
     * `[:combo, :router_dispatch, :stop]` - dispatched by `Combo.Router`
       after successfully dispatching a matched route:
       * Measurement: `%{duration: native_time}`
-      * Metadata: `%{conn: Plug.Conn.t, route: binary, plug: module, plug_opts: term, path_params: map, pipe_through: [atom], log: Logger.level | false}`
+      * Metadata: `%{conn: Plug.Conn.t, route: binary, plug: module, plug_opts: term, path_params: map, pipes: [atom], log: Logger.level | false}`
       * Disable logging: This event is not logged
 
     * `[:combo, :error_rendered]` - dispatched at the end of an error view being rendered:
@@ -218,7 +218,7 @@ defmodule Combo.Logger do
   def combo_router_dispatch_start(_, _, metadata, _) do
     %{
       route: %{
-        pipe_through: pipe_through,
+        pipes: pipes,
         plug: plug,
         plug_opts: plug_opts,
         log: level
@@ -239,7 +239,7 @@ defmodule Combo.Logger do
         params(conn.params),
         ?\n,
         "  Pipelines: ",
-        inspect(pipe_through)
+        inspect(pipes)
       ]
     end)
   end

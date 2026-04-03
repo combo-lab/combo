@@ -403,17 +403,17 @@ defmodule Combo.Router do
   end
 
   defp build_match_pipes(route, acc_pipes, known_pipes) do
-    %{pipe_through: pipe_through} = route
+    %{pipes: pipes} = route
 
     case known_pipes do
-      %{^pipe_through => name} ->
+      %{^pipes => name} ->
         {name, acc_pipes, known_pipes}
 
       %{} ->
         id = map_size(known_pipes)
         name = :"__pipe_through#{id}__"
-        acc_pipes = [build_pipes(name, pipe_through) | acc_pipes]
-        known_pipes = Map.put(known_pipes, pipe_through, name)
+        acc_pipes = [build_pipes(name, pipes) | acc_pipes]
+        known_pipes = Map.put(known_pipes, pipes, name)
         {name, acc_pipes, known_pipes}
     end
   end
@@ -425,7 +425,7 @@ defmodule Combo.Router do
         :verb,
         :path,
         :path_info,
-        :pipe_through,
+        :pipes,
         :plug,
         :plug_opts,
         :log,
