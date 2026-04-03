@@ -328,7 +328,7 @@ defmodule Combo.Router do
       |> Enum.uniq_by(fn route -> {route.line, route.plug, route.plug_opts} end)
       |> Enum.map(&build_check/1)
 
-    {matches, {pipelines, _}} =
+    {matches, {pipe_throughs, _}} =
       Enum.map_reduce(routes_with_exprs, {[], %{}}, &build_match/2)
 
     helpers = Helpers.define(env, routes_with_exprs)
@@ -356,7 +356,7 @@ defmodule Combo.Router do
       @doc false
       def __helpers__, do: unquote(helpers)
 
-      unquote(pipelines)
+      unquote(pipe_throughs)
       unquote(matches)
       unquote(match_catch_all)
       unquote(forward_catch_all)
@@ -386,7 +386,7 @@ defmodule Combo.Router do
 
     {pipe_name, acc_pipes, known_pipes} = build_match_pipes(route, acc_pipes, known_pipes)
 
-    clauses =
+    match =
       quote line: route.line do
         def __match_route__(unquote(method_match), unquote(path_info_match)) do
           {
@@ -399,7 +399,7 @@ defmodule Combo.Router do
         end
       end
 
-    {clauses, {acc_pipes, known_pipes}}
+    {match, {acc_pipes, known_pipes}}
   end
 
   defp build_match_pipes(route, acc_pipes, known_pipes) do
@@ -410,7 +410,8 @@ defmodule Combo.Router do
         {name, acc_pipes, known_pipes}
 
       %{} ->
-        name = :"__pipe_through#{map_size(known_pipes)}__"
+        id = map_size(known_pipes)
+        name = :"__pipe_through#{id}__"
         acc_pipes = [build_pipes(name, pipe_through) | acc_pipes]
         known_pipes = Map.put(known_pipes, pipe_through, name)
         {name, acc_pipes, known_pipes}
