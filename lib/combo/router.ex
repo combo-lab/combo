@@ -394,14 +394,14 @@ defmodule Combo.Router do
     end
   end
 
-  defp build_match({route, expr}, pipe_name_lookup) do
+  defp build_match({route, exprs}, pipe_name_lookup) do
     %{
       method_match: method_match,
       path_info_match: path_info_match,
       path_params: path_params,
       prepare: prepare,
       dispatch: dispatch
-    } = expr
+    } = exprs
 
     pipe_name = Map.fetch!(pipe_name_lookup, route.pipes)
 
