@@ -161,7 +161,7 @@ defmodule Combo.Router do
       MyApp.Web.Router.Helpers.special_page_path(conn, :show, "hello")
       "/pages/hello"
 
-  See the `Combo.Router.Helpers` for more information.
+  See `Combo.Router.Helpers` for more information.
 
   ## Scopes
 
@@ -181,45 +181,35 @@ defmodule Combo.Router do
         get "/pages/:id", PageController, :show
       end
 
-  Check `scope/2` for more information.
+  See `scope/2` for more information.
 
-  ## Pipelines and plugs
+  ## Pipes
 
-  Once a request arrives at the router, it performs a series of transformations
-  through pipelines until the request is dispatched to a desired route.
+  Once a request arrives at the router, it passes through a series of pipes
+  before being dispatched to the matched route.
 
-  > Pipelines are only invoked after a route is matched. If no route matches,
-  > no pipeline is invoked.
+  > Pipes are only invoked if a route is matched. If no route matches,
+  > no pipe is invoked.
 
-  Such transformations are defined via plugs, as defined in the
-  [Plug](https://github.com/elixir-plug/plug) specification.
+  A pipe can be either a plug, or a pipeline.
 
-  Once a pipeline is defined, it can be piped through per scope.
+  ### Pipe names
 
-  For example:
+  Every pipe has a name.
 
-      defmodule MyApp.Web.Router do
-        use Combo.Router
+    * For function plugs, the pipe name is the atom name of the function.
+    * For module plugs, the pipe name is the module name.
+    * For pipelines, the pipe name is the atom name of the pipeline.
 
-        import Combo.Conn
-        import Plug.Conn
+  ### Defining pipes
 
-        pipeline :browser do
-          plug :accepts, ["html"]
-          plug :fetch_session
-        end
+  To define a plug, see `Plug` for more information.
 
-        scope "/" do
-          pipe_through :browser
+  To define a pipeline, see `pipeline/2` for more information.
 
-          # browser related routes
-          # ...
-        end
-      end
+  ### Using pipes
 
-  > We also imports `Combo.Conn` and `Plug.Conn` to help defining plugins.
-  > `accepts/2` comes from `Combo.Conn`, while `fetch_session/2` comes from
-  > `Plug.Conn`.
+  See `pipe_through/1` for more information.
 
   ## Resources
 
@@ -292,8 +282,8 @@ defmodule Combo.Router do
         path_info = Enum.map(encoded_path_info, &URI.decode/1)
 
         case __match_route__(method, path_info) do
-          {prepare, path_params, metadata, pipeline, dispatch} ->
-            unquote(__MODULE__).__call__(conn, prepare, path_params, metadata, pipeline, dispatch)
+          {prepare, path_params, metadata, pipe, dispatch} ->
+            unquote(__MODULE__).__call__(conn, prepare, path_params, metadata, pipe, dispatch)
 
           :error ->
             raise NoRouteError, conn: conn, router: __MODULE__
@@ -328,8 +318,13 @@ defmodule Combo.Router do
       |> Enum.uniq_by(fn route -> {route.line, route.plug, route.plug_opts} end)
       |> Enum.map(&build_check/1)
 
-    {matches, {pipe_throughs, _}} =
-      Enum.map_reduce(routes_with_exprs, {[], %{}}, &build_match/2)
+    {pipes, pipe_name_lookup} =
+      routes
+      |> Enum.map(& &1.pipes)
+      |> Enum.uniq_by(& &1)
+      |> Enum.map_reduce(%{}, &fuse_pipes/2)
+
+    matches = Enum.map(routes_with_exprs, &build_match(&1, pipe_name_lookup))
 
     helpers = Helpers.define(env, routes_with_exprs)
 
@@ -356,7 +351,7 @@ defmodule Combo.Router do
       @doc false
       def __helpers__, do: unquote(helpers)
 
-      unquote(pipe_throughs)
+      unquote(pipes)
       unquote(matches)
       unquote(match_catch_all)
       unquote(forward_catch_all)
@@ -375,7 +370,31 @@ defmodule Combo.Router do
     end
   end
 
-  defp build_match({route, expr}, {acc_pipes, known_pipes}) do
+  defp fuse_pipes(pipes, pipe_name_lookup) do
+    index = map_size(pipe_name_lookup)
+    name = :"__pipe#{index}__"
+    pipe = compile_pipes(name, pipes)
+    pipe_name_lookup = Map.put(pipe_name_lookup, pipes, name)
+    {pipe, pipe_name_lookup}
+  end
+
+  defp compile_pipes(name, []) do
+    quote do
+      defp unquote(name)(conn), do: conn
+    end
+  end
+
+  defp compile_pipes(name, pipes) do
+    plugs = pipes |> Enum.reverse() |> Enum.map(&{&1, [], true})
+    opts = [init_mode: Combo.plug_init_mode(), log_on_halt: :debug]
+    {conn, body} = Plug.Builder.compile(__ENV__, plugs, opts)
+
+    quote do
+      defp unquote(name)(unquote(conn)), do: unquote(body)
+    end
+  end
+
+  defp build_match({route, expr}, pipe_name_lookup) do
     %{
       method_match: method_match,
       path_info_match: path_info_match,
@@ -384,37 +403,18 @@ defmodule Combo.Router do
       dispatch: dispatch
     } = expr
 
-    {pipe_name, acc_pipes, known_pipes} = build_match_pipes(route, acc_pipes, known_pipes)
+    pipe_name = Map.fetch!(pipe_name_lookup, route.pipes)
 
-    match =
-      quote line: route.line do
-        def __match_route__(unquote(method_match), unquote(path_info_match)) do
-          {
-            unquote(prepare),
-            unquote(path_params),
-            unquote(build_metadata(route, path_params)),
-            &(unquote(Macro.var(pipe_name, __MODULE__)) / 1),
-            unquote(dispatch)
-          }
-        end
+    quote line: route.line do
+      def __match_route__(unquote(method_match), unquote(path_info_match)) do
+        {
+          unquote(prepare),
+          unquote(path_params),
+          unquote(build_metadata(route, path_params)),
+          &(unquote(Macro.var(pipe_name, __MODULE__)) / 1),
+          unquote(dispatch)
+        }
       end
-
-    {match, {acc_pipes, known_pipes}}
-  end
-
-  defp build_match_pipes(route, acc_pipes, known_pipes) do
-    %{pipes: pipes} = route
-
-    case known_pipes do
-      %{^pipes => name} ->
-        {name, acc_pipes, known_pipes}
-
-      %{} ->
-        id = map_size(known_pipes)
-        name = :"__pipe_through#{id}__"
-        acc_pipes = [build_pipes(name, pipes) | acc_pipes]
-        known_pipes = Map.put(known_pipes, pipes, name)
-        {name, acc_pipes, known_pipes}
     end
   end
 
@@ -440,36 +440,20 @@ defmodule Combo.Router do
      ]}
   end
 
-  defp build_pipes(name, []) do
-    quote do
-      defp unquote(name)(conn), do: conn
-    end
-  end
-
-  defp build_pipes(name, pipe_through) do
-    plugs = pipe_through |> Enum.reverse() |> Enum.map(&{&1, [], true})
-    opts = [init_mode: Combo.plug_init_mode(), log_on_halt: :debug]
-    {conn, body} = Plug.Builder.compile(__ENV__, plugs, opts)
-
-    quote do
-      defp unquote(name)(unquote(conn)), do: unquote(body)
-    end
-  end
-
   @doc false
   def __call__(
         %{private: %{combo_bypass: {router, pipes}}} = conn,
         prepare,
         path_params,
         _metadata,
-        pipeline,
+        pipe,
         _dispatch
       ) do
     conn = prepare.(conn, path_params)
 
     case pipes do
       :current ->
-        pipeline.(conn)
+        pipe.(conn)
 
       _ ->
         Enum.reduce(pipes, conn, fn pipe, acc -> apply(router, pipe, [acc, []]) end)
@@ -481,7 +465,7 @@ defmodule Combo.Router do
         prepare,
         path_params,
         _metadata,
-        _pipeline,
+        _pipe,
         _dispatch
       ) do
     prepare.(conn, path_params)
@@ -492,7 +476,7 @@ defmodule Combo.Router do
         prepare,
         path_params,
         metadata,
-        pipeline,
+        pipe,
         {plug, opts}
       ) do
     conn = prepare.(conn, path_params)
@@ -501,7 +485,7 @@ defmodule Combo.Router do
     metadata = %{metadata | conn: conn}
     :telemetry.execute([:combo, :router_dispatch, :start], measurements, metadata)
 
-    case pipeline.(conn) do
+    case pipe.(conn) do
       %Plug.Conn{halted: true} = halted_conn ->
         measurements = %{duration: System.monotonic_time() - start}
         metadata = %{metadata | conn: halted_conn}
@@ -540,9 +524,9 @@ defmodule Combo.Router do
   # Pipeline #
 
   @doc """
-  Defines a pipeline.
+  Defines a pipeline, which is a named collection of plugs.
 
-  Pipelines are defined at the router root and can be used from any scope.
+  > Pipelines must be defined at the root of router.
 
   ## Examples
 
@@ -571,7 +555,7 @@ defmodule Combo.Router do
   end
 
   @doc """
-  Defines a plug inside a pipeline.
+  Adds a plug into a pipeline.
 
   See `pipeline/2` for more information.
   """
@@ -613,7 +597,7 @@ defmodule Combo.Router do
       `false`.
       Defaults to `:debug`. Route dispatching contains information about how
       the route is handled (which plug is called, what plug_opts are given,
-      what parameters are available and which pipelines are used) and is
+      what parameters are available and which pipes are used) and is
       separate from the plug level logging. To alter the plug log level, please
       see https://hexdocs.pm/combo/Combo.Logger.html#module-dynamic-log-level.
 
@@ -671,11 +655,9 @@ defmodule Combo.Router do
   end
 
   @doc """
-  Defines a list of plugs and pipelines to apply to the connection.
+  Defines pipes to apply within the current scope.
 
-  Plugs are specified using the atom name of function plugs.
-  Pipelines are specified using the atom name of pipelines. See `pipeline/2`
-  for more information.
+  The pipes are specified by their names.
 
   ## Examples
 
@@ -684,8 +666,8 @@ defmodule Combo.Router do
   ## Multiple invocations
 
   `pipe_through/1` can be invoked multiple times within the same scope. Each
-  invocation appends new plugs and pipelines, which are applied to all routes
-  **after** the `pipe_through/1` invocation. For example:
+  invocation appends new pipes, which are applied to all routes **after**
+  the `pipe_through/1` invocation. For example:
 
       scope "/" do
         pipe_through [:browser]
@@ -695,9 +677,9 @@ defmodule Combo.Router do
         get "/settings", UserController, :edit
       end
 
-  In the example above, `/` applies `:browser` only, while `/settings` applies
-  both `:browser` and `:require_authenticated_user`. To avoid confusion, we
-  recommend to use a single `pipe_through` at the top of each scope:
+  `/` applies `:browser` only, while `/settings` applies both `:browser` and
+  `:require_authenticated_user`. To avoid confusion, we recommend to use a
+  single `pipe_through` at the top of each scope:
 
       scope "/" do
         pipe_through [:browser]
@@ -773,7 +755,7 @@ defmodule Combo.Router do
       Defaults to `:debug`. Can be set to `false` to disable the logging.
       Route dispatching logging contains information about how the route is
       handled (which controller action is called, what parameters are available
-      and which pipelines are used).
+      and which pipes are used).
       It is separated from the plug level logging. To alter the plug log level,
       please see https://hexdocs.pm/combo/Combo.Logger.html#module-dynamic-log-level.
 
@@ -847,7 +829,7 @@ defmodule Combo.Router do
   However, in other for route generation to route accordingly, you
   can only forward to a given `Combo.Router` once.
 
-  The router pipelines will be invoked prior to forwarding the
+  The router pipes will be invoked prior to forwarding the
   connection.
 
   ## Examples
@@ -887,7 +869,7 @@ defmodule Combo.Router do
 
     * `:log` - the configured log level, such as `:debug`.
     * `:path_params` - the map of runtime path params.
-    * `:pipe_through` - the list of pipelines for the route's scope, such as `[:browser]`.
+    * `:pipes` - the pipes for the route's scope, such as `[:browser]`.
     * `:plug` - the plug to dispatch the route to, such as `MyApp.Web.PostController`.
     * `:plug_opts` - the options to pass when calling the plug, such as `:index`.
     * `:route` - the string route pattern, such as `"/posts/:id"`.
@@ -915,7 +897,7 @@ defmodule Combo.Router do
   end
 
   def route_info(router, method, path_info) when is_list(path_info) do
-    with {_prepare, _path_params, metadata, _pipeline, _dispatch} <-
+    with {_prepare, _path_params, metadata, _pipe, _dispatch} <-
            router.__match_route__(method, path_info) do
       Map.delete(metadata, :conn)
     end
