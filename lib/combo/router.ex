@@ -791,10 +791,10 @@ defmodule Combo.Router do
       """
       ## Compatibility with `Plug.Head`
 
-      By default, Combo apps include `Plug.Head` in their endpoint, which converts
-      HEAD requests into regular GET requests. Therefore, if you intend to use
-      `head/4` in your router, you need to move `Plug.Head` to inside your router
-      in a way it does not conflict with the paths given to `head/4`.
+      Templates provided by `combo_new` include `Plug.Head` in their endpoint,
+      which converts HEAD requests into regular GET requests. Therefore, if you
+      intend to use `head/4` in your router, you need to move `Plug.Head` to
+      your router in a way it does not conflict with the paths given to `head/4`.
       """
     end}
     """
