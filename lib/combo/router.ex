@@ -695,7 +695,7 @@ defmodule Combo.Router do
   defmacro pipe_through(pipes) do
     pipes =
       if Combo.plug_init_mode() == :runtime and Macro.quoted_literal?(pipes) do
-        Macro.prewalk(pipes, &Scope.expand_module(&1, __CALLER__))
+        Macro.prewalk(pipes, &Utils.expand_alias(&1, __CALLER__))
       else
         pipes
       end
