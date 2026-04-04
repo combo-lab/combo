@@ -91,7 +91,7 @@ defmodule Combo.Router.RoutingTest do
   end
 
   setup do
-    Logger.disable(self())
+    Logger.put_process_level(self(), :none)
     router = build_router()
     %{router: router}
   end
@@ -259,7 +259,7 @@ defmodule Combo.Router.RoutingTest do
 
   describe "logging" do
     setup do
-      Logger.enable(self())
+      Logger.delete_process_level(self())
       :ok
     end
 

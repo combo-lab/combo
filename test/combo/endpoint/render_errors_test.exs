@@ -75,7 +75,7 @@ defmodule Combo.Endpoint.RenderErrorsTest do
   end
 
   setup do
-    Logger.disable(self())
+    Logger.put_process_level(self(), :none)
     :ok
   end
 
@@ -123,7 +123,7 @@ defmodule Combo.Endpoint.RenderErrorsTest do
   end
 
   test "logs converted errors if response has not yet been sent" do
-    Logger.enable(self())
+    Logger.delete_process_level(self())
     conn = put_endpoint(conn(:get, "/"))
 
     assert capture_log(fn ->
@@ -285,7 +285,7 @@ defmodule Combo.Endpoint.RenderErrorsTest do
   end
 
   test "captures warning when format is not supported" do
-    Logger.enable(self())
+    Logger.delete_process_level(self())
 
     assert capture_log(fn ->
              conn = conn(:get, "/") |> put_req_header("accept", "unknown/unknown")
@@ -294,7 +294,7 @@ defmodule Combo.Endpoint.RenderErrorsTest do
   end
 
   test "captures warning when format does not match error view" do
-    Logger.enable(self())
+    Logger.delete_process_level(self())
 
     assert capture_log(fn ->
              conn = conn(:get, "/?_format=unknown")

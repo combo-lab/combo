@@ -83,7 +83,7 @@ defmodule Combo.Router.PipelineTest do
   use Support.RouterHelper
 
   setup do
-    Logger.disable(self())
+    Logger.put_process_level(self(), :none)
     :ok
   end
 

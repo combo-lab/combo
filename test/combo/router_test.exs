@@ -9,7 +9,7 @@ defmodule Combo.RouterTest do
   end
 
   setup do
-    Logger.disable(self())
+    Logger.put_process_level(self(), :none)
     router = build_router()
     %{router: router}
   end

@@ -81,7 +81,7 @@ defmodule Combo.Test.ConnTest do
   @endpoint Endpoint
 
   setup_all do
-    Logger.disable(self())
+    Logger.put_process_level(self(), :none)
     Endpoint.start_link()
     :ok
   end

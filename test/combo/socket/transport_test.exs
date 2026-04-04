@@ -50,7 +50,7 @@ defmodule Combo.Socket.TransportTest do
   end
 
   setup do
-    Logger.disable(self())
+    Logger.put_process_level(self(), :none)
   end
 
   ## Check origin
@@ -126,7 +126,7 @@ defmodule Combo.Socket.TransportTest do
     end
 
     test "halts invalid URIs when check origin is configured" do
-      Logger.enable(self())
+      Logger.delete_process_level(self())
       origins = ["//example.com", "http://scheme.com", "//port.com:81"]
 
       logs =
