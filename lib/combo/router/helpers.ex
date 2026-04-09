@@ -56,10 +56,9 @@ defmodule Combo.Router.Helpers do
   Generates the helper module for the given environment and routes.
   """
   def define(env, routes_with_exprs) do
-    # Ignore routes without name, or routes of forward kind.
     routes_with_exprs =
       Enum.filter(routes_with_exprs, fn {route, _exprs} ->
-        not is_nil(route.name) and route.kind != :forward
+        route.kind == :match and route.name != nil
       end)
 
     groups = Enum.group_by(routes_with_exprs, fn {route, _exprs} -> route.name end)
