@@ -8,6 +8,9 @@ locals_without_parens = [
   # Combo.Router
   match: 4,
   match: 5,
+  forward: 2,
+  forward: 3,
+  forward: 4,
   get: 3,
   get: 4,
   post: 3,
@@ -26,11 +29,12 @@ locals_without_parens = [
   trace: 4,
   head: 3,
   head: 4,
-  forward: 2,
-  forward: 3,
-  forward: 4,
   pipeline: 2,
+  # plug: 2 has been included by Combo.Endpoint.
   pipe_through: 1,
+  scope: 2,
+  scope: 3,
+  scope: 4,
 
   # Combo.Controller
   action_fallback: 1,
