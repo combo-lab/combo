@@ -1,8 +1,9 @@
 # Changelog
 
-## Unreleased
+## v0.9.0
 
-- remove catch-all functions in route helpers, because we can find the type violation by using Elixir compiler.
+- [`Combo.Router`] remove catch-all functions in route helpers, because we can find the type violation by using Elixir compiler.
+- [`Combo.Router`] remove `resources/_`
 
 ## v0.8.0
 
