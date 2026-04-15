@@ -37,16 +37,16 @@ defmodule Combo.LiveReloader.Channel do
     end
   end
 
-  def handle_info({:file_event, _pid, {path, _event}}, socket) do
+  def handle_info({:file_event, _pid, file_event}, socket) do
     %{patterns: patterns} = socket.assigns
 
-    file_events = collect_file_events(path, patterns, [])
+    file_events = collect_file_events(file_event, patterns, [])
 
     grouped_file_events =
       Enum.group_by(
         file_events,
-        fn {type, _path} -> type end,
-        fn {_type, path} -> path end
+        fn {path, _events} -> build_file_type(path) end,
+        fn {path, _events} -> path end
       )
 
     for {type, paths} <- grouped_file_events do
@@ -60,29 +60,33 @@ defmodule Combo.LiveReloader.Channel do
     {:noreply, socket}
   end
 
-  defp collect_file_events(path, patterns, acc) do
+  @watched_events [:created, :modified, :removed, :renamed]
+  defp collect_file_events(file_event, path_patterns, acc) do
     acc =
-      if match_patterns?(path, patterns) do
-        type = build_file_type(path)
-        [{type, path} | acc]
-      else
-        acc
-      end
+      if match_file_event?(file_event, path_patterns, @watched_events),
+        do: [file_event | acc],
+        else: acc
 
     receive do
-      {:file_event, _pid, {path, _event}} ->
-        collect_file_events(path, patterns, acc)
+      {:file_event, _pid, file_event} ->
+        collect_file_events(file_event, path_patterns, acc)
     after
       0 -> Enum.reverse(acc)
     end
   end
 
-  defp match_patterns?(path, patterns) do
+  defp match_file_event?(file_event, path_patterns, watched_events) do
+    {path, events} = file_event
     path = to_string(path)
 
-    Enum.any?(patterns, fn pattern ->
-      String.match?(path, pattern) and not String.match?(path, ~r{(^|/)_build/})
-    end)
+    path_matched? =
+      Enum.any?(path_patterns, fn path_pattern ->
+        String.match?(path, path_pattern) and not String.match?(path, ~r{(^|/)_build/})
+      end)
+
+    events_matched? = Enum.any?(events, fn event -> event in watched_events end)
+
+    path_matched? && events_matched?
   end
 
   defp build_file_type(path) do

@@ -25,7 +25,7 @@ defmodule Combo.LiveReloader.ChannelTest do
   @endpoint Endpoint
 
   defp file_event(path, event) do
-    {:file_event, self(), {path, event}}
+    {:file_event, self(), {path, [event]}}
   end
 
   setup_all do
