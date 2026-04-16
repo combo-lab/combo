@@ -194,27 +194,21 @@ defmodule Combo.CodeReloader.Server do
     end
   end
 
-  if Version.match?(System.version(), ">= 1.18.0-dev") do
-    defp warn_missing_mix_listener do
-      if Mix.Project.get() != Combo.MixProject do
-        IO.warn("""
-        a Mix listener expected by Combo.CodeReloader is missing.
+  defp warn_missing_mix_listener do
+    if Mix.Project.get() != Combo.MixProject do
+      IO.warn("""
+      a Mix listener expected by Combo.CodeReloader is missing.
 
-        Please add the listener to your mix.exs configuration, like so:
+      Please add the listener to your mix.exs configuration, like so:
 
-            def project do
-              [
-                ...,
-                listeners: [Combo.CodeReloader]
-              ]
-            end
+          def project do
+            [
+              ...,
+              listeners: [Combo.CodeReloader]
+            ]
+          end
 
-        """)
-      end
-    end
-  else
-    defp warn_missing_mix_listener do
-      :ok
+      """)
     end
   end
 
