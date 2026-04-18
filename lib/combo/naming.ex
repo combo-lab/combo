@@ -44,7 +44,7 @@ defmodule Combo.Naming do
     prefix_size = byte_size(string) - suffix_size
 
     case string do
-      <<prefix::binary-size(prefix_size), ^suffix::binary>> -> prefix
+      <<prefix::binary-size(^prefix_size), ^suffix::binary>> -> prefix
       _ -> string
     end
   end
