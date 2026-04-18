@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.10.0
+
+- remove CEEx formatter
+
 ## v0.9.0
 
 - [`Combo.Router`] remove catch-all functions in route helpers, because we can find the type violation by using Elixir compiler.

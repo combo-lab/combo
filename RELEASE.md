@@ -2,7 +2,7 @@
 
 1. update `CHANGELOG.md`
 2. update the version in `mix.exs`
-3. update the version in `package.json`
+3. update the version in `node-packages/combo/package.json`
 4. run `mix test`
 5. run `pnpm --dir node-packages/combo/ test`
 6. run `mix build`
