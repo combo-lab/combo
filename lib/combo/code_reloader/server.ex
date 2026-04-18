@@ -346,10 +346,7 @@ defmodule Combo.CodeReloader.Server do
       | compile_args
     ]
 
-    {status, diagnostics} =
-      with_logger_app(config, fn ->
-        run_compilers(compilers, args, :noop, [])
-      end)
+    {status, diagnostics} = run_compilers(compilers, args, :noop, [])
 
     Proxy.diagnostics(Process.group_leader(), diagnostics)
 
@@ -442,19 +439,6 @@ defmodule Combo.CodeReloader.Server do
         )
 
         {:noop, []}
-    end
-  end
-
-  # TODO: remove once we depend on Elixir 1.17
-  defp with_logger_app(config, fun) do
-    app = Keyword.fetch!(config, :app)
-    logger_config_app = Application.get_env(:logger, :compile_time_application)
-
-    try do
-      Logger.configure(compile_time_application: app)
-      fun.()
-    after
-      Logger.configure(compile_time_application: logger_config_app)
     end
   end
 end
