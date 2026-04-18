@@ -1334,7 +1334,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
   end
 
   defp build_literal(literal) do
-    [?`, inspect(literal, charlists: :as_list), ?`]
+    [?`, inspect(literal, charlists: :as_lists), ?`]
   end
 
   defp build_hyphen(%{doc: doc}) when is_binary(doc) do
