@@ -533,8 +533,7 @@ defmodule Combo.Socket do
   defp result({:error, _}), do: :error
 
   defp set_label(socket) do
-    # TODO: replace with Process.put_label/2 when we require Elixir 1.17
-    Process.put(:"$process_label", {Combo.Socket, socket.handler, socket.id})
+    Process.set_label({Combo.Socket, socket.handler, socket.id})
   end
 
   def __init__({state, %{id: id, endpoint: endpoint} = socket}) do
