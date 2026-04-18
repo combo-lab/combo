@@ -92,7 +92,7 @@ defmodule Combo.MixProject do
       {:makeup_syntect, "~> 0.1.0", only: [:docs, :publish]},
 
       # code quality
-      {:ex_check, "~> 0.16.0", only: [:dev], runtime: false},
+      {:ex_check, ">= 0.0.0", only: [:dev], runtime: false},
       {:dialyxir, ">= 0.0.0", only: [:dev], runtime: false},
 
       # Test dependencies
