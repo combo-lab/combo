@@ -74,7 +74,7 @@ defmodule Combo.CodeReloader.Server do
     froms = all_waiting([from], endpoint)
 
     {backup, res, out} =
-      with_build_lock(fn ->
+      Mix.Project.with_build_lock(fn ->
         purge_fallback? =
           if Combo.CodeReloader.MixListener.started?() do
             Combo.CodeReloader.MixListener.purge(apps)
@@ -456,12 +456,5 @@ defmodule Combo.CodeReloader.Server do
     after
       Logger.configure(compile_time_application: logger_config_app)
     end
-  end
-
-  # TODO: remove once we depend on Elixir 1.18
-  if Code.ensure_loaded?(Mix.Project) and function_exported?(Mix.Project, :with_build_lock, 1) do
-    defp with_build_lock(fun), do: Mix.Project.with_build_lock(fun)
-  else
-    defp with_build_lock(fun), do: fun.()
   end
 end
