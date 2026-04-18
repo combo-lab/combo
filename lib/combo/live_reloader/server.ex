@@ -1,7 +1,6 @@
 defmodule Combo.LiveReloader.Server do
   @moduledoc false
 
-  require Logger
   alias Combo.Env
 
   def child_spec(args) do

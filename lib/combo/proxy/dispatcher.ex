@@ -1,7 +1,6 @@
 defmodule Combo.Proxy.Dispatcher do
   @moduledoc false
 
-  require Logger
   alias Combo.Proxy.Backend
   alias Combo.Proxy.ErrorPlug
 

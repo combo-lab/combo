@@ -2,7 +2,6 @@ defmodule Combo.Proxy.ErrorPlug do
   @moduledoc false
 
   import Plug.Conn
-  require Logger
 
   @behaviour Plug
 

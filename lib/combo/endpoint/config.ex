@@ -1,7 +1,6 @@
 defmodule Combo.Endpoint.Config do
   @moduledoc false
 
-  require Logger
   use GenServer
 
   @doc """
