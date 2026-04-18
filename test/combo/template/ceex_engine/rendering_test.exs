@@ -1325,11 +1325,6 @@ defmodule Combo.Template.CEExEngine.RenderingTest do
              <div ceex-no-curly-interpolation>{:pre}{open}<%= :eval %>{close}{:post}</div>
              """) == "<div>{:pre}{open}eval{close}{:post}</div>"
     end
-
-    test "ceex-no-format attr is not rendered" do
-      assert render_string!("<div ceex-no-format />") == "<div></div>"
-      assert render_string!("<div ceex-no-format>content</div>") == "<div>content</div>"
-    end
   end
 
   describe "whitespace suppression at boundaries" do

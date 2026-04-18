@@ -156,9 +156,6 @@ defmodule Combo.Template.CEExEngine.Compiler.Engine do
     {t_type, t_name, new_t_attrs, new_t_meta}
   end
 
-  defp remove_control_attr({"ceex-no-format", _, _}, token, _state),
-    do: token
-
   defp remove_control_attr({"ceex-no-curly-interpolation", _, _}, token, _state),
     do: token
 

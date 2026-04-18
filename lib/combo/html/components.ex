@@ -90,7 +90,6 @@ defmodule Combo.HTML.Components do
       data-method={if @method != "get", do: @method}
       data-csrf={if @method != "get", do: csrf_token(@csrf_token, @href)}
       data-to={if @method != "get", do: @href}
-      ceex-no-format
       {@rest}
     >{render_slot(@inner_block)}</a>
     """
