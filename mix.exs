@@ -188,7 +188,6 @@ defmodule Combo.MixProject do
       ],
       HTML: [
         Combo.HTML,
-        Combo.HTML.Formatter,
         Combo.HTML.Form,
         Combo.HTML.FormData,
         Combo.HTML.FormField

@@ -16,7 +16,6 @@ defmodule Combo.Template.CEExEngine do
       - declarative assigns
     * component system
     * protection on XSS
-    * code formatter
 
   ## Modules
 

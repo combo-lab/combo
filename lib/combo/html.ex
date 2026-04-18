@@ -730,12 +730,6 @@ defmodule Combo.HTML do
   <p>Howdy from the inner block!</p>
   <p>Howdy from the named slot!</p>
   ```
-
-  ## Code formatting
-
-  You can automatically format CEEx template files (using .ceex extension) and
-  inline templates (using `~CE` sigil) using `Combo.HTML.Formatter`. Please
-  check that module for more information.
   '''
 
   @doc false
