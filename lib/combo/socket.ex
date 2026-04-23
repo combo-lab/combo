@@ -598,7 +598,7 @@ defmodule Combo.Socket do
     :ok
   end
 
-  defp negotiate_serializer(serializers, vsn) when is_list(serializers) do
+  defp negotiate_serializer(serializers, vsn) when is_list(serializers) and is_binary(vsn) do
     case Version.parse(vsn) do
       {:ok, vsn} ->
         serializers
@@ -620,6 +620,11 @@ defmodule Combo.Socket do
         Logger.warning("Client sent invalid transport version \"#{vsn}\"")
         :error
     end
+  end
+
+  defp negotiate_serializer(_serializer, vsn) do
+    Logger.warning("Client sent invalid transport version \"#{vsn}\"")
+    :error
   end
 
   defp user_connect(handler, endpoint, transport, serializer, params, connect_info) do
