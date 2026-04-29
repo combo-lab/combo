@@ -18,12 +18,12 @@ alias Combo.SafeHTML.Escape
 
 defimpl Combo.SafeHTML.Safe, for: Atom do
   def to_iodata(nil), do: ""
-  def to_iodata(atom), do: Escape.escape_html(Atom.to_string(atom))
+  def to_iodata(atom), do: Escape.escape_binary(Atom.to_string(atom))
 end
 
 defimpl Combo.SafeHTML.Safe, for: BitString do
   def to_iodata(""), do: ""
-  defdelegate to_iodata(data), to: Escape, as: :escape_html
+  defdelegate to_iodata(data), to: Escape, as: :escape_binary
 end
 
 defimpl Combo.SafeHTML.Safe, for: Integer do
@@ -40,40 +40,7 @@ defimpl Combo.SafeHTML.Safe, for: Tuple do
 end
 
 defimpl Combo.SafeHTML.Safe, for: List do
-  def to_iodata(list), do: recur(list)
-
-  defp recur([h | t]), do: [recur(h) | recur(t)]
-  defp recur([]), do: []
-
-  defp recur(?<), do: "&lt;"
-  defp recur(?>), do: "&gt;"
-  defp recur(?&), do: "&amp;"
-  defp recur(?"), do: "&quot;"
-  defp recur(?'), do: "&#39;"
-
-  defp recur(h) when is_integer(h) and h >= 0 and h <= 255 do
-    h
-  end
-
-  defp recur(h) when is_integer(h) do
-    raise ArgumentError,
-          "lists in Combo.HTML templates only support iodata, and not chardata. Integers may only represent bytes. " <>
-            "It's likely you meant to pass a string with double quotes instead of a char list with single quotes."
-  end
-
-  defp recur(h) when is_binary(h) do
-    Escape.escape_html(h)
-  end
-
-  defp recur({:safe, data}) do
-    data
-  end
-
-  defp recur(other) do
-    raise ArgumentError,
-          "lists in Combo.HTML and templates may only contain integers representing bytes, binaries or other lists, " <>
-            "got invalid entry: #{inspect(other)}"
-  end
+  defdelegate to_iodata(list), to: Escape, as: :escape_list
 end
 
 defimpl Combo.SafeHTML.Safe, for: Time do
@@ -92,7 +59,7 @@ defimpl Combo.SafeHTML.Safe, for: DateTime do
   def to_iodata(data) do
     # Call escape in case someone can inject reserved
     # characters in the timezone or its abbreviation
-    Escape.escape_html(DateTime.to_iso8601(data))
+    Escape.escape_binary(DateTime.to_iso8601(data))
   end
 end
 
@@ -103,7 +70,7 @@ if Code.ensure_loaded?(Duration) do
 end
 
 defimpl Combo.SafeHTML.Safe, for: URI do
-  def to_iodata(data), do: Escape.escape_html(URI.to_string(data))
+  def to_iodata(data), do: Escape.escape_binary(URI.to_string(data))
 end
 
 if Code.ensure_loaded?(Decimal) do

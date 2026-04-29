@@ -1,13 +1,6 @@
 defmodule Combo.SafeHTML.Escape do
   @moduledoc false
 
-  alias Combo.SafeHTML.Safe
-
-  @doc false
-  def escape_html(bin) when is_binary(bin) do
-    escape_html(bin, 0, bin, [])
-  end
-
   escapes = [
     {?<, "&lt;"},
     {?>, "&gt;"},
@@ -16,65 +9,76 @@ defmodule Combo.SafeHTML.Escape do
     {?', "&#39;"}
   ]
 
+  # Escaping binaries
+
+  @doc false
+  def escape_binary(binary) when is_binary(binary), do: escape_binary(binary, 0, binary, [])
+
   for {match, insert} <- escapes do
-    defp escape_html(<<unquote(match), rest::bits>>, skip, original, acc) do
-      escape_html(rest, skip + 1, original, [acc, unquote(insert)])
+    defp escape_binary(<<unquote(match), rest::bits>>, skip, original, acc) do
+      escape_binary(rest, skip + 1, original, [acc, unquote(insert)])
     end
   end
 
-  defp escape_html(<<_char, rest::bits>>, skip, original, acc) do
-    escape_html(rest, skip, original, acc, 1)
+  defp escape_binary(<<_char, rest::bits>>, skip, original, acc) do
+    escape_binary(rest, skip, original, acc, 1)
   end
 
-  defp escape_html(<<>>, _skip, _original, acc) do
+  defp escape_binary(<<>>, _skip, _original, acc) do
     acc
   end
 
   for {match, insert} <- escapes do
-    defp escape_html(<<unquote(match), rest::bits>>, skip, original, acc, len) do
+    defp escape_binary(<<unquote(match), rest::bits>>, skip, original, acc, len) do
       part = binary_part(original, skip, len)
-      escape_html(rest, skip + len + 1, original, [acc, part, unquote(insert)])
+      escape_binary(rest, skip + len + 1, original, [acc, part, unquote(insert)])
     end
   end
 
-  defp escape_html(<<_char, rest::bits>>, skip, original, acc, len) do
-    escape_html(rest, skip, original, acc, len + 1)
+  defp escape_binary(<<_char, rest::bits>>, skip, original, acc, len) do
+    escape_binary(rest, skip, original, acc, len + 1)
   end
 
-  defp escape_html(<<>>, 0, original, _acc, _len) do
+  defp escape_binary(<<>>, 0, original, _acc, _len) do
     original
   end
 
-  defp escape_html(<<>>, skip, original, acc, len) do
+  defp escape_binary(<<>>, skip, original, acc, len) do
     [acc, binary_part(original, skip, len)]
   end
 
+  # Escaping lists
+
   @doc false
-  def escape_attrs(attrs) when is_list(attrs) do
-    build_attrs(attrs)
+  def escape_list(list) when is_list(list), do: escape_list_elem(list)
+
+  ## bytes
+  for {match, insert} <- escapes do
+    defp escape_list_elem(unquote(match)), do: unquote(insert)
   end
 
-  def escape_attrs(attrs) do
-    attrs |> Enum.to_list() |> build_attrs()
+  defp escape_list_elem(h) when is_integer(h) and h >= 0 and h <= 255 do
+    h
   end
 
-  defp build_attrs([{k, true} | t]),
-    do: [?\s, escape_key(k) | build_attrs(t)]
+  ## binaries
+  defp escape_list_elem(h) when is_binary(h) do
+    escape_binary(h)
+  end
 
-  defp build_attrs([{_, false} | t]),
-    do: build_attrs(t)
+  ## lists
+  defp escape_list_elem([h | t]), do: [escape_list_elem(h) | escape_list_elem(t)]
+  defp escape_list_elem([]), do: []
 
-  defp build_attrs([{_, nil} | t]),
-    do: build_attrs(t)
+  ## safe data
+  defp escape_list_elem({:safe, data}) do
+    data
+  end
 
-  defp build_attrs([{k, v} | t]),
-    do: [?\s, escape_key(k), ?=, ?", escape_value(v), ?" | build_attrs(t)]
-
-  defp build_attrs([]), do: []
-
-  @doc false
-  def escape_key(value), do: Safe.to_iodata(value)
-
-  @doc false
-  def escape_value(value), do: Safe.to_iodata(value)
+  ## fallback
+  defp escape_list_elem(other) do
+    raise ArgumentError,
+          "expected list element to be a byte (0-255), binary, list or {:safe, data}, " <>
+            "got: #{inspect(other)}"
+  end
 end

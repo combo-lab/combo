@@ -39,9 +39,11 @@ defmodule Combo.SafeHTML.SafeTest do
     assert Safe.to_iodata([~c"<foo>"]) == [["&lt;", 102, 111, 111, "&gt;"]]
     assert Safe.to_iodata([?<, "foo" | ?>]) == ["&lt;", "foo" | "&gt;"]
 
-    assert_raise ArgumentError, ~r/templates only support iodata/, fn ->
-      Safe.to_iodata(~c"foo🐥")
-    end
+    assert_raise ArgumentError,
+                 "expected list element to be a byte (0-255), binary, list or {:safe, data}, got: 128037",
+                 fn ->
+                   Safe.to_iodata(~c"foo🐥")
+                 end
   end
 
   test "impl for Time" do

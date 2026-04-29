@@ -92,7 +92,7 @@ defmodule Combo.SafeHTML do
 
   """
   @spec escape(String.t()) :: String.t()
-  defdelegate escape(string), to: Escape, as: :escape_html
+  def escape(string) when is_binary(string), do: Escape.escape_binary(string)
 
   @doc ~S"""
   Escapes an enumerable of attributes, returning iodata.
@@ -125,17 +125,37 @@ defmodule Combo.SafeHTML do
 
   """
   @spec escape_attrs([{term(), term()}] | map()) :: iodata()
-  defdelegate escape_attrs(list_or_map), to: Escape
+  def escape_attrs(attrs) when is_list(attrs) do
+    build_attrs(attrs)
+  end
+
+  def escape_attrs(attrs) do
+    attrs |> Enum.to_list() |> build_attrs()
+  end
+
+  defp build_attrs([{k, true} | t]),
+    do: [?\s, escape_attr_key(k) | build_attrs(t)]
+
+  defp build_attrs([{_, false} | t]),
+    do: build_attrs(t)
+
+  defp build_attrs([{_, nil} | t]),
+    do: build_attrs(t)
+
+  defp build_attrs([{k, v} | t]),
+    do: [?\s, escape_attr_key(k), ?=, ?", escape_attr_value(v), ?" | build_attrs(t)]
+
+  defp build_attrs([]), do: []
 
   @doc """
   Escapes a term as the key of an attribute.
   """
   @spec escape_attr_key(term()) :: iodata()
-  defdelegate escape_attr_key(term), to: Escape, as: :escape_key
+  def escape_attr_key(term), do: Safe.to_iodata(term)
 
   @doc """
   Escapes a term as the value of an attribute.
   """
   @spec escape_attr_value(term()) :: iodata()
-  defdelegate escape_attr_value(term), to: Escape, as: :escape_value
+  def escape_attr_value(term), do: Safe.to_iodata(term)
 end
