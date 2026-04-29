@@ -51,7 +51,7 @@ defimpl Combo.SafeHTML.Safe, for: List do
   defp recur(?"), do: "&quot;"
   defp recur(?'), do: "&#39;"
 
-  defp recur(h) when is_integer(h) and h <= 255 do
+  defp recur(h) when is_integer(h) and h >= 0 and h <= 255 do
     h
   end
 
