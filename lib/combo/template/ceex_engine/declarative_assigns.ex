@@ -336,17 +336,16 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
 
   @global_attrs ~w(
     accesskey
-    alt
+    anchor
     autocapitalize
+    autocorrect
     autofocus
     class
     contenteditable
-    contextmenu
     dir
     draggable
     enterkeyhint
     exportparts
-    height
     hidden
     id
     inert
@@ -422,19 +421,16 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssigns do
     onvolumechange
     onwaiting
     part
-    placeholder
     popover
-    rel
     role
     slot
     spellcheck
     style
     tabindex
-    target
     title
     translate
-    type
-    width
+    virtualkeyboardpolicy
+    writingsuggestions
     xml:base
     xml:lang
   )
