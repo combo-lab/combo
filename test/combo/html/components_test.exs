@@ -358,12 +358,16 @@ defmodule Combo.HTML.ComponentsTest do
       end
     end
 
-    test "ensures attribute names are escaped" do
+    test "ensures attribute names are validated" do
       assigns = %{}
 
-      assert to_x(
-               ~CE|<.dynamic_tag tag_name="p" {%{"<script>alert('nice try');</script>" => ""}}></.dynamic_tag>|
-             ) == ~X|<p &lt;script&gt;alert(&#39;nice try&#39;);&lt;/script&gt;=""></p>|
+      assert_raise ArgumentError,
+                   ~r/expected attribute name to be a non-empty atom or string/,
+                   fn ->
+                     to_x(
+                       ~CE|<.dynamic_tag tag_name="p" {%{"<script>alert('nice try');</script>" => ""}}></.dynamic_tag>|
+                     ) == ~X|<p &lt;script&gt;alert(&#39;nice try&#39;);&lt;/script&gt;=""></p>|
+                   end
     end
 
     test "ensures attribute values are escaped" do

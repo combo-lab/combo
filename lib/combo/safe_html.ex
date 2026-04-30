@@ -134,7 +134,7 @@ defmodule Combo.SafeHTML do
   end
 
   defp build_attrs([{k, true} | t]),
-    do: [?\s, escape_attr_key(k) | build_attrs(t)]
+    do: [?\s, escape_attr_name(k) | build_attrs(t)]
 
   defp build_attrs([{_, false} | t]),
     do: build_attrs(t)
@@ -143,19 +143,44 @@ defmodule Combo.SafeHTML do
     do: build_attrs(t)
 
   defp build_attrs([{k, v} | t]),
-    do: [?\s, escape_attr_key(k), ?=, ?", escape_attr_value(v), ?" | build_attrs(t)]
+    do: [?\s, escape_attr_name(k), ?=, ?", escape_attr_value(v), ?" | build_attrs(t)]
 
   defp build_attrs([]), do: []
 
-  @doc """
-  Escapes a term as the key of an attribute.
-  """
-  @spec escape_attr_key(term()) :: iodata()
-  def escape_attr_key(term), do: Safe.to_iodata(term)
+  defp escape_attr_name(atom) when is_atom(atom) do
+    atom |> Atom.to_string() |> validate_attr_name!()
+  end
 
-  @doc """
-  Escapes a term as the value of an attribute.
-  """
-  @spec escape_attr_value(term()) :: iodata()
-  def escape_attr_value(term), do: Safe.to_iodata(term)
+  defp escape_attr_name(string) when is_binary(string) do
+    validate_attr_name!(string)
+  end
+
+  defp escape_attr_name(other) do
+    raise ArgumentError,
+          "expected attribute name to be an atom or string, got: #{inspect(other)}"
+  end
+
+  @invalid_attr_name_chars [?<, ?>, ?", ?', ?/, ?=]
+
+  defp validate_attr_name!(name) do
+    if name != "" and valid_attr_name?(name) do
+      name
+    else
+      raise ArgumentError,
+            "expected attribute name to be a non-empty atom or string not containing any of " <>
+              "#{inspect(List.to_string(@invalid_attr_name_chars))}, control characters, or DEL, " <>
+              "got: #{inspect(name)}"
+    end
+  end
+
+  defp valid_attr_name?(<<c, rest::binary>>) do
+    c not in @invalid_attr_name_chars and
+      c > 0x1F and c != 0x7F and
+      valid_attr_name?(rest)
+  end
+
+  defp valid_attr_name?(<<>>),
+    do: true
+
+  defp escape_attr_value(term), do: Safe.to_iodata(term)
 end

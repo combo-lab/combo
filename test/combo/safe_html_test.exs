@@ -13,17 +13,23 @@ defmodule Combo.SafeHTMLTest do
   end
 
   describe "escape_attrs/1" do
-    test "key as atom" do
+    test "name as atom" do
       assert escape_attrs([{:title, "the title"}]) |> IO.iodata_to_binary() ==
                ~s( title="the title")
     end
 
-    test "key as string" do
+    test "name as string" do
       assert escape_attrs([{"title", "the title"}]) |> IO.iodata_to_binary() ==
                ~s( title="the title")
     end
 
-    test "keep the case style of keys unchanged" do
+    test "raises on unsupported data type of attribute name" do
+      assert_raise ArgumentError, ~r/expected attribute name to be an atom or string/, fn ->
+        escape_attrs([{["title"], "the title"}])
+      end
+    end
+
+    test "keep the case style of names unchanged" do
       assert escape_attrs([{:my_attr, "value"}]) |> IO.iodata_to_binary() == ~s( my_attr="value")
       assert escape_attrs([{"my_attr", "value"}]) |> IO.iodata_to_binary() == ~s( my_attr="value")
 
@@ -32,6 +38,25 @@ defmodule Combo.SafeHTMLTest do
 
       assert escape_attrs([{"my-attr", "value"}]) |> IO.iodata_to_binary() ==
                ~s( my-attr="value")
+    end
+
+    test "raises on invalid attribute name" do
+      for invalid <- [
+            "",
+            "foo\"bar",
+            "foo'bar",
+            "foo>bar",
+            "foo/bar",
+            "foo=bar",
+            "foo\tbar",
+            "foo\nbar",
+            "foo\0bar",
+            "foo\x7Fbar"
+          ] do
+        assert_raise ArgumentError, ~r/expected attribute name/, fn ->
+          escape_attrs([{invalid, "value"}])
+        end
+      end
     end
 
     test "value as string" do
