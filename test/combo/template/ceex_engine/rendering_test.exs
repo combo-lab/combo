@@ -310,16 +310,16 @@ defmodule Combo.Template.CEExEngine.RenderingTest do
              }) == ~S|<div key1="value1"></div>|
 
       assert render_string!("<div {@rest} />", %{
-               rest: [{"<key2>", "value2"}]
-             }) == ~S|<div &lt;key2&gt;="value2"></div>|
+               rest: [{"key2", "<value2>"}]
+             }) == ~S|<div key2="&lt;value2&gt;"></div>|
 
-      assert render_string!("<div {@rest} />", %{
-               rest: [{"key3", "<value3>"}]
-             }) == ~S|<div key3="&lt;value3&gt;"></div>|
-
-      assert render_string!("<div {@rest} />", %{
-               rest: [{{:safe, "<key4>"}, {:safe, "<value4>"}}]
-             }) == ~S|<div <key4>="<value4>"></div>|
+      assert_raise ArgumentError,
+                   ~r/expected attribute name to be a non-empty atom or string/,
+                   fn ->
+                     render_string!("<div {@rest} />", %{
+                       rest: [{"<key3", "<value3>"}]
+                     })
+                   end
     end
 
     test "root attrs - keep the order of attrs" do

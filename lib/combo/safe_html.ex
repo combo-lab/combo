@@ -10,6 +10,7 @@ defmodule Combo.SafeHTML do
   - ...
   """
 
+  import Bitwise, only: [&&&: 2]
   alias Combo.SafeHTML.Safe
   alias Combo.SafeHTML.Escape
 
@@ -92,7 +93,7 @@ defmodule Combo.SafeHTML do
 
   """
   @spec escape(String.t()) :: String.t()
-  defdelegate escape(string), to: Escape, as: :escape_html
+  def escape(string) when is_binary(string), do: Escape.escape_binary(string)
 
   @doc ~S"""
   Escapes an enumerable of attributes, returning iodata.
@@ -125,17 +126,94 @@ defmodule Combo.SafeHTML do
 
   """
   @spec escape_attrs([{term(), term()}] | map()) :: iodata()
-  defdelegate escape_attrs(list_or_map), to: Escape
+  def escape_attrs(attrs) when is_list(attrs) do
+    build_attrs(attrs)
+  end
 
-  @doc """
-  Escapes a term as the key of an attribute.
-  """
-  @spec escape_attr_key(term()) :: iodata()
-  defdelegate escape_attr_key(term), to: Escape, as: :escape_key
+  def escape_attrs(attrs) do
+    attrs |> Enum.to_list() |> build_attrs()
+  end
 
-  @doc """
-  Escapes a term as the value of an attribute.
-  """
-  @spec escape_attr_value(term()) :: iodata()
-  defdelegate escape_attr_value(term), to: Escape, as: :escape_value
+  defp build_attrs([{k, true} | t]),
+    do: [?\s, escape_attr_name(k) | build_attrs(t)]
+
+  defp build_attrs([{_, false} | t]),
+    do: build_attrs(t)
+
+  defp build_attrs([{_, nil} | t]),
+    do: build_attrs(t)
+
+  defp build_attrs([{k, v} | t]),
+    do: [?\s, escape_attr_name(k), ?=, ?", escape_attr_value(v), ?" | build_attrs(t)]
+
+  defp build_attrs([]), do: []
+
+  defp escape_attr_name(atom) when is_atom(atom) do
+    atom |> Atom.to_string() |> validate_attr_name!()
+  end
+
+  defp escape_attr_name(string) when is_binary(string) do
+    validate_attr_name!(string)
+  end
+
+  defp escape_attr_name(other) do
+    raise ArgumentError,
+          "expected attribute name to be an atom or string, got: #{inspect(other)}"
+  end
+
+  defp validate_attr_name!(name) do
+    if valid_attr_name?(name) do
+      name
+    else
+      raise ArgumentError,
+            "expected attribute name to be a non-empty atom or string containing valid characters, " <>
+              "got: #{inspect(name)}"
+    end
+  end
+
+  defp escape_attr_value(term), do: Safe.to_iodata(term)
+
+  # https://html.spec.whatwg.org/multipage/syntax.html#attributes-2
+  #
+  # Attribute names must consist of one or more characters other than:
+  #
+  #   * controls
+  #   * U+0020 SPACE
+  #   * syntax characters: U+0022 ("), U+0027 ('), U+003E (>), U+002F (/), U+003D (=)
+  #   * noncharacters
+  #
+  defp valid_attr_name?(""), do: false
+  defp valid_attr_name?(name), do: valid_attr_name_chars?(name)
+
+  defp valid_attr_name_chars?(<<c::utf8, rest::binary>>) do
+    not control?(c) and
+      not space?(c) and
+      not syntax_char?(c) and
+      not nonchar?(c) and
+      valid_attr_name_chars?(rest)
+  end
+
+  defp valid_attr_name_chars?(<<>>), do: true
+
+  # * C0 control - 0x00..0x1F
+  # * DEL        - 0x7F
+  # * C1 control - 0x80..0x9F
+  defp control?(c) do
+    (c >= 0x0000 and c <= 0x001F) or c == 0x007F or (c >= 0x0080 and c <= 0x009F)
+  end
+
+  defp space?(c) do
+    c == 0x0020
+  end
+
+  # ?< is not required by the spec, but is included as an additional safeguard.
+  @syntax_chars [?<, ?>, ?", ?', ?/, ?=]
+  defp syntax_char?(c) do
+    c in @syntax_chars
+  end
+
+  defp nonchar?(c) do
+    (c >= 0xFDD0 and c <= 0xFDEF) or
+      (c &&& 0xFFFE) == 0xFFFE
+  end
 end
