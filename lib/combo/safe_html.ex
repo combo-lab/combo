@@ -10,6 +10,7 @@ defmodule Combo.SafeHTML do
   - ...
   """
 
+  import Bitwise, only: [&&&: 2]
   alias Combo.SafeHTML.Safe
   alias Combo.SafeHTML.Escape
 
@@ -160,27 +161,59 @@ defmodule Combo.SafeHTML do
           "expected attribute name to be an atom or string, got: #{inspect(other)}"
   end
 
-  @invalid_attr_name_chars [?<, ?>, ?", ?', ?/, ?=]
-
   defp validate_attr_name!(name) do
-    if name != "" and valid_attr_name?(name) do
+    if valid_attr_name?(name) do
       name
     else
       raise ArgumentError,
-            "expected attribute name to be a non-empty atom or string not containing any of " <>
-              "#{inspect(List.to_string(@invalid_attr_name_chars))}, control characters, or DEL, " <>
+            "expected attribute name to be a non-empty atom or string containing valid characters, " <>
               "got: #{inspect(name)}"
     end
   end
 
-  defp valid_attr_name?(<<c, rest::binary>>) do
-    c not in @invalid_attr_name_chars and
-      c > 0x1F and c != 0x7F and
-      valid_attr_name?(rest)
+  defp escape_attr_value(term), do: Safe.to_iodata(term)
+
+  # https://html.spec.whatwg.org/multipage/syntax.html#attributes-2
+  #
+  # Attribute names must consist of one or more characters other than:
+  #
+  #   * controls
+  #   * U+0020 SPACE
+  #   * syntax characters: U+0022 ("), U+0027 ('), U+003E (>), U+002F (/), U+003D (=)
+  #   * noncharacters
+  #
+  defp valid_attr_name?(""), do: false
+  defp valid_attr_name?(name), do: valid_attr_name_chars?(name)
+
+  defp valid_attr_name_chars?(<<c::utf8, rest::binary>>) do
+    not control?(c) and
+      not space?(c) and
+      not syntax_char?(c) and
+      not nonchar?(c) and
+      valid_attr_name_chars?(rest)
   end
 
-  defp valid_attr_name?(<<>>),
-    do: true
+  defp valid_attr_name_chars?(<<>>), do: true
 
-  defp escape_attr_value(term), do: Safe.to_iodata(term)
+  # * C0 control - 0x00..0x1F
+  # * DEL        - 0x7F
+  # * C1 control - 0x80..0x9F
+  defp control?(c) do
+    (c >= 0x0000 and c <= 0x001F) or c == 0x007F or (c >= 0x0080 and c <= 0x009F)
+  end
+
+  defp space?(c) do
+    c == 0x0020
+  end
+
+  # ?< is not required by the spec, but is included as an additional safeguard.
+  @syntax_chars [?<, ?>, ?", ?', ?/, ?=]
+  defp syntax_char?(c) do
+    c in @syntax_chars
+  end
+
+  defp nonchar?(c) do
+    (c >= 0xFDD0 and c <= 0xFDEF) or
+      (c &&& 0xFFFE) == 0xFFFE
+  end
 end

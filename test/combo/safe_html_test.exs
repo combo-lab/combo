@@ -43,15 +43,20 @@ defmodule Combo.SafeHTMLTest do
     test "raises on invalid attribute name" do
       for invalid <- [
             "",
+            "foo<bar",
+            "foo>bar",
             "foo\"bar",
             "foo'bar",
-            "foo>bar",
             "foo/bar",
             "foo=bar",
+            "foo\sbar",
             "foo\tbar",
             "foo\nbar",
+            "foo\fbar",
+            "foo\rbar",
             "foo\0bar",
-            "foo\x7Fbar"
+            "foo\x7Fbar",
+            "foo bar"
           ] do
         assert_raise ArgumentError, ~r/expected attribute name/, fn ->
           escape_attrs([{invalid, "value"}])
