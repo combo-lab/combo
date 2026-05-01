@@ -1,6 +1,17 @@
 defmodule Combo.SafeHTML.Escape do
   @moduledoc false
 
+  # For text nodes, `<`, `>`, and `&` need escaping.
+  # For attribute values, `<`, `>`, `&`, `"`, and `'` need escaping.
+  #
+  # We could provide different escaping logic for each, but depending on the
+  # implementation, that might mean lots of duplicated code or complex macros.
+  #
+  # So I decided to use the same escaping logic for both — escape `<`, `>`,
+  # `&`, `"`, and `'` regardless of whether it's a text node or attribute value.
+  #
+  # Escaping `"` and `'` in text nodes is harmless, they still render correctly.
+
   escapes = [
     {?<, "&lt;"},
     {?>, "&gt;"},
