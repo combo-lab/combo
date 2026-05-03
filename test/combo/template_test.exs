@@ -17,7 +17,7 @@ defmodule Combo.TemplateTest do
 
   test "format_encoder/1 returns the format encoder for a given format" do
     assert Template.format_encoder("html") == Combo.Template.HTMLEncoder
-    assert Template.format_encoder("js") == Combo.Template.HTMLEncoder
+    assert Template.format_encoder("json") == Jason
     assert Template.format_encoder("unknown") == nil
   end
 
