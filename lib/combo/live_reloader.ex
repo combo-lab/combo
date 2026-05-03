@@ -41,7 +41,7 @@ defmodule Combo.LiveReloader do
         live_reloader: [
           patterns: [
             ~r"lib/my_app/web/router\.ex"E,
-            ~r"lib/my_app/web/(controllers|layouts|components)/.*\.(ex|ceex)$"E,
+            ~r"lib/my_app/web/(controllers|layouts|components)/.*\.(ex|hat)$"E,
             ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$"E
           ]
         ]
@@ -125,7 +125,7 @@ defmodule Combo.LiveReloader do
 
   import Plug.Conn
   import Combo.Conn, only: [endpoint_module!: 1]
-  import Combo.SafeHTML, only: [escape_attrs: 1]
+  import HAT.SafeHTML, only: [escape_attrs: 1]
 
   @behaviour Plug
 

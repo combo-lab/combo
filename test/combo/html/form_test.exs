@@ -1,7 +1,7 @@
 defmodule Combo.HTML.FormTest do
   use ExUnit.Case, async: true
 
-  import Combo.SafeHTML, only: [safe_to_string: 1]
+  import HAT.SafeHTML, only: [safe_to_string: 1]
   import Combo.HTML.Form
   import ExUnit.CaptureIO
   doctest Combo.HTML.Form

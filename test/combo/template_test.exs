@@ -3,7 +3,7 @@ defmodule Combo.TemplateTest do
 
   doctest Combo.Template
   require Combo.Template, as: Template
-  import Combo.SafeHTML, only: [safe_to_string: 1]
+  import HAT.SafeHTML, only: [safe_to_string: 1]
 
   @templates Path.expand("../fixtures/templates", __DIR__)
 
@@ -23,7 +23,7 @@ defmodule Combo.TemplateTest do
 
   test "find_all/3 finds all templates in the given root" do
     templates = Template.find_all(@templates)
-    assert Path.join(@templates, "show.html.ceex") in templates
+    assert Path.join(@templates, "show.html.hat") in templates
 
     templates = Template.find_all(Path.expand("unknown"))
     assert templates == []
@@ -63,15 +63,15 @@ defmodule Combo.TemplateTest do
     end
 
     test "compiles all templates at once" do
-      assert AllTemplates.show_html_ceex(%{message: "hello!"})
+      assert AllTemplates.show_html_hat(%{message: "hello!"})
              |> safe_to_string() ==
                "<div>Show! hello!</div>\n"
 
-      assert AllTemplates.show_html_ceex(%{message: "<hello>"})
+      assert AllTemplates.show_html_hat(%{message: "<hello>"})
              |> safe_to_string() ==
                "<div>Show! &lt;hello&gt;</div>\n"
 
-      assert AllTemplates.show_html_ceex(%{message: {:safe, "<hello>"}})
+      assert AllTemplates.show_html_hat(%{message: {:safe, "<hello>"}})
              |> safe_to_string() ==
                "<div>Show! <hello></div>\n"
 
@@ -81,12 +81,12 @@ defmodule Combo.TemplateTest do
     end
 
     test "trims only HTML templates" do
-      assert AllTemplates.trim_html_ceex(%{}) |> safe_to_string() == "12\n  34\n56"
+      assert AllTemplates.trim_html_hat(%{}) |> safe_to_string() == "12\n  34\n56"
       assert AllTemplates.trim_text_eex(%{}) == "12\n  34\n56\n"
     end
 
     defmodule OptionsTemplates do
-      [{"show1html1ceex", _} | _] =
+      [{"show1html1hat", _} | _] =
         Template.compile_all(
           &(&1 |> Path.basename() |> String.replace(".", "1")),
           Path.expand("../fixtures/templates", __DIR__),
@@ -110,7 +110,7 @@ defmodule Combo.TemplateTest do
     end
 
     test "compiles templates across several calls" do
-      assert OptionsTemplates.show1html1ceex(%{message: "hello!"})
+      assert OptionsTemplates.show1html1hat(%{message: "hello!"})
              |> safe_to_string() ==
                "<div>Show! hello!</div>\n"
 
@@ -124,7 +124,7 @@ defmodule Combo.TemplateTest do
     test "render/4" do
       assigns = %{message: "hello!"}
 
-      assert Template.render(AllTemplates, "show_html_ceex", "html", assigns)
+      assert Template.render(AllTemplates, "show_html_hat", "html", assigns)
              |> safe_to_string() ==
                "<div>Show! hello!</div>\n"
     end
@@ -132,12 +132,12 @@ defmodule Combo.TemplateTest do
     test "render_to_iodata/4" do
       assigns = %{message: "hello!"}
 
-      assert Template.render_to_iodata(AllTemplates, "show_html_ceex", "html", assigns) ==
+      assert Template.render_to_iodata(AllTemplates, "show_html_hat", "html", assigns) ==
                ["<div", ">", "Show! ", "hello!", "</div>", "\n"]
     end
 
     test "render_to_string/4" do
-      assert Template.render_to_string(AllTemplates, "show_html_ceex", "html", %{
+      assert Template.render_to_string(AllTemplates, "show_html_hat", "html", %{
                message: "hello!"
              }) ==
                "<div>Show! hello!</div>\n"

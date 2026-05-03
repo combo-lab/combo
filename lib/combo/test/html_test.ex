@@ -9,7 +9,7 @@ defmodule Combo.HTMLTest do
   are named like this.
   """
 
-  alias Combo.SafeHTML
+  alias HAT.SafeHTML
   alias Combo.HTMLTest.DOM
 
   @doc """

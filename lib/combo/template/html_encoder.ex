@@ -3,7 +3,7 @@ defmodule Combo.Template.HTMLEncoder do
   The format encoder for HTML.
   """
 
-  alias Combo.SafeHTML
+  alias HAT.SafeHTML
 
   @behaviour Combo.Template.FormatEncoder
 

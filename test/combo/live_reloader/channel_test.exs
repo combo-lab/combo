@@ -16,7 +16,7 @@ defmodule Combo.LiveReloader.ChannelTest do
     pubsub_server: __MODULE__.PubSub,
     live_reloader: [
       patterns: [
-        ~r"lib/demo/web/(?:router|controllers|layouts|components)(?:/.*)?\.(ex|ceex)$",
+        ~r"lib/demo/web/(?:router|controllers|layouts|components)(?:/.*)?\.(ex|hat)$",
         ~r"priv/static/.*(js|css|png|jpeg|jpg|gif)$"
       ]
     ]
@@ -84,12 +84,12 @@ defmodule Combo.LiveReloader.ChannelTest do
     send(
       socket.channel_pid,
       file_event(
-        "/home/nobody/www/widget_builder/lib/demo/web/layouts/app.html.ceex",
+        "/home/nobody/www/widget_builder/lib/demo/web/layouts/app.html.hat",
         :created
       )
     )
 
-    assert_push "reload", %{type: "ceex"}
+    assert_push "reload", %{type: "hat"}
   end
 
   test "sends notification for js", %{socket: socket} do
@@ -108,8 +108,8 @@ defmodule Combo.LiveReloader.ChannelTest do
   end
 
   test "sends notification for templates", %{socket: socket} do
-    send(socket.channel_pid, file_event("lib/demo/web/layouts/root.html.ceex", :created))
-    assert_push "reload", %{type: "ceex"}
+    send(socket.channel_pid, file_event("lib/demo/web/layouts/root.html.hat", :created))
+    assert_push "reload", %{type: "hat"}
   end
 
   test "sends notification for Elixir module", %{socket: socket} do

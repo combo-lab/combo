@@ -2,7 +2,7 @@ defmodule Combo.HTML.Components do
   @moduledoc false
 
   use Combo.HTML
-  alias Combo.SafeHTML
+  alias HAT.SafeHTML
 
   @doc """
   Renders an anchor element.
@@ -11,15 +11,15 @@ defmodule Combo.HTML.Components do
 
   ## Examples
 
-  ```ceex
+  ```hat
   <.a href={~p"/"}>home</.a>
   ```
 
-  ```ceex
+  ```hat
   <.a href={URI.parse("https://elixir-lang.org")}>Elixir</.a>
   ```
 
-  ```ceex
+  ```hat
   <.a href="/the_world" method="delete" data-confirm="Really?">delete</.a>
   ```
 
@@ -84,7 +84,7 @@ defmodule Combo.HTML.Components do
     href = valid_destination!(href, "<.a>")
     assigns = assign(assigns, :href, href)
 
-    ~CE"""
+    ~HAT"""
     <a
       href={@href}
       data-method={if @method != "get", do: @method}
@@ -96,7 +96,7 @@ defmodule Combo.HTML.Components do
   end
 
   def a(%{} = assigns) do
-    ~CE"""
+    ~HAT"""
     <a href="#" {@rest}>{render_slot(@inner_block)}</a>
     """
   end
@@ -251,7 +251,7 @@ defmodule Combo.HTML.Components do
 
   The form can be passed to the `<.form>` component:
 
-  ```ceex
+  ```hat
   <.form for={@form} :let={f} id="todo-form">
     <.input field={f[:name]} type="text" />
   </.form>
@@ -323,7 +323,7 @@ defmodule Combo.HTML.Components do
   This component is typically called with `for={@form}`, where `@form` is built
   using the `to_form/2` function. For example:
 
-  ```ceex
+  ```hat
   <.form for={@form} action={~p"/path"}>
     <.input field={@form[:email]} />
   </.form>
@@ -333,7 +333,7 @@ defmodule Combo.HTML.Components do
 
   The form passed to `for` attribute can be captured using `:let` attribute:
 
-  ```ceex
+  ```hat
   <.form for={@form} :let={f} action={~p"/path"}>
     <.input field={f[:email]} />
   </.form>
@@ -486,7 +486,7 @@ defmodule Combo.HTML.Components do
         attrs: attrs
       )
 
-    ~CE"""
+    ~HAT"""
     <form {@attrs}>
       <input
         :if={@hidden_method && @hidden_method not in ~w(get post)}
@@ -527,11 +527,11 @@ defmodule Combo.HTML.Components do
 
   ## Examples
 
-  ```ceex
+  ```hat
   <.input field={@form[:email]} type="email" />
   ```
 
-  ```ceex
+  ```hat
   <.input id="email" name="email" value="admin@example.com" />
   ```
   """
@@ -574,7 +574,7 @@ defmodule Combo.HTML.Components do
         Combo.HTML.Form.normalize_value("checkbox", assigns[:value])
       end)
 
-    ~CE"""
+    ~HAT"""
     <input name={@name} type="hidden" value="false" disabled={@rest[:disabled]} />
     <input
       id={@id}
@@ -588,7 +588,7 @@ defmodule Combo.HTML.Components do
   end
 
   defp build_input(assigns) do
-    ~CE"""
+    ~HAT"""
     <input
       id={@id}
       name={@name}
@@ -611,11 +611,11 @@ defmodule Combo.HTML.Components do
 
   ## Examples
 
-  ```ceex
+  ```hat
   <.textarea field={@form[:content]} />
   ```
 
-  ```ceex
+  ```hat
   <.textarea id="content" name="content" value="Lorem ipsum..." />
   ```
   """
@@ -647,7 +647,7 @@ defmodule Combo.HTML.Components do
   end
 
   defp build_textarea(assigns) do
-    ~CE"""
+    ~HAT"""
     <textarea
       id={@id}
       name={@name}
@@ -668,7 +668,7 @@ defmodule Combo.HTML.Components do
 
   ## Examples
 
-  ```ceex
+  ```hat
   <.select
     field={@form[:pet]}
     prompt="Choose a pet"
@@ -676,7 +676,7 @@ defmodule Combo.HTML.Components do
   />
   ```
 
-  ```ceex
+  ```hat
   <.select
     field={@form[:pet]}
     prompt="Choose a pet"
@@ -721,7 +721,7 @@ defmodule Combo.HTML.Components do
   end
 
   defp build_select(assigns) do
-    ~CE"""
+    ~HAT"""
     <select
       id={@id}
       name={@name}
@@ -742,7 +742,7 @@ defmodule Combo.HTML.Components do
 
   ## Examples
 
-  ```ceex
+  ```hat
   <.form for={@form} action={~p"/path"}>
     <.inputs_for :let={f_nested} field={@form[:nested]}>
       <.input type="text" field={f_nested[:name]} />
@@ -791,7 +791,7 @@ defmodule Combo.HTML.Components do
 
   The markup for such a schema and association would look like this:
 
-  ```ceex
+  ```hat
   <.inputs_for :let={ef} field={@form[:emails]}>
     <input type="hidden" name="mailing_list[emails_sort][]" value={ef.index} />
     <.input type="text" field={ef[:email]} placeholder="email" />
@@ -993,7 +993,7 @@ defmodule Combo.HTML.Components do
 
     assigns = assign(assigns, :forms, forms)
 
-    ~CE"""
+    ~HAT"""
     <%= for finner <- @forms do %>
       <%= if !@skip_hidden do %>
         <%= for {name, value_or_values} <- finner.hidden,
@@ -1070,13 +1070,13 @@ defmodule Combo.HTML.Components do
 
   ## Examples
 
-  ```ceex
+  ```hat
   <.dynamic_tag tag_name="input" name="my-input" type="text" />
   # outputs:
   <input name="my-input" type="text" />
   ```
 
-  ```ceex
+  ```hat
   <.dynamic_tag tag_name="p">content</.dynamic_tag>
   # outputs:
   <p>content</p>
@@ -1096,7 +1096,7 @@ defmodule Combo.HTML.Components do
     %{tag_name: tag_name, rest: rest} = assigns
 
     tag =
-      if SafeHTML.escape(tag_name) == tag_name do
+      if SafeHTML.escape_content(tag_name) == tag_name do
         tag_name
       else
         raise ArgumentError,
@@ -1109,12 +1109,12 @@ defmodule Combo.HTML.Components do
       |> assign(:escaped_attrs, SafeHTML.escape_attrs(rest))
 
     if assigns.inner_block != [] do
-      ~CE"""
+      ~HAT"""
       {{:safe, [?<, @tag]}}{{:safe, @escaped_attrs}}{{:safe, [?>]}}{render_slot(@inner_block)}{{:safe,
        [?<, ?/, @tag, ?>]}}
       """
     else
-      ~CE"""
+      ~HAT"""
       {{:safe, [?<, @tag]}}{{:safe, @escaped_attrs}}{{:safe, [?/, ?>]}}
       """
     end
@@ -1125,7 +1125,7 @@ defmodule Combo.HTML.Components do
 
   ## Examples
 
-  ```ceex
+  ```hat
   <.flash kind={:info} flash={@flash} :let={{_kind, msg}} />
     <p>{msg}</p>
   </.flash>
@@ -1143,7 +1143,7 @@ defmodule Combo.HTML.Components do
       |> assign_new(:id, fn -> "flash-#{assigns.kind}" end)
       |> assign(:msg, Combo.Flash.get(assigns.flash, assigns.kind))
 
-    ~CE"""
+    ~HAT"""
     <div :if={@msg} id={@id} {@rest}>
       {render_slot(@inner_block, {@kind, @msg})}
     </div>
@@ -1158,7 +1158,7 @@ defmodule Combo.HTML.Components do
 
   ## Examples
 
-  ```ceex
+  ```hat
   <.intersperse :let={item} enum={["home", "profile", "settings"]}>
     <:separator>
       <span class="sep">|</span>
@@ -1179,7 +1179,7 @@ defmodule Combo.HTML.Components do
   slot :separator, required: true, doc: "the slot for the separator"
 
   def intersperse(assigns) do
-    ~CE"""
+    ~HAT"""
     <%= for item <- Enum.intersperse(@enum, :separator) do %><%=
       if item == :separator do
         render_slot(@separator)
@@ -1187,6 +1187,6 @@ defmodule Combo.HTML.Components do
         render_slot(@inner_block, item)
       end
     %><% end %>
-    """noformat
+    """
   end
 end

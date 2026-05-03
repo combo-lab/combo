@@ -8,35 +8,35 @@ defmodule Combo.HTML.ComponentsTest do
     test "with no href" do
       assigns = %{}
 
-      assert to_x(~CE|<.a>text</.a>|) ==
+      assert to_x(~HAT|<.a>text</.a>|) ==
                ~X|<a href="#">text</a>|
     end
 
     test "with href" do
       assigns = %{}
 
-      assert to_x(~CE|<.a href="/">text</.a>|) ==
+      assert to_x(~HAT|<.a href="/">text</.a>|) ==
                ~X|<a href="/">text</a>|
     end
 
     test "with href - #" do
       assigns = %{}
 
-      assert to_x(~CE|<.a href="#">text</.a>|) ==
+      assert to_x(~HAT|<.a href="#">text</.a>|) ==
                ~X|<a href="#">text</a>|
     end
 
     test "with href - nil" do
       assigns = %{}
 
-      assert to_x(~CE|<.a href={nil}>text</.a>|) ==
+      assert to_x(~HAT|<.a href={nil}>text</.a>|) ==
                ~X|<a href="#">text</a>|
     end
 
     test "with href - unsupported scheme" do
       assigns = %{}
 
-      assert to_x(~CE|<.a href={{:javascript, "alert('bad')"}}>js</.a>|) ==
+      assert to_x(~HAT|<.a href={{:javascript, "alert('bad')"}}>js</.a>|) ==
                ~X|<a href="javascript:alert(&#39;bad&#39;)">js</a>|
     end
 
@@ -44,7 +44,7 @@ defmodule Combo.HTML.ComponentsTest do
       assigns = %{}
 
       assert_raise ArgumentError, ~r/unsupported scheme given to <.a>/, fn ->
-        to_x(~CE|<.a href="javascript:alert('bad')">bad</.a>|) ==
+        to_x(~HAT|<.a href="javascript:alert('bad')">bad</.a>|) ==
           ~X|<a href="/users" data-method="post" data-csrf="123">delete</a>|
       end
     end
@@ -52,17 +52,17 @@ defmodule Combo.HTML.ComponentsTest do
     test "global attributes" do
       assigns = %{}
 
-      assert to_x(~CE|<.a href="/" class="foo" data-action="click">text</.a>|) ==
+      assert to_x(~HAT|<.a href="/" class="foo" data-action="click">text</.a>|) ==
                ~X|<a href="/" class="foo" data-action="click">text</a>|
     end
 
     test "csrf with get method" do
       assigns = %{}
 
-      assert to_x(~CE|<.a href="/" method="get">text</.a>|) ==
+      assert to_x(~HAT|<.a href="/" method="get">text</.a>|) ==
                ~X|<a href="/">text</a>|
 
-      assert to_x(~CE|<.a href="/" method="get" csrf_token="123">text</.a>|) ==
+      assert to_x(~HAT|<.a href="/" method="get" csrf_token="123">text</.a>|) ==
                ~X|<a href="/">text</a>|
     end
 
@@ -70,20 +70,20 @@ defmodule Combo.HTML.ComponentsTest do
       assigns = %{}
       csrf = Plug.CSRFProtection.get_csrf_token_for("/users")
 
-      assert to_x(~CE|<.a href="/users" method="delete">delete</.a>|) ==
+      assert to_x(~HAT|<.a href="/users" method="delete">delete</.a>|) ==
                ~x|<a href="/users" data-method="delete" data-csrf="#{csrf}" data-to="/users">delete</a>|
 
-      assert to_x(~CE|<.a href="/users" method="delete" csrf_token={true}>delete</.a>|) ==
+      assert to_x(~HAT|<.a href="/users" method="delete" csrf_token={true}>delete</.a>|) ==
                ~x|<a href="/users" data-method="delete" data-csrf="#{csrf}" data-to="/users">delete</a>|
 
-      assert to_x(~CE|<.a href="/users" method="delete" csrf_token={false}>delete</.a>|) ==
+      assert to_x(~HAT|<.a href="/users" method="delete" csrf_token={false}>delete</.a>|) ==
                ~X|<a href="/users" data-method="delete" data-to="/users">delete</a>|
     end
 
     test "csrf with custom token" do
       assigns = %{}
 
-      assert to_x(~CE|<.a href="/users" method="post" csrf_token="123">delete</.a>|) ==
+      assert to_x(~HAT|<.a href="/users" method="post" csrf_token="123">delete</.a>|) ==
                ~X|<a href="/users" data-method="post" data-csrf="123" data-to="/users">delete</a>|
     end
   end
@@ -147,7 +147,7 @@ defmodule Combo.HTML.ComponentsTest do
     test "renders form with prebuilt form" do
       assigns = %{form: to_form(%{})}
 
-      template = ~CE"""
+      template = ~HAT"""
       <.form for={@form}>
         <input id={@form[:foo].id} name={@form[:foo].name} type="text" />
       </.form>
@@ -159,7 +159,7 @@ defmodule Combo.HTML.ComponentsTest do
     test "renders form with prebuilt form and :as" do
       assigns = %{form: to_form(%{}, as: :data)}
 
-      template = ~CE"""
+      template = ~HAT"""
       <.form :let={f} for={@form}>
         <input id={f[:foo].id} name={f[:foo].name} type="text" />
       </.form>
@@ -172,7 +172,7 @@ defmodule Combo.HTML.ComponentsTest do
     test "renders form with prebuilt form and options" do
       assigns = %{form: to_form(%{})}
 
-      template = ~CE"""
+      template = ~HAT"""
       <.form :let={f} for={@form} as={:base} data-foo="bar" class="pretty">
         <input id={f[:foo].id} name={f[:foo].name} type="text" />
       </.form>
@@ -189,7 +189,7 @@ defmodule Combo.HTML.ComponentsTest do
     test "renders form with prebuilt form and errors" do
       assigns = %{form: to_form(%{})}
 
-      template = ~CE"""
+      template = ~HAT"""
       <.form :let={form} for={@form} errors={[name: "can't be blank"]}>
         {inspect(form.errors)}
       </.form>
@@ -201,7 +201,7 @@ defmodule Combo.HTML.ComponentsTest do
     test "renders form with form data" do
       assigns = %{}
 
-      template = ~CE"""
+      template = ~HAT"""
       <.form :let={f} for={to_form(%{})}>
         <input id={f[:foo].id} name={f[:foo].name} type="text" />
       </.form>
@@ -214,7 +214,7 @@ defmodule Combo.HTML.ComponentsTest do
     test "does not raise when action is given and method is missing" do
       assigns = %{}
 
-      template = ~CE"""
+      template = ~HAT"""
       <.form for={to_form(%{})} action="/"></.form>
       """
 
@@ -227,7 +227,7 @@ defmodule Combo.HTML.ComponentsTest do
     test "renders a csrf_token if if an action is set" do
       assigns = %{}
 
-      template = ~CE"""
+      template = ~HAT"""
       <.form :let={f} for={to_form(%{})} action="/">
         <input id={f[:foo].id} name={f[:foo].name} type="text" />
       </.form>
@@ -247,7 +247,7 @@ defmodule Combo.HTML.ComponentsTest do
     test "does not generate csrf_token if method is not post or if no action" do
       assigns = %{}
 
-      template = ~CE"""
+      template = ~HAT"""
       <.form :let={f} for={to_form(%{})} method="get" action="/">
         <input id={f[:foo].id} name={f[:foo].name} type="text" />
       </.form>
@@ -260,7 +260,7 @@ defmodule Combo.HTML.ComponentsTest do
                </form>
                """
 
-      template = ~CE"""
+      template = ~HAT"""
       <.form :let={f} for={to_form(%{})}>
         <input id={f[:foo].id} name={f[:foo].name} type="text" />
       </.form>
@@ -277,7 +277,7 @@ defmodule Combo.HTML.ComponentsTest do
     test "renders form with available options and custom attributes" do
       assigns = %{}
 
-      template = ~CE"""
+      template = ~HAT"""
       <.form
         :let={user_form}
         for={to_form(%{})}
@@ -318,14 +318,14 @@ defmodule Combo.HTML.ComponentsTest do
     test "method is case insensitive when using get or post with action" do
       assigns = %{}
 
-      template = ~CE"""
+      template = ~HAT"""
       <.form for={to_form(%{})} method="GET" action="/"></.form>
       """
 
       assert to_x(template) ==
                ~x{<form method="get" action="/"></form>}
 
-      template = ~CE"""
+      template = ~HAT"""
       <.form for={to_form(%{})} method="PoST" action="/"></.form>
       """
 
@@ -335,7 +335,7 @@ defmodule Combo.HTML.ComponentsTest do
                ~x{<form method="post" action="/"><input name="_csrf_token" type="hidden" hidden="" value="#{csrf}"></form>}
 
       # for anything != get or post we use post and set the hidden _method field
-      template = ~CE"""
+      template = ~HAT"""
       <.form for={to_form(%{})} method="PuT" action="/"></.form>
       """
 
@@ -354,7 +354,7 @@ defmodule Combo.HTML.ComponentsTest do
       assigns = %{}
 
       assert_raise ArgumentError, ~r/expected tag_name to be safe HTML/, fn ->
-        to_x(~CE|<.dynamic_tag tag_name="p><script>alert('nice try');</script>" />|)
+        to_x(~HAT|<.dynamic_tag tag_name="p><script>alert('nice try');</script>" />|)
       end
     end
 
@@ -365,7 +365,7 @@ defmodule Combo.HTML.ComponentsTest do
                    ~r/expected attribute name to be a non-empty atom or string/,
                    fn ->
                      to_x(
-                       ~CE|<.dynamic_tag tag_name="p" {%{"<script>alert('nice try');</script>" => ""}}></.dynamic_tag>|
+                       ~HAT|<.dynamic_tag tag_name="p" {%{"<script>alert('nice try');</script>" => ""}}></.dynamic_tag>|
                      ) == ~X|<p &lt;script&gt;alert(&#39;nice try&#39;);&lt;/script&gt;=""></p>|
                    end
     end
@@ -374,33 +374,33 @@ defmodule Combo.HTML.ComponentsTest do
       assigns = %{}
 
       assert to_x(
-               ~CE|<.dynamic_tag tag_name="p" class="<script>alert('nice try');</script>"></.dynamic_tag>|
+               ~HAT|<.dynamic_tag tag_name="p" class="<script>alert('nice try');</script>"></.dynamic_tag>|
              ) == ~X|<p class="&lt;script&gt;alert(&#39;nice try&#39;);&lt;/script&gt;"></p>|
     end
 
     test "with empty inner block" do
       assigns = %{}
 
-      assert to_x(~CE|<.dynamic_tag tag_name="tr"></.dynamic_tag>|) == ~X|<tr></tr>|
+      assert to_x(~HAT|<.dynamic_tag tag_name="tr"></.dynamic_tag>|) == ~X|<tr></tr>|
 
-      assert to_x(~CE|<.dynamic_tag tag_name="tr" class="foo"></.dynamic_tag>|) ==
+      assert to_x(~HAT|<.dynamic_tag tag_name="tr" class="foo"></.dynamic_tag>|) ==
                ~X|<tr class="foo"></tr>|
     end
 
     test "with inner block" do
       assigns = %{}
 
-      assert to_x(~CE|<.dynamic_tag tag_name="tr">content</.dynamic_tag>|) == ~X|<tr>content</tr>|
+      assert to_x(~HAT|<.dynamic_tag tag_name="tr">content</.dynamic_tag>|) == ~X|<tr>content</tr>|
 
-      assert to_x(~CE|<.dynamic_tag tag_name="tr" class="foo">content</.dynamic_tag>|) ==
+      assert to_x(~HAT|<.dynamic_tag tag_name="tr" class="foo">content</.dynamic_tag>|) ==
                ~X|<tr class="foo">content</tr>|
     end
 
     test "self closing without inner block" do
       assigns = %{}
 
-      assert to_x(~CE|<.dynamic_tag tag_name="br" />|) == ~X|<br/>|
-      assert to_x(~CE|<.dynamic_tag tag_name="input" type="text" />|) == ~X|<input type="text"/>|
+      assert to_x(~HAT|<.dynamic_tag tag_name="br" />|) == ~X|<br/>|
+      assert to_x(~HAT|<.dynamic_tag tag_name="input" type="text" />|) == ~X|<input type="text"/>|
     end
   end
 
@@ -408,7 +408,7 @@ defmodule Combo.HTML.ComponentsTest do
     test "renders nested inputs with no options" do
       assigns = %{}
 
-      template = ~CE"""
+      template = ~HAT"""
       <.form :let={f} for={to_form(%{})} as={:myform}>
         <.inputs_for :let={finner} field={f[:inner]}>
           <% 0 = finner.index %>
@@ -429,7 +429,7 @@ defmodule Combo.HTML.ComponentsTest do
     test "with naming options" do
       assigns = %{}
 
-      template = ~CE"""
+      template = ~HAT"""
       <.form :let={f} for={to_form(%{})} as={:myform}>
         <.inputs_for :let={finner} field={f[:inner]} id="test" as={:name}>
           <input id={finner[:foo].id} name={finner[:foo].name} type="text" />
@@ -445,7 +445,7 @@ defmodule Combo.HTML.ComponentsTest do
                </form>
                """
 
-      template = ~CE"""
+      template = ~HAT"""
       <.form :let={f} for={to_form(%{})} as={:myform}>
         <.inputs_for :let={finner} field={f[:inner]} as={:name}>
           <input id={finner[:foo].id} name={finner[:foo].name} type="text" />
@@ -465,7 +465,7 @@ defmodule Combo.HTML.ComponentsTest do
     test "with default map option" do
       assigns = %{}
 
-      template = ~CE"""
+      template = ~HAT"""
       <.form :let={f} for={to_form(%{})} as={:myform}>
         <.inputs_for :let={finner} field={f[:inner]} default={%{foo: "123"}}>
           <input id={finner[:foo].id} name={finner[:foo].name} type="text" value={finner[:foo].value} />
@@ -485,7 +485,7 @@ defmodule Combo.HTML.ComponentsTest do
     test "with default list and list related options" do
       assigns = %{}
 
-      template = ~CE"""
+      template = ~HAT"""
       <.form :let={f} for={to_form(%{})} as={:myform}>
         <.inputs_for
           :let={finner}
@@ -515,7 +515,7 @@ defmodule Combo.HTML.ComponentsTest do
     test "can disable persistent ids" do
       assigns = %{}
 
-      template = ~CE"""
+      template = ~HAT"""
       <.form :let={f} for={to_form(%{})} as={:myform}>
         <.inputs_for
           :let={finner}
@@ -544,7 +544,7 @@ defmodule Combo.HTML.ComponentsTest do
     test "with FormData implementation options" do
       assigns = %{}
 
-      template = ~CE"""
+      template = ~HAT"""
       <.form :let={f} for={to_form(%{})} as={:myform}>
         <.inputs_for :let={finner} field={f[:inner]} options={[foo: "bar"]}>
           <p>{finner.options[:foo]}</p>
@@ -566,7 +566,7 @@ defmodule Combo.HTML.ComponentsTest do
     test "renders" do
       assigns = %{}
 
-      template = ~CE"""
+      template = ~HAT"""
       <.intersperse :let={item} enum={[1, 2, 3]}>
         <:separator><span class="sep">|</span></:separator>
         Item{item}
@@ -582,7 +582,7 @@ defmodule Combo.HTML.ComponentsTest do
                Item3
              """
 
-      template = ~CE"""
+      template = ~HAT"""
       <.intersperse :let={item} enum={[1]}>
         <:separator><span class="sep">|</span></:separator>
         Item{item}

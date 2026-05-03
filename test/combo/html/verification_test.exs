@@ -24,12 +24,12 @@ defmodule Combo.HTML.VerificationTest do
           attr :list, :list
           attr :global, :global
 
-          def func(assigns), do: ~CE[]
+          def func(assigns), do: ~HAT[]
 
           def global_line, do: __ENV__.line + 4
 
           def global_render(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func global="global" />
             <.func id="id" />
             """
@@ -38,7 +38,7 @@ defmodule Combo.HTML.VerificationTest do
           def any_line, do: __ENV__.line + 4
 
           def any_render(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func any="any" />
             <.func any={:any} />
             <.func any={true} />
@@ -53,7 +53,7 @@ defmodule Combo.HTML.VerificationTest do
           def render_string_line, do: __ENV__.line + 4
 
           def string_render(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func string="string" />
             <.func string={:string} />
             <.func string={true} />
@@ -68,7 +68,7 @@ defmodule Combo.HTML.VerificationTest do
           def render_atom_line, do: __ENV__.line + 4
 
           def atom_render(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func atom="atom" />
             <.func atom={:atom} />
             <.func atom={true} />
@@ -83,7 +83,7 @@ defmodule Combo.HTML.VerificationTest do
           def render_boolean_line, do: __ENV__.line + 4
 
           def boolean_render(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func boolean="boolean" />
             <.func boolean={:boolean} />
             <.func boolean={true} />
@@ -98,7 +98,7 @@ defmodule Combo.HTML.VerificationTest do
           def render_integer_line, do: __ENV__.line + 4
 
           def integer_render(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func integer="integer" />
             <.func integer={:integer} />
             <.func integer={true} />
@@ -113,7 +113,7 @@ defmodule Combo.HTML.VerificationTest do
           def render_float_line, do: __ENV__.line + 4
 
           def float_render(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func float="float" />
             <.func float={:float} />
             <.func float={true} />
@@ -128,7 +128,7 @@ defmodule Combo.HTML.VerificationTest do
           def render_map_line, do: __ENV__.line + 4
 
           def map_render(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func map="map" />
             <.func map={:map} />
             <.func map={true} />
@@ -143,7 +143,7 @@ defmodule Combo.HTML.VerificationTest do
           def render_list_line, do: __ENV__.line + 4
 
           def list_render(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func list="list" />
             <.func list={:list} />
             <.func list={true} />
@@ -313,12 +313,12 @@ defmodule Combo.HTML.VerificationTest do
           use Combo.HTML
 
           attr :uri, URI
-          def func(assigns), do: ~CE[]
+          def func(assigns), do: ~HAT[]
 
           def line, do: __ENV__.line + 2
 
           def render(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func uri={123} />
             <.func uri={%URI{}} />
             <.func uri={%{@foo | bar: :baz}} />
@@ -353,12 +353,12 @@ defmodule Combo.HTML.VerificationTest do
             attr :arity_1, {:fun, 1}
           end
 
-          def func(assigns), do: ~CE[]
+          def func(assigns), do: ~HAT[]
 
           def line, do: __ENV__.line + 4
 
           def render(assigns) do
-            ~CE"""
+            ~HAT"""
             <%!-- those are valid functions --%>
             <.func any_fun={fn x, y -> x + y end} />
             <.func any_fun={&Function.identity/1} />
@@ -439,7 +439,7 @@ defmodule Combo.HTML.VerificationTest do
                use Combo.HTML
 
                attr :name, :any, required: true
-               defp func(assigns), do: ~CE[]
+               defp func(assigns), do: ~HAT[]
              end
            end) =~ "function func/1 is unused"
   end
@@ -454,12 +454,12 @@ defmodule Combo.HTML.VerificationTest do
           attr :phone, :any
           attr :email, :any, required: true
 
-          def func(assigns), do: ~CE[]
+          def func(assigns), do: ~HAT[]
 
           def line, do: __ENV__.line + 4
 
           def render(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func />
             """
           end
@@ -490,12 +490,12 @@ defmodule Combo.HTML.VerificationTest do
           use Combo.HTML
 
           attr :class, :any
-          def func(assigns), do: ~CE[]
+          def func(assigns), do: ~HAT[]
 
           def line, do: __ENV__.line + 4
 
           def render(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func width="btn" size={@size} />
             """
           end
@@ -526,21 +526,21 @@ defmodule Combo.HTML.VerificationTest do
           use Combo.HTML
 
           attr :attr, :string, values: ["foo", "bar", "baz"]
-          def func_string(assigns), do: ~CE[]
+          def func_string(assigns), do: ~HAT[]
 
           attr :attr, :string
-          def func_string_no_values(assigns), do: ~CE[]
+          def func_string_no_values(assigns), do: ~HAT[]
 
           attr :attr, :atom, values: [:foo, :bar, :baz]
-          def func_atom(assigns), do: ~CE[]
+          def func_atom(assigns), do: ~HAT[]
 
           attr :attr, :integer, values: 1..10
-          def func_integer(assigns), do: ~CE[]
+          def func_integer(assigns), do: ~HAT[]
 
           def line, do: __ENV__.line + 2
 
           def render(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func_string attr="boom" />
             <.func_string attr={fn _ -> :bar end} />
             <.func_string_no_values attr={fn _ -> :baz end} />
@@ -610,16 +610,16 @@ defmodule Combo.HTML.VerificationTest do
 
           slot(:inner_block, required: true)
 
-          def func(assigns), do: ~CE[]
+          def func(assigns), do: ~HAT[]
 
           slot(:named, required: true)
 
-          def func_named_slot(assigns), do: ~CE[]
+          def func_named_slot(assigns), do: ~HAT[]
 
           def line, do: __ENV__.line + 2
 
           def render(assigns) do
-            ~CE"""
+            ~HAT"""
             <!-- no default slot provided -->
             <.func />
             <!-- with an empty default slot -->
@@ -685,12 +685,12 @@ defmodule Combo.HTML.VerificationTest do
             attr :list, :list
           end
 
-          def func(assigns), do: ~CE[]
+          def func(assigns), do: ~HAT[]
 
           def render_any_line, do: __ENV__.line + 5
 
           def render_any(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func>
               <:slot any />
               <:slot any="any" />
@@ -706,7 +706,7 @@ defmodule Combo.HTML.VerificationTest do
           def render_string_line, do: __ENV__.line + 5
 
           def render_string(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func>
               <:slot string="string" />
               <:slot string={:string} />
@@ -722,7 +722,7 @@ defmodule Combo.HTML.VerificationTest do
           def render_atom_line, do: __ENV__.line + 5
 
           def render_atom(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func>
               <:slot atom="atom" />
               <:slot atom={:atom} />
@@ -738,7 +738,7 @@ defmodule Combo.HTML.VerificationTest do
           def render_boolean_line, do: __ENV__.line + 5
 
           def render_boolean(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func>
               <:slot boolean="boolean" />
               <:slot boolean={:boolean} />
@@ -754,7 +754,7 @@ defmodule Combo.HTML.VerificationTest do
           def render_integer_line, do: __ENV__.line + 5
 
           def render_integer(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func>
               <:slot integer="integer" />
               <:slot integer={:integer} />
@@ -770,7 +770,7 @@ defmodule Combo.HTML.VerificationTest do
           def render_float_line, do: __ENV__.line + 5
 
           def render_float(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func>
               <:slot float="float" />
               <:slot float={:float} />
@@ -786,7 +786,7 @@ defmodule Combo.HTML.VerificationTest do
           def render_list_line, do: __ENV__.line + 5
 
           def render_list(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func>
               <:slot list="list" />
               <:slot list={:list} />
@@ -929,7 +929,7 @@ defmodule Combo.HTML.VerificationTest do
           slot :item, validate_attrs: false
 
           def func_slot_wo_do_block(assigns) do
-            ~CE"""
+            ~HAT"""
             <div>
               {render_slot(@item)}
             </div>
@@ -937,7 +937,7 @@ defmodule Combo.HTML.VerificationTest do
           end
 
           def render(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func_slot_wo_do_block>
               <:item class="test"></:item>
             </.func_slot_wo_do_block>
@@ -958,7 +958,7 @@ defmodule Combo.HTML.VerificationTest do
           slot :item, validate_attrs: true
 
           def func_slot_wo_do_block(assigns) do
-            ~CE"""
+            ~HAT"""
             <div>
               {render_slot(@item)}
             </div>
@@ -966,7 +966,7 @@ defmodule Combo.HTML.VerificationTest do
           end
 
           def render(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func_slot_wo_do_block>
               <:item class="test"></:item>
             </.func_slot_wo_do_block>
@@ -993,12 +993,12 @@ defmodule Combo.HTML.VerificationTest do
             attr :integer, :integer, values: 1..10
           end
 
-          def func(assigns), do: ~CE[]
+          def func(assigns), do: ~HAT[]
 
           def line, do: __ENV__.line + 2
 
           def render(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func>
               <:named string="boom" atom={:boom} integer={11} />
               <:named string={@string} atom={@atom} integer={@integer} />
@@ -1049,7 +1049,7 @@ defmodule Combo.HTML.VerificationTest do
           end
 
           def func(assigns) do
-            ~CE"""
+            ~HAT"""
             <div>
               {render_slot(@slot)}
             </div>
@@ -1059,7 +1059,7 @@ defmodule Combo.HTML.VerificationTest do
           def line(), do: __ENV__.line + 4
 
           def render(assigns) do
-            ~CE"""
+            ~HAT"""
             <.func>
               <:slot />
               <:slot attr="foo" />
@@ -1105,20 +1105,20 @@ defmodule Combo.HTML.VerificationTest do
 
           attr :attr, :any
 
-          def fun_no_slots(assigns), do: ~CE[]
+          def fun_no_slots(assigns), do: ~HAT[]
 
           slot(:inner_block)
 
-          def func(assigns), do: ~CE[]
+          def func(assigns), do: ~HAT[]
 
           slot(:named)
 
-          def func_undefined_slot_attrs(assigns), do: ~CE[]
+          def func_undefined_slot_attrs(assigns), do: ~HAT[]
 
           def line, do: __ENV__.line + 2
 
           def render(assigns) do
-            ~CE"""
+            ~HAT"""
             <!-- undefined default slot -->
             <.fun_no_slots>
               hello
@@ -1183,7 +1183,7 @@ defmodule Combo.HTML.VerificationTest do
             attr :attr, :any, required: true
           end
 
-          def render(assigns), do: ~CE[]
+          def render(assigns), do: ~HAT[]
         end
 
         defmodule ExternalCalls do
@@ -1192,7 +1192,7 @@ defmodule Combo.HTML.VerificationTest do
           def line, do: __ENV__.line + 4
 
           def render(assigns) do
-            ~CE"""
+            ~HAT"""
             <External.render>
               <:named />
             </External.render>
@@ -1227,7 +1227,7 @@ defmodule Combo.HTML.VerificationTest do
           attr :attr, :string, required: true
 
           def public(assigns) do
-            ~CE"""
+            ~HAT"""
             {@attr}
             """
           end
@@ -1235,7 +1235,7 @@ defmodule Combo.HTML.VerificationTest do
           attr :attr, :string, required: true
 
           defp private(assigns) do
-            ~CE"""
+            ~HAT"""
             {@attr}
             """
           end
@@ -1243,7 +1243,7 @@ defmodule Combo.HTML.VerificationTest do
           def line, do: __ENV__.line + 2
 
           def render(assigns) do
-            ~CE"""
+            ~HAT"""
             <.public />
             <.private />
             """
@@ -1276,15 +1276,15 @@ defmodule Combo.HTML.VerificationTest do
 
       attr :id, :any, required: true
       attr :rest, :global, include: ~w(form)
-      def button(assigns), do: ~CE|<button id={@id} {@rest}>button</button>|
-      def any_render(assigns), do: ~CE|<.button id="123" form="my-form" />|
+      def button(assigns), do: ~HAT|<button id={@id} {@rest}>button</button>|
+      def any_render(assigns), do: ~HAT|<.button id="123" form="my-form" />|
     end
 
     assigns = %{attrs: %{id: "abc", form: "my-form"}}
 
-    import Combo.Template.CEExEngine.Sigil
+    import HAT.Sigil
 
-    assert to_x(~CE|<GlobalIncludes.button {@attrs} />|) ==
+    assert to_x(~HAT|<GlobalIncludes.button {@attrs} />|) ==
              ~X(<button id="abc" form="my-form">button</button>)
   end
 
@@ -1295,7 +1295,7 @@ defmodule Combo.HTML.VerificationTest do
           use Combo.HTML
 
           def render(assigns) do
-            ~CE"""
+            ~HAT"""
             <Combo.Test.Support.FunctionComponentWithAttrs.fun_attr_any unknown="foo" />
             """
           end

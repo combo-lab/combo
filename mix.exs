@@ -73,6 +73,7 @@ defmodule Combo.MixProject do
       {:combo_pubsub, "~> 0.1"},
       {:websock_adapter, "~> 0.5.3"},
       {:file_system, "~> 1.0"},
+      {:hat, "~> 0.1.0"},
       {:lazy_html, "~> 0.1.0"},
 
       # Optional deps
@@ -88,7 +89,6 @@ defmodule Combo.MixProject do
       {:telemetry_poller, "~> 1.0", only: [:docs, :publish]},
       {:telemetry_metrics, "~> 1.0", only: [:docs, :publish]},
       {:makeup_elixir, "~> 1.0.1", only: [:docs, :publish]},
-      {:makeup_ceex, "~> 0.1.0", only: [:docs, :publish]},
       {:makeup_syntect, "~> 0.1.0", only: [:docs, :publish]},
 
       # code quality
@@ -178,12 +178,6 @@ defmodule Combo.MixProject do
         Combo.Template.FormatEncoder,
         Combo.Template.ExsEngine,
         Combo.Template.EExEngine,
-        Combo.Template.CEExEngine,
-        Combo.Template.CEExEngine.Compiler,
-        Combo.Template.CEExEngine.Sigil,
-        Combo.Template.CEExEngine.Assigns,
-        Combo.Template.CEExEngine.DeclarativeAssigns,
-        Combo.Template.CEExEngine.Slot,
         Combo.Template.HTMLEncoder
       ],
       HTML: [
@@ -191,10 +185,6 @@ defmodule Combo.MixProject do
         Combo.HTML.Form,
         Combo.HTML.FormData,
         Combo.HTML.FormField
-      ],
-      "Safe HTML": [
-        Combo.SafeHTML,
-        Combo.SafeHTML.Safe
       ],
       Static: [
         Combo.Static,

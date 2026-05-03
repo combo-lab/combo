@@ -43,13 +43,6 @@ locals_without_parens = [
   embed_templates: 1,
   embed_templates: 2,
 
-  # Combo.HTML
-  attr: 2,
-  attr: 3,
-  slot: 1,
-  slot: 2,
-  slot: 3,
-
   # Combo.Socket
   channel: 2,
   channel: 3,
@@ -78,6 +71,7 @@ locals_without_parens = [
 ]
 
 [
+  import_deps: [:hat],
   locals_without_parens: locals_without_parens,
   export: [locals_without_parens: locals_without_parens],
   inputs: ["{mix,.formatter}.exs", "{config,lib,test}/**/*.{ex,exs}"]

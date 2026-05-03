@@ -121,7 +121,7 @@ defmodule Combo.CodeReloader do
 
   import Plug.Conn
   import Combo.Conn, only: [endpoint_module!: 1]
-  alias Combo.SafeHTML
+  alias HAT.SafeHTML
 
   @style %{
     light: %{
@@ -326,7 +326,7 @@ defmodule Combo.CodeReloader do
     output
     |> String.trim()
     |> remove_ansi_escapes()
-    |> SafeHTML.escape()
+    |> SafeHTML.escape_content()
   end
 
   defp remove_ansi_escapes(text) do

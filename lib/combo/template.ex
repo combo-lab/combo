@@ -102,7 +102,7 @@ defmodule Combo.Template do
   Imagine a directory listing:
 
       ├── pages
-      │   ├── about.html.ceex
+      │   ├── about.html.hat
       │   └── sitemap.xml.eex
 
   To embed the templates into a module, we can define a module like this:
@@ -181,7 +181,7 @@ defmodule Combo.Template do
   @doc """
   Renders template from module.
 
-  For a module called `DemoWeb.UserHTML` and template "index.html.ceex",
+  For a module called `DemoWeb.UserHTML` and template "index.html.hat",
   it will:
 
     * First attempt to call `DemoWeb.UserHTML.index(assigns)`
@@ -279,7 +279,7 @@ defmodule Combo.Template do
     [
       exs: Combo.Template.ExsEngine,
       eex: Combo.Template.EExEngine,
-      ceex: Combo.Template.CEExEngine
+      hat: HAT
     ]
   end
 
