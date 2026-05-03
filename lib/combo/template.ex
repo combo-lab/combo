@@ -279,7 +279,7 @@ defmodule Combo.Template do
     [
       exs: Combo.Template.ExsEngine,
       eex: Combo.Template.EExEngine,
-      hat: HAT
+      hat: Combo.Template.HATEngine
     ]
   end
 
