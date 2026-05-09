@@ -1,4 +1,9 @@
-import { SOCKET_STATES, TRANSPORTS, AUTH_TOKEN_PREFIX } from "./constants"
+import {
+  SOCKET_STATES,
+  TRANSPORTS,
+  AUTH_TOKEN_PREFIX,
+  MAX_LONGPOLL_BATCH_SIZE,
+} from "./constants"
 
 import Ajax from "./ajax"
 
@@ -157,21 +162,27 @@ export default class LongPoll {
     }
   }
 
-  batchSend(messages) {
+  batchSend(messages, offset = 0) {
     this.awaitingBatchAck = true
+    const next = offset + MAX_LONGPOLL_BATCH_SIZE
+    const batch = messages.slice(offset, next)
     this.ajax(
       "POST",
       { "Content-Type": "application/x-ndjson" },
-      messages.join("\n"),
+      batch.join("\n"),
       () => this.onerror("timeout"),
       (resp) => {
-        this.awaitingBatchAck = false
         if (!resp || resp.status !== 200) {
+          this.awaitingBatchAck = false
           this.onerror(resp && resp.status)
           this.closeAndRetry(1011, "internal server error", false)
+        } else if (next < messages.length) {
+          this.batchSend(messages, next)
         } else if (this.batchBuffer.length > 0) {
           this.batchSend(this.batchBuffer)
           this.batchBuffer = []
+        } else {
+          this.awaitingBatchAck = false
         }
       },
     )
