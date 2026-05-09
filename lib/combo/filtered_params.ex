@@ -76,7 +76,7 @@ defmodule Combo.FilteredParams do
 
   defp keep(_other, _keys), do: replacement()
 
-  @default_rule {:discard, ["password"]}
+  @default_rule {:discard, ["password", "token"]}
   defp rule do
     Combo.Env.get_env(:filtered_params, :rule, @default_rule)
   end
