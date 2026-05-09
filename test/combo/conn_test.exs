@@ -9,7 +9,8 @@ defmodule Combo.Conn.Test do
   import Combo.Conn
 
   defp sent_conn do
-    conn(:get, "/") |> send_resp(:ok, "")
+    # The type system is too smart and will notice the response is sent and calls with fail
+    Process.get(:unused, conn(:get, "/") |> send_resp(:ok, ""))
   end
 
   defp get_resp_content_type(conn) do
