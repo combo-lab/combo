@@ -67,7 +67,7 @@ defmodule Combo.MixProject do
 
   defp deps do
     [
-      {:plug, "~> 1.14"},
+      {:plug, "~> 1.19"},
       {:plug_crypto, "~> 1.2 or ~> 2.0"},
       {:telemetry, "~> 0.4 or ~> 1.0"},
       {:combo_pubsub, "~> 0.1"},
@@ -76,14 +76,14 @@ defmodule Combo.MixProject do
       {:lazy_html, "~> 0.1.0"},
 
       # Optional deps
-      {:plug_cowboy, "~> 2.7", optional: true},
-      {:bandit, "~> 1.0", optional: true},
+      {:plug_cowboy, "~> 2.8", optional: true},
+      {:bandit, "~> 1.11", optional: true},
       {:jason, "~> 1.0", optional: true},
 
       # Docs dependencies (some for cross references)
       {:ex_doc, "~> 0.38", only: [:docs, :publish]},
-      {:ecto, "~> 3.0", only: [:docs, :publish]},
-      {:ecto_sql, "~> 3.10", only: [:docs, :publish]},
+      {:ecto, "~> 3.14", only: [:docs, :publish]},
+      {:ecto_sql, "~> 3.14", only: [:docs, :publish]},
       {:gettext, "~> 0.26", only: [:docs, :publish]},
       {:telemetry_poller, "~> 1.0", only: [:docs, :publish]},
       {:telemetry_metrics, "~> 1.0", only: [:docs, :publish]},
@@ -99,7 +99,7 @@ defmodule Combo.MixProject do
       # Test dependencies
       {:mint, "~> 1.4", only: :test},
       {:mint_web_socket, "~> 1.0.0", only: :test},
-      {:decimal, "~> 2.0 or ~> 3.0", optional: true}
+      {:decimal, "~> 3.0", optional: true}
     ]
   end
 
