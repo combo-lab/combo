@@ -559,7 +559,14 @@ defmodule Combo.Socket do
   end
 
   def __info__(%Broadcast{event: "disconnect"}, state) do
-    {:stop, {:shutdown, :disconnected}, state}
+    # Close code 1001 ("Going Away") signals the client that the connection
+    # is intentionally closed but a reconnect is expected — combo.js gates
+    # `reconnectTimer.scheduleTimeout()` on `closeCode !== 1000`, so without
+    # an explicit code here the default mapping of `{:shutdown, :disconnected}`
+    # (1000 in bandit ≥1.10.4) prevents the combo.js from reconnecting after
+    # broadcasting disconnect.
+    # See mtrudel/bandit#582.
+    {:stop, {:shutdown, :disconnected}, 1001, state}
   end
 
   def __info__(:socket_drain, state) do
