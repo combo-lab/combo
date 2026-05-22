@@ -94,6 +94,7 @@ defmodule Combo.MixProject do
       # code quality
       {:ex_check, ">= 0.0.0", only: [:dev], runtime: false},
       {:dialyxir, ">= 0.0.0", only: [:dev], runtime: false},
+      {:mix_audit, ">= 0.0.0", only: [:dev], runtime: false},
 
       # Test dependencies
       {:mint, "~> 1.4", only: :test},
