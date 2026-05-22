@@ -141,11 +141,11 @@ defmodule Combo.SocketTest do
   describe "__info__/2" do
     alias Combo.Socket.Broadcast
 
-    test "disconnect broadcast emits close code 1001 so combo.js reconnects" do
-      # phoenix.js gates `reconnectTimer.scheduleTimeout()` on
-      # `closeCode !== 1000`. The default `{:shutdown, :disconnected}`
-      # mapping in bandit ≥1.10.4 is 1000, which suppresses reconnect;
-      # we pass 1001 ("Going Away") explicitly so the client retries.
+    test "disconnect broadcast emits close code 1001 so Combo JS client reconnects" do
+      # Combo JS client gates reconnects on `closeCode !== 1000`.
+      # Servers might interpret `{:shutdown, :disconnected}`
+      # as code 1000, so we pass 1001 explicitly to force a retry.
+      # See https://github.com/mtrudel/bandit/issues/582.
       state = make_ref()
       msg = %Broadcast{topic: "t", event: "disconnect", payload: %{}}
 
