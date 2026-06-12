@@ -348,6 +348,11 @@ defmodule Combo.Channel do
   To authorize a socket, return `{:ok, socket}` or `{:ok, reply, socket}`. To
   refuse authorization, return `{:error, reason}`.
 
+  > #### Security Note {: .warning}
+  >
+  > The `payload` contains untrusted data from the client. You must authorize
+  > and validate this data before using it.
+
   Payloads are serialized before sending with the configured serializer.
 
   ## Example
@@ -370,6 +375,11 @@ defmodule Combo.Channel do
   Handle incoming `event`s.
 
   Payloads are serialized before sending with the configured serializer.
+
+  > #### Security Note {: .warning}
+  >
+  > The `payload` contains untrusted data from the client. You must authorize
+  > and validate this data before using it.
 
   ## Example
 
