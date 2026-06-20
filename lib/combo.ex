@@ -43,7 +43,14 @@ defmodule Combo do
   Returns the value of `:json_library` option, which specifies the module
   for JSON encoding.
 
-  To customize the JSON module, including the following in your
+  The configured module is required to provide three functions:
+
+    * `decode!/1` — decodes a JSON binary, raising on invalid input
+    * `encode!/1` — encodes a term to a JSON binary, raising on encoding errors
+    * `encode_to_iodata!/1` — encodes a term to JSON iodata, raising on
+      encoding errors
+
+  To customize the JSON library, including the following in your
   `config/config.exs`:
 
       config :combo, :json_library, JSON
