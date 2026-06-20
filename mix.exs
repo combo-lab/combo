@@ -71,7 +71,7 @@ defmodule Combo.MixProject do
       {:plug_crypto, "~> 1.2 or ~> 2.0"},
       {:telemetry, "~> 0.4 or ~> 1.0"},
       {:combo_pubsub, "~> 0.1"},
-      {:websock_adapter, "~> 0.5.3"},
+      {:websock_adapter, "~> 0.5"},
       {:file_system, "~> 1.0"},
       {:lazy_html, "~> 0.1.0"},
 
