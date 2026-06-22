@@ -39,7 +39,7 @@ defmodule Combo.Template.CEExEngine.DeclarativeAssignsTest do
 
   defp normalize_tree(values, sort_attributes?, true) when is_list(values) do
     for value <- values,
-        not is_binary(value) or (is_binary(value) and String.trim(value) != ""),
+        (is_binary(value) and String.trim(value) != "") or not is_binary(value),
         do: normalize_tree(value, sort_attributes?, true)
   end
 
