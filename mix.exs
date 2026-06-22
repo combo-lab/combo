@@ -13,20 +13,9 @@ defmodule Combo.MixProject do
       version: @version,
       elixir: @elixir_requirement,
       elixirc_paths: elixirc_paths(Mix.env()),
+      elixirc_options: elixirc_options(),
       deps: deps(),
       consolidate_protocols: Mix.env() != :test,
-      xref: [
-        exclude: [
-          {IEx, :started?, 0},
-          Ecto.Type,
-          :ranch,
-          :cowboy_req,
-          Plug.Cowboy.Conn,
-          Plug.Cowboy,
-          :httpc,
-          :public_key
-        ]
-      ],
       description: @description,
       source_url: @source_url,
       homepage_url: @source_url,
@@ -54,6 +43,22 @@ defmodule Combo.MixProject do
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
+
+  defp elixirc_options,
+    do: [
+      no_warn_undefined: [
+        exclude: [
+          {IEx, :started?, 0},
+          Ecto.Type,
+          :ranch,
+          :cowboy_req,
+          Plug.Cowboy.Conn,
+          Plug.Cowboy,
+          :httpc,
+          :public_key
+        ]
+      ]
+    ]
 
   def application do
     [
