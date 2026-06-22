@@ -3,6 +3,10 @@ defmodule Combo.CodeReloader.Server do
 
   use GenServer
 
+  # Elixir v1.19 bundles consolidation into compile.elixir
+  # so we no longer need to trigger it manually
+  @requires_consolidation not Version.match?(System.version(), ">= 1.19.0")
+
   require Logger
   alias Combo.CodeReloader.Proxy
 
@@ -243,7 +247,7 @@ defmodule Combo.CodeReloader.Server do
       purge_fallback?
     )
 
-    if config[:consolidate_protocols] do
+    if @requires_consolidation && config[:consolidate_protocols] do
       # If we are consolidating protocols, we need to purge all of its modules
       # to ensure the consolidated versions are loaded. "mix compile" performs
       # a similar task.
@@ -336,7 +340,6 @@ defmodule Combo.CodeReloader.Server do
     Mix.Project.build_structure(config)
 
     args = [
-      # TODO: The purge option may no longer be required from Elixir v1.18
       "--purge-consolidation-path-if-stale",
       consolidation_path,
       # Since Elixir v1.20, Elixir no longer automatically purges compiler
@@ -356,7 +359,7 @@ defmodule Combo.CodeReloader.Server do
           exit({:shutdown, 1})
         end
 
-      status == :ok && config[:consolidate_protocols] ->
+      @requires_consolidation && status == :ok && config[:consolidate_protocols] ->
         # TODO: Calling compile.protocols is no longer be required from Elixir v1.19
         Mix.Task.reenable("compile.protocols")
         Mix.Task.run("compile.protocols", [])
