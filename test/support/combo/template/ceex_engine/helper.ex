@@ -57,8 +57,8 @@ defmodule ComboTest.Template.CEExEngine.Helper do
   def inspector(assigns) do
     slots =
       Enum.filter(assigns, fn {_k, v} ->
-        is_list(v) or
-          (is_list(v) && Enum.any?(v, fn i -> Map.has_key?(i, :__slot__) end))
+        is_list(v) and
+          (v == [] or Enum.any?(v, fn i -> is_map(i) and Map.has_key?(i, :__slot__) end))
       end)
 
     slot_keys = Enum.map(slots, fn {k, _v} -> k end)
