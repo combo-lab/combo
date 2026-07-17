@@ -44,8 +44,8 @@ defmodule Combo.MixProject do
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
-  defp elixirc_options,
-    do: [
+  defp elixirc_options do
+    [
       no_warn_undefined: [
         exclude: [
           {IEx, :started?, 0},
@@ -59,6 +59,7 @@ defmodule Combo.MixProject do
         ]
       ]
     ]
+  end
 
   def application do
     [
