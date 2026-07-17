@@ -40,6 +40,10 @@ if Code.ensure_loaded?(Bandit) do
             websocket_options: [compress: false]
           ]
 
+    ## Connection draining
+
+    Bandit has built-in connection draining.
+
     ## Thanks
 
     The original code comes from `Bandit.PhoenixAdapter` of
