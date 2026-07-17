@@ -76,7 +76,9 @@ defmodule Combo.Debug do
   @doc """
   Checks if the given pid is a `Combo.Channel` process.
 
-  Note: this function returns false for [custom channels](https://hexdocs.pm/combo/Combo.Socket.html#module-custom-channels).
+  > ### Custom channels {: .info}
+  > This function alawys returns `false` for
+  > [custom channels](`m:Combo.Socket#module-custom-channels`).
   """
   def channel_process?(pid) do
     # Combo.Channel sets the "$process_label" to {Combo.Socket, handler_module, id}
@@ -99,10 +101,10 @@ defmodule Combo.Debug do
     - `:status` - the status of the channel
     - `:topic` - the topic of the channel
 
-  Note that this list also contains
-  [custom channels](https://hexdocs.pm/combo/Combo.Socket.html#module-custom-channels)
-  You can check if a channel is a custom channel by using the `channel?/1`
-  function, which returns `false` for custom channels.
+  > ### Custom channels {: .info}
+  > Note that the list also contains [custom channels](`m:Combo.Socket#module-custom-channels`).
+  > You can check if a channel is a custom channel by using the `channel_process?/1`
+  > function, which returns `false` for custom channels.
 
   ## Examples
 

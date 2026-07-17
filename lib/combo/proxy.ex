@@ -153,8 +153,8 @@ defmodule Combo.Proxy do
 
   For more available adapter options:
     
-    * `Combo.Proxy.Bandit` - checkout [Bandit options](https://hexdocs.pm/bandit/Bandit.html#t:options/0).
-    * `Combo.Proxy.Cowboy2Adapter` - checkout [Plug.Cowboy options](https://hexdocs.pm/plug_cowboy/Plug.Cowboy.html#module-options).
+    * `Combo.Proxy.Bandit` - checkout [Bandit options](`t:Bandit.options/0`).
+    * `Combo.Proxy.Cowboy2Adapter` - checkout [Plug.Cowboy options](`m:Plug.Cowboy#module-options`).
 
   """
 

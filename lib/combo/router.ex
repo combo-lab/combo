@@ -599,7 +599,7 @@ defmodule Combo.Router do
       handled (which plug is called, what plug_opts are given, what parameters
       are available and which pipes are used).
       It is separate from the plug level logging. To alter the plug log level,
-      please see https://hexdocs.pm/combo/Combo.Logger.html#module-dynamic-log-level.
+      please see `m:Combo.Logger#module-dynamic-log-level`.
 
   ## Shortcuts
 
@@ -757,7 +757,7 @@ defmodule Combo.Router do
       handled (which plug is called, what plug_opts are given, what parameters
       are available and which pipes are used).
       It is separated from the plug level logging. To alter the plug log level,
-      please see https://hexdocs.pm/combo/Combo.Logger.html#module-dynamic-log-level.
+      please see `m:Combo.Logger#module-dynamic-log-level`.
 
   ## Examples
 

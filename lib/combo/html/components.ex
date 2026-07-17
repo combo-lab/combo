@@ -342,8 +342,7 @@ defmodule Combo.HTML.Components do
   ## A note on `:errors`
 
   Even if `changeset.errors` is non-empty, errors will not be displayed in a
-  form if [the changeset
-  `:action`](https://hexdocs.pm/ecto/Ecto.Changeset.html#module-changeset-actions)
+  form if [the changeset `:action`](`m:Ecto.Changeset#module-changeset-actions`)
   is `nil` or `:ignore`.
 
   This is useful for things like validation hints on form fields, e.g. an empty

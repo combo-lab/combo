@@ -219,11 +219,10 @@ defmodule Combo.Socket do
 
   To deny connection, return `:error` or `{:error, term}`. To control the
   response the client receives in that case, [define an error handler in the
-  websocket
-  configuration](https://hexdocs.pm/combo/Combo.Endpoint.html#socket/3-websocket-configuration).
+  websocket configuration](Combo.Endpoint.html#socket/3#websocket-configuration).
 
-  See `Combo.Token` documentation for examples in
-  performing token verification on connect.
+  See `Combo.Token` documentation for examples in performing token verification
+  on connect.
   """
   @callback connect(params :: map, Socket.t(), connect_info :: map) ::
               {:ok, Socket.t()} | {:error, term} | :error
