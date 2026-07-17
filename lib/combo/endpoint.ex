@@ -169,22 +169,22 @@ defmodule Combo.Endpoint do
 
   Combo allows you to choose which web server adapter to use.
 
-  Applications generated via `combo_new` uses `Combo.Endpoint.BanditAdapter`.
-  If not otherwise specified via the `:adapter` option, Combo will fall back
-  to use `Combo.Endpoint.Cowboy2Adapter`.
+  The default adapter is `Combo.Endpoint.BanditAdapter`.
 
   Both adapters can be configured in a similar manner using the following two
   top-level options:
 
     * `:http` - the configuration for the HTTP server. It accepts all options
-      as defined by either [`Bandit`](https://hexdocs.pm/bandit/Bandit.html#t:options/0)
-      or [`Plug.Cowboy`](https://hexdocs.pm/plug_cowboy/) depending on your
-      choice of adapter. Defaults to `false`.
+      as defined by either [`Bandit`](`t:Bandit.options/0`) or
+      [`Plug.Cowboy`](`m:Plug.Cowboy`) depending on your choice of adapter.
+      Defaults to `false`.
 
     * `:https` - the configuration for the HTTPS server. It accepts all options
-      as defined by either [`Bandit`](https://hexdocs.pm/bandit/Bandit.html#t:options/0)
-      or [`Plug.Cowboy`](https://hexdocs.pm/plug_cowboy/) depending on your
-      choice of adapter. Defaults to `false`.
+      as defined by either [`Bandit`](`t:Bandit.options/0`) or
+      [`Plug.Cowboy`](`m:Plug.Cowboy`) depending on your choice of adapter.
+      Defaults to `false`.
+
+  ## Connection draining
 
   In addition, the connection draining can be configured for the Cowboy web
   server via the following top-level option (this is not required for Bandit
