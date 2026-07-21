@@ -385,7 +385,14 @@ defmodule Combo.Router do
   end
 
   defp compile_pipes(name, pipes) do
-    plugs = pipes |> Enum.reverse() |> Enum.map(&{&1, [], true})
+    plugs =
+      pipes
+      |> Enum.reverse()
+      |> Enum.map(fn
+        {plug, opts} -> {plug, opts, true}
+        plug -> {plug, [], true}
+      end)
+
     opts = [init_mode: Combo.plug_init_mode(), log_on_halt: :debug]
     {conn, body} = Plug.Builder.compile(__ENV__, plugs, opts)
 
@@ -657,11 +664,15 @@ defmodule Combo.Router do
   @doc """
   Defines pipes to apply within the current scope.
 
-  The pipes are specified by their names.
-
   ## Examples
 
-      pipe_through [:browser, :require_authenticated_user]
+      pipe_through [
+        :pipeline1,
+        :function_plug,
+        {:function_plug, opts},
+        ModulePlug,
+        {ModulePlug, opts}
+      ]
 
   ## Multiple invocations
 
