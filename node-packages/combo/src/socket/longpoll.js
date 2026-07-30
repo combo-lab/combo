@@ -170,7 +170,7 @@ export default class LongPoll {
       "POST",
       { "Content-Type": "application/x-ndjson" },
       batch.join("\n"),
-      () => this.onerror("timeout"),
+      () => this.ontimeout("timeout"),
       (resp) => {
         if (!resp || resp.status !== 200) {
           this.awaitingBatchAck = false
@@ -198,6 +198,7 @@ export default class LongPoll {
       { code, reason, wasClean },
     )
     this.batchBuffer = []
+    this.awaitingBatchAck = false
     clearTimeout(this.currentBatchTimer)
     this.currentBatchTimer = null
     if (typeof CloseEvent !== "undefined") {
