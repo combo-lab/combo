@@ -50,7 +50,7 @@ export default class LongPoll {
   }
 
   endpointURL() {
-    return Ajax.appendParams(this.pollEndpoint, { token: this.token })
+    return this.pollEndpoint
   }
 
   closeAndRetry(code, reason, wasClean) {
@@ -213,6 +213,9 @@ export default class LongPoll {
     let ontimeout = () => {
       this.reqs.delete(req)
       onCallerTimeout()
+    }
+    if (this.token !== null) {
+      headers = Object.assign({}, headers, { "X-Combo-Longpoll-Token": this.token })
     }
     req = Ajax.request(
       method,
