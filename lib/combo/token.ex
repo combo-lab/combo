@@ -119,6 +119,7 @@ defmodule Combo.Token do
 
   @type max_age_opt :: {:max_age, pos_integer() | :infinity}
   @type signed_at_opt :: {:signed_at, pos_integer()}
+  @type encode_opt :: {:compressed, boolean} | {:local, boolean}
 
   @doc """
   Encodes and signs data into a token you can send to clients.
@@ -135,10 +136,15 @@ defmodule Combo.Token do
       `System.os_time(:second)`.
     * `:max_age` - the default maximum age of the token in seconds. Defaults to
       `86400` and it may be overridden on `verify/4`.
+    * `:compressed` - compresses the encoded term. Defaults to `false`.
+    * `:local` - encodes the term in a format that is only decodable by
+      the current Erlang runtime instance. This option requires Erlang/OTP
+      26 or later and will fail on earlier versions. Defaults to `false`.
 
   """
-  @spec sign(context(), salt(), data(), [shared_opt() | max_age_opt() | signed_at_opt()]) ::
-          token()
+  @spec sign(context(), salt(), data(), [
+          shared_opt() | max_age_opt() | signed_at_opt() | encode_opt()
+        ]) :: token()
   def sign(context, salt, data, opts \\ []) when is_binary(salt) do
     context
     |> get_key_base()
@@ -162,10 +168,15 @@ defmodule Combo.Token do
       `System.os_time(:second)`.
     * `:max_age` - the default maximum age of the token in seconds. Defaults to
       `86400` and it may be overridden on `decrypt/4`.
+    * `:compressed` - compresses the encoded term. Defaults to `false`.
+    * `:local` - encodes the term in a format that is only decodable by
+      the current Erlang runtime instance. This option requires Erlang/OTP
+      26 or later and will fail on earlier versions. Defaults to `false`.
 
   """
-  @spec encrypt(context(), salt(), data(), [shared_opt() | max_age_opt() | signed_at_opt()]) ::
-          token()
+  @spec encrypt(context(), salt(), data(), [
+          shared_opt() | max_age_opt() | signed_at_opt() | encode_opt()
+        ]) :: token()
   def encrypt(context, salt, data, opts \\ []) when is_binary(salt) do
     context
     |> get_key_base()

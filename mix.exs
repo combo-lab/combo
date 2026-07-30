@@ -74,7 +74,7 @@ defmodule Combo.MixProject do
   defp deps do
     [
       {:plug, "~> 1.19"},
-      {:plug_crypto, "~> 1.2 or ~> 2.0"},
+      {:plug_crypto, "~> 2.2"},
       {:telemetry, "~> 0.4 or ~> 1.0"},
       {:combo_pubsub, "~> 0.1"},
       {:websock_adapter, "~> 0.5"},
