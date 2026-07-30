@@ -164,9 +164,9 @@ describe("keys colliding with Object.prototype properties", () => {
   // built via JSON.parse because a "__proto__" key in an object literal would
   // set the prototype instead of creating an own property
   const protoState = JSON.parse(`{
-    "__proto__": {"metas": [{"id": 1, "phx_ref": "1"}]},
-    "constructor": {"metas": [{"id": 2, "phx_ref": "2"}]},
-    "hasOwnProperty": {"metas": [{"id": 3, "phx_ref": "3"}]}
+    "__proto__": {"metas": [{"id": 1, "combo_ref": "1"}]},
+    "constructor": {"metas": [{"id": 2, "combo_ref": "2"}]},
+    "hasOwnProperty": {"metas": [{"id": 3, "combo_ref": "3"}]}
   }`)
 
   it("syncState joins and leaves them without touching the prototype", () => {
@@ -186,7 +186,7 @@ describe("keys colliding with Object.prototype properties", () => {
 
   it("syncDiff joins and leaves them without touching the prototype", () => {
     let diff = JSON.parse(
-      `{"joins": {"__proto__": {"metas": [{"id": 1, "phx_ref": "1"}]}}, "leaves": {}}`,
+      `{"joins": {"__proto__": {"metas": [{"id": 1, "combo_ref": "1"}]}}, "leaves": {}}`,
     )
     let state = Presence.syncDiff({}, diff)
     expect(Presence.list(state, (key, { metas }) => [key, metas[0].id])).toEqual([
@@ -196,7 +196,7 @@ describe("keys colliding with Object.prototype properties", () => {
     state = Presence.syncDiff(
       state,
       JSON.parse(
-        `{"joins": {}, "leaves": {"__proto__": {"metas": [{"id": 1, "phx_ref": "1"}]}}}`,
+        `{"joins": {}, "leaves": {"__proto__": {"metas": [{"id": 1, "combo_ref": "1"}]}}}`,
       ),
     )
     expect(Presence.list(state)).toEqual([])
