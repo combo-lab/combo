@@ -684,7 +684,12 @@ defmodule Combo.Integration.WebSocketChannelsTest do
 
           capture_log(fn ->
             WebsocketClient.send_event(sock, lobby, "boom", %{})
-            assert_receive %Message{event: "combo_error", payload: %{}, topic: ^lobby}
+
+            assert_receive %Message{
+              event: "combo_error",
+              payload: %{"reason" => "channel_crash"},
+              topic: ^lobby
+            }
           end)
         end
 

@@ -818,7 +818,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
 
           assert chan_error == %Message{
                    event: "combo_error",
-                   payload: %{},
+                   payload: %{"reason" => "channel_crash"},
                    topic: topic,
                    ref: @join_ref,
                    join_ref: @join_ref
