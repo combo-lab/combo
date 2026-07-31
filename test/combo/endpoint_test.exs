@@ -646,7 +646,13 @@ defmodule Combo.EndpointTest do
   end
 
   describe "watchers" do
-    @watchers [npm: ["run", "dev", cd: "."]]
+    @watchers [test: {__MODULE__, :test_watcher, []}]
+
+    def test_watcher do
+      receive do
+        :stop -> :ok
+      end
+    end
 
     @tag :capture_log
     test "starts when :server config is true" do
