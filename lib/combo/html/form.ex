@@ -236,9 +236,8 @@ defmodule Combo.HTML.Form do
   @doc """
   Normalizes an input `value` according to its input `type`.
 
-  Certain HTML input values must be cast, or they will have idiosyncracies
-  when they are rendered. The goal of this function is to encapsulate
-  this logic. In particular:
+  Some input types require their values to be normalized before rendering.
+  The goal of this function is to encapsulate this logic. In particular:
 
     * For "datetime-local" types, it converts `DateTime` and
       `NaiveDateTime` to strings without the second precision
