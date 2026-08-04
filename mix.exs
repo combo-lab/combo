@@ -83,7 +83,7 @@ defmodule Combo.MixProject do
 
       # Optional deps
       {:plug_cowboy, "~> 2.8", optional: true},
-      {:bandit, "~> 1.11", optional: true},
+      {:bandit, "~> 1.12", optional: true},
       {:jason, "~> 1.0", optional: true},
 
       # Docs dependencies (some for cross references)
