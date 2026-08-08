@@ -236,8 +236,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
   @endpoint Endpoint
 
   for %{adapter: adapter} <- [
-        %{adapter: Combo.Endpoint.BanditAdapter},
-        %{adapter: Combo.Endpoint.Cowboy2Adapter}
+        %{adapter: Combo.Endpoint.BanditAdapter}
       ] do
     for {serializer, vsn, join_ref} <- [
           {V1.JSONSerializer, "1.0.0", nil},

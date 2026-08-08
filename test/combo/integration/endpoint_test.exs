@@ -7,8 +7,8 @@ defmodule Combo.Integration.EndpointTest do
 
   import Combo.Integration.EndpointHelper
 
-  alias Combo.Integration.AdapterTest.ProdEndpoint
   alias Combo.Integration.AdapterTest.DevEndpoint
+  alias Combo.Integration.AdapterTest.ProdEndpoint
   alias Combo.Integration.AdapterTest.ProdInet6Endpoint
 
   # Find available ports to use for this test
@@ -17,25 +17,23 @@ defmodule Combo.Integration.EndpointTest do
   @prod prod
   @prod_inet6 prod_inet6
 
+  Application.put_env(:endpoint_int, DevEndpoint,
+    adapter: Combo.Endpoint.BanditAdapter,
+    http: [port: @dev],
+    debug_errors: true
+  )
+
   Application.put_env(:endpoint_int, ProdEndpoint,
-    adapter: Combo.Endpoint.Cowboy2Adapter,
+    adapter: Combo.Endpoint.BanditAdapter,
     http: [port: @prod],
     url: [host: "example.com"],
     server: true,
-    drainer: false,
     render_errors: [formats: [html: __MODULE__.ErrorView, json: __MODULE__.ErrorView]]
   )
 
-  Application.put_env(:endpoint_int, DevEndpoint,
-    adapter: Combo.Endpoint.Cowboy2Adapter,
-    http: [port: @dev],
-    debug_errors: true,
-    drainer: false
-  )
-
   Application.put_env(:endpoint_int, ProdInet6Endpoint,
-    adapter: Combo.Endpoint.Cowboy2Adapter,
-    http: [port: @prod_inet6, transport_options: [socket_opts: [:inet6]]],
+    adapter: Combo.Endpoint.BanditAdapter,
+    http: [{:port, @prod_inet6}, :inet6],
     url: [host: "example.com"],
     server: true
   )
@@ -114,7 +112,7 @@ defmodule Combo.Integration.EndpointTest do
     end
   end
 
-  for mod <- [ProdEndpoint, DevEndpoint, ProdInet6Endpoint] do
+  for mod <- [DevEndpoint, ProdEndpoint, ProdInet6Endpoint] do
     defmodule mod do
       use Combo.Endpoint, otp_app: :endpoint_int
       @before_compile Wrapper
@@ -137,15 +135,37 @@ defmodule Combo.Integration.EndpointTest do
 
   alias Combo.Integration.HTTPClient
 
-  test "starts drainer in supervision tree if configured" do
-    capture_log(fn ->
-      {:ok, _} = ProdInet6Endpoint.start_link()
-      assert List.keyfind(Supervisor.which_children(ProdInet6Endpoint), Plug.Cowboy.Drainer, 0)
-      Supervisor.stop(ProdInet6Endpoint)
+  test "adapters starts on configured port and serves requests and stops for dev" do
+    # Toggle globally
+    serve_endpoints(true)
+    on_exit(fn -> serve_endpoints(false) end)
 
-      {:ok, _} = ProdEndpoint.start_link()
-      refute List.keyfind(Supervisor.which_children(ProdEndpoint), Plug.Cowboy.Drainer, 0)
-      Supervisor.stop(ProdEndpoint)
+    capture_log(fn ->
+      # Has server: false
+      {:ok, _} = DevEndpoint.start_link()
+
+      # Requests
+      {:ok, resp} = HTTPClient.request(:get, "http://127.0.0.1:#{@dev}", %{})
+      assert resp.status == 200
+      assert resp.body == "ok"
+
+      {:ok, resp} = HTTPClient.request(:get, "http://127.0.0.1:#{@dev}/unknown", %{})
+      assert resp.status == 404
+      assert resp.body =~ "NoRouteError at GET /unknown"
+
+      assert capture_log(fn ->
+               {:ok, resp} = HTTPClient.request(:get, "http://127.0.0.1:#{@dev}/oops", %{})
+               assert resp.status == 500
+               assert resp.body =~ "RuntimeError at GET /oops"
+
+               {:ok, resp} = HTTPClient.request(:get, "http://127.0.0.1:#{@dev}/router/oops", %{})
+               assert resp.status == 500
+               assert resp.body =~ "RuntimeError at GET /router/oops"
+
+               Supervisor.stop(DevEndpoint)
+             end) =~ "** (RuntimeError) oops"
+
+      {:error, _reason} = HTTPClient.request(:get, "http://127.0.0.1:#{@dev}", %{})
     end)
   end
 
@@ -187,40 +207,6 @@ defmodule Combo.Integration.EndpointTest do
              end) =~ "** (RuntimeError) oops"
 
       {:error, _reason} = HTTPClient.request(:get, "http://127.0.0.1:#{@prod}", %{})
-    end)
-  end
-
-  test "adapters starts on configured port and serves requests and stops for dev" do
-    # Toggle globally
-    serve_endpoints(true)
-    on_exit(fn -> serve_endpoints(false) end)
-
-    capture_log(fn ->
-      # Has server: false
-      {:ok, _} = DevEndpoint.start_link()
-
-      # Requests
-      {:ok, resp} = HTTPClient.request(:get, "http://127.0.0.1:#{@dev}", %{})
-      assert resp.status == 200
-      assert resp.body == "ok"
-
-      {:ok, resp} = HTTPClient.request(:get, "http://127.0.0.1:#{@dev}/unknown", %{})
-      assert resp.status == 404
-      assert resp.body =~ "NoRouteError at GET /unknown"
-
-      assert capture_log(fn ->
-               {:ok, resp} = HTTPClient.request(:get, "http://127.0.0.1:#{@dev}/oops", %{})
-               assert resp.status == 500
-               assert resp.body =~ "RuntimeError at GET /oops"
-
-               {:ok, resp} = HTTPClient.request(:get, "http://127.0.0.1:#{@dev}/router/oops", %{})
-               assert resp.status == 500
-               assert resp.body =~ "RuntimeError at GET /router/oops"
-
-               Supervisor.stop(DevEndpoint)
-             end) =~ "** (RuntimeError) oops"
-
-      {:error, _reason} = HTTPClient.request(:get, "http://127.0.0.1:#{@dev}", %{})
     end)
   end
 

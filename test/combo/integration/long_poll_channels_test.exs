@@ -348,8 +348,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
   end
 
   for %{adapter: adapter} <- [
-        %{adapter: Combo.Endpoint.BanditAdapter},
-        %{adapter: Combo.Endpoint.Cowboy2Adapter}
+        %{adapter: Combo.Endpoint.BanditAdapter}
       ] do
     describe "adapter: #{inspect(adapter)}" do
       @describetag adapter: adapter

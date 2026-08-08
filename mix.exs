@@ -162,7 +162,6 @@ defmodule Combo.MixProject do
       Endpoint: [
         Combo.Endpoint,
         Combo.Endpoint.BanditAdapter,
-        Combo.Endpoint.Cowboy2Adapter,
         Combo.Endpoint.SyncCodeReloadPlug
       ],
       Router: [
