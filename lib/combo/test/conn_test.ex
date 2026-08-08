@@ -109,28 +109,6 @@ defmodule Combo.ConnTest do
   as well as peer data information.
   """
 
-  @doc false
-  defmacro __using__(_) do
-    IO.warn(
-      """
-      Using Combo.ConnTest is deprecated, instead of:
-
-          use Combo.ConnTest
-
-      do:
-
-          import Plug.Conn
-          import Combo.ConnTest
-      """,
-      Macro.Env.stacktrace(__CALLER__)
-    )
-
-    quote do
-      import Plug.Conn
-      import Combo.ConnTest
-    end
-  end
-
   alias Plug.Conn
   import ExUnit.Assertions, only: [flunk: 1]
   import Combo.Conn, only: [router_module!: 1]

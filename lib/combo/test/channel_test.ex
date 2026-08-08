@@ -179,26 +179,6 @@ defmodule Combo.ChannelTest do
     def decode!(message, _opts), do: message
   end
 
-  @doc false
-  defmacro __using__(_) do
-    IO.warn(
-      """
-      Using Combo.ChannelTest is deprecated, instead of:
-
-          use Combo.ChannelTest
-
-      do:
-
-          import Combo.ChannelTest
-      """,
-      Macro.Env.stacktrace(__CALLER__)
-    )
-
-    quote do
-      import Combo.ChannelTest
-    end
-  end
-
   @doc """
   Builds a socket for the given `socket_module`.
 
@@ -298,18 +278,6 @@ defmodule Combo.ChannelTest do
     end
   end
 
-  @doc false
-  @deprecated "Combo.ChannelTest.socket/0 is deprecated, please call socket/1 instead"
-  defmacro socket() do
-    socket(nil, nil, [], [], __CALLER__)
-  end
-
-  @doc false
-  @deprecated "Combo.ChannelTest.socket/2 is deprecated, please call socket/4 instead"
-  defmacro socket(id, assigns) do
-    socket(nil, id, assigns, [], __CALLER__)
-  end
-
   @doc """
   Initiates a transport connection for the socket handler.
 
@@ -333,16 +301,7 @@ defmodule Combo.ChannelTest do
 
   @doc false
   def __connect__(endpoint, handler, params, options) do
-    {connect_info, options} =
-      if is_map(options) do
-        IO.warn(
-          "Passing \"connect_info\" directly to connect/3 is deprecated, please pass \"connect_info: ...\" as an option instead"
-        )
-
-        {options, []}
-      else
-        Keyword.pop(options, :connect_info, %{})
-      end
+    {connect_info, options} = Keyword.pop(options, :connect_info, %{})
 
     map = %{
       endpoint: endpoint,
