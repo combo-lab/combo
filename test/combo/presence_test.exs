@@ -31,12 +31,12 @@ defmodule Combo.PresenceTest do
     use Combo.Presence, otp_app: :combo
 
     def init_presence do
-      Combo.Presence.init({
-        __MODULE__,
-        __MODULE__.TaskSupervisor,
-        PresPub,
-        Combo.Channel.Server
-      })
+      Combo.Presence.init(
+        module: __MODULE__,
+        task_supervisor: __MODULE__.TaskSupervisor,
+        pubsub_server: PresPub,
+        dispatcher: Combo.Channel.Server
+      )
     end
 
     def handle_metas(_topic, _diff, _presences, _state) do

@@ -436,12 +436,17 @@ defmodule Combo.Presence do
 
       Combo.Tracker.start_link(
         __MODULE__,
-        {module, task_supervisor, pubsub_server, dispatcher},
+        [
+          module: module,
+          task_supervisor: task_supervisor,
+          pubsub_server: pubsub_server,
+          dispatcher: dispatcher
+        ],
         opts
       )
     end
 
-    def init(state), do: Combo.Presence.init(state)
+    def init(opts), do: Combo.Presence.init(opts)
 
     def handle_diff(diff, state), do: Combo.Presence.handle_diff(diff, state)
 
@@ -472,7 +477,12 @@ defmodule Combo.Presence do
   end
 
   @doc false
-  def init({module, task_supervisor, pubsub_server, dispatcher}) do
+  def init(opts) do
+    module = Keyword.fetch!(opts, :module)
+    task_supervisor = Keyword.fetch!(opts, :task_supervisor)
+    pubsub_server = Keyword.fetch!(opts, :pubsub_server)
+    dispatcher = Keyword.fetch!(opts, :dispatcher)
+
     state = %{
       module: module,
       task_supervisor: task_supervisor,
