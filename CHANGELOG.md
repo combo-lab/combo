@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.11.0
+
+- drop cowboy2 support
+
 ## v0.10.0
 
 - remove CEEx formatter
