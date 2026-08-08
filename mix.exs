@@ -3,7 +3,7 @@ defmodule Combo.MixProject do
 
   @version "0.11.0"
   @description "A web framework, that combines the good parts of modern web development."
-  @elixir_requirement "~> 1.18"
+  @elixir_requirement "~> 1.20"
   @source_url "https://github.com/combo-lab/combo"
   @changelog_url "https://github.com/combo-lab/combo/blob/v#{@version}/CHANGELOG.md"
 
