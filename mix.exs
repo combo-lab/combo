@@ -50,10 +50,6 @@ defmodule Combo.MixProject do
         exclude: [
           {IEx, :started?, 0},
           Ecto.Type,
-          :ranch,
-          :cowboy_req,
-          Plug.Cowboy.Conn,
-          Plug.Cowboy,
           :httpc,
           :public_key
         ]
@@ -82,7 +78,6 @@ defmodule Combo.MixProject do
       {:lazy_html, "~> 0.1.0"},
 
       # Optional deps
-      {:plug_cowboy, "~> 2.8", optional: true},
       {:bandit, "~> 1.12", optional: true},
       {:jason, "~> 1.0", optional: true},
 
