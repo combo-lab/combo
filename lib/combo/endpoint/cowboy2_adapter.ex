@@ -23,9 +23,9 @@ if Code.ensure_loaded?(Plug.Cowboy) do
       * `:https` - the configuration for the HTTPS server. It accepts all options
         as defined by `m:Plug.Cowboy`. Defaults to `false`.
 
-      * `:drainer` - a drainer process that triggers when your application is
-        shutting down to wait for any on-going request to finish. It accepts all
-        options as defined by [`Plug.Cowboy.Drainer`](`m:Plug.Cowboy.Drainer`).
+      * `:drainer` - a drainer process waits for any on-going request to finish
+        during application shutdown. It accepts all options as defined by
+        [`Plug.Cowboy.Drainer`](`m:Plug.Cowboy.Drainer`).
         Defaults to `[]`, which will start a drainer process for each configured endpoint,
         but can be disabled by setting it to `false`.
 

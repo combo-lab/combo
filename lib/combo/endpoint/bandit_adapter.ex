@@ -13,28 +13,23 @@ if Code.ensure_loaded?(Bandit) do
         config :demo, Demo.Web.Endpoint,
           adapter: Combo.Endpoint.BanditAdapter
 
-    Good to know that it's the default adapter, so you don't have to set
-    `:adapter` option.
-
     ## Endpoint configuration
 
-    This adapter supports the structure for endpoint configuration.
+    This adapter uses the following endpoint configuration:
 
-    Top-level keys for `:http` and `:https` are supported, and values within
-    within each of those are interpreted as raw Bandit configuration as specified
-    by `t:Bandit.options/0`.
+    * `:http` - the configuration for the HTTP server. It accepts all options
+      as defined by `t:Bandit.options/0`. Defaults to `false`.
 
-    It can be difficult to know exactly where to put the options that you may
-    need to set from the ones available at `t:Bandit.options/0`. The general
-    idea is that anything inside the `http:` or `https:` keyword lists in
-    your configuration are passed directly to `Bandit.start_link/1`, so an
-    example may look like so:
+    * `:https` - the configuration for the HTTPS server. It accepts all options
+      as defined by `t:Bandit.options/0`. Defaults to `false`.
+
+    For example:
 
         config :demo, Demo.Web.Endpoint,
           http: [
             ip: {127, 0, 0, 1},
             port: 4000,
-            thousand_island_options: [num_acceptors: 123],
+            thousand_island_options: [num_acceptors: 12],
             http_options: [log_protocol_errors: false],
             http_1_options: [max_requests: 1],
             websocket_options: [compress: false]
@@ -42,7 +37,7 @@ if Code.ensure_loaded?(Bandit) do
 
     ## Connection draining
 
-    Bandit has built-in connection draining.
+    Bandit has built-in support of connection draining.
 
     ## Thanks
 

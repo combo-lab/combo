@@ -171,34 +171,23 @@ defmodule Combo.Endpoint do
 
   The default adapter is `Combo.Endpoint.BanditAdapter`.
 
-  Both adapters can be configured in a similar manner using the following two
+  Both adapters should be configured in a similar manner using the following two
   top-level options:
 
-    * `:http` - the configuration for the HTTP server. It accepts all options
-      as defined by either [`Bandit`](`t:Bandit.options/0`) or
-      [`Plug.Cowboy`](`m:Plug.Cowboy`) depending on your choice of adapter.
-      Defaults to `false`.
+    * `:http` - the configuration for the HTTP server.
 
-    * `:https` - the configuration for the HTTPS server. It accepts all options
-      as defined by either [`Bandit`](`t:Bandit.options/0`) or
-      [`Plug.Cowboy`](`m:Plug.Cowboy`) depending on your choice of adapter.
-      Defaults to `false`.
+    * `:https` - the configuration for the HTTPS server.
+
+  And, other config can be passed through to the adapter, too.
 
   ## Connection draining
 
-  In addition, the connection draining can be configured for the Cowboy web
-  server via the following top-level option (this is not required for Bandit
-  as it has connection draining built-in):
+  Connection draining should be implemented by the endpoint adapter.
 
-    * `:drainer` - a drainer process waits for any on-going request to finish
-      during application shutdown. It accepts the `:shutdown` and
-      `:check_interval` options as defined by `Plug.Cowboy.Drainer`.
-      Note the draining does not terminate any existing connection, it simply
-      waits for them to finish. Socket connections run their own drainer
-      before this one is invoked. That's because sockets are stateful and
-      can be gracefully notified, which allows us to stagger them over a
-      longer period of time. See the documentation for `socket/3` for more
-      information
+  Socket connections run their own drainer before this one is invoked. That's
+  because sockets are stateful and can be gracefully notified, which allows
+  us to stagger them over a longer period of time. See `socket/3` for more
+  information.
 
   ## Endpoint API
 
