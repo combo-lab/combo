@@ -1,5 +1,6 @@
 defmodule Combo.Transports.LongPoll do
   @moduledoc false
+
   @behaviour Plug
 
   # The maximum is 10MB but read_body will cap the whole request at ~8MB,
@@ -14,10 +15,13 @@ defmodule Combo.Transports.LongPoll do
 
   def default_config() do
     [
-      window_ms: 10_000,
       path: "/longpoll",
+      window_ms: 10_000,
       pubsub_timeout_ms: 2_000,
-      serializer: [{V1.JSONSerializer, "~> 1.0.0"}, {V2.JSONSerializer, "~> 2.0.0"}],
+      serializer: [
+        {V1.JSONSerializer, "~> 1.0.0"},
+        {V2.JSONSerializer, "~> 2.0.0"}
+      ],
       transport_log: false,
       crypto: [max_age: 1_209_600]
     ]

@@ -1,6 +1,5 @@
 defmodule Combo.Transports.WebSocket do
   @moduledoc false
-  #
   # How WebSockets work in Combo
   #
   # WebSocket support is implemented on top of the `WebSockAdapter` library. Upgrade
@@ -12,7 +11,7 @@ defmodule Combo.Transports.WebSocket do
   # other transports such as long polling). Because this behaviour is a superset of the `WebSock`
   # behaviour, the `WebSock` library is able to use the callbacks in the `WebSock` behaviour to
   # call this handler module directly for the rest of the WebSocket connection's lifetime.
-  #
+
   @behaviour Plug
 
   @connect_info_opts [:check_csrf]
@@ -26,7 +25,10 @@ defmodule Combo.Transports.WebSocket do
   def default_config() do
     [
       path: "/websocket",
-      serializer: [{V1.JSONSerializer, "~> 1.0.0"}, {V2.JSONSerializer, "~> 2.0.0"}],
+      serializer: [
+        {V1.JSONSerializer, "~> 1.0.0"},
+        {V2.JSONSerializer, "~> 2.0.0"}
+      ],
       error_handler: {__MODULE__, :handle_error, []},
       timeout: 60_000,
       transport_log: false,
