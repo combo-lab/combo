@@ -4,7 +4,7 @@ defmodule TestSupport.Proxy.SamplePlug.General do
 
   ## How to start the server?
 
-      webserver = {Plug.Cowboy, [
+      webserver = {Bandit, [
         plug: TestSupport.Proxy.SamplePlug.General,
         scheme: :http,
         port: 4000

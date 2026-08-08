@@ -208,7 +208,6 @@ defmodule Combo.Proxy do
     end)
   end
 
-  # Same as the default ports of Plug.Cowboy and Bandit
   defp get_default_port(:http = _scheme), do: 4000
   defp get_default_port(:https = _scheme), do: 4040
 

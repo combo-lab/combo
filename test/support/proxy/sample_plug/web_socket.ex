@@ -20,7 +20,7 @@ defmodule TestSupport.Proxy.SamplePlug.WebSocket do
 
   ## How to start the server?
 
-      webserver = {Plug.Cowboy, [
+      webserver = {Bandit, [
         plug: TestSupport.Proxy.SamplePlug.WebSocket,
         scheme: :http,
         port: 4000

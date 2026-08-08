@@ -34,9 +34,6 @@ IO.write("\n")
 
 Code.require_file("support/router_helper.exs", __DIR__)
 
-# Starts web server applications
-Application.ensure_all_started(:plug_cowboy)
-
 # For mix tests
 Mix.shell(Mix.Shell.Process)
 

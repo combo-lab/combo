@@ -791,7 +791,6 @@ defmodule Combo.Integration.WebSocketChannelsTest do
 
           assert_receive {:DOWN, _, :process, ^sock, :normal}
           assert_receive {:DOWN, _, :process, ^chan1, shutdown}
-          # :shutdown for cowboy, {:shutdown, :closed} for cowboy 2, {:shutdown, :disconnected}
           # for bandit
           assert shutdown in [:shutdown, {:shutdown, :closed}, {:shutdown, :disconnected}]
           assert_receive {:DOWN, _, :process, ^chan2, shutdown}
