@@ -73,9 +73,7 @@ defmodule Combo.Proxy do
       Default to `false`.
     * `:backends` - the list of backends.  See following section for more details.
       Default to `[]`.
-    * `:adapter` - the adapter for web server, `Combo.Proxy.Cowboy2Adapter` and
-      `Combo.Proxy.BanditAdapter` are available.
-      Default to `Combo.Proxy.BanditAdapter`.
+    * `:adapter` - the adapter for web server. Default to `Combo.Proxy.BanditAdapter`.
     * adapter options - all other options will be put into an keyword list and
       passed as the options of the adapter. See following section for more details.
 
@@ -122,39 +120,38 @@ defmodule Combo.Proxy do
 
   In the section of Options, we said:
 
-  > all other options will be put into an keyword list and passed as the
-  > options of the adapter.
+  > all other options will be put into an keyword list and passed as the options
+  > of the adapter.
 
   It means the all options except `:server`, `:backends`, `:adapter` will be
   passed as the the options of an adapter.
 
-  Take `Combo.Proxy.Cowboy2Adapter` adapter as an example. If we declare the
+  Take `Combo.Proxy.BanditAdapter` adapter as an example. If we declare the
   options like:
 
       config :my_app, MyApp.Proxy,
         backends: [
           # ...
         ],
-        adapter: Combo.Proxy.Cowboy2Adapter,
+        adapter: Combo.Proxy.BanditAdapter,
         scheme: :http,
         ip: {127, 0, 0, 1},
         port: 4000,
-        transport_options: [num_acceptors: 2]
+        thousand_island_options: [num_acceptors: 2]
 
-  Then following options will be passed to the underlying `Plug.Cowboy` when
+  Then following options will be passed to the underlying `Bandit` when
   initializing `Combo.Proxy`:
 
       [
         scheme: :http,
         ip: {127, 0, 0, 1},
         port: 4000,
-        transport_options: [num_acceptors: 2]
+        thousand_island_options: [num_acceptors: 2]
       ]
 
   For more available adapter options:
     
     * `Combo.Proxy.Bandit` - checkout [Bandit options](`t:Bandit.options/0`).
-    * `Combo.Proxy.Cowboy2Adapter` - checkout [Plug.Cowboy options](`m:Plug.Cowboy#module-options`).
 
   """
 
@@ -230,21 +227,6 @@ defmodule Combo.Proxy do
     :ok
   end
 
-  defp check_adapter_module!(Combo.Proxy.Cowboy2Adapter) do
-    unless Code.ensure_loaded?(Plug.Cowboy) do
-      Logger.error("""
-      Could not find Plug.Cowboy dependency. Please add :plug_cowboy to your dependencies:
-
-          {:plug_cowboy, "~> 2.6"}
-
-      """)
-
-      raise "missing Plug.Cowboy dependency"
-    end
-
-    :ok
-  end
-
   defp check_adapter_module!(adapter) do
     raise "unknown adapter #{inspect(adapter)}"
   end
@@ -270,15 +252,9 @@ defmodule Combo.Proxy do
   end
 
   defp fetch_adapter_plug!(Combo.Proxy.BanditAdapter), do: Bandit
-  defp fetch_adapter_plug!(Combo.Proxy.Cowboy2Adapter), do: Plug.Cowboy
 
   defp build_adapter_opts(Combo.Proxy.BanditAdapter = _adapter, adapter_config) do
     adapter_config
-  end
-
-  defp build_adapter_opts(Combo.Proxy.Cowboy2Adapter = _adapter, adapter_config) do
-    {scheme, options} = Keyword.pop!(adapter_config, :scheme)
-    [scheme: scheme, options: options]
   end
 
   defp gen_listen_line(adapter_config) do
