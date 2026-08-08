@@ -362,15 +362,15 @@ defmodule Combo.Test.ConnTest do
       build_conn(:get, "/") |> resp(200, "ok") |> json_response(200)
     end
 
-    assert_raise Jason.DecodeError, "unexpected byte at position 0: 0x6F (\"o\")", fn ->
+    assert_raise JSON.DecodeError, "invalid byte 111 at position (byte offset) 0", fn ->
       build_conn(:get, "/")
       |> put_resp_content_type("application/json")
       |> resp(200, "ok")
       |> json_response(200)
     end
 
-    assert_raise Jason.DecodeError,
-                 "unexpected end of input at position 0",
+    assert_raise JSON.DecodeError,
+                 "unexpected end of JSON binary at position (byte offset) 0",
                  fn ->
                    build_conn(:get, "/")
                    |> put_resp_content_type("application/json")

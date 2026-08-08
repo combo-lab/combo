@@ -79,7 +79,6 @@ defmodule Combo.MixProject do
 
       # Optional deps
       {:bandit, "~> 1.12", optional: true},
-      {:jason, "~> 1.0", optional: true},
 
       # Docs dependencies (some for cross references)
       {:ex_doc, "~> 0.38", only: [:docs, :publish]},

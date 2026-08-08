@@ -50,14 +50,13 @@ defmodule Combo do
     * `encode_to_iodata!/1` — encodes a term to JSON iodata, raising on
       encoding errors
 
-  To customize the JSON library, including the following in your
-  `config/config.exs`:
+  To customize the JSON library, including the following in `config/config.exs`:
 
-      config :combo, :json_library, JSON
+      config :combo, :json_library, Jason
 
   """
   def json_library do
-    Application.get_env(:combo, :json_library, Jason)
+    Application.get_env(:combo, :json_library, JSON)
   end
 
   @doc """
