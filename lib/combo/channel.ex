@@ -5,8 +5,6 @@ defmodule Combo.Channel do
   Channels provide a means for bidirectional communication from clients that
   integrate with the `Combo.PubSub` layer for soft-realtime functionality.
 
-  For a conceptual overview, see the [Channels guide](channels.md).
-
   ## Topics & Callbacks
 
   Every time you join a channel, you need to choose which particular topic you

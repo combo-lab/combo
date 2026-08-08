@@ -1,6 +1,4 @@
 defmodule Combo.Channel.Server do
-  @moduledoc false
-
   use GenServer, restart: :temporary
 
   require Logger

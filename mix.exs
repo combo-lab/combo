@@ -212,6 +212,7 @@ defmodule Combo.MixProject do
       ],
       Channel: [
         Combo.Channel,
+        Combo.Channel.Server,
         Combo.Presence
       ],
       Logging: [
