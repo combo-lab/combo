@@ -171,8 +171,7 @@ defmodule Combo.Endpoint do
 
   The default adapter is `Combo.Endpoint.BanditAdapter`.
 
-  Both adapters should be configured in a similar manner using the following two
-  top-level options:
+  Adapters are configured using the following two top-level options:
 
     * `:http` - the configuration for the HTTP server.
 
@@ -184,10 +183,10 @@ defmodule Combo.Endpoint do
 
   Connection draining should be implemented by the endpoint adapter.
 
-  Socket connections run their own drainer before this one is invoked. That's
-  because sockets are stateful and can be gracefully notified, which allows
-  us to stagger them over a longer period of time. See `socket/3` for more
-  information.
+  > Socket connections run their own drainer before the endpoint adapter's
+  > server children are shut down. That's because sockets are stateful and
+  > can be gracefully notified, which allows us to stagger them over a longer
+  > period of time. See `socket/3` for more information.
 
   ## Endpoint API
 

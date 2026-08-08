@@ -151,7 +151,7 @@ defmodule Combo.Proxy do
 
   For more available adapter options:
     
-    * `Combo.Proxy.Bandit` - checkout [Bandit options](`t:Bandit.options/0`).
+    * `Combo.Proxy.BanditAdapter` - checkout [Bandit options](`t:Bandit.options/0`).
 
   """
 
