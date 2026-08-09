@@ -21,7 +21,7 @@ defmodule Combo.Transports.WebSocket do
   import Plug.Conn
 
   alias Combo.Socket.{V1, V2}
-  alias Combo.Transport.Handler
+  alias Combo.Transport
 
   def default_config() do
     [
@@ -52,11 +52,11 @@ defmodule Combo.Transports.WebSocket do
 
     conn
     |> fetch_query_params()
-    |> Handler.code_reload(endpoint, opts)
-    |> Handler.transport_log(opts[:transport_log])
-    |> Handler.check_origin(handler, endpoint, opts)
+    |> Transport.code_reload(endpoint, opts)
+    |> Transport.transport_log(opts[:transport_log])
+    |> Transport.check_origin(handler, endpoint, opts)
     |> maybe_auth_token_from_header(opts[:auth_token])
-    |> Handler.check_subprotocols(subprotocols)
+    |> Transport.check_subprotocols(subprotocols)
     |> case do
       %{halted: true} = conn ->
         conn
@@ -65,7 +65,7 @@ defmodule Combo.Transports.WebSocket do
         keys = Keyword.get(opts, :connect_info, [])
 
         connect_info =
-          Handler.connect_info(conn, endpoint, keys, Keyword.take(opts, @connect_info_opts))
+          Transport.connect_info(conn, endpoint, keys, Keyword.take(opts, @connect_info_opts))
 
         config = %{
           endpoint: endpoint,

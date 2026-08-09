@@ -1,10 +1,10 @@
-defmodule Combo.Transport.HandlerTest do
+defmodule Combo.TransportTest do
   use ExUnit.Case, async: true
   use Support.RouterHelper
 
   import ExUnit.CaptureLog
 
-  alias Combo.Transport.Handler
+  alias Combo.Transport
 
   @secret_key_base String.duplicate("abcdefgh", 8)
 
@@ -58,7 +58,7 @@ defmodule Combo.Transport.HandlerTest do
   describe "check_origin/4" do
     defp check_origin(%Plug.Conn{} = conn, origin, opts) do
       conn = put_req_header(conn, "origin", origin)
-      Handler.check_origin(conn, make_ref(), Endpoint, opts)
+      Transport.check_origin(conn, make_ref(), Endpoint, opts)
     end
 
     defp check_origin(origin, opts), do: check_origin(conn(:get, "/"), origin, opts)
@@ -250,7 +250,7 @@ defmodule Combo.Transport.HandlerTest do
       check = fn origin, opts ->
         conn(:get, "/")
         |> put_req_header("origin", origin)
-        |> Handler.check_origin(handler, Endpoint, opts)
+        |> Transport.check_origin(handler, Endpoint, opts)
       end
 
       # Mount A is reached first and populates the cache.
@@ -271,7 +271,7 @@ defmodule Combo.Transport.HandlerTest do
   describe "check_subprotocols/2" do
     defp check_subprotocols(expected, passed) do
       conn = conn(:get, "/") |> put_req_header("sec-websocket-protocol", Enum.join(passed, ", "))
-      Handler.check_subprotocols(conn, expected)
+      Transport.check_subprotocols(conn, expected)
     end
 
     test "does not check subprotocols if not passed expected" do
@@ -280,7 +280,7 @@ defmodule Combo.Transport.HandlerTest do
 
     test "does not check subprotocols if conn is halted" do
       halted_conn = conn(:get, "/") |> halt()
-      conn = Handler.check_subprotocols(halted_conn, ["sip"])
+      conn = Transport.check_subprotocols(halted_conn, ["sip"])
       assert conn == halted_conn
     end
 
@@ -305,7 +305,7 @@ defmodule Combo.Transport.HandlerTest do
 
   describe "connect_info/4" do
     defp load_connect_info(connect_info) do
-      [connect_info: connect_info] = Handler.load_config(connect_info: connect_info)
+      [connect_info: connect_info] = Transport.load_config(connect_info: connect_info)
       connect_info
     end
 
@@ -320,7 +320,7 @@ defmodule Combo.Transport.HandlerTest do
                conn(:get, "https://foo.com/", _csrf_token: csrf_token)
                |> put_req_cookie("_hello_key", session_cookie)
                |> fetch_query_params()
-               |> Handler.connect_info(Endpoint, connect_info)
+               |> Transport.connect_info(Endpoint, connect_info)
     end
 
     test "loads the session with custom :csrf_token_key" do
@@ -341,7 +341,7 @@ defmodule Combo.Transport.HandlerTest do
                conn(:get, "https://foo.com/", _csrf_token: csrf_token)
                |> put_req_cookie("_hello_key", session_cookie)
                |> fetch_query_params()
-               |> Handler.connect_info(Endpoint, connect_info)
+               |> Transport.connect_info(Endpoint, connect_info)
 
       connect_info =
         load_connect_info(
@@ -356,7 +356,7 @@ defmodule Combo.Transport.HandlerTest do
                conn(:get, "https://foo.com/", _csrf_token: csrf_token)
                |> put_req_cookie("_hello_key", session_cookie)
                |> fetch_query_params()
-               |> Handler.connect_info(Endpoint, connect_info)
+               |> Transport.connect_info(Endpoint, connect_info)
     end
 
     test "loads the session when CSRF is disabled despite CSRF token not being provided" do
@@ -369,7 +369,7 @@ defmodule Combo.Transport.HandlerTest do
                conn(:get, "https://foo.com/")
                |> put_req_cookie("_hello_key", session_cookie)
                |> fetch_query_params()
-               |> Handler.connect_info(Endpoint, connect_info, check_csrf: false)
+               |> Transport.connect_info(Endpoint, connect_info, check_csrf: false)
     end
 
     test "doesn't load session when an invalid CSRF token is provided" do
@@ -383,7 +383,7 @@ defmodule Combo.Transport.HandlerTest do
                conn(:get, "https://foo.com/", _csrf_token: invalid_csrf_token)
                |> put_req_cookie("_hello_key", session_cookie)
                |> fetch_query_params()
-               |> Handler.connect_info(Endpoint, connect_info)
+               |> Transport.connect_info(Endpoint, connect_info)
     end
   end
 end

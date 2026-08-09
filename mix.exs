@@ -202,6 +202,7 @@ defmodule Combo.MixProject do
         Combo.Static.Compressor.Gzip
       ],
       Transport: [
+        Combo.Transport,
         Combo.Transport.Handler
       ],
       Socket: [

@@ -630,7 +630,7 @@ defmodule Combo.Endpoint do
     paths =
       if websocket do
         websocket = put_auth_token(websocket, opts[:auth_token])
-        config = Combo.Transport.Handler.load_config(websocket, Combo.Transports.WebSocket)
+        config = Combo.Transport.load_config(websocket, Combo.Transports.WebSocket)
         plug_init = {endpoint, socket, config}
         {conn_ast, match_path} = socket_path(path, config)
         [{match_path, Combo.Transports.WebSocket, conn_ast, plug_init} | paths]
@@ -641,7 +641,7 @@ defmodule Combo.Endpoint do
     paths =
       if longpoll do
         longpoll = put_auth_token(longpoll, opts[:auth_token])
-        config = Combo.Transport.Handler.load_config(longpoll, Combo.Transports.LongPoll)
+        config = Combo.Transport.load_config(longpoll, Combo.Transports.LongPoll)
         plug_init = {endpoint, socket, config}
         {conn_ast, match_path} = socket_path(path, config)
         [{match_path, Combo.Transports.LongPoll, conn_ast, plug_init} | paths]
