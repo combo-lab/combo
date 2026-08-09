@@ -525,12 +525,13 @@ defmodule Combo.Endpoint do
   end
 
   @doc false
-  defmacro __before_compile__(%{module: module}) do
-    sockets = Module.get_attribute(module, :combo_sockets)
+  defmacro __before_compile__(%{module: endpoint}) do
+    sockets = Module.get_attribute(endpoint, :combo_sockets)
 
     dispatches =
       for {path, socket, socket_opts} <- sockets,
-          {path, plug, conn_ast, plug_opts} <- socket_paths(module, path, socket, socket_opts) do
+          {path, conn_ast, plug, plug_opts} <-
+            build_socket_dispatches(endpoint, path, socket, socket_opts) do
         quote do
           defp do_socket_dispatch(unquote(path), conn) do
             halt(unquote(plug).call(unquote(conn_ast), unquote(Macro.escape(plug_opts))))
@@ -583,8 +584,8 @@ defmodule Combo.Endpoint do
     end
   end
 
-  defp socket_paths(endpoint, path, socket, opts) do
-    paths = []
+  defp build_socket_dispatches(endpoint, path, socket, opts) do
+    dispatches = []
 
     common_config = [
       :path,
@@ -628,29 +629,29 @@ defmodule Combo.Endpoint do
           ]
       )
 
-    paths =
+    dispatches =
       if websocket do
         websocket = put_auth_token(websocket, opts[:auth_token])
         config = Combo.Transport.load_config(Combo.Transports.WebSocket, websocket)
-        plug_init = {endpoint, socket, config}
-        {conn_ast, match_path} = socket_path(path, config)
-        [{match_path, Combo.Transports.WebSocket, conn_ast, plug_init} | paths]
+        plug_opts = {endpoint, socket, config}
+        {match_path, conn_ast} = socket_path(path, config)
+        [{match_path, conn_ast, Combo.Transports.WebSocket, plug_opts} | dispatches]
       else
-        paths
+        dispatches
       end
 
-    paths =
+    dispatches =
       if longpoll do
         longpoll = put_auth_token(longpoll, opts[:auth_token])
         config = Combo.Transport.load_config(Combo.Transports.LongPoll, longpoll)
-        plug_init = {endpoint, socket, config}
-        {conn_ast, match_path} = socket_path(path, config)
-        [{match_path, Combo.Transports.LongPoll, conn_ast, plug_init} | paths]
+        plug_opts = {endpoint, socket, config}
+        {match_path, conn_ast} = socket_path(path, config)
+        [{match_path, conn_ast, Combo.Transports.LongPoll, plug_opts} | dispatches]
       else
-        paths
+        dispatches
       end
 
-    paths
+    dispatches
   end
 
   defp put_auth_token(true, enabled), do: [auth_token: enabled]
@@ -682,7 +683,7 @@ defmodule Combo.Endpoint do
         end
       end
 
-    {conn_ast, path}
+    {path, conn_ast}
   end
 
   defp maybe_validate_keys(opts, keys) when is_list(opts), do: Keyword.validate!(opts, keys)
@@ -693,23 +694,23 @@ defmodule Combo.Endpoint do
   @doc """
   Defines a websocket/longpoll mount-point for a `socket`.
 
-  It expects a `path`, a `socket` module, and a set of options.
-  The socket module is typically defined with `Combo.Socket`.
+  It expects a path, a socket module, and a set of options. The socket module
+  is typically defined with `Combo.Socket`.
 
   Both websocket and longpolling connections are supported out of the box.
 
   ## Options
 
-    * `:websocket` - controls the websocket configuration.
+    * `:websocket` - the websocket configuration.
       May be a boolean or a keyword list of options.
       See ["Common configuration"](#socket/3-common-configuration)
       and ["WebSocket configuration"](#socket/3-websocket-configuration)
       for the whole list.
       Defaults to `true`.
 
-    * `:longpoll` - controls the longpoll configuration.
+    * `:longpoll` - the longpoll configuration.
       May be a boolean or a keyword list of options.
-      of options. See ["Common configuration"](#socket/3-common-configuration)
+      See ["Common configuration"](#socket/3-common-configuration)
       and ["Longpoll configuration"](#socket/3-longpoll-configuration)
       for the whole list.
       Defaults to `false`.
@@ -759,8 +760,8 @@ defmodule Combo.Endpoint do
       socket "/ws", MyApp.Web.UserSocket
 
       socket "/ws/admin", MyApp.Web.AdminUserSocket,
-        longpoll: true,
-        websocket: [compress: true]
+        websocket: [compress: true],
+        longpoll: true
 
   ## Path params
 
@@ -787,7 +788,7 @@ defmodule Combo.Endpoint do
     * `:check_origin` - if the transport should check the origin of requests
       when the `origin` header is present. May be a boolean, a list of URIs
       that are allowed, or a function provided as an MFA.
-      Defaults to the `:check_origin` setting in the endpoint's `:transport`
+      Defaults to the `:check_origin` option in the endpoint's `:transport`
       configuration.
 
       If `true`, the header is checked against `:host` in
@@ -824,7 +825,7 @@ defmodule Combo.Endpoint do
       Combo will raise, but it is still possible to disable both by passing
       an MFA to `check_origin`. In such cases, it is your responsibility to
       ensure at least one of them is enabled. Defaults to the `:check_csrf`
-      setting in the endpoint's `:transport` configuration.
+      option in the endpoint's `:transport` configuration.
 
     * `:code_reloader` - enable or disable the code reloader. Defaults to your
       endpoint configuration.
