@@ -7,7 +7,7 @@ defmodule Combo.Transports.WebSocket do
   # Plug. These requests are then upgraded to WebSocket connections via
   # `WebSockAdapter.upgrade/4`, which takes as an argument the handler for a given socket endpoint
   # as configured in the application's Endpoint. This handler module must implement the
-  # transport-agnostic `Combo.Socket.Transport` behaviour (this same behaviour is also used for
+  # transport-agnostic `Combo.Transport.Handler` behaviour (this same behaviour is also used for
   # other transports such as long polling). Because this behaviour is a superset of the `WebSock`
   # behaviour, the `WebSock` library is able to use the callbacks in the `WebSock` behaviour to
   # call this handler module directly for the rest of the WebSocket connection's lifetime.
@@ -20,7 +20,8 @@ defmodule Combo.Transports.WebSocket do
 
   import Plug.Conn
 
-  alias Combo.Socket.{V1, V2, Transport}
+  alias Combo.Socket.{V1, V2}
+  alias Combo.Transport.Handler
 
   def default_config() do
     [
@@ -51,11 +52,11 @@ defmodule Combo.Transports.WebSocket do
 
     conn
     |> fetch_query_params()
-    |> Transport.code_reload(endpoint, opts)
-    |> Transport.transport_log(opts[:transport_log])
-    |> Transport.check_origin(handler, endpoint, opts)
+    |> Handler.code_reload(endpoint, opts)
+    |> Handler.transport_log(opts[:transport_log])
+    |> Handler.check_origin(handler, endpoint, opts)
     |> maybe_auth_token_from_header(opts[:auth_token])
-    |> Transport.check_subprotocols(subprotocols)
+    |> Handler.check_subprotocols(subprotocols)
     |> case do
       %{halted: true} = conn ->
         conn
@@ -64,7 +65,7 @@ defmodule Combo.Transports.WebSocket do
         keys = Keyword.get(opts, :connect_info, [])
 
         connect_info =
-          Transport.connect_info(conn, endpoint, keys, Keyword.take(opts, @connect_info_opts))
+          Handler.connect_info(conn, endpoint, keys, Keyword.take(opts, @connect_info_opts))
 
         config = %{
           endpoint: endpoint,

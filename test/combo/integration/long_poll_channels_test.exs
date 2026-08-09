@@ -116,7 +116,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
   end
 
   defmodule SlowSocket do
-    @behaviour Combo.Socket.Transport
+    @behaviour Combo.Transport.Handler
 
     def child_spec(_opts), do: :ignore
     def connect(_), do: {:ok, %{}}

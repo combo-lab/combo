@@ -25,7 +25,7 @@ defmodule Combo.Integration.WebSocketTest do
   )
 
   defmodule UserSocket do
-    @behaviour Combo.Socket.Transport
+    @behaviour Combo.Transport.Handler
 
     def child_spec(opts) do
       :value = Keyword.fetch!(opts, :custom)
@@ -62,7 +62,7 @@ defmodule Combo.Integration.WebSocketTest do
   end
 
   defmodule PingSocket do
-    @behaviour Combo.Socket.Transport
+    @behaviour Combo.Transport.Handler
 
     def child_spec(_opts), do: :ignore
     def connect(_), do: {:ok, %{}}

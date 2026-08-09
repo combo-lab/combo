@@ -11,7 +11,8 @@ defmodule Combo.Transports.LongPoll do
   @token_header "x-combo-longpoll-token"
 
   import Plug.Conn
-  alias Combo.Socket.{V1, V2, Transport}
+  alias Combo.Socket.{V1, V2}
+  alias Combo.Transport.Handler
 
   def default_config() do
     [
@@ -33,9 +34,9 @@ defmodule Combo.Transports.LongPoll do
     conn
     |> fetch_query_params()
     |> put_resp_header("access-control-allow-origin", "*")
-    |> Transport.code_reload(endpoint, opts)
-    |> Transport.transport_log(opts[:transport_log])
-    |> Transport.check_origin(handler, endpoint, opts, &status_json/1)
+    |> Handler.code_reload(endpoint, opts)
+    |> Handler.transport_log(opts[:transport_log])
+    |> Handler.check_origin(handler, endpoint, opts, &status_json/1)
     |> dispatch(endpoint, handler, opts)
   end
 
@@ -146,7 +147,7 @@ defmodule Combo.Transports.LongPoll do
     conn = maybe_auth_token_from_header(conn, opts[:auth_token])
 
     connect_info =
-      Transport.connect_info(conn, endpoint, keys, Keyword.take(opts, @connect_info_opts))
+      Handler.connect_info(conn, endpoint, keys, Keyword.take(opts, @connect_info_opts))
 
     arg = {endpoint, handler, opts, conn.params, priv_topic, connect_info}
     spec = {Combo.Transports.LongPoll.Server, arg}

@@ -27,7 +27,7 @@ defmodule Combo.Integration.LongPollSocketTest do
   )
 
   defmodule UserSocket do
-    @behaviour Combo.Socket.Transport
+    @behaviour Combo.Transport.Handler
 
     def child_spec(opts) do
       :value = Keyword.fetch!(opts, :custom)

@@ -7,7 +7,7 @@ defmodule Combo.Debug do
 
   It allows you to:
 
-    * List all currently connected `Combo.Socket` transport processes.
+    * List all currently connected `Combo.Socket` transport handler processes.
     * List all channels for a given `Combo.Socket` process.
     * Get the socket of a channel process.
     * Check if a process is a `Combo.Socket` or `Combo.Channel`.
@@ -15,10 +15,11 @@ defmodule Combo.Debug do
   """
 
   @doc """
-  Returns a list of all currently connected `Combo.Socket` transport processes.
+  Returns a list of all currently connected `Combo.Socket` transport handler
+  processes.
 
-  Note that custom sockets implementing the `Combo.Socket.Transport` behaviour
-  are not listed.
+  Note that other transport handlers implementing the `Combo.Transport.Handler`
+  behaviour are not listed.
 
   Each process corresponds to one connection that can have multiple channels.
   See `Combo.Debug.list_channels/1`.
@@ -56,9 +57,10 @@ defmodule Combo.Debug do
   end
 
   @doc """
-  Returns true if the given pid is a `Combo.Socket` transport process.
+  Returns true if the given pid is a `Combo.Socket` transport handler process.
 
-  It returns `false` for custom sockets implementing the `Combo.Socket.Transport` behaviour.
+  Note that it returns `false` for other transport handlers implementing the
+  `Combo.Transport.Handler` behaviour.
 
   ## Examples
 

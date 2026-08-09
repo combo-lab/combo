@@ -1,4 +1,4 @@
-defmodule Combo.Socket.Transport do
+defmodule Combo.Transport.Handler do
   @moduledoc """
   Outlines the Socket <-> Transport communication.
 
@@ -20,7 +20,7 @@ defmodule Combo.Socket.Transport do
   Here is a simple echo socket implementation:
 
       defmodule EchoSocket do
-        @behaviour Combo.Socket.Transport
+        @behaviour Combo.Transport.Handler
 
         def child_spec(opts) do
           # We won't spawn any process, so let's ignore the child spec

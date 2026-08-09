@@ -141,7 +141,7 @@ defmodule Combo.EndpointTest do
 
   describe "validates :check_origin and :check_csrf socket options" do
     defmodule TestSocket do
-      @behaviour Combo.Socket.Transport
+      @behaviour Combo.Transport.Handler
 
       def child_spec(_), do: :ignore
       def connect(_), do: {:ok, []}

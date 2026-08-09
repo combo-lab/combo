@@ -131,7 +131,7 @@ defmodule Combo.Socket do
 
   ## Custom sockets and transports
 
-  See the `Combo.Socket.Transport` documentation for more information on
+  See the `Combo.Transport.Handler` documentation for more information on
   writing your own socket that does not leverage channels or for writing
   your own transports that interacts with other sockets.
 
@@ -304,7 +304,7 @@ defmodule Combo.Socket do
 
       ## Callbacks
 
-      @behaviour Combo.Socket.Transport
+      @behaviour Combo.Transport.Handler
 
       @doc false
       def child_spec(opts) do

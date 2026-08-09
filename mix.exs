@@ -201,13 +201,15 @@ defmodule Combo.MixProject do
         Combo.Static.Compressor,
         Combo.Static.Compressor.Gzip
       ],
+      Transport: [
+        Combo.Transport.Handler
+      ],
       Socket: [
         Combo.Socket,
         Combo.Socket.Broadcast,
         Combo.Socket.Message,
         Combo.Socket.Reply,
-        Combo.Socket.Serializer,
-        Combo.Socket.Transport
+        Combo.Socket.Serializer
       ],
       Channel: [
         Combo.Channel,
