@@ -1,9 +1,7 @@
 defmodule Combo.Transport do
   @moduledoc """
-  Provides utils shared by transports.
-
-  See `Combo.Transport.Handler` for the interface implemented by transport
-  handlers.
+  Defines the transport behaviour and provides functionality shared by transport
+  implementations.
   """
 
   @callback default_config() :: Keyword.t()
@@ -13,9 +11,12 @@ defmodule Combo.Transport do
   require Logger
   alias Combo.Transport.Cache
 
+  @global_transport_keys [:check_origin, :check_csrf]
+
   @doc false
   def merge_config(endpoint, config) do
     endpoint.config(:transport)
+    |> Keyword.validate!(@global_transport_keys)
     |> Keyword.merge(config)
   end
 
