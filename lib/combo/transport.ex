@@ -12,13 +12,6 @@ defmodule Combo.Transport do
 
   require Logger
 
-  @doc false
-  def load_config(true, module),
-    do: module.default_config()
-
-  def load_config(config, module),
-    do: module.default_config() |> Keyword.merge(config) |> load_config()
-
   @connect_info_keys [
     :peer_data,
     :trace_context_headers,
@@ -28,6 +21,13 @@ defmodule Combo.Transport do
     :sec_websocket_headers,
     :auth_token
   ]
+
+  @doc false
+  def load_config(module, config) do
+    module.default_config()
+    |> Keyword.merge(config)
+    |> load_config()
+  end
 
   @doc false
   def load_config(config) do
