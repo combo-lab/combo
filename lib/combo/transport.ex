@@ -11,6 +11,7 @@ defmodule Combo.Transport do
   @callback call(Plug.Conn.t(), Plug.opts()) :: Plug.Conn.t()
 
   require Logger
+  alias Combo.Transport.Cache
 
   @connect_info_keys [
     :peer_data,
@@ -352,9 +353,9 @@ defmodule Combo.Transport do
     # :check_origin options, so the option must be part of the cache key.
     # Otherwise the first mount to be reached decides the policy for all
     # of them.
-    key = {:socket, handler, :config, :check_origin, Keyword.get(opts, :check_origin)}
+    key = {handler, :config, :check_origin, Keyword.get(opts, :check_origin)}
 
-    Combo.Socket.Cache.get(endpoint, key, fn ->
+    Cache.get(endpoint, key, fn ->
       check_origin =
         case Keyword.get(opts, :check_origin, endpoint.config(:check_origin)) do
           origins when is_list(origins) ->
