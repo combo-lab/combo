@@ -43,6 +43,8 @@ defmodule Combo.Transports.WebSocket do
 
   @impl true
   def call(%{method: "GET"} = conn, {endpoint, handler, opts}) do
+    opts = Transport.merge_config(endpoint, opts)
+
     subprotocols =
       if opts[:auth_token] do
         # when using Sec-WebSocket-Protocol for passing an auth token

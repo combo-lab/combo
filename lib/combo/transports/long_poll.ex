@@ -34,6 +34,8 @@ defmodule Combo.Transports.LongPoll do
 
   @impl true
   def call(conn, {endpoint, handler, opts}) do
+    opts = Transport.merge_config(endpoint, opts)
+
     conn
     |> fetch_query_params()
     |> put_resp_header("access-control-allow-origin", "*")

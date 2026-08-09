@@ -28,7 +28,7 @@ defmodule Combo.Endpoint.Supervisor do
     static_url: nil,
     log_access_url: true,
     server: nil,
-    check_origin: true,
+    transport: [check_origin: true, check_csrf: true],
     render_errors: [layout: false],
     secret_key_base: nil,
     static: [
@@ -140,11 +140,11 @@ defmodule Combo.Endpoint.Supervisor do
   end
 
   defp check_origin_or_csrf_checked!(endpoint_config, socket_opts) do
-    check_origin = endpoint_config[:check_origin]
+    transport_config = endpoint_config[:transport]
 
     for {transport, transport_opts} <- socket_opts, is_list(transport_opts) do
-      check_origin = Keyword.get(transport_opts, :check_origin, check_origin)
-
+      transport_opts = Keyword.merge(transport_config, transport_opts)
+      check_origin = transport_opts[:check_origin]
       check_csrf = transport_opts[:check_csrf]
 
       if check_origin == false and check_csrf == false do

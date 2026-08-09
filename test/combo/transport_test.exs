@@ -10,7 +10,7 @@ defmodule Combo.TransportTest do
 
   Application.put_env(:combo, __MODULE__.Endpoint,
     url: [host: "host.com"],
-    check_origin: ["//endpoint.com"],
+    transport: [check_origin: ["//endpoint.com"], check_csrf: true],
     secret_key_base: @secret_key_base
   )
 
@@ -51,6 +51,13 @@ defmodule Combo.TransportTest do
 
   setup do
     Logger.put_process_level(self(), :none)
+  end
+
+  test "merges endpoint transport config with transport-specific config" do
+    config = Transport.merge_config(Endpoint, check_origin: false)
+
+    assert config[:check_origin] == false
+    assert config[:check_csrf] == true
   end
 
   ## Check origin

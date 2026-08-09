@@ -80,8 +80,9 @@ defmodule Combo.Endpoint do
 
     * `:static` - the configuration of `Combo.Static`.
 
-    * `:check_origin` - configure the `:check_origin` option for transports.
-      See `socket/3` for options. Defaults to `true`.
+    * `:transport` - shared transport configuration. The `:check_origin` and
+      `:check_csrf` options configure the default cross-origin request policy
+      for transports. See `socket/3` for details. Both default to `true`.
 
     * `:secret_key_base` - a secret key used as a base to generate secrets for
       encrypting and signing data. For example, cookies and tokens are signed
@@ -786,7 +787,8 @@ defmodule Combo.Endpoint do
     * `:check_origin` - if the transport should check the origin of requests
       when the `origin` header is present. May be a boolean, a list of URIs
       that are allowed, or a function provided as an MFA.
-      Defaults to `:check_origin` setting at endpoint configuration.
+      Defaults to the `:check_origin` setting in the endpoint's `:transport`
+      configuration.
 
       If `true`, the header is checked against `:host` in
       `MyApp.Web.Endpoint.config(:url)[:host]`.
@@ -821,7 +823,8 @@ defmodule Combo.Endpoint do
       `check_origin` and `check_csrf` enabled. If you set both to `false`,
       Combo will raise, but it is still possible to disable both by passing
       an MFA to `check_origin`. In such cases, it is your responsibility to
-      ensure at least one of them is enabled. Defaults to `true`.
+      ensure at least one of them is enabled. Defaults to the `:check_csrf`
+      setting in the endpoint's `:transport` configuration.
 
     * `:code_reloader` - enable or disable the code reloader. Defaults to your
       endpoint configuration.

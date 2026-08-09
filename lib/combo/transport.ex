@@ -13,6 +13,12 @@ defmodule Combo.Transport do
   require Logger
   alias Combo.Transport.Cache
 
+  @doc false
+  def merge_config(endpoint, config) do
+    endpoint.config(:transport)
+    |> Keyword.merge(config)
+  end
+
   @connect_info_keys [
     :peer_data,
     :trace_context_headers,
@@ -353,11 +359,13 @@ defmodule Combo.Transport do
     # :check_origin options, so the option must be part of the cache key.
     # Otherwise the first mount to be reached decides the policy for all
     # of them.
-    key = {handler, :config, :check_origin, Keyword.get(opts, :check_origin)}
+    transport_config = endpoint.config(:transport)
+    check_origin = Keyword.get(opts, :check_origin, transport_config[:check_origin])
+    key = {handler, :config, :check_origin, check_origin}
 
     Cache.get(endpoint, key, fn ->
       check_origin =
-        case Keyword.get(opts, :check_origin, endpoint.config(:check_origin)) do
+        case check_origin do
           origins when is_list(origins) ->
             Enum.map(origins, &parse_origin/1)
 

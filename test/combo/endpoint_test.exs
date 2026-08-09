@@ -169,12 +169,33 @@ defmodule Combo.EndpointTest do
       socket "/ws", TestSocket, websocket: [check_csrf: false]
     end
 
-    test "fails when :check_origin is disabled in endpoint config and :check_csrf is disabled in transport config" do
-      with_config!(SocketEndpointWithCheckOriginDisabled, [check_origin: false], fn _ ->
-        assert_raise ArgumentError, ~r/one of :check_origin and :check_csrf must be set/, fn ->
-          Combo.Endpoint.Supervisor.init({:combo, SocketEndpointWithCheckOriginDisabled, []})
+    test "fails when :check_origin is disabled in endpoint transport config and :check_csrf is disabled in transport config" do
+      with_config!(
+        SocketEndpointWithCheckOriginDisabled,
+        [transport: [check_origin: false]],
+        fn _ ->
+          assert_raise ArgumentError, ~r/one of :check_origin and :check_csrf must be set/, fn ->
+            Combo.Endpoint.Supervisor.init({:combo, SocketEndpointWithCheckOriginDisabled, []})
+          end
         end
-      end)
+      )
+    end
+
+    defmodule SocketEndpointWithCheckCsrfDisabled do
+      use Combo.Endpoint, otp_app: :combo
+      socket "/ws", TestSocket, websocket: [check_origin: false]
+    end
+
+    test "fails when :check_csrf is disabled in endpoint transport config and :check_origin is disabled in transport config" do
+      with_config!(
+        SocketEndpointWithCheckCsrfDisabled,
+        [transport: [check_csrf: false]],
+        fn _ ->
+          assert_raise ArgumentError, ~r/one of :check_origin and :check_csrf must be set/, fn ->
+            Combo.Endpoint.Supervisor.init({:combo, SocketEndpointWithCheckCsrfDisabled, []})
+          end
+        end
+      )
     end
   end
 
