@@ -104,11 +104,11 @@ defmodule Combo.Transport do
   Checks the origin request header against the list of allowed origins.
 
   Should be called by transports before connecting when appropriate.
-  If the origin header matches the allowed origins, no origin header was
-  sent or no origin was configured, it will return the given connection.
 
-  Otherwise a 403 Forbidden response will be sent and the connection halted.
-  It is a noop if the connection has been halted.
+  If the origin header matches the allowed origins, no origin header was sent
+  or no origin was configured, it will return the given connection. Otherwise,
+  a 403 Forbidden response will be sent and the connection halted. It is a noop
+  if the connection has been halted.
   """
   def check_origin(conn, handler, endpoint, opts, sender \\ &Plug.Conn.send_resp/1)
 
@@ -129,23 +129,22 @@ defmodule Combo.Transport do
 
       true ->
         Logger.error("""
-        Could not check origin for Combo.Socket transport.
+        Could not validate the origin for a transport connection.
 
         Origin of the request: #{origin}
 
-        This happens when you are attempting a socket connection to
-        a different host than the one configured in your config/
-        files. For example, in development the host is configured
-        to "localhost" but you may be trying to access it from
-        "127.0.0.1". To fix this issue, you may either:
+        This happens when you are attempting a transport connection to
+        a different host than the one configured in your config files.
+        For example, in development the host is configured to "localhost"
+        but you may be trying to access it from "127.0.0.1".
+
+        To fix this issue, you may either:
 
           1. update [url: [host: ...]] to your actual host in the
              config file for your current environment (recommended)
 
-          2. pass the :check_origin option when configuring your
-             endpoint or when configuring the transport in your
-             UserSocket module, explicitly outlining which origins
-             are allowed:
+          2. pass the :check_origin option when configuring your endpoint
+             or transport, explicitly outlining which origins are allowed:
 
                 check_origin: ["https://example.com",
                                "//another.com:888", "//other.com"]
@@ -200,25 +199,26 @@ defmodule Combo.Transport do
     request_headers = get_req_header(conn, "sec-websocket-protocol")
 
     Logger.error("""
-    Could not check Websocket subprotocols for Combo.Socket transport.
+    Could not negotiate a WebSocket subprotocol for a transport connection.
 
     Subprotocols of the request: #{inspect(request_headers)}
     Configured supported subprotocols: #{inspect(subprotocols)}
 
-    This happens when you are attempting a socket connection to
-    a different subprotocols than the one configured in your endpoint
-    or when you incorrectly configured supported subprotocols.
+    This happens when the requested subprotocols do not match the ones
+    configured for the transport, or when the supported subprotocols are
+    not configured correctly.
 
     To fix this issue, you may either:
 
-      1. update websocket: [subprotocols: [..]] to your actual subprotocols
-         in your endpoint socket configuration.
+      1. update websocket: [subprotocols: [..]] to the subprotocols supported
+         by your transport.
 
       2. check the correctness of the `sec-websocket-protocol` request header
          sent from the client.
 
-      3. remove `websocket` option from your endpoint socket configuration
-         if you don't use Websocket subprotocols.
+      3. remove the `:subprotocols` option from your WebSocket transport
+         configuration if you don't use WebSocket subprotocols.
+
     """)
 
     resp(conn, :forbidden, "")
@@ -391,6 +391,8 @@ defmodule Combo.Transport do
         {scheme, host, port}
     end
   end
+
+  defp origin_allowed?(check_origin, uri, endpoint, conn)
 
   defp origin_allowed?({module, function, arguments}, uri, _endpoint, _conn),
     do: apply(module, function, [uri | arguments])

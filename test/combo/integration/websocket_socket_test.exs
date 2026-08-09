@@ -149,7 +149,7 @@ defmodule Combo.Integration.WebSocketTest do
 
                  assert {:error, %Mint.WebSocket.UpgradeFailureError{status_code: 403}} =
                           WebsocketClient.connect(self(), @path, :noop, headers)
-               end) =~ "Could not check Websocket subprotocols"
+               end) =~ "Could not negotiate a WebSocket subprotocol"
       end
 
       test "returns params with sync request" do
