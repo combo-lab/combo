@@ -584,7 +584,7 @@ defmodule Combo.Endpoint do
     end
   end
 
-  defp build_socket_dispatches(endpoint, path, socket, opts) do
+  defp build_socket_dispatches(endpoint, path, socket, socket_opts) do
     dispatches = []
 
     common_config = [
@@ -600,7 +600,7 @@ defmodule Combo.Endpoint do
     ]
 
     websocket =
-      opts
+      socket_opts
       |> Keyword.get(:websocket, true)
       |> maybe_validate_keys(
         common_config ++
@@ -618,7 +618,7 @@ defmodule Combo.Endpoint do
       )
 
     longpoll =
-      opts
+      socket_opts
       |> Keyword.get(:longpoll, false)
       |> maybe_validate_keys(
         common_config ++
@@ -631,7 +631,7 @@ defmodule Combo.Endpoint do
 
     dispatches =
       if websocket do
-        websocket = put_auth_token(websocket, opts[:auth_token])
+        websocket = put_auth_token(websocket, socket_opts[:auth_token])
         config = Combo.Transport.load_config(Combo.Transports.WebSocket, websocket)
         plug_opts = {endpoint, socket, config}
         {match_path, conn_ast} = socket_path(path, config)
@@ -642,7 +642,7 @@ defmodule Combo.Endpoint do
 
     dispatches =
       if longpoll do
-        longpoll = put_auth_token(longpoll, opts[:auth_token])
+        longpoll = put_auth_token(longpoll, socket_opts[:auth_token])
         config = Combo.Transport.load_config(Combo.Transports.LongPoll, longpoll)
         plug_opts = {endpoint, socket, config}
         {match_path, conn_ast} = socket_path(path, config)
@@ -704,14 +704,14 @@ defmodule Combo.Endpoint do
     * `:websocket` - the websocket configuration.
       May be a boolean or a keyword list of options.
       See ["Common configuration"](#socket/3-common-configuration)
-      and ["WebSocket configuration"](#socket/3-websocket-configuration)
+      and ["WebSocket configuration"](`Combo.Transports.WebSocket`)
       for the whole list.
       Defaults to `true`.
 
     * `:longpoll` - the longpoll configuration.
       May be a boolean or a keyword list of options.
       See ["Common configuration"](#socket/3-common-configuration)
-      and ["Longpoll configuration"](#socket/3-longpoll-configuration)
+      and ["Longpoll configuration"](`Combo.Transports.LongPoll`)
       for the whole list.
       Defaults to `false`.
 
@@ -896,62 +896,6 @@ defmodule Combo.Endpoint do
   > these attacks, but you can't access cookies and other headers in your socket.
   > You may access the session stored in the connection via the `:connect_info`
   > option, provided you also pass a csrf token when connecting over WebSocket.
-
-  ## Websocket configuration
-
-  The following configuration applies only to `:websocket`.
-
-    * `:timeout` - the timeout for keeping websocket connections
-      open after it last received data. Defaults to `60_000`ms.
-
-    * `:max_frame_size` - the maximum allowed frame size in bytes,
-      Defaults to `"infinity"`.
-
-    * `:fullsweep_after` - the maximum number of garbage collections
-      before forcing a fullsweep for the socket process. You can set
-      it to `0` to force more frequent cleanups of your websocket
-      transport processes. Setting this option requires Erlang/OTP 24.
-
-    * `:compress` - whether to enable per message compression on
-      all data frames, Defaults to `false`.
-
-    * `:subprotocols` - a list of supported websocket subprotocols.
-      Used for handshake `Sec-WebSocket-Protocol` response header.
-      Defaults to `nil`.
-
-      For example:
-
-          subprotocols: ["sip", "mqtt"]
-
-    * `:error_handler` - custom error handler for connection errors.
-      If `c:Combo.Socket.connect/3` returns an `{:error, reason}` tuple,
-      the error handler will be called with the error reason. For WebSockets,
-      the error handler must be an MFA tuple that receives a `Plug.Conn`, the
-      error reason, and returns a `Plug.Conn` with a response. For example:
-
-          socket "/socket", MyApp.Web.Socket,
-            websocket: [
-              error_handler: {MyApp.Web.Socket, :handle_error, []}
-            ]
-
-      and a `{:error, :rate_limit}` return may be handled on `MyApp.Web.Socket` as:
-
-          def handle_error(conn, :rate_limit),
-            do: Plug.Conn.send_resp(conn, 429, "Too many requests")
-
-  ## Longpoll configuration
-
-  The following configuration applies only to `:longpoll`:
-
-    * `:window_ms` - how long the client can wait for new messages
-      in its poll request in milliseconds (ms). Defaults to `10_000`.
-
-    * `:pubsub_timeout_ms` - how long a request can wait for the
-      pubsub layer to respond in milliseconds (ms). Defaults to `2000`.
-
-    * `:crypto` - options for verifying and signing the token, accepted
-      by `Combo.Token`. By default tokens are valid for 2 weeks.
-
   """
   defmacro socket(path, module, opts \\ []) do
     module = Macro.expand(module, %{__CALLER__ | function: {:socket_dispatch, 2}})
