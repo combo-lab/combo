@@ -1,7 +1,14 @@
 defmodule Combo.Transport do
   @moduledoc """
-  Shared functionality for implementing transports.
+  Provides utils shared by transports.
+
+  See `Combo.Transport.Handler` for the interface implemented by transport
+  handlers.
   """
+
+  @callback default_config() :: Keyword.t()
+  @callback init(Plug.opts()) :: Plug.opts()
+  @callback call(Plug.Conn.t(), Plug.opts()) :: Plug.Conn.t()
 
   require Logger
 

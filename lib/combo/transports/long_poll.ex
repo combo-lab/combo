@@ -1,7 +1,7 @@
 defmodule Combo.Transports.LongPoll do
   @moduledoc false
 
-  @behaviour Plug
+  @behaviour Combo.Transport
 
   # The maximum is 10MB but read_body will cap the whole request at ~8MB,
   # so this acts as a secondary protection mechanism.
@@ -14,7 +14,8 @@ defmodule Combo.Transports.LongPoll do
   alias Combo.Socket.{V1, V2}
   alias Combo.Transport
 
-  def default_config() do
+  @impl true
+  def default_config do
     [
       path: "/longpoll",
       window_ms: 10_000,
@@ -28,8 +29,10 @@ defmodule Combo.Transports.LongPoll do
     ]
   end
 
+  @impl true
   def init(opts), do: opts
 
+  @impl true
   def call(conn, {endpoint, handler, opts}) do
     conn
     |> fetch_query_params()

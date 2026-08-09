@@ -12,7 +12,7 @@ defmodule Combo.Transports.WebSocket do
   # behaviour, the `WebSock` library is able to use the callbacks in the `WebSock` behaviour to
   # call this handler module directly for the rest of the WebSocket connection's lifetime.
 
-  @behaviour Plug
+  @behaviour Combo.Transport
 
   @connect_info_opts [:check_csrf]
 
@@ -23,7 +23,8 @@ defmodule Combo.Transports.WebSocket do
   alias Combo.Socket.{V1, V2}
   alias Combo.Transport
 
-  def default_config() do
+  @impl true
+  def default_config do
     [
       path: "/websocket",
       serializer: [
@@ -37,8 +38,10 @@ defmodule Combo.Transports.WebSocket do
     ]
   end
 
+  @impl true
   def init(opts), do: opts
 
+  @impl true
   def call(%{method: "GET"} = conn, {endpoint, handler, opts}) do
     subprotocols =
       if opts[:auth_token] do
