@@ -1,22 +1,15 @@
 defprotocol Combo.HTML.FormData do
   @moduledoc """
-  Converts a data structure into a `Combo.HTML.Form` struct.
-
-  ## Ecto integration
-
-  Combo provides integration of forms with Ecto changesets and data structures
-  via the [combo_ecto](https://hex.pm/packages/combo_ecto) package. If a
-  project was generated without Ecto support that dependency will need to be
-  manually added.
+  A protocol for converting data structure into a
+  [`Combo.HTML.Form`](`t:Combo.HTML.Form.t/0`) struct.
   """
 
   @doc """
   Converts a data structure into a [`Combo.HTML.Form`](`t:Combo.HTML.Form.t/0`) struct.
 
-  The options have their meaning defined by the underlying
-  implementation but all shared options below are expected to
-  be implemented. All remaining options must be stored in the
-  returned struct.
+  The options have their meaning defined by the underlying implementation
+  but all shared options below are expected to be implemented. All remaining
+  options must be stored in the returned struct.
 
   ## Shared options
 
@@ -30,13 +23,12 @@ defprotocol Combo.HTML.FormData do
   def to_form(data, options)
 
   @doc """
-  Converts the field in the given form based on the data structure
-  into a list of [`Combo.HTML.Form`](`t:Combo.HTML.Form.t/0`) structs.
+  Converts the field in the given form based on the data structure into a list
+  of [`Combo.HTML.Form`](`t:Combo.HTML.Form.t/0`) structs.
 
-  The options have their meaning defined by the underlying
-  implementation but all shared options below are expected to
-  be implemented. All remaining options must be stored in the
-  returned struct.
+  The options have their meaning defined by the underlying implementation but
+  all shared options below are expected to be implemented. All remaining options
+  must be stored in the returned struct.
 
   ## Shared Options
 
