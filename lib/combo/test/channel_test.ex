@@ -306,7 +306,7 @@ defmodule Combo.ChannelTest do
     map = %{
       endpoint: endpoint,
       transport: {__MODULE__, fetch_test_supervisor!(options)},
-      options: [serializer: [{NoopSerializer, "~> 1.0.0"}]],
+      options: [serializer: [{NoopSerializer, "~> 2.0.0"}]],
       params: __stringify__(params),
       connect_info: connect_info
     }

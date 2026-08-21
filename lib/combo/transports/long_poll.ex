@@ -27,7 +27,7 @@ defmodule Combo.Transports.LongPoll do
   @token_header "x-combo-longpoll-token"
 
   import Plug.Conn
-  alias Combo.Socket.{V1, V2}
+  alias Combo.Socket.V2
   alias Combo.Transport
 
   @impl true
@@ -37,7 +37,6 @@ defmodule Combo.Transports.LongPoll do
       window_ms: 10_000,
       pubsub_timeout_ms: 2_000,
       serializer: [
-        {V1.JSONSerializer, "~> 1.0.0"},
         {V2.JSONSerializer, "~> 2.0.0"}
       ],
       transport_log: false,
@@ -107,9 +106,9 @@ defmodule Combo.Transports.LongPoll do
   defp publish(conn, server_ref, endpoint, opts) do
     case read_body(conn, []) do
       {:ok, body, conn} ->
-        # We need to match on both v1 and v2 protocol, as well as wrap for backwards compat
         status =
           case get_req_header(conn, "content-type") do
+            # batched messages use NDJSON.
             ["application/x-ndjson"] ->
               body
               |> String.splitter(["\n", "\r\n"])
@@ -124,6 +123,7 @@ defmodule Combo.Transports.LongPoll do
                 transport_dispatch(endpoint, server_ref, msg, opts)
               end)
 
+            # individual messages use plain JSON.
             _ ->
               transport_dispatch(endpoint, server_ref, {body, :text}, opts)
           end

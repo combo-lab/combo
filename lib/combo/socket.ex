@@ -500,7 +500,7 @@ defmodule Combo.Socket do
       connect_info: connect_info
     } = map
 
-    vsn = params["vsn"] || "1.0.0"
+    vsn = params["vsn"] || "2.0.0"
 
     options = Keyword.merge(socket_options, options)
     start = System.monotonic_time()

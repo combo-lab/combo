@@ -67,7 +67,7 @@ defmodule Combo.Transports.WebSocket do
 
   import Plug.Conn
 
-  alias Combo.Socket.{V1, V2}
+  alias Combo.Socket.V2
   alias Combo.Transport
 
   @impl true
@@ -75,7 +75,6 @@ defmodule Combo.Transports.WebSocket do
     [
       path: "/websocket",
       serializer: [
-        {V1.JSONSerializer, "~> 1.0.0"},
         {V2.JSONSerializer, "~> 2.0.0"}
       ],
       transport_log: false,

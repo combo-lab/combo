@@ -7,7 +7,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
   import ExUnit.CaptureLog
 
   alias Combo.Integration.HTTPClient
-  alias Combo.Socket.{Broadcast, Message, V1, V2}
+  alias Combo.Socket.{Broadcast, Message, V2}
   alias __MODULE__.Endpoint
 
   @moduletag :capture_log
@@ -201,22 +201,14 @@ defmodule Combo.Integration.LongPollChannelsTest do
       end
 
     body = encode(serializer, json)
-    query_string = params |> Map.put("vsn", vsn) |> URI.encode_query()
+    params = if vsn, do: Map.put(params, "vsn", vsn), else: params
+    query_string = URI.encode_query(params)
     url = "http://127.0.0.1:#{@port}#{path}/longpoll?" <> query_string
     {:ok, resp} = HTTPClient.request(method, url, headers, body)
     decode_body(serializer, resp)
   end
 
-  defp serializer("2." <> _, json), do: {V2.JSONSerializer, json}
-  defp serializer(_, nil), do: {V1.JSONSerializer, nil}
-
-  defp serializer(_, batch) when is_list(batch) do
-    {V1.JSONSerializer, for(msg <- batch, do: Map.delete(msg, "join_ref"))}
-  end
-
-  defp serializer(_, %{} = json) do
-    {V1.JSONSerializer, json}
-  end
+  defp serializer(_vsn, json), do: {V2.JSONSerializer, json}
 
   defp decode_body(serializer, %{} = resp) do
     resp
@@ -270,8 +262,6 @@ defmodule Combo.Integration.LongPollChannelsTest do
         ])
     end
   end
-
-  defp encode(V1.JSONSerializer, %{} = map), do: Combo.json_library().encode!(map)
 
   @doc """
   Joins a long poll socket.
@@ -355,10 +345,11 @@ defmodule Combo.Integration.LongPollChannelsTest do
 
       for mode <- [:local, :pubsub] do
         @mode mode
-        @vsn "1.0.0"
+        @vsn "2.0.0"
 
         test "#{@mode}: joins and poll messages" do
-          session = join("/ws", "room:lobby", @vsn, "1", @mode)
+          join_ref = "1"
+          session = join("/ws", "room:lobby", @vsn, join_ref, @mode)
 
           # pull messages
           resp = poll(:get, "/ws", @vsn, session)
@@ -370,6 +361,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
                    event: "combo_reply",
                    payload: %{"response" => %{}, "status" => "ok"},
                    ref: "1",
+                   join_ref: join_ref,
                    topic: "room:lobby"
                  }
 
@@ -377,7 +369,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
                    event: "joined",
                    payload: %{"status" => "connected", "user_id" => nil},
                    ref: nil,
-                   join_ref: nil,
+                   join_ref: ^join_ref,
                    topic: "room:lobby"
                  } = status_msg
 
@@ -557,7 +549,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
                    event: "new_msg",
                    payload: %{"transport" => ":longpoll", "body" => "hi!"},
                    ref: nil,
-                   join_ref: nil,
+                   join_ref: join_ref,
                    topic: "room:lobby"
                  }
 
@@ -749,7 +741,6 @@ defmodule Combo.Integration.LongPollChannelsTest do
     end
 
     for {serializer, vsn, join_ref} <- [
-          {V1.JSONSerializer, "1.0.0", nil},
           {V2.JSONSerializer, "2.0.0", "1"}
         ] do
       @vsn vsn
@@ -880,6 +871,18 @@ defmodule Combo.Integration.LongPollChannelsTest do
 
           poll(:get, "/ws", @vsn, session)
           assert resp.body["status"] == 410
+        end
+
+        test "defaults to V2 when vsn is omitted" do
+          session = join("/ws", "room:lobby", nil, @join_ref)
+          resp = poll(:get, "/ws", nil, session)
+
+          assert Enum.any?(resp.body["messages"], fn message ->
+                   match?(
+                     %Message{event: "combo_reply", join_ref: @join_ref, topic: "room:lobby"},
+                     message
+                   )
+                 end)
         end
 
         test "refuses non-matching versions" do

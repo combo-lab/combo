@@ -7,7 +7,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
   import ExUnit.CaptureLog
 
   alias Combo.Integration.WebsocketClient
-  alias Combo.Socket.{V1, V2, Message}
+  alias Combo.Socket.{V2, Message}
   alias __MODULE__.Endpoint
 
   @moduletag :capture_log
@@ -239,7 +239,6 @@ defmodule Combo.Integration.WebSocketChannelsTest do
         %{adapter: Combo.Endpoint.BanditAdapter}
       ] do
     for {serializer, vsn, join_ref} <- [
-          {V1.JSONSerializer, "1.0.0", nil},
           {V2.JSONSerializer, "2.0.0", "11"}
         ] do
       @serializer serializer
@@ -826,6 +825,20 @@ defmodule Combo.Integration.WebSocketChannelsTest do
                             WebsocketClient.connect(self(), url, @serializer)
                  end) =~
                    "The client's requested transport version \"123.1.1\" does not match server's version"
+        end
+
+        test "defaults to V2 when vsn is omitted" do
+          url = "ws://127.0.0.1:#{@port}/ws/websocket"
+          {:ok, sock} = WebsocketClient.connect(self(), url, V2.JSONSerializer)
+
+          WebsocketClient.join(sock, "room:lobby", %{})
+
+          assert_receive %Message{
+            event: "combo_reply",
+            join_ref: @join_ref,
+            payload: %{"status" => "ok"},
+            topic: "room:lobby"
+          }
         end
 
         test "shuts down if client goes quiet" do
