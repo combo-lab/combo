@@ -779,8 +779,8 @@ defmodule Combo.Endpoint do
     * `:path` - the path to use for the transport. Default to the transport
       name (`"/websocket"` or `"/longpoll"`).
 
-    * `:serializer` - a list of serializers for messages. See `Combo.Socket`
-      for more information.
+    * `:serializer` - a list of serializers for messages that overrides the
+      socket's defaults. See `Combo.Socket` for more information.
 
     * `:transport_log` - if the transport layer itself should log and, if so,
       the level.

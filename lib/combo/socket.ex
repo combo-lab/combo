@@ -275,6 +275,10 @@ defmodule Combo.Socket do
             transport: nil,
             transport_pid: nil
 
+  @default_serializers [
+    {Combo.Socket.V2.JSONSerializer, "~> 2.0.0"}
+  ]
+
   @type t :: %Socket{
           assigns: map,
           channel: atom,
@@ -505,7 +509,9 @@ defmodule Combo.Socket do
     options = Keyword.merge(socket_options, options)
     start = System.monotonic_time()
 
-    case negotiate_serializer(Keyword.fetch!(options, :serializer), vsn) do
+    serializers = Keyword.get(options, :serializer, @default_serializers)
+
+    case negotiate_serializer(serializers, vsn) do
       {:ok, serializer} ->
         result =
           user_connect(

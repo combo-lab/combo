@@ -67,16 +67,12 @@ defmodule Combo.Transports.WebSocket do
 
   import Plug.Conn
 
-  alias Combo.Socket.V2
   alias Combo.Transport
 
   @impl true
   def default_config do
     [
       path: "/websocket",
-      serializer: [
-        {V2.JSONSerializer, "~> 2.0.0"}
-      ],
       transport_log: false,
       error_handler: {__MODULE__, :handle_error, []},
       timeout: 60_000,

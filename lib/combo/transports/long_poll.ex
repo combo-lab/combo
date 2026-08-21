@@ -27,7 +27,6 @@ defmodule Combo.Transports.LongPoll do
   @token_header "x-combo-longpoll-token"
 
   import Plug.Conn
-  alias Combo.Socket.V2
   alias Combo.Transport
 
   @impl true
@@ -36,9 +35,6 @@ defmodule Combo.Transports.LongPoll do
       path: "/longpoll",
       window_ms: 10_000,
       pubsub_timeout_ms: 2_000,
-      serializer: [
-        {V2.JSONSerializer, "~> 2.0.0"}
-      ],
       transport_log: false,
       crypto: [max_age: 1_209_600]
     ]
