@@ -1,21 +1,18 @@
 defmodule Combo.Transport.Handler do
   @moduledoc """
-  Outlines the Socket <-> Transport communication.
+  The transport handler behaviour.
 
-  Each transport, such as websockets and longpolling, must interact
-  with a socket. This module defines the functions a transport will
-  invoke on a given socket implementation.
+  Each transport, such as websockets and longpolling, must interact with a
+  handler module.
 
-  `Combo.Socket` is just one possible implementation of a socket
-  that multiplexes events over multiple channels. If you implement
-  this behaviour, then existing transports can use your new socket
-  implementation, without passing through channels.
+  `Combo.Socket` is one possible implementation. See `Combo.Socket` for more
+  information.
 
   ## Example
 
-  Here is a simple echo socket implementation:
+  Here is a simple echo handler:
 
-      defmodule EchoSocket do
+      defmodule EchoHandler do
         @behaviour Combo.Transport.Handler
 
         def child_spec(opts) do
@@ -46,13 +43,6 @@ defmodule Combo.Transport.Handler do
           :ok
         end
       end
-
-  It can be mounted in your endpoint like any other socket:
-
-      socket "/socket", EchoSocket, websocket: true, longpoll: true
-
-  You can now interact with the socket under `/socket/websocket`
-  and `/socket/longpoll`.
 
   ## Custom transports
 
@@ -159,7 +149,7 @@ defmodule Combo.Transport.Handler do
       serializers and their requirements
 
   """
-  @callback connect(transport_info :: map) :: {:ok, state} | {:error, term()} | :error
+  @callback connect(transport_info :: map) :: {:ok, state()} | {:error, term()} | :error
 
   @doc """
   Initializes the socket state.
@@ -167,7 +157,7 @@ defmodule Combo.Transport.Handler do
   This must be executed from the process that will effectively
   operate the socket.
   """
-  @callback init(state) :: {:ok, state}
+  @callback init(state()) :: {:ok, state()}
 
   @doc """
   Handles incoming socket messages.
@@ -184,10 +174,10 @@ defmodule Combo.Transport.Handler do
   `:binary` opcode and the message must be always iodata. Long polling only
   supports text opcode.
   """
-  @callback handle_in({message :: term, opts :: keyword}, state) ::
-              {:ok, state}
-              | {:reply, :ok | :error, {opcode :: atom, message :: term}, state}
-              | {:stop, reason :: term, state}
+  @callback handle_in({message :: term, opts :: keyword}, state()) ::
+              {:ok, state()}
+              | {:reply, :ok | :error, {opcode :: atom, message :: term}, state()}
+              | {:stop, reason :: term, state()}
 
   @doc """
   Handles incoming control frames.
@@ -207,10 +197,10 @@ defmodule Combo.Transport.Handler do
   If a control frame doesn't have a payload, then the payload value
   will be `nil`.
   """
-  @callback handle_control({message :: term, opts :: keyword}, state) ::
+  @callback handle_control({message :: term, opts :: keyword}, state()) ::
               {:ok, state}
-              | {:reply, :ok | :error, {opcode :: atom, message :: term}, state}
-              | {:stop, reason :: term, state}
+              | {:reply, :ok | :error, {opcode :: atom, message :: term}, state()}
+              | {:stop, reason :: term, state()}
 
   @doc """
   Handles info messages.
@@ -226,10 +216,10 @@ defmodule Combo.Transport.Handler do
   `:binary` opcode and the message must be always iodata. Long polling only
   supports text opcode.
   """
-  @callback handle_info(message :: term, state) ::
-              {:ok, state}
-              | {:push, {opcode :: atom, message :: term}, state}
-              | {:stop, reason :: term, state}
+  @callback handle_info(message :: term, state()) ::
+              {:ok, state()}
+              | {:push, {opcode :: atom, message :: term}, state()}
+              | {:stop, reason :: term, state()}
 
   @doc """
   Invoked on termination.
@@ -238,7 +228,7 @@ defmodule Combo.Transport.Handler do
   considered a `:normal` exit signal, so linked process will not automatically
   exit. See `Process.exit/2` for more details on exit signals.
   """
-  @callback terminate(reason :: term, state) :: :ok
+  @callback terminate(reason :: term, state()) :: :ok
 
   @optional_callbacks handle_control: 2, drainer_spec: 1
 end

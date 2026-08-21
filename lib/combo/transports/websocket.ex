@@ -3,20 +3,21 @@ defmodule Combo.Transports.WebSocket do
 
   ## Options
 
-    * `:timeout` - the timeout for keeping websocket connections open after
-      it last received data.
-      Defaults to `60_000`ms.
+    * `:timeout` - the number of milliseconds to wait after no client data is
+      received before closing the connection
+      Defaults to `60_000`.
 
-    * `:max_frame_size` - the maximum allowed frame size in bytes.
-      Defaults to `"infinity"`.
+    * `:compress` - whether to accept negotiation of a compression extension
+      with the client.
+      Defaults to `false`.
+
+    * `:max_frame_size` - the maximum allowed frame size in bytes. If a frame size
+      larger than this is received the connection will be closed
+      Defaults to `10_000_000` (10MB).
 
     * `:fullsweep_after` - the maximum number of garbage collections before
-      forcing a fullsweep for the socket process. You can set it to `0` to
-      force more frequent cleanups of your websocket transport processes.
-
-    * `:compress` - whether to enable per message compression on all data
-      frames.
-      Defaults to `false`.
+      forcing a fullsweep of the WebSocket connection process.
+      You can set it to `0` to force more frequent cleanups.
 
     * `:subprotocols` - a list of supported websocket subprotocols.
       Used for handshake `Sec-WebSocket-Protocol` response header.
