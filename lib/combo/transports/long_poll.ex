@@ -32,9 +32,9 @@ defmodule Combo.Transports.LongPoll do
   @impl true
   def default_config do
     [
+      transport_log: false,
       window_ms: 10_000,
       pubsub_timeout_ms: 2_000,
-      transport_log: false,
       crypto: [max_age: 1_209_600]
     ]
   end
