@@ -72,7 +72,6 @@ defmodule Combo.Transports.WebSocket do
   @impl true
   def default_config do
     [
-      path: "/websocket",
       transport_log: false,
       error_handler: {__MODULE__, :handle_error, []},
       timeout: 60_000,

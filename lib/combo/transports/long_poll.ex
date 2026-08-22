@@ -32,7 +32,6 @@ defmodule Combo.Transports.LongPoll do
   @impl true
   def default_config do
     [
-      path: "/longpoll",
       window_ms: 10_000,
       pubsub_timeout_ms: 2_000,
       transport_log: false,

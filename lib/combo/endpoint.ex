@@ -632,9 +632,10 @@ defmodule Combo.Endpoint do
     dispatches =
       if websocket do
         websocket = put_auth_token(websocket, socket_opts[:auth_token])
+        {transport_path, websocket} = Keyword.pop(websocket, :path, "/websocket")
         config = Combo.Transport.load_config(Combo.Transports.WebSocket, websocket)
         plug_opts = {endpoint, socket, config}
-        {match_path, conn_ast} = socket_path(path, config)
+        {match_path, conn_ast} = socket_path(path, transport_path)
         [{match_path, conn_ast, Combo.Transports.WebSocket, plug_opts} | dispatches]
       else
         dispatches
@@ -643,9 +644,10 @@ defmodule Combo.Endpoint do
     dispatches =
       if longpoll do
         longpoll = put_auth_token(longpoll, socket_opts[:auth_token])
+        {transport_path, longpoll} = Keyword.pop(longpoll, :path, "/longpoll")
         config = Combo.Transport.load_config(Combo.Transports.LongPoll, longpoll)
         plug_opts = {endpoint, socket, config}
-        {match_path, conn_ast} = socket_path(path, config)
+        {match_path, conn_ast} = socket_path(path, transport_path)
         [{match_path, conn_ast, Combo.Transports.LongPoll, plug_opts} | dispatches]
       else
         dispatches
@@ -657,9 +659,7 @@ defmodule Combo.Endpoint do
   defp put_auth_token(true, enabled), do: [auth_token: enabled]
   defp put_auth_token(opts, enabled), do: Keyword.put(opts, :auth_token, enabled)
 
-  defp socket_path(path, config) do
-    end_path_fragment = Keyword.fetch!(config, :path)
-
+  defp socket_path(path, end_path_fragment) do
     {vars, path} =
       String.split(path <> "/" <> end_path_fragment, "/", trim: true)
       |> Enum.join("/")
