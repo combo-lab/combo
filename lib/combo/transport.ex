@@ -1,7 +1,20 @@
 defmodule Combo.Transport do
   @moduledoc """
-  Defines the transport behaviour and provides functionality shared by transport
-  implementations.
+  The transport behaviour and utils shared by transport implementations.
+
+  ## Terminology
+
+  A **transport** establishes communication between a client and the server,
+  and transfers data between them.
+  `Combo.Transports.WebSocket` and `Combo.Transports.LongPoll` are built-in
+  transports.
+
+  A **transport session** is the logical communication lifecycle managed by a
+  transport. A WebSocket session uses one persistent connection, while a Long
+  Poll session spans multiple HTTP requests.
+
+  A **transport handler** is a module that handles transport sessions by
+  implementing `Combo.Transport.Handler`.
   """
 
   @callback default_config() :: Keyword.t()

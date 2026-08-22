@@ -2,11 +2,20 @@ defmodule Combo.Transport.Handler do
   @moduledoc """
   The transport handler behaviour.
 
-  Each transport, such as websockets and longpolling, must interact with a
-  handler module.
+  ## Terminology
 
-  `Combo.Socket` is one possible implementation. See `Combo.Socket` for more
-  information.
+  **Transport handler resources** are extra resources used by a transport
+  handler, such as processes, or other infrastructure.
+
+  **Transport handler state** is the per-session state returned by the
+  transport handler and passed between its callbacks.
+
+  **Transport messages** are units of data transferred through a transport
+  session. They do not necessarily correspond to an underlying network frames
+  or HTTP requests.
+
+  **Transport session draining** is the process of gradually terminating
+  established transport sessions during application shutdown or restart.
 
   ## Example
 
@@ -16,18 +25,14 @@ defmodule Combo.Transport.Handler do
         @behaviour Combo.Transport.Handler
 
         def child_spec(opts) do
-          # We won't spawn any process, so let's ignore the child spec
           :ignore
         end
 
         def connect(state) do
-          # Callback to retrieve relevant data from the connection.
-          # The map contains options, params, transport and endpoint keys.
           {:ok, state}
         end
 
         def init(state) do
-          # Now we are effectively inside the process that maintains the socket.
           {:ok, state}
         end
 
@@ -44,191 +49,119 @@ defmodule Combo.Transport.Handler do
         end
       end
 
-  ## Custom transports
-
-  Sockets are operated by a transport. When a transport is defined,
-  it usually receives a socket module and the module will be invoked
-  when certain events happen at the transport level. The functions
-  a transport can invoke are the callbacks defined in this module.
-
-  Whenever the transport receives a new connection, it should invoke
-  the `c:connect/1` callback with a map of metadata. Different sockets
-  may require different metadata.
-
-  If the connection is accepted, the transport can move the connection
-  to another process, if so desires, or keep using the same process. The
-  process responsible for managing the socket should then call `c:init/1`.
-
-  For each message received from the client, the transport must call
-  `c:handle_in/2` on the socket. For each informational message the
-  transport receives, it should call `c:handle_info/2` on the socket.
-
-  Transports can optionally implement `c:handle_control/2` for handling
-  control frames such as `:ping` and `:pong`.
-
-  On termination, `c:terminate/2` must be called. A special atom with
-  reason `:closed` can be used to specify that the client terminated
-  the connection.
-
-  ### Booting
-
-  When you list a socket under `Combo.Endpoint.socket/3`, Combo
-  will automatically start the socket module under its supervision tree,
-  however Combo does not manage any transport.
-
-  Whenever your endpoint starts, Combo invokes the `child_spec/1` on
-  each listed socket and start that specification under the endpoint
-  supervisor. Since the socket supervision tree is started by the endpoint,
-  any custom transport must be started after the endpoint.
   """
 
   @type state :: term()
 
+  @type message :: term()
+  @type opcode :: atom()
+
+  @type reason :: term()
+
   @doc """
-  Returns a child specification for socket management.
+  Returns a child specification for managing handler resources.
 
-  This is invoked only once per socket regardless of
-  the number of transports and should be responsible
-  for setting up any process structure used exclusively
-  by the socket regardless of transports.
-
-  Each socket connection is started by the transport
-  and the process that controls the socket likely
-  belongs to the transport. However, some sockets spawn
-  new processes, such as `Combo.Socket` which spawns
-  channels, and this gives the ability to start a
-  supervision tree associated to the socket.
-
-  It receives the socket options from the endpoint,
-  for example:
-
-      socket "/my_app", MyApp.Socket, shutdown: 5000
-
-  means `child_spec([shutdown: 5000])` will be invoked.
-
-  `:ignore` means no child spec is necessary for this socket.
+  Return `:ignore` if the transport handler requires no managed resources.
   """
-  @callback child_spec(keyword) :: :supervisor.child_spec() | :ignore
+  @callback child_spec(opts :: Keyword.t()) ::
+              :supervisor.child_spec()
+              | :ignore
 
   @doc """
-  Returns a child specification for terminating the socket.
+  Returns a child specification for draining transport sessions.
 
-  This is a process that is started late in the supervision
-  tree with the specific goal of draining connections on
-  application shutdown.
-
-  Similar to `child_spec/1`, it receives the socket options
-  from the endpoint.
+  Return `:ignore` if the transport handler requires no session drainer.
   """
-  @callback drainer_spec(keyword) :: :supervisor.child_spec() | :ignore
+  @callback drainer_spec(opts :: Keyword.t()) ::
+              :supervisor.child_spec()
+              | :ignore
 
   @doc """
-  Connects to the socket.
+  Accepts or rejects to establish a transport session.
 
-  The transport passes a map of metadata and the socket
-  returns `{:ok, state}`, `{:error, reason}` or `:error`.
-  The state must be stored by the transport and returned
-  in all future operations. When `{:error, reason}` is
-  returned, some transports - such as WebSockets - allow
-  customizing the response based on `reason` via a custom
-  `:error_handler`.
+  This callback typically performs authorization and creates the initial
+  transport handler state. It may run outside the process that will operate
+  the established transport session.
 
-  This function is used for authorization purposes and it
-  may be invoked outside of the process that effectively
-  runs the socket.
-
-  In the default `Combo.Socket` implementation, the
-  metadata expects the following keys:
-
-    * `:endpoint` - the application endpoint
-    * `:transport` - the transport name
-    * `:params` - the connection parameters
-    * `:options` - a keyword list of transport options, often
-      given by developers when configuring the transport.
-      It must include a `:serializer` field with the list of
-      serializers and their requirements
-
+  Return `{:ok, state}` to accept it, `{:error, reason}` to reject it with a
+  reason, or `:error` to reject it without a reason.
   """
-  @callback connect(transport_info :: map) :: {:ok, state()} | {:error, term()} | :error
+  @callback connect(metadata :: map()) ::
+              {:ok, state()}
+              | {:error, reason()}
+              | :error
 
   @doc """
-  Initializes the socket state.
+  Initializes the transport handler state for a established transport session.
 
-  This must be executed from the process that will effectively
-  operate the socket.
+  This callback runs in the process that handles the transport session.
   """
   @callback init(state()) :: {:ok, state()}
 
   @doc """
-  Handles incoming socket messages.
+  Handles a transport message received during a transport session.
 
-  The message is represented as `{payload, options}`. It must
-  return one of:
+  The transport message is represented as `{payload, options}`.
+  It must return one of:
 
-    * `{:ok, state}` - continues the socket with no reply
-    * `{:reply, status, reply, state}` - continues the socket with reply
-    * `{:stop, reason, state}` - stops the socket
+    * `{:ok, state}` - continues the transport session without a reply.
+    * `{:reply, status, reply, state}` - sends a reply and continues the transport session.
+    * `{:stop, reason, state}` - terminates the transport session.
 
-  The `reply` is a tuple contain an `opcode` atom and a message that can
-  be any term. The built-in websocket transport supports both `:text` and
-  `:binary` opcode and the message must be always iodata. Long polling only
-  supports text opcode.
+  The reply is an `{opcode, message}` tuple. The built-in WebSocket
+  transport supports `:text` and `:binary` opcodes, and the message must
+  be iodata. Long Poll supports only the `:text` opcode.
   """
-  @callback handle_in({message :: term, opts :: keyword}, state()) ::
+  @callback handle_in({message(), opts :: Keyword.t()}, state()) ::
               {:ok, state()}
-              | {:reply, :ok | :error, {opcode :: atom, message :: term}, state()}
-              | {:stop, reason :: term, state()}
+              | {:reply, :ok | :error, {opcode(), message()}, state()}
+              | {:stop, reason(), state()}
 
   @doc """
-  Handles incoming control frames.
+  Handles a control frame received during a transport session.
 
-  The message is represented as `{payload, options}`. It must
-  return one of:
+  The control frame is represented as `{payload, options}`.
+  It must return one of:
 
-    * `{:ok, state}` - continues the socket with no reply
-    * `{:reply, status, reply, state}` - continues the socket with reply
-    * `{:stop, reason, state}` - stops the socket
+    * `{:ok, state}` - continues the transport session without a reply.
+    * `{:reply, status, reply, state}` - sends a reply and continues the transport session.
+    * `{:stop, reason, state}` - terminates the transport session.
 
-  Control frames are only supported when using websockets.
-
-  The `options` contains an `opcode` key, this will be either `:ping` or
-  `:pong`.
-
-  If a control frame doesn't have a payload, then the payload value
-  will be `nil`.
+  Control frames are supported only by WebSocket transports. The `:opcode`
+  option is either `:ping` or `:pong`. The payload is `nil` when the frame
+  has no payload.
   """
-  @callback handle_control({message :: term, opts :: keyword}, state()) ::
-              {:ok, state}
-              | {:reply, :ok | :error, {opcode :: atom, message :: term}, state()}
-              | {:stop, reason :: term, state()}
-
-  @doc """
-  Handles info messages.
-
-  The message is a term. It must return one of:
-
-    * `{:ok, state}` - continues the socket with no reply
-    * `{:push, reply, state}` - continues the socket with reply
-    * `{:stop, reason, state}` - stops the socket
-
-  The `reply` is a tuple contain an `opcode` atom and a message that can
-  be any term. The built-in websocket transport supports both `:text` and
-  `:binary` opcode and the message must be always iodata. Long polling only
-  supports text opcode.
-  """
-  @callback handle_info(message :: term, state()) ::
+  @callback handle_control({message(), opts :: Keyword.t()}, state()) ::
               {:ok, state()}
-              | {:push, {opcode :: atom, message :: term}, state()}
-              | {:stop, reason :: term, state()}
+              | {:reply, :ok | :error, {opcode(), message()}, state()}
+              | {:stop, reason(), state()}
 
   @doc """
-  Invoked on termination.
+  Handles an Erlang message received during a transport session.
 
-  If `reason` is `:closed`, it means the client closed the socket. This is
-  considered a `:normal` exit signal, so linked process will not automatically
+  It must return one of:
+
+    * `{:ok, state}` - continues the transport session without a push.
+    * `{:push, push, state}` - sends a push and continues the transport session.
+    * `{:stop, reason, state}` - terminates the transport session.
+
+  The push is an `{opcode, message}` tuple. The built-in WebSocket transport
+  supports `:text` and `:binary` opcodes, and the message must be iodata. Long
+  Poll supports only the `:text` opcode.
+  """
+  @callback handle_info(message(), state()) ::
+              {:ok, state()}
+              | {:push, {opcode(), message()}, state()}
+              | {:stop, reason(), state()}
+
+  @doc """
+  Cleans up the transport handler state when a transport session terminates.
+
+  If `reason` is `:closed`, the client closed the transport session. This is
+  considered a `:normal` exit signal, so linked processes do not automatically
   exit. See `Process.exit/2` for more details on exit signals.
   """
-  @callback terminate(reason :: term, state()) :: :ok
+  @callback terminate(reason(), state()) :: :ok
 
-  @optional_callbacks handle_control: 2, drainer_spec: 1
+  @optional_callbacks drainer_spec: 1, handle_control: 2
 end
