@@ -776,8 +776,8 @@ defmodule Combo.Endpoint do
   The configuration below can be given to both `:websocket` and `:longpoll`
   options:
 
-    * `:path` - the path to use for the transport. Default to the transport
-      name (`"/websocket"` or `"/longpoll"`).
+    * `:path` - the route suffix appended to the socket mount path.
+      Defaults to `"/websocket"` or `"/longpoll"`.
 
     * `:serializer` - a list of serializers for messages that overrides the
       socket's defaults. See `Combo.Socket` for more information.
