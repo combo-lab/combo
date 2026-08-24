@@ -547,7 +547,7 @@ defmodule Combo.Integration.LongPollChannelsTest do
 
           assert List.last(resp.body["messages"]) == %Message{
                    event: "new_msg",
-                   payload: %{"transport" => ":longpoll", "body" => "hi!"},
+                   payload: %{"transport" => "Combo.Transports.LongPoll", "body" => "hi!"},
                    ref: nil,
                    join_ref: join_ref,
                    topic: "room:lobby"
@@ -646,28 +646,28 @@ defmodule Combo.Integration.LongPollChannelsTest do
                    %Message{
                      topic: "room:lobby",
                      event: "new_msg",
-                     payload: %{"body" => "hi1", "transport" => ":longpoll"},
+                     payload: %{"body" => "hi1", "transport" => "Combo.Transports.LongPoll"},
                      ref: nil,
                      join_ref: "1"
                    },
                    %Message{
                      topic: "room:lobby",
                      event: "new_msg",
-                     payload: %{"body" => "hi2", "transport" => ":longpoll"},
+                     payload: %{"body" => "hi2", "transport" => "Combo.Transports.LongPoll"},
                      ref: nil,
                      join_ref: "1"
                    },
                    %Message{
                      topic: "room:lobby",
                      event: "bin_ack",
-                     payload: %{"transport" => ":longpoll"},
+                     payload: %{"transport" => "Combo.Transports.LongPoll"},
                      ref: nil,
                      join_ref: "1"
                    },
                    %Message{
                      topic: "room:lobby",
                      event: "new_msg",
-                     payload: %{"body" => "hi3", "transport" => ":longpoll"},
+                     payload: %{"body" => "hi3", "transport" => "Combo.Transports.LongPoll"},
                      ref: nil,
                      join_ref: "1"
                    }

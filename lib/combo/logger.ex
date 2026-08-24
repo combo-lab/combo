@@ -56,7 +56,7 @@ defmodule Combo.Logger do
     * `[:combo, :socket_connected]` - dispatched by `Combo.Socket`, at the end of a socket connection:
       * Measurement: `%{duration: native_time}`
       * Metadata: `%{endpoint: atom, transport: atom, params: term, connect_info: map, vsn: binary, user_socket: atom, result: :ok | :error, serializer: atom, log: Logger.level | false}`
-      * Disable logging: `use Combo.Socket, log: false` or `socket "/foo", MySocket, websocket: [log: false]` in your endpoint
+      * Disable logging: `use Combo.Socket, log: false` or `socket "/foo", MySocket, log: false` in your endpoint
 
     * `[:combo, :socket_drain]` - dispatched by `Combo.Socket` when using the `:drainer` option:
       * Measurement: `%{count: integer, total: integer, index: integer, rounds: integer}`

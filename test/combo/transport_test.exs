@@ -54,7 +54,7 @@ defmodule Combo.TransportTest do
   end
 
   test "merges endpoint transport config with transport-specific config" do
-    config = Transport.merge_config(Endpoint, check_origin: false)
+    config = Transport.merge_endpoint_config(Endpoint, check_origin: false)
 
     assert config[:check_origin] == false
     assert config[:check_csrf] == true

@@ -303,7 +303,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
 
           assert_receive %Message{
             event: "new_msg",
-            payload: %{"transport" => ":websocket", "body" => "hi!"}
+            payload: %{"transport" => "Combo.Transports.WebSocket", "body" => "hi!"}
           }
 
           WebsocketClient.leave(sock, lobby, %{})
@@ -613,7 +613,7 @@ defmodule Combo.Integration.WebSocketChannelsTest do
             end)
 
           assert log =~ "CONNECTED TO Combo.Integration.WebSocketChannelsTest.UserSocket in "
-          assert log =~ "  Transport: :websocket"
+          assert log =~ "  Transport: Combo.Transports.WebSocket"
           assert log =~ "  Serializer: #{inspect(@serializer)}"
           assert log =~ "  Parameters: %{\"logging\" => \"enabled\", \"vsn\" => #{inspect(@vsn)}}"
         end

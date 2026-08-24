@@ -30,8 +30,9 @@ defmodule Combo.Transports.WebSocket do
     * `:error_handler` - custom error handler for connecting errors.
       If `c:Combo.Transport.Handler.connect/3` returns an `{:error, reason}`
       tuple, the error handler will be called with the error reason.
-      the error handler must be an MFA tuple that receives a `Plug.Conn`, the
-      error reason, and returns a `Plug.Conn` with a response. For example:
+      the error handler must be an MFA tuple that receives a `Plug.Conn`
+      struct, the error reason, and returns a `Plug.Conn` struct with a
+      response. For example:
 
           socket "/socket", MyApp.Web.UserSocket,
             websocket: [
@@ -69,22 +70,45 @@ defmodule Combo.Transports.WebSocket do
 
   alias Combo.Transport
 
+  @default_config [
+    log: false,
+    error_handler: {__MODULE__, :handle_error, []},
+    timeout: 60_000,
+    compress: false
+  ]
+
+  @config_keys [
+    # common
+    :log,
+    :check_origin,
+    :check_csrf,
+    :code_reloader,
+    :connect_info,
+    :auth_token,
+    # transport-specific - provided by websock_adapter
+    :timeout,
+    :compress,
+    :max_frame_size,
+    :fullsweep_after,
+    :validate_utf8,
+    :active_n,
+    :deflate_options,
+    # transport-specific - custom
+    :subprotocols,
+    :error_handler
+  ]
+
   @impl true
-  def default_config do
-    [
-      transport_log: false,
-      error_handler: {__MODULE__, :handle_error, []},
-      timeout: 60_000,
-      compress: false
-    ]
+  def build_config(opts) do
+    opts
+    |> Keyword.validate!(@config_keys)
+    |> then(&Keyword.merge(@default_config, &1))
+    |> Transport.load_config()
   end
 
   @impl true
-  def init(opts), do: opts
-
-  @impl true
-  def call(%{method: "GET"} = conn, {endpoint, handler, opts}) do
-    opts = Transport.merge_config(endpoint, opts)
+  def call(%{method: "GET"} = conn, {endpoint, opts, handler, handler_opts}) do
+    opts = Transport.merge_endpoint_config(endpoint, opts)
 
     subprotocols =
       if opts[:auth_token] do
@@ -99,7 +123,7 @@ defmodule Combo.Transports.WebSocket do
     conn
     |> fetch_query_params()
     |> Transport.code_reload(endpoint, opts)
-    |> Transport.transport_log(opts[:transport_log])
+    |> Transport.log(opts[:log])
     |> Transport.check_origin(handler, endpoint, opts)
     |> maybe_auth_token_from_header(opts[:auth_token])
     |> check_subprotocols(subprotocols)
@@ -113,19 +137,19 @@ defmodule Combo.Transports.WebSocket do
         connect_info =
           Transport.connect_info(conn, endpoint, keys, Keyword.take(opts, @connect_info_opts))
 
-        config = %{
+        metadata = %{
           endpoint: endpoint,
-          transport: :websocket,
-          options: opts,
+          transport: {__MODULE__, opts},
+          handler: {handler, handler_opts},
           params: params,
           connect_info: connect_info
         }
 
-        case handler.connect(config) do
-          {:ok, arg} ->
+        case handler.connect(metadata) do
+          {:ok, state} ->
             try do
               conn
-              |> WebSockAdapter.upgrade(handler, arg, opts)
+              |> WebSockAdapter.upgrade(handler, state, opts)
               |> halt()
             rescue
               e in WebSockAdapter.UpgradeError -> send_resp(conn, 400, e.message)

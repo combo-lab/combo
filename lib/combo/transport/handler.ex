@@ -92,7 +92,7 @@ defmodule Combo.Transport.Handler do
               | :error
 
   @doc """
-  Initializes the transport handler state for a established transport session.
+  Initializes the transport handler state for an established transport session.
 
   This callback runs in the process that handles the transport session.
   """

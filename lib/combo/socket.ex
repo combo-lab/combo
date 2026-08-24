@@ -75,6 +75,9 @@ defmodule Combo.Socket do
 
   On `use Combo.Socket`, the following options are accepted:
 
+    * `:serializers` - a list of `{serializer, version_requirement}` tuples
+      available for socket messages.
+
     * `:log` - the default level to log socket actions. Defaults
       to `:info`. May be set to `false` to disable it
 
@@ -495,21 +498,21 @@ defmodule Combo.Socket do
     end
   end
 
-  def __connect__(user_socket, map, socket_options) do
+  def __connect__(user_socket, metadata, socket_options) do
     %{
       endpoint: endpoint,
-      options: options,
-      transport: transport,
+      handler: {^user_socket, handler_opts},
+      transport: {transport, _transport_opts},
       params: params,
       connect_info: connect_info
-    } = map
+    } = metadata
 
     vsn = params["vsn"] || "2.0.0"
 
-    options = Keyword.merge(socket_options, options)
+    options = Keyword.merge(socket_options, handler_opts)
     start = System.monotonic_time()
 
-    serializers = Keyword.get(options, :serializer, @default_serializers)
+    serializers = Keyword.get(options, :serializers, @default_serializers)
 
     case negotiate_serializer(serializers, vsn) do
       {:ok, serializer} ->

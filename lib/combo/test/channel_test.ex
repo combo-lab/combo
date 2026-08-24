@@ -243,14 +243,17 @@ defmodule Combo.ChannelTest do
 
   @doc false
   def __socket__(socket, id, assigns, endpoint, options) do
+    supervisor = fetch_test_supervisor!(options)
+
     %Socket{
       assigns: Enum.into(assigns, %{}),
       endpoint: endpoint,
       handler: socket || first_socket!(endpoint),
       id: id,
+      private: %{__MODULE__ => supervisor},
       pubsub_server: endpoint.config(:pubsub_server),
       serializer: NoopSerializer,
-      transport: {__MODULE__, fetch_test_supervisor!(options)},
+      transport: __MODULE__,
       transport_pid: self()
     }
   end
@@ -302,18 +305,20 @@ defmodule Combo.ChannelTest do
   @doc false
   def __connect__(endpoint, handler, params, options) do
     {connect_info, options} = Keyword.pop(options, :connect_info, %{})
+    supervisor = fetch_test_supervisor!(options)
 
     map = %{
       endpoint: endpoint,
-      transport: {__MODULE__, fetch_test_supervisor!(options)},
-      options: [serializer: [{NoopSerializer, "~> 2.0.0"}]],
+      transport: {__MODULE__, []},
+      handler: {handler, [serializers: [{NoopSerializer, "~> 2.0.0"}]]},
       params: __stringify__(params),
       connect_info: connect_info
     }
 
     with {:ok, state} <- handler.connect(map),
-         {:ok, {_, socket}} = handler.init(state),
-         do: {:ok, socket}
+         {:ok, {_, socket}} <- handler.init(state) do
+      {:ok, %{socket | private: Map.put(socket.private, __MODULE__, supervisor)}}
+    end
   end
 
   @doc "See `subscribe_and_join!/4`."
@@ -409,7 +414,8 @@ defmodule Combo.ChannelTest do
         match_topic_to_channel!(socket, topic)
       end
 
-    %Socket{transport: {__MODULE__, sup}} = socket
+    %Socket{transport: __MODULE__} = socket
+    sup = Map.fetch!(socket.private, __MODULE__)
 
     starter =
       fn _, _, spec ->

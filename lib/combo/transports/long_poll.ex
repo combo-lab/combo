@@ -29,39 +29,55 @@ defmodule Combo.Transports.LongPoll do
   import Plug.Conn
   alias Combo.Transport
 
+  @default_config [
+    log: false,
+    window_ms: 10_000,
+    pubsub_timeout_ms: 2_000,
+    crypto: [max_age: 1_209_600]
+  ]
+
+  @config_keys [
+    # common
+    :log,
+    :check_origin,
+    :check_csrf,
+    :code_reloader,
+    :connect_info,
+    :auth_token,
+    # transport-specific
+    :window_ms,
+    :pubsub_timeout_ms,
+    :crypto
+  ]
+
   @impl true
-  def default_config do
-    [
-      transport_log: false,
-      window_ms: 10_000,
-      pubsub_timeout_ms: 2_000,
-      crypto: [max_age: 1_209_600]
-    ]
+  def build_config(opts) do
+    opts
+    |> Keyword.validate!(@config_keys)
+    |> then(&Keyword.merge(@default_config, &1))
+    |> Transport.load_config()
   end
 
   @impl true
-  def init(opts), do: opts
-
-  @impl true
-  def call(conn, {endpoint, handler, opts}) do
-    opts = Transport.merge_config(endpoint, opts)
+  def call(conn, {endpoint, opts, handler, handler_opts}) do
+    opts = Transport.merge_endpoint_config(endpoint, opts)
 
     conn
     |> fetch_query_params()
     |> put_resp_header("access-control-allow-origin", "*")
     |> Transport.code_reload(endpoint, opts)
-    |> Transport.transport_log(opts[:transport_log])
+    |> Transport.log(opts[:log])
     |> Transport.check_origin(handler, endpoint, opts, &status_json/1)
-    |> dispatch(endpoint, handler, opts)
+    |> dispatch(endpoint, opts, handler, handler_opts)
   end
 
-  defp dispatch(%{halted: true} = conn, _, _, _) do
+  defp dispatch(%{halted: true} = conn, _, _, _, _) do
     conn
   end
 
   # Responds to pre-flight CORS requests with Allow-Origin-* headers.
   # We allow cross-origin requests as we always validate the Origin header.
-  defp dispatch(%{method: "OPTIONS"} = conn, _, _, _) do
+  defp dispatch(%{method: "OPTIONS"} = conn, _, _, _, _) do
     headers = get_req_header(conn, "access-control-request-headers") |> Enum.join(", ")
 
     conn
@@ -72,18 +88,18 @@ defmodule Combo.Transports.LongPoll do
   end
 
   # Starts a new session or listen to a message if one already exists.
-  defp dispatch(%{method: "GET"} = conn, endpoint, handler, opts) do
+  defp dispatch(%{method: "GET"} = conn, endpoint, opts, handler, handler_opts) do
     case resume_session(conn, endpoint, opts) do
       {:ok, new_conn, server_ref, token} ->
         listen(new_conn, server_ref, token, endpoint, opts)
 
       :error ->
-        new_session(conn, endpoint, handler, opts)
+        new_session(conn, endpoint, handler, handler_opts, opts)
     end
   end
 
   # Publish the message.
-  defp dispatch(%{method: "POST"} = conn, endpoint, _, opts) do
+  defp dispatch(%{method: "POST"} = conn, endpoint, opts, _, _) do
     case resume_session(conn, endpoint, opts) do
       {:ok, new_conn, server_ref, _token} ->
         publish(new_conn, server_ref, endpoint, opts)
@@ -94,7 +110,7 @@ defmodule Combo.Transports.LongPoll do
   end
 
   # All other requests should fail.
-  defp dispatch(conn, _, _, _) do
+  defp dispatch(conn, _, _, _, _) do
     send_resp(conn, :bad_request, "")
   end
 
@@ -152,7 +168,7 @@ defmodule Combo.Transports.LongPoll do
 
   ## Session handling
 
-  defp new_session(conn, endpoint, handler, opts) do
+  defp new_session(conn, endpoint, handler, handler_opts, opts) do
     priv_topic =
       "combo:lp:" <>
         Base.encode64(:crypto.strong_rand_bytes(16)) <>
@@ -165,7 +181,7 @@ defmodule Combo.Transports.LongPoll do
     connect_info =
       Transport.connect_info(conn, endpoint, keys, Keyword.take(opts, @connect_info_opts))
 
-    arg = {endpoint, handler, opts, conn.params, priv_topic, connect_info}
+    arg = {endpoint, handler, handler_opts, opts, conn.params, priv_topic, connect_info}
     spec = {Combo.Transports.LongPoll.Server, arg}
 
     case DynamicSupervisor.start_child(Combo.Transports.LongPoll.Supervisor, spec) do

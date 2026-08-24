@@ -129,14 +129,6 @@ defmodule Combo.EndpointTest do
         socket "/ws", UserSocket, websocket: [path: "/ws", check_origin: false, invalid: true]
       end
     end
-
-    assert_raise ArgumentError, ~r/unknown keys \[:drainer\]/, fn ->
-      defmodule MyInvalidSocketEndpoint2 do
-        use Combo.Endpoint, otp_app: :combo
-
-        socket "/ws", UserSocket, longpoll: [path: "/ws", check_origin: false, drainer: []]
-      end
-    end
   end
 
   describe "validates :check_origin and :check_csrf socket options" do

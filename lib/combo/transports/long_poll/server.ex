@@ -8,18 +8,18 @@ defmodule Combo.Transports.LongPoll.Server do
     GenServer.start_link(__MODULE__, arg)
   end
 
-  def init({endpoint, handler, options, params, priv_topic, connect_info}) do
-    config = %{
+  def init({endpoint, handler, handler_options, options, params, priv_topic, connect_info}) do
+    metadata = %{
       endpoint: endpoint,
-      transport: :longpoll,
-      options: options,
+      transport: {Combo.Transports.LongPoll, options},
+      handler: {handler, handler_options},
       params: params,
       connect_info: connect_info
     }
 
     window_ms = Keyword.fetch!(options, :window_ms)
 
-    case handler.connect(config) do
+    case handler.connect(metadata) do
       {:ok, handler_state} ->
         {:ok, handler_state} = handler.init(handler_state)
 

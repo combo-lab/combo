@@ -353,6 +353,7 @@ defmodule Combo.Endpoint do
       # Avoid unused variable warnings
       _ = var!(live_reloading?)
       _ = var!(code_reloading?)
+      _ = var!(debug_errors?)
     end
   end
 
@@ -528,13 +529,13 @@ defmodule Combo.Endpoint do
   defmacro __before_compile__(%{module: endpoint}) do
     sockets = Module.get_attribute(endpoint, :combo_sockets)
 
-    dispatches =
+    socket_dispatches =
       for {path, socket, socket_opts} <- sockets,
           {path, conn_ast, plug, plug_opts} <-
             build_socket_dispatches(endpoint, path, socket, socket_opts) do
         quote do
           defp do_socket_dispatch(unquote(path), conn) do
-            halt(unquote(plug).call(unquote(conn_ast), unquote(Macro.escape(plug_opts))))
+            unquote(plug).call(unquote(conn_ast), unquote(Macro.escape(plug_opts))) |> halt()
           end
         end
       end
@@ -579,87 +580,102 @@ defmodule Combo.Endpoint do
 
       @doc false
       def socket_dispatch(%{path_info: path} = conn, _opts), do: do_socket_dispatch(path, conn)
-      unquote(dispatches)
+      unquote(socket_dispatches)
       defp do_socket_dispatch(_path, conn), do: conn
     end
   end
 
-  defp build_socket_dispatches(endpoint, path, socket, socket_opts) do
-    dispatches = []
+  @common_transport_config_keys [:check_origin, :check_csrf, :auth_token]
+  @specific_transport_config_namespaces [:websocket, :longpoll]
+  @socket_transports [
+    {:websocket, Combo.Transports.WebSocket, true, "/websocket"},
+    {:longpoll, Combo.Transports.LongPoll, false, "/longpoll"}
+  ]
+  defp build_socket_dispatches(endpoint, path, socket_module, config) do
+    {common_transport_config, config} =
+      Keyword.split(config, @common_transport_config_keys)
 
-    common_config = [
-      :path,
-      :serializer,
-      :transport_log,
-      :check_origin,
-      :check_csrf,
-      :code_reloader,
-      :connect_info,
-      :auth_token,
-      :log
-    ]
+    {specific_transport_configs, socket_config} =
+      Keyword.split(config, @specific_transport_config_namespaces)
 
-    websocket =
-      socket_opts
-      |> Keyword.get(:websocket, true)
-      |> maybe_validate_keys(
-        common_config ++
-          [
-            :timeout,
-            :max_frame_size,
-            :fullsweep_after,
-            :compress,
-            :subprotocols,
-            :error_handler,
-            :validate_utf8,
-            :active_n,
-            :deflate_options
-          ]
-      )
+    Enum.flat_map(
+      @socket_transports,
+      fn {name, transport_module, default_transport_config, default_transport_path} ->
+        specific_transport_config =
+          Keyword.get(specific_transport_configs, name, default_transport_config)
 
-    longpoll =
-      socket_opts
-      |> Keyword.get(:longpoll, false)
-      |> maybe_validate_keys(
-        common_config ++
-          [
-            :window_ms,
-            :pubsub_timeout_ms,
-            :crypto
-          ]
-      )
+        case normalize_transport_config(specific_transport_config) do
+          :disabled ->
+            []
 
-    dispatches =
-      if websocket do
-        websocket = put_auth_token(websocket, socket_opts[:auth_token])
-        {transport_path, websocket} = Keyword.pop(websocket, :path, "/websocket")
-        config = Combo.Transport.load_config(Combo.Transports.WebSocket, websocket)
-        plug_opts = {endpoint, socket, config}
-        {match_path, conn_ast} = socket_path(path, transport_path)
-        [{match_path, conn_ast, Combo.Transports.WebSocket, plug_opts} | dispatches]
-      else
-        dispatches
+          specific_transport_config ->
+            dispatch =
+              build_socket_dispatch(
+                endpoint,
+                path,
+                default_transport_path,
+                transport_module,
+                common_transport_config,
+                specific_transport_config,
+                socket_module,
+                socket_config
+              )
+
+            [dispatch]
+        end
       end
-
-    dispatches =
-      if longpoll do
-        longpoll = put_auth_token(longpoll, socket_opts[:auth_token])
-        {transport_path, longpoll} = Keyword.pop(longpoll, :path, "/longpoll")
-        config = Combo.Transport.load_config(Combo.Transports.LongPoll, longpoll)
-        plug_opts = {endpoint, socket, config}
-        {match_path, conn_ast} = socket_path(path, transport_path)
-        [{match_path, conn_ast, Combo.Transports.LongPoll, plug_opts} | dispatches]
-      else
-        dispatches
-      end
-
-    dispatches
+    )
   end
 
-  defp put_auth_token(true, enabled), do: [auth_token: enabled]
-  defp put_auth_token(opts, enabled), do: Keyword.put(opts, :auth_token, enabled)
+  defp build_socket_dispatch(
+         endpoint,
+         path,
+         default_transport_path,
+         transport_module,
+         common_transport_config,
+         specific_transport_config,
+         socket_module,
+         socket_config
+       ) do
+    {transport_path, specific_transport_config} =
+      Keyword.pop(specific_transport_config, :path, default_transport_path)
 
-  defp socket_path(path, end_path_fragment) do
+    {match_path, conn_ast} = build_socket_path(path, transport_path)
+
+    transport_config =
+      common_transport_config
+      |> Keyword.merge(specific_transport_config)
+      |> transport_module.build_config()
+
+    transport_plug_opts = {
+      endpoint,
+      transport_config,
+      socket_module,
+      socket_config
+    }
+
+    {match_path, conn_ast, transport_module, transport_plug_opts}
+  end
+
+  defp normalize_transport_config(config) do
+    cond do
+      config == true ->
+        []
+
+      config == false ->
+        :disabled
+
+      Keyword.keyword?(config) ->
+        config
+
+      true ->
+        raise ArgumentError,
+              "expected transport configuration to be true, false, or a keyword list, " <>
+                "got: #{inspect(config)}"
+    end
+  end
+
+  defp build_socket_path(path, end_path_fragment) do
     {vars, path} =
       String.split(path <> "/" <> end_path_fragment, "/", trim: true)
       |> Enum.join("/")
@@ -685,9 +701,6 @@ defmodule Combo.Endpoint do
 
     {path, conn_ast}
   end
-
-  defp maybe_validate_keys(opts, keys) when is_list(opts), do: Keyword.validate!(opts, keys)
-  defp maybe_validate_keys(other, _), do: other
 
   ## API
 
@@ -752,6 +765,12 @@ defmodule Combo.Endpoint do
 
       Custom transports might implement their own mechanism.
 
+    * `:serializers` - a list of serializers for messages that overrides the
+      handler's defaults. See `Combo.Socket` for more information.
+
+    * `:log` - the log level for handler connection events. Set it to `false`
+      to disable logging.
+
   You can also pass the options below on `use Combo.Socket`.
   The values specified here override the value in `use Combo.Socket`.
 
@@ -779,11 +798,7 @@ defmodule Combo.Endpoint do
     * `:path` - the route suffix appended to the socket mount path.
       Defaults to `"/websocket"` or `"/longpoll"`.
 
-    * `:serializer` - a list of serializers for messages that overrides the
-      socket's defaults. See `Combo.Socket` for more information.
-
-    * `:transport_log` - if the transport layer itself should log and, if so,
-      the level.
+    * `:log` - if the transport layer itself should log and, if so, the level.
 
     * `:check_origin` - if the transport should check the origin of requests
       when the `origin` header is present. May be a boolean, a list of URIs

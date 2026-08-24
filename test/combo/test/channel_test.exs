@@ -234,7 +234,7 @@ defmodule Combo.Test.ChannelTest do
     assert socket.endpoint == @endpoint
     assert socket.pubsub_server == Combo.Test.ChannelTest.PubSub
     assert socket.topic == "foo:socket"
-    assert {Combo.ChannelTest, _} = socket.transport
+    assert socket.transport == Combo.ChannelTest
     assert socket.transport_pid == self()
     assert socket.serializer == Combo.ChannelTest.NoopSerializer
     assert socket.assigns == %{hello: :world, original: :assign}

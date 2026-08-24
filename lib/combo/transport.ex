@@ -17,19 +17,18 @@ defmodule Combo.Transport do
   implementing `Combo.Transport.Handler`.
   """
 
-  @callback default_config() :: Keyword.t()
-  @callback init(Plug.opts()) :: Plug.opts()
-  @callback call(Plug.Conn.t(), Plug.opts()) :: Plug.Conn.t()
-
   require Logger
   alias Combo.Transport.Cache
 
-  @global_transport_keys [:check_origin, :check_csrf]
+  @endpoint_config [:check_origin, :check_csrf]
+
+  @callback build_config(Keyword.t()) :: Keyword.t()
+  @callback call(Plug.Conn.t(), term()) :: Plug.Conn.t()
 
   @doc false
-  def merge_config(endpoint, config) do
+  def merge_endpoint_config(endpoint, config) do
     endpoint.config(:transport)
-    |> Keyword.validate!(@global_transport_keys)
+    |> Keyword.validate!(@endpoint_config)
     |> Keyword.merge(config)
   end
 
@@ -42,13 +41,6 @@ defmodule Combo.Transport do
     :sec_websocket_headers,
     :auth_token
   ]
-
-  @doc false
-  def load_config(module, config) do
-    module.default_config()
-    |> Keyword.merge(config)
-    |> load_config()
-  end
 
   @doc false
   def load_config(config) do
@@ -109,12 +101,11 @@ defmodule Combo.Transport do
 
   @doc """
   Logs the transport request.
-
-  Available for transports that generate a connection.
   """
-  def transport_log(conn, level) do
+  def log(conn, level) do
     if level do
-      Plug.Logger.call(conn, Plug.Logger.init(log: level))
+      opts = Plug.Logger.init(log: level)
+      Plug.Logger.call(conn, opts)
     else
       conn
     end
