@@ -3,7 +3,7 @@ defmodule Combo.Endpoint do
   Defines an endpoint.
 
   The endpoint is the boundary where all requests to a web application start.
-  It is also the interface of the underlying web servers.
+  It is also the interface of the underlying web server.
 
   Overall, an endpoint has three responsibilities:
 
@@ -16,7 +16,7 @@ defmodule Combo.Endpoint do
 
   ## Endpoints
 
-  An endpoint is a module defined with the help of `Combo.Endpoint`.
+  An endpoint is a module defined with the help of `Combo.Endpoint`. For example:
 
       defmodule MyApp.Web.Endpoint do
         use Combo.Endpoint, otp_app: :my_app
@@ -35,21 +35,23 @@ defmodule Combo.Endpoint do
 
   ## Endpoint configuration
 
-  Endpoints are configured in your application environment. For example:
+  An endpoint is configured in your application environment. For example:
 
       config :my_app, MyApp.Web.Endpoint,
-        secret_key_base: "kjoy3o1zeidquwy1398juxzldjlksahdk3"
+        key1: value1,
+        # ...
+        keyN: valueN
 
   Endpoint configuration is split into two categories:
 
     * Compile-time configuration
-    * Runtime configuretion
+    * Runtime configuration
 
-  Compile-time configuration means the configuration is read during
-  compilation and changing it at runtime has no effect.
+  Compile-time configuration means the configuration is read during compilation,
+  and changing it at runtime has no effect.
 
-  Runtime configuration, instead, is read during or after your application
-  is started and can be read through the `c:config/2` function.
+  Runtime configuration means the configuration is read during runtime, and can
+  be changed at runtime.
 
   ### Compile-time configuration
 
@@ -61,8 +63,8 @@ defmodule Combo.Endpoint do
     * `:code_reloader` - the configuration of `Combo.CodeReloader`.
 
     * `:debug_errors` - when `true`, uses `Plug.Debugger` functionality for
-      debugging failures in the application. Recommended to be set to `true`
-      only in development as it allows listing of the application source
+      debugging failures in the application. It is recommended to set it to
+      `true` only in development as it allows listing of the application source
       code during debugging. Defaults to `false`.
 
   ### Runtime configuration
@@ -182,12 +184,12 @@ defmodule Combo.Endpoint do
 
   ## Connection draining
 
-  Connection draining should be implemented by the endpoint adapter.
+  Connection draining should be implemented by the web server adapter.
 
-  > Socket connections run their own drainer before the endpoint adapter's
-  > server children are shut down. That's because sockets are stateful and
-  > can be gracefully notified, which allows us to stagger them over a longer
-  > period of time. See `socket/3` for more information.
+  > Socket connections run their own drainer before the web server adapter's
+  > children are shut down. That's because sockets are stateful and can be
+  > gracefully notified, which allows us to stagger them over a longer period
+  > of time. See `socket/3` for more information.
 
   ## Endpoint API
 
@@ -329,20 +331,30 @@ defmodule Combo.Endpoint do
 
   @doc false
   defmacro __using__(opts) do
+    otp_app = Keyword.fetch!(opts, :otp_app)
+
+    unless is_atom(otp_app) do
+      raise ArgumentError, "expected :otp_app to be an atom, got: #{inspect(otp_app)}"
+    end
+
     quote do
+      @otp_app unquote(otp_app)
+
       @behaviour Combo.Endpoint
+
+      import Combo.Endpoint
 
       unquote(config(opts))
       unquote(pubsub())
       unquote(plug())
       unquote(server())
+
+      @before_compile Combo.Endpoint
     end
   end
 
   defp config(opts) do
     quote do
-      @otp_app unquote(opts)[:otp_app] || raise("endpoint expects :otp_app to be given")
-
       # Compile-time configuration checking
       # This ensures that, if a compile-time configuration is overwritten at runtime,
       # the application won't boot.
@@ -402,8 +414,6 @@ defmodule Combo.Endpoint do
     quote location: :keep do
       use Plug.Builder, init_mode: Combo.plug_init_mode()
 
-      import Combo.Endpoint
-
       Module.register_attribute(__MODULE__, :combo_sockets, accumulate: true)
 
       if var!(debug_errors?) do
@@ -421,9 +431,6 @@ defmodule Combo.Endpoint do
       end
 
       plug :socket_dispatch
-
-      # Compile after the debugger so we properly wrap it.
-      @before_compile Combo.Endpoint
     end
   end
 
@@ -528,46 +535,8 @@ defmodule Combo.Endpoint do
   @doc false
   defmacro __before_compile__(%{module: endpoint}) do
     quote do
-      unquote(compile_plugs(endpoint))
       unquote(compile_sockets(endpoint))
-    end
-  end
-
-  defp compile_plugs(endpoint) do
-    quote do
-      defoverridable call: 2
-
-      # Inline render errors so we set the endpoint before calling it.
-      def call(conn, opts) do
-        conn = %{conn | script_name: script_name(), secret_key_base: config(:secret_key_base)}
-        conn = Plug.Conn.put_private(conn, :combo_endpoint, unquote(endpoint))
-
-        try do
-          super(conn, opts)
-        rescue
-          e in Plug.Conn.WrapperError ->
-            %{conn: conn, kind: kind, reason: reason, stack: stack} = e
-
-            Combo.Endpoint.RenderErrors.__catch__(
-              conn,
-              kind,
-              reason,
-              stack,
-              config(:render_errors)
-            )
-        catch
-          kind, reason ->
-            stack = __STACKTRACE__
-
-            Combo.Endpoint.RenderErrors.__catch__(
-              conn,
-              kind,
-              reason,
-              stack,
-              config(:render_errors)
-            )
-        end
-      end
+      unquote(compile_plugs(endpoint))
     end
   end
 
@@ -682,7 +651,7 @@ defmodule Combo.Endpoint do
 
       true ->
         raise ArgumentError,
-              "expected transport configuration to be true, false, or a keyword list, " <>
+              "expected :transport configuration to be true, false, or a keyword list, " <>
                 "got: #{inspect(config)}"
     end
   end
@@ -712,6 +681,44 @@ defmodule Combo.Endpoint do
       end
 
     {path, conn_ast}
+  end
+
+  defp compile_plugs(endpoint) do
+    quote do
+      defoverridable call: 2
+
+      # Inline render errors so we set the endpoint before calling it.
+      def call(conn, opts) do
+        conn = %{conn | script_name: script_name(), secret_key_base: config(:secret_key_base)}
+        conn = Plug.Conn.put_private(conn, :combo_endpoint, unquote(endpoint))
+
+        try do
+          super(conn, opts)
+        rescue
+          e in Plug.Conn.WrapperError ->
+            %{conn: conn, kind: kind, reason: reason, stack: stack} = e
+
+            Combo.Endpoint.RenderErrors.__catch__(
+              conn,
+              kind,
+              reason,
+              stack,
+              config(:render_errors)
+            )
+        catch
+          kind, reason ->
+            stack = __STACKTRACE__
+
+            Combo.Endpoint.RenderErrors.__catch__(
+              conn,
+              kind,
+              reason,
+              stack,
+              config(:render_errors)
+            )
+        end
+      end
+    end
   end
 
   ## API
