@@ -527,26 +527,20 @@ defmodule Combo.Endpoint do
 
   @doc false
   defmacro __before_compile__(%{module: endpoint}) do
-    sockets = Module.get_attribute(endpoint, :combo_sockets)
+    quote do
+      unquote(compile_plugs(endpoint))
+      unquote(compile_sockets(endpoint))
+    end
+  end
 
-    socket_dispatches =
-      for {path, socket, socket_opts} <- sockets,
-          {path, conn_ast, plug, plug_opts} <-
-            build_socket_dispatches(endpoint, path, socket, socket_opts) do
-        quote do
-          defp do_socket_dispatch(unquote(path), conn) do
-            unquote(plug).call(unquote(conn_ast), unquote(Macro.escape(plug_opts))) |> halt()
-          end
-        end
-      end
-
+  defp compile_plugs(endpoint) do
     quote do
       defoverridable call: 2
 
       # Inline render errors so we set the endpoint before calling it.
       def call(conn, opts) do
         conn = %{conn | script_name: script_name(), secret_key_base: config(:secret_key_base)}
-        conn = Plug.Conn.put_private(conn, :combo_endpoint, __MODULE__)
+        conn = Plug.Conn.put_private(conn, :combo_endpoint, unquote(endpoint))
 
         try do
           super(conn, opts)
@@ -574,13 +568,31 @@ defmodule Combo.Endpoint do
             )
         end
       end
+    end
+  end
 
+  defp compile_sockets(endpoint) do
+    sockets = Module.get_attribute(endpoint, :combo_sockets)
+
+    socket_dispatches =
+      for {path, socket, socket_opts} <- sockets,
+          {path, conn_ast, plug, plug_opts} <-
+            build_socket_dispatches(endpoint, path, socket, socket_opts) do
+        quote do
+          defp do_socket_dispatch(unquote(path), conn) do
+            unquote(plug).call(unquote(conn_ast), unquote(Macro.escape(plug_opts))) |> halt()
+          end
+        end
+      end
+
+    quote do
       @doc false
       def __sockets__, do: unquote(Macro.escape(sockets))
 
       @doc false
       def socket_dispatch(%{path_info: path} = conn, _opts), do: do_socket_dispatch(path, conn)
-      unquote(socket_dispatches)
+
+      unquote_splicing(socket_dispatches)
       defp do_socket_dispatch(_path, conn), do: conn
     end
   end
