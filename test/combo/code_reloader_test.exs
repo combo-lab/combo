@@ -6,12 +6,13 @@ defmodule Combo.CodeReloaderTest do
     def config(:code_reloader) do
       [
         reloadable_apps: nil,
-        reloadable_compilers: [:unknown_compiler, :elixir]
+        reloadable_compilers: [:unknown_compiler, :elixir],
+        reloadable_args: ["--unknown", "--all-warnings"]
       ]
     end
   end
 
-  def reload(_, _) do
+  def reload(_) do
     {:error, "oops \e[31merror"}
   end
 
@@ -68,11 +69,11 @@ defmodule Combo.CodeReloaderTest do
 
     assert conn.state == :unset
 
-    assert_receive {:trace, ^pid, :receive, {_, _, {:reload!, Endpoint, _}}}
+    assert_receive {:trace, ^pid, :receive, {_, _, {:reload!, Endpoint}}}
   end
 
   test "renders compilation error on failure" do
-    opts = Combo.CodeReloader.init(reloader: &__MODULE__.reload/2)
+    opts = Combo.CodeReloader.init(reloader: &__MODULE__.reload/1)
 
     conn =
       conn(:get, "/")

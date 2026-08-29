@@ -18,8 +18,8 @@ defmodule Combo.CodeReloader.Server do
     GenServer.call(__MODULE__, :check_symlinks, :infinity)
   end
 
-  def reload!(endpoint, opts) do
-    GenServer.call(__MODULE__, {:reload!, endpoint, opts}, :infinity)
+  def reload!(endpoint) do
+    GenServer.call(__MODULE__, {:reload!, endpoint}, :infinity)
   end
 
   def sync do
@@ -112,7 +112,7 @@ defmodule Combo.CodeReloader.Server do
     {:reply, :ok, %{state | check_symlinks: false}}
   end
 
-  def handle_call({:reload!, endpoint, opts}, from, state) do
+  def handle_call({:reload!, endpoint}, from, state) do
     config =
       case endpoint.config(:code_reloader) do
         true -> []
@@ -121,7 +121,7 @@ defmodule Combo.CodeReloader.Server do
 
     apps = config[:reloadable_apps] || default_reloadable_apps()
     compilers = config[:reloadable_compilers] || default_reloadable_compilers()
-    args = Keyword.get(opts, :reloadable_args, ["--no-all-warnings"])
+    args = config[:reloadable_args] || default_reloadable_args()
 
     froms = all_waiting([from], endpoint)
 
@@ -193,6 +193,10 @@ defmodule Combo.CodeReloader.Server do
     [:elixir, :app]
   end
 
+  defp default_reloadable_args do
+    ["--no-all-warnings"]
+  end
+
   defp os_symlink({:win32, _}),
     do:
       " On Windows, the lack of symlinks may even cause empty assets to be served. " <>
@@ -240,7 +244,7 @@ defmodule Combo.CodeReloader.Server do
 
   defp all_waiting(acc, endpoint) do
     receive do
-      {:"$gen_call", from, {:reload!, ^endpoint, _}} -> all_waiting([from | acc], endpoint)
+      {:"$gen_call", from, {:reload!, ^endpoint}} -> all_waiting([from | acc], endpoint)
     after
       0 -> acc
     end

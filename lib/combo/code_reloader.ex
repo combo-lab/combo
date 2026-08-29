@@ -2,8 +2,8 @@ defmodule Combo.CodeReloader do
   @moduledoc """
   A plug and module to handle automatic code reloading.
 
-  To avoid race conditions, all code reloads are funneled through a
-  sequential call operation.
+  To avoid race conditions, all code reloads are funneled through a sequential
+  call operation.
 
   ## Usage
 
@@ -47,7 +47,8 @@ defmodule Combo.CodeReloader do
       config :my_app, MyApp.Web.Endpoint,
         code_reloader: [
           reloadable_apps: [:ui, :backend],
-          reloadable_compilers: [:gettext, :elixir]
+          reloadable_compilers: [:gettext, :elixir],
+          reloadable_args: []
         ]
 
   ### The `:reloadable_apps` option
@@ -64,6 +65,13 @@ defmodule Combo.CodeReloader do
 
   The `:reloadable_compilers` option must be a subset of the `:compilers`
   specified in `project/0` in your `mix.exs`.
+
+  ### The `:reloadable_args` option
+
+  The additional CLI args to pass to the compiler tasks.
+
+  Defaults to `["--no-all-warnings"]` so only warnings related to the files
+  being compiled are printed.
 
   ## Notes
 
@@ -84,24 +92,17 @@ defmodule Combo.CodeReloader do
   `:reloadable_compilers` on the list of `:reloadable_apps`.
 
   This function is a no-op and returns `:ok` if Mix is not available.
-
-  ## Options
-
-    * `:reloadable_args` - additional CLI args to pass to the compiler tasks.
-      Defaults to `["--no-all-warnings"]` so only warnings related to the
-      files being compiled are printed
-
   """
-  @spec reload(module, keyword) :: :ok | {:error, binary()}
-  def reload(endpoint, opts \\ []) do
-    if Code.ensure_loaded?(Mix.Project), do: reload!(endpoint, opts), else: :ok
+  @spec reload(module) :: :ok | {:error, binary()}
+  def reload(endpoint) do
+    if Code.ensure_loaded?(Mix.Project), do: reload!(endpoint), else: :ok
   end
 
   @doc """
   Same as `reload/1` but it will raise if Mix is not available.
   """
-  @spec reload!(module, keyword) :: :ok | {:error, binary()}
-  defdelegate reload!(endpoint, opts), to: Combo.CodeReloader.Server
+  @spec reload!(module) :: :ok | {:error, binary()}
+  defdelegate reload!(endpoint), to: Combo.CodeReloader.Server
 
   @doc """
   Synchronizes with the code server if it is alive.
@@ -145,7 +146,7 @@ defmodule Combo.CodeReloader do
   API used by Plug to start the code reloader.
   """
   def init(opts) do
-    Keyword.put_new(opts, :reloader, &Combo.CodeReloader.reload/2)
+    Keyword.put_new(opts, :reloader, &Combo.CodeReloader.reload/1)
   end
 
   @doc """
@@ -154,7 +155,7 @@ defmodule Combo.CodeReloader do
   def call(conn, opts) do
     endpoint = endpoint_module!(conn)
 
-    case opts[:reloader].(endpoint, opts) do
+    case opts[:reloader].(endpoint) do
       :ok ->
         conn
 
