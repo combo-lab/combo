@@ -73,7 +73,7 @@ defmodule Combo.CodeReloaderTest do
   end
 
   test "renders compilation error on failure" do
-    opts = Combo.CodeReloader.init(reloader: &__MODULE__.reload/1)
+    opts = Combo.CodeReloader.init(__reloader__: &__MODULE__.reload/1)
 
     conn =
       conn(:get, "/")

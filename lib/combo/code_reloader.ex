@@ -146,7 +146,8 @@ defmodule Combo.CodeReloader do
   API used by Plug to start the code reloader.
   """
   def init(opts) do
-    Keyword.put_new(opts, :reloader, &Combo.CodeReloader.reload/1)
+    # :__reloader__ is an internal option for test
+    Keyword.put_new(opts, :__reloader__, &Combo.CodeReloader.reload/1)
   end
 
   @doc """
@@ -154,8 +155,9 @@ defmodule Combo.CodeReloader do
   """
   def call(conn, opts) do
     endpoint = endpoint_module!(conn)
+    {reloader, _} = Keyword.pop!(opts, :__reloader__)
 
-    case opts[:reloader].(endpoint) do
+    case reloader.(endpoint) do
       :ok ->
         conn
 
