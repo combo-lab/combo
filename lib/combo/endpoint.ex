@@ -333,7 +333,7 @@ defmodule Combo.Endpoint do
   defmacro __using__(opts) do
     otp_app = Keyword.fetch!(opts, :otp_app)
 
-    unless is_atom(otp_app) do
+    if not is_atom(otp_app) do
       raise ArgumentError, "expected :otp_app to be an atom, got: #{inspect(otp_app)}"
     end
 
