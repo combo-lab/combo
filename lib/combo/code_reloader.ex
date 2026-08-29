@@ -93,7 +93,7 @@ defmodule Combo.CodeReloader do
 
   This function is a no-op and returns `:ok` if Mix is not available.
   """
-  @spec reload(module) :: :ok | {:error, binary()}
+  @spec reload(module) :: :ok | {:error, output :: binary()}
   def reload(endpoint) do
     if Code.ensure_loaded?(Mix.Project), do: reload!(endpoint), else: :ok
   end
@@ -101,7 +101,7 @@ defmodule Combo.CodeReloader do
   @doc """
   Same as `reload/1` but it will raise if Mix is not available.
   """
-  @spec reload!(module) :: :ok | {:error, binary()}
+  @spec reload!(module) :: :ok | {:error, output :: binary()}
   defdelegate reload!(endpoint), to: Combo.CodeReloader.Server
 
   @doc """
@@ -142,31 +142,23 @@ defmodule Combo.CodeReloader do
     monospace_font: "menlo, consolas, monospace"
   }
 
-  @doc """
-  API used by Plug to start the code reloader.
-  """
-  def init(opts) do
-    # :__reloader__ is an internal option for test
-    Keyword.put_new(opts, :__reloader__, &Combo.CodeReloader.reload/1)
+  @impl true
+  def init(opts), do: opts
+
+  @impl true
+  def call(conn, _opts) do
+    endpoint = endpoint_module!(conn)
+    __handle_reload__(conn, reload(endpoint))
   end
 
-  @doc """
-  API used by Plug to invoke the code reloader on every request.
-  """
-  def call(conn, opts) do
-    endpoint = endpoint_module!(conn)
-    {reloader, _} = Keyword.pop!(opts, :__reloader__)
+  @doc false
+  def __handle_reload__(conn, :ok), do: conn
 
-    case reloader.(endpoint) do
-      :ok ->
-        conn
-
-      {:error, output} ->
-        conn
-        |> put_resp_content_type("text/html")
-        |> send_resp(500, template(output))
-        |> halt()
-    end
+  def __handle_reload__(conn, {:error, output}) do
+    conn
+    |> put_resp_content_type("text/html")
+    |> send_resp(500, template(output))
+    |> halt()
   end
 
   defp template(output) do

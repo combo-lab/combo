@@ -12,10 +12,6 @@ defmodule Combo.CodeReloaderTest do
     end
   end
 
-  def reload(_) do
-    {:error, "oops \e[31merror"}
-  end
-
   # Booting Elixir puts Mix in the code path but does not start it,
   # which is how deployments that keep Mix around look to Combo.
   @boot_without_mix """
@@ -73,12 +69,11 @@ defmodule Combo.CodeReloaderTest do
   end
 
   test "renders compilation error on failure" do
-    opts = Combo.CodeReloader.init(__reloader__: &__MODULE__.reload/1)
+    reload_result = {:error, "oops \e[31merror"}
 
     conn =
       conn(:get, "/")
-      |> Plug.Conn.put_private(:combo_endpoint, Endpoint)
-      |> Combo.CodeReloader.call(opts)
+      |> Combo.CodeReloader.__handle_reload__(reload_result)
 
     assert conn.state == :sent
     assert conn.status == 500
