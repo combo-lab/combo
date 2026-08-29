@@ -131,6 +131,20 @@ defmodule Combo.EndpointTest do
     end
   end
 
+  test "__sockets__/0 saves socket/3 declarations" do
+    defmodule SocketsEndpoint do
+      use Combo.Endpoint, otp_app: :combo
+
+      socket "/1", Socket1, []
+      socket "/2", Socket2, []
+    end
+
+    assert [
+             {"/1", Socket1, []},
+             {"/2", Socket2, []}
+           ] = SocketsEndpoint.__sockets__()
+  end
+
   describe "validates :check_origin and :check_csrf socket options" do
     defmodule TestSocket do
       @behaviour Combo.Transport.Handler

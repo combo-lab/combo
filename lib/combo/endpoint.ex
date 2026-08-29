@@ -541,7 +541,10 @@ defmodule Combo.Endpoint do
   end
 
   defp compile_sockets(endpoint) do
-    sockets = Module.get_attribute(endpoint, :combo_sockets)
+    sockets =
+      endpoint
+      |> Module.get_attribute(:combo_sockets)
+      |> Enum.reverse()
 
     socket_dispatches =
       for {path, socket, socket_opts} <- sockets,
