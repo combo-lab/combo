@@ -89,17 +89,6 @@ defmodule Combo.Transport do
   end
 
   @doc """
-  Runs the code reloader if enabled.
-  """
-  def code_reload(conn, endpoint, opts) do
-    if Keyword.get(opts, :code_reloader, endpoint.config(:code_reloader)) do
-      Combo.CodeReloader.reload(endpoint)
-    end
-
-    conn
-  end
-
-  @doc """
   Logs the transport request.
   """
   def log(conn, level) do

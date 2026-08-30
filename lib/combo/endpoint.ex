@@ -344,16 +344,20 @@ defmodule Combo.Endpoint do
 
       import Combo.Endpoint
 
-      unquote(config(opts))
-      unquote(pubsub())
-      unquote(plug())
-      unquote(server())
+      unquote(compile_config())
+      unquote(compile_server())
+      unquote(compile_url_helpers())
+      unquote(compile_pubsub())
+
+      unquote(Combo.Endpoint.Socket.setup())
+
+      unquote(compile_plug())
 
       @before_compile Combo.Endpoint
     end
   end
 
-  defp config(opts) do
+  defp compile_config do
     quote do
       # Compile-time configuration checking
       # This ensures that, if a compile-time configuration is overwritten at runtime,
@@ -366,10 +370,52 @@ defmodule Combo.Endpoint do
       _ = var!(live_reloading?)
       _ = var!(code_reloading?)
       _ = var!(debug_errors?)
+
+      @combo_live_reloading? var!(live_reloading?)
+      @combo_code_reloading? var!(code_reloading?)
+      @combo_debug_errors? var!(debug_errors?)
     end
   end
 
-  defp pubsub do
+  defp compile_server do
+    quote location: :keep, unquote: false do
+      @doc """
+      Returns the child specification to start the endpoint under a supervision tree.
+      """
+      def child_spec(opts) do
+        %{
+          id: __MODULE__,
+          start: {__MODULE__, :start_link, [opts]},
+          type: :supervisor
+        }
+      end
+
+      @doc """
+      Starts the endpoint supervision tree.
+
+      All other options are merged into the endpoint configuration.
+      """
+      def start_link(opts \\ []) do
+        Combo.Endpoint.Supervisor.start_link(@otp_app, __MODULE__, opts)
+      end
+
+      @doc """
+      Returns the endpoint configuration for `key`.
+
+      Returns `default` if the key does not exist.
+      """
+      def config(key, default \\ nil) do
+        Combo.Endpoint.Config.get(__MODULE__, key, default)
+      end
+
+      @doc """
+      Returns the address and port that the server is listening on.
+      """
+      def server_info(scheme), do: config(:adapter).server_info(__MODULE__, scheme)
+    end
+  end
+
+  defp compile_pubsub do
     quote generated: true do
       def subscribe(topic, opts \\ []) when is_binary(topic) do
         Combo.PubSub.subscribe(pubsub_server!(), topic, opts)
@@ -410,11 +456,9 @@ defmodule Combo.Endpoint do
     end
   end
 
-  defp plug do
+  defp compile_plug do
     quote location: :keep do
       use Plug.Builder, init_mode: Combo.plug_init_mode()
-
-      Module.register_attribute(__MODULE__, :combo_sockets, accumulate: true)
 
       if var!(debug_errors?) do
         use Plug.Debugger,
@@ -430,42 +474,12 @@ defmodule Combo.Endpoint do
           ]
       end
 
-      plug :socket_dispatch
+      plug unquote(Combo.Endpoint.Socket.plug())
     end
   end
 
-  defp server do
+  defp compile_url_helpers do
     quote location: :keep, unquote: false do
-      @doc """
-      Returns the child specification to start the endpoint
-      under a supervision tree.
-      """
-      def child_spec(opts) do
-        %{
-          id: __MODULE__,
-          start: {__MODULE__, :start_link, [opts]},
-          type: :supervisor
-        }
-      end
-
-      @doc """
-      Starts the endpoint supervision tree.
-
-      All other options are merged into the endpoint configuration.
-      """
-      def start_link(opts \\ []) do
-        Combo.Endpoint.Supervisor.start_link(@otp_app, __MODULE__, opts)
-      end
-
-      @doc """
-      Returns the endpoint configuration for `key`.
-
-      Returns `default` if the key does not exist.
-      """
-      def config(key, default \\ nil) do
-        Combo.Endpoint.Config.get(__MODULE__, key, default)
-      end
-
       @doc """
       Returns the base URL of current endpoint, without any path information.
 
@@ -524,169 +538,18 @@ defmodule Combo.Endpoint do
       def static_integrity(path), do: elem(static_lookup(path), 1)
 
       defp static_lookup(path), do: Combo.Static.lookup(__MODULE__, path)
-
-      @doc """
-      Returns the address and port that the server is listening on.
-      """
-      def server_info(scheme), do: config(:adapter).server_info(__MODULE__, scheme)
     end
   end
 
   @doc false
   defmacro __before_compile__(%{module: endpoint}) do
     quote do
-      unquote(compile_sockets(endpoint))
-      unquote(compile_plugs(endpoint))
+      unquote(Combo.Endpoint.Socket.compile(endpoint))
+      unquote(compile_endpoint_call(endpoint))
     end
   end
 
-  defp compile_sockets(endpoint) do
-    sockets =
-      endpoint
-      |> Module.get_attribute(:combo_sockets)
-      |> Enum.reverse()
-
-    socket_dispatches =
-      for {path, socket, socket_opts} <- sockets,
-          {path, conn_ast, plug, plug_opts} <-
-            build_socket_dispatches(endpoint, path, socket, socket_opts) do
-        quote do
-          defp do_socket_dispatch(unquote(path), conn) do
-            unquote(plug).call(unquote(conn_ast), unquote(Macro.escape(plug_opts))) |> halt()
-          end
-        end
-      end
-
-    quote do
-      @doc false
-      def __sockets__, do: unquote(Macro.escape(sockets))
-
-      @doc false
-      def socket_dispatch(%{path_info: path} = conn, _opts), do: do_socket_dispatch(path, conn)
-
-      unquote_splicing(socket_dispatches)
-      defp do_socket_dispatch(_path, conn), do: conn
-    end
-  end
-
-  @common_transport_config_keys [:check_origin, :check_csrf, :auth_token]
-  @specific_transport_config_namespaces [:websocket, :longpoll]
-  @socket_transports [
-    {:websocket, Combo.Transports.WebSocket, true, "/websocket"},
-    {:longpoll, Combo.Transports.LongPoll, false, "/longpoll"}
-  ]
-  defp build_socket_dispatches(endpoint, path, socket_module, config) do
-    {common_transport_config, config} =
-      Keyword.split(config, @common_transport_config_keys)
-
-    {specific_transport_configs, socket_config} =
-      Keyword.split(config, @specific_transport_config_namespaces)
-
-    Enum.flat_map(
-      @socket_transports,
-      fn {name, transport_module, default_transport_config, default_transport_path} ->
-        specific_transport_config =
-          Keyword.get(specific_transport_configs, name, default_transport_config)
-
-        case normalize_transport_config(specific_transport_config) do
-          :disabled ->
-            []
-
-          specific_transport_config ->
-            dispatch =
-              build_socket_dispatch(
-                endpoint,
-                path,
-                default_transport_path,
-                transport_module,
-                common_transport_config,
-                specific_transport_config,
-                socket_module,
-                socket_config
-              )
-
-            [dispatch]
-        end
-      end
-    )
-  end
-
-  defp build_socket_dispatch(
-         endpoint,
-         path,
-         default_transport_path,
-         transport_module,
-         common_transport_config,
-         specific_transport_config,
-         socket_module,
-         socket_config
-       ) do
-    {transport_path, specific_transport_config} =
-      Keyword.pop(specific_transport_config, :path, default_transport_path)
-
-    {match_path, conn_ast} = build_socket_path(path, transport_path)
-
-    transport_config =
-      common_transport_config
-      |> Keyword.merge(specific_transport_config)
-      |> transport_module.build_config()
-
-    transport_plug_opts = {
-      endpoint,
-      transport_config,
-      socket_module,
-      socket_config
-    }
-
-    {match_path, conn_ast, transport_module, transport_plug_opts}
-  end
-
-  defp normalize_transport_config(config) do
-    cond do
-      config == true ->
-        []
-
-      config == false ->
-        :disabled
-
-      Keyword.keyword?(config) ->
-        config
-
-      true ->
-        raise ArgumentError,
-              "expected :transport configuration to be true, false, or a keyword list, " <>
-                "got: #{inspect(config)}"
-    end
-  end
-
-  defp build_socket_path(path, end_path_fragment) do
-    {vars, path} =
-      String.split(path <> "/" <> end_path_fragment, "/", trim: true)
-      |> Enum.join("/")
-      |> Plug.Router.Utils.build_path_match()
-
-    conn_ast =
-      if vars == [] do
-        quote do
-          conn
-        end
-      else
-        params =
-          for var <- vars,
-              param = Atom.to_string(var),
-              not match?("_" <> _, param),
-              do: {param, Macro.var(var, nil)}
-
-        quote do
-          params = %{unquote_splicing(params)}
-          %{conn | path_params: params, params: params}
-        end
-      end
-
-    {path, conn_ast}
-  end
-
-  defp compile_plugs(endpoint) do
+  defp compile_endpoint_call(endpoint) do
     quote do
       defoverridable call: 2
 
@@ -864,9 +727,6 @@ defmodule Combo.Endpoint do
       ensure at least one of them is enabled. Defaults to the `:check_csrf`
       option in the endpoint's `:transport` configuration.
 
-    * `:code_reloader` - enable or disable the code reloader. Defaults to your
-      endpoint configuration.
-
     * `:connect_info` - a list of keys that represent data to be copied from
       the transport to be made available in the user socket `connect/3` callback.
       See the "Connect info" subsection for valid keys.
@@ -935,11 +795,7 @@ defmodule Combo.Endpoint do
   > option, provided you also pass a csrf token when connecting over WebSocket.
   """
   defmacro socket(path, module, opts \\ []) do
-    module = Macro.expand(module, %{__CALLER__ | function: {:socket_dispatch, 2}})
-
-    quote do
-      @combo_sockets {unquote(path), unquote(module), unquote(opts)}
-    end
+    Combo.Endpoint.Socket.add_socket(path, module, opts, __CALLER__)
   end
 
   @doc """

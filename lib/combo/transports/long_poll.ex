@@ -41,7 +41,6 @@ defmodule Combo.Transports.LongPoll do
     :log,
     :check_origin,
     :check_csrf,
-    :code_reloader,
     :connect_info,
     :auth_token,
     # transport-specific
@@ -65,7 +64,6 @@ defmodule Combo.Transports.LongPoll do
     conn
     |> fetch_query_params()
     |> put_resp_header("access-control-allow-origin", "*")
-    |> Transport.code_reload(endpoint, opts)
     |> Transport.log(opts[:log])
     |> Transport.check_origin(handler, endpoint, opts, &status_json/1)
     |> dispatch(endpoint, opts, handler, handler_opts)

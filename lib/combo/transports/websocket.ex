@@ -82,7 +82,6 @@ defmodule Combo.Transports.WebSocket do
     :log,
     :check_origin,
     :check_csrf,
-    :code_reloader,
     :connect_info,
     :auth_token,
     # transport-specific - provided by websock_adapter
@@ -122,7 +121,6 @@ defmodule Combo.Transports.WebSocket do
 
     conn
     |> fetch_query_params()
-    |> Transport.code_reload(endpoint, opts)
     |> Transport.log(opts[:log])
     |> Transport.check_origin(handler, endpoint, opts)
     |> maybe_auth_token_from_header(opts[:auth_token])
