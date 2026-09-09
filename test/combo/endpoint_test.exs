@@ -126,7 +126,7 @@ defmodule Combo.EndpointTest do
       defmodule MyInvalidSocketEndpoint1 do
         use Combo.Endpoint, otp_app: :combo
 
-        socket "/ws", UserSocket, websocket: [path: "/ws", check_origin: false, invalid: true]
+        socket "/user", UserSocket, websocket: [check_origin: false, invalid: true]
       end
     end
   end

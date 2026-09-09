@@ -86,7 +86,7 @@ defmodule Combo.Endpoint.Compilers.Socket do
 
     socket = {socket_path, socket_module, socket_config}
 
-    Enum.flat_map(@socket_transports, fn {name, module, default_config, default_path} ->
+    Enum.flat_map(@socket_transports, fn {name, module, default_config, path} ->
       transport_config = Keyword.get(specific_transport_configs, name, default_config)
 
       case normalize_transport_config(transport_config) do
@@ -94,9 +94,8 @@ defmodule Combo.Endpoint.Compilers.Socket do
           []
 
         transport_config ->
-          {transport_path, transport_config} = Keyword.pop(transport_config, :path, default_path)
-
           transport_module = module
+          transport_path = path
 
           transport_config =
             common_transport_config
@@ -251,6 +250,16 @@ defmodule Combo.Endpoint.Compilers.Socket do
 
   Both websocket and longpolling connections are supported out of the box.
 
+  Enabled transports append fixed suffixes to the socket mount path:
+
+    * `/websocket` for WebSocket
+    * `/longpoll` for LongPoll
+
+  For example, a socket mounted at `/users` accepts WebSocket connections at
+  `/users/websocket`, and LongPoll connections at `/users/longpoll`.
+
+  Transport suffixes cannot be configured.
+
   ## Options
 
     * `:websocket` - the websocket configuration.
@@ -315,9 +324,9 @@ defmodule Combo.Endpoint.Compilers.Socket do
 
   ## Examples
 
-      socket "/ws", MyApp.Web.UserSocket
+      socket "/users", MyApp.Web.UserSocket
 
-      socket "/ws/admin", MyApp.Web.AdminUserSocket,
+      socket "/admin", MyApp.Web.AdminUserSocket,
         websocket: [compress: true],
         longpoll: true
 
@@ -326,16 +335,12 @@ defmodule Combo.Endpoint.Compilers.Socket do
   It is possible to include variables in the path, these will be available in
   the `params` that are passed to the socket.
 
-      socket "/ws/:user_id", MyApp.Web.UserSocket,
-        websocket: [path: "/project/:project_id"]
+      socket "/users/:user_id", MyApp.Web.UserSocket
 
   ## Common configuration
 
   The configuration below can be given to both `:websocket` and `:longpoll`
   options:
-
-    * `:path` - the route suffix appended to the socket mount path.
-      Defaults to `"/websocket"` or `"/longpoll"`.
 
     * `:log` - if the transport layer itself should log and, if so, the level.
 
