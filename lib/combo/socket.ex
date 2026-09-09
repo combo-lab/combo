@@ -8,7 +8,7 @@ defmodule Combo.Socket do
 
   The same socket can be used to receive events from different transports.
   Combo supports `:websocket` and `:longpoll` options when invoking
-  `Combo.Endpoint.socket/3` in your endpoint. `websocket` is set by default
+  `Combo.Endpoint.Compilers.Socket.socket/3` in your endpoint. `websocket` is set by default
   and `longpoll` can also be configured explicitly.
 
       socket "/socket", Demo.Web.UserSocket,
@@ -98,7 +98,7 @@ defmodule Combo.Socket do
 
   Alternatively, you can configure your endpoint socket to trigger more
   fullsweep garbage collections more frequently, by setting the `:fullsweep_after`
-  option for websockets. See `Combo.Endpoint.socket/3` for more info.
+  option for websockets. See `Combo.Endpoint.Compilers.Socket.socket/3` for more info.
 
   ## Client-server communication
 
@@ -222,7 +222,7 @@ defmodule Combo.Socket do
 
   To deny connection, return `:error` or `{:error, term}`. To control the
   response the client receives in that case, [define an error handler in the
-  websocket configuration](Combo.Endpoint.html#socket/3#websocket-configuration).
+  websocket configuration](Combo.Transports.WebSocket.html).
 
   See `Combo.Token` documentation for examples in performing token verification
   on connect.

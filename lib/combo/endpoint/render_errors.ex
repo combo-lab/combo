@@ -130,16 +130,6 @@ defmodule Combo.Endpoint.RenderErrors do
 
   ## Rendering
 
-  @doc false
-  def __debugger_banner__(_conn, _status, _kind, %NoRouteError{router: router}, _stack) do
-    """
-    <h3>Available routes</h3>
-    <pre>#{Combo.Router.ConsoleFormatter.format(router)}</pre>
-    """
-  end
-
-  def __debugger_banner__(_conn, _status, _kind, _reason, _stack), do: nil
-
   defp render(conn, status, kind, reason, stack, opts) do
     layout = opts[:layout] || []
     formats = opts[:formats]
