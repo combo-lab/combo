@@ -30,7 +30,7 @@ defmodule Combo.Proxy do
 
       config :my_app, MyApp.Proxy,
         server: true,
-        adapter: Combo.Proxy.BanditAdapter,
+        server_adapter: Combo.Proxy.ServerAdapters.Bandit,
         scheme: :http,
         ip: {127, 0, 0, 1},
         port: 4000,
@@ -73,7 +73,8 @@ defmodule Combo.Proxy do
       Default to `false`.
     * `:backends` - the list of backends.  See following section for more details.
       Default to `[]`.
-    * `:adapter` - the adapter for web server. Default to `Combo.Proxy.BanditAdapter`.
+    * `:server_adapter` - the server adapter.
+      Default to `Combo.Proxy.ServerAdapters.Bandit`.
     * adapter options - all other options will be put into an keyword list and
       passed as the options of the adapter. See following section for more details.
 
@@ -123,17 +124,17 @@ defmodule Combo.Proxy do
   > all other options will be put into an keyword list and passed as the options
   > of the adapter.
 
-  It means the all options except `:server`, `:backends`, `:adapter` will be
+  It means the all options except `:server`, `:backends`, `:server_adapter` will be
   passed as the the options of an adapter.
 
-  Take `Combo.Proxy.BanditAdapter` adapter as an example. If we declare the
+  Take `Combo.Proxy.ServerAdapters.Bandit` adapter as an example. If we declare the
   options like:
 
       config :my_app, MyApp.Proxy,
         backends: [
           # ...
         ],
-        adapter: Combo.Proxy.BanditAdapter,
+        server_adapter: Combo.Proxy.ServerAdapters.Bandit,
         scheme: :http,
         ip: {127, 0, 0, 1},
         port: 4000,
@@ -151,7 +152,7 @@ defmodule Combo.Proxy do
 
   For more available adapter options:
     
-    * `Combo.Proxy.BanditAdapter` - checkout [Bandit options](`t:Bandit.options/0`).
+    * `Combo.Proxy.ServerAdapters.Bandit` - checkout [Bandit options](`t:Bandit.options/0`).
 
   """
 
@@ -171,10 +172,13 @@ defmodule Combo.Proxy do
   @impl true
   def init(init_arg) do
     {server, rest_arg} = Keyword.pop(init_arg, :server, false)
-    {adapter, rest_arg} = Keyword.pop(rest_arg, :adapter, Combo.Proxy.BanditAdapter)
+
+    {server_adapter, rest_arg} =
+      Keyword.pop(rest_arg, :server_adapter, Combo.Proxy.ServerAdapters.Bandit)
+
     {backends, rest_arg} = Keyword.pop(rest_arg, :backends, [])
 
-    adapter_config =
+    server_adapter_config =
       rest_arg
       |> Keyword.delete(:plug)
       |> Keyword.put_new(:scheme, :http)
@@ -184,12 +188,12 @@ defmodule Combo.Proxy do
     config =
       Config.new!(%{
         server: server,
-        adapter: adapter,
-        adapter_config: adapter_config,
+        server_adapter: server_adapter,
+        server_adapter_config: server_adapter_config,
         backends: backends
       })
 
-    check_adapter_module!(config.adapter)
+    check_server_adapter_module!(config.server_adapter)
 
     start_server? = config.server || mix_combo_serve?()
 
@@ -201,9 +205,9 @@ defmodule Combo.Proxy do
     Supervisor.init(children, strategy: :one_for_one)
   end
 
-  defp put_new_port(adapter_config) do
-    Keyword.put_new_lazy(adapter_config, :port, fn ->
-      scheme = Keyword.fetch!(adapter_config, :scheme)
+  defp put_new_port(server_adapter_config) do
+    Keyword.put_new_lazy(server_adapter_config, :port, fn ->
+      scheme = Keyword.fetch!(server_adapter_config, :scheme)
       get_default_port(scheme)
     end)
   end
@@ -211,7 +215,7 @@ defmodule Combo.Proxy do
   defp get_default_port(:http = _scheme), do: 4000
   defp get_default_port(:https = _scheme), do: 4040
 
-  defp check_adapter_module!(Combo.Proxy.BanditAdapter) do
+  defp check_server_adapter_module!(Combo.Proxy.ServerAdapters.Bandit) do
     unless Code.ensure_loaded?(Bandit) do
       Logger.error("""
       Could not find Bandit dependency. Please add :bandit to your dependencies:
@@ -226,8 +230,8 @@ defmodule Combo.Proxy do
     :ok
   end
 
-  defp check_adapter_module!(adapter) do
-    raise "unknown adapter #{inspect(adapter)}"
+  defp check_server_adapter_module!(server_adapter) do
+    raise "unknown server adapter #{inspect(server_adapter)}"
   end
 
   # Consinder Combo should serve when meets following cases:
@@ -240,26 +244,34 @@ defmodule Combo.Proxy do
   end
 
   defp build_child(%Config{} = config) do
-    %{adapter: adapter, adapter_config: adapter_config, backends: backends} = config
+    %{
+      server_adapter: server_adapter,
+      server_adapter_config: server_adapter_config,
+      backends: backends
+    } = config
 
-    Logger.info(fn -> gen_listen_line(adapter_config) end)
+    Logger.info(fn -> gen_listen_line(server_adapter_config) end)
 
     {
-      fetch_adapter_plug!(adapter),
-      [plug: {Dispatcher, [backends: backends]}] ++ build_adapter_opts(adapter, adapter_config)
+      fetch_server_adapter_plug!(server_adapter),
+      [plug: {Dispatcher, [backends: backends]}] ++
+        build_server_adapter_opts(server_adapter, server_adapter_config)
     }
   end
 
-  defp fetch_adapter_plug!(Combo.Proxy.BanditAdapter), do: Bandit
+  defp fetch_server_adapter_plug!(Combo.Proxy.ServerAdapters.Bandit), do: Bandit
 
-  defp build_adapter_opts(Combo.Proxy.BanditAdapter = _adapter, adapter_config) do
-    adapter_config
+  defp build_server_adapter_opts(
+         Combo.Proxy.ServerAdapters.Bandit = _server_adapter,
+         server_adapter_config
+       ) do
+    server_adapter_config
   end
 
-  defp gen_listen_line(adapter_config) do
-    scheme = Keyword.fetch!(adapter_config, :scheme)
-    ip = Keyword.fetch!(adapter_config, :ip)
-    port = Keyword.fetch!(adapter_config, :port)
+  defp gen_listen_line(server_adapter_config) do
+    scheme = Keyword.fetch!(server_adapter_config, :scheme)
+    ip = Keyword.fetch!(server_adapter_config, :ip)
+    port = Keyword.fetch!(server_adapter_config, :port)
     "#{inspect(__MODULE__)} is listening on #{scheme}://#{format_ip(ip)}:#{port}"
   end
 

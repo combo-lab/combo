@@ -4,8 +4,8 @@ defmodule Combo.Proxy.Config do
   alias Combo.Proxy.Backend
 
   defstruct server: false,
-            adapter: nil,
-            adapter_config: nil,
+            server_adapter: nil,
+            server_adapter_config: nil,
             backends: []
 
   @type t :: %__MODULE__{}
