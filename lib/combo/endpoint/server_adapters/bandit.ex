@@ -1,5 +1,5 @@
 if Code.ensure_loaded?(Bandit) do
-  defmodule Combo.Endpoint.BanditAdapter do
+  defmodule Combo.Endpoint.ServerAdapters.Bandit do
     @moduledoc """
     The Bandit adapter for `Combo.Endpoint`.
 
@@ -7,11 +7,11 @@ if Code.ensure_loaded?(Bandit) do
 
         {:bandit, "~> 1.0"}
 
-    Once bandit is installed, set the `:adapter` option to your endpoint
+    Once bandit is installed, set the `:server_adapter` option to your endpoint
     configuration. For example:
 
         config :demo, Demo.Web.Endpoint,
-          adapter: Combo.Endpoint.BanditAdapter
+          server_adapter: Combo.Endpoint.ServerAdapters.Bandit
 
     ## Endpoint configuration
 
@@ -45,7 +45,7 @@ if Code.ensure_loaded?(Bandit) do
     [bandit](https://github.com/mtrudel/bandit) which is created by Mat Trudel.
     """
 
-    @behaviour Combo.Endpoint.Adapter
+    @behaviour Combo.Endpoint.ServerAdapter
 
     @impl true
     def child_specs(endpoint, config) do

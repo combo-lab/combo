@@ -18,13 +18,13 @@ defmodule Combo.Integration.EndpointTest do
   @prod_inet6 prod_inet6
 
   Application.put_env(:endpoint_int, DevEndpoint,
-    adapter: Combo.Endpoint.BanditAdapter,
+    server_adapter: Combo.Endpoint.ServerAdapters.Bandit,
     http: [port: @dev],
     debug_errors: true
   )
 
   Application.put_env(:endpoint_int, ProdEndpoint,
-    adapter: Combo.Endpoint.BanditAdapter,
+    server_adapter: Combo.Endpoint.ServerAdapters.Bandit,
     http: [port: @prod],
     url: [host: "example.com"],
     server: true,
@@ -32,7 +32,7 @@ defmodule Combo.Integration.EndpointTest do
   )
 
   Application.put_env(:endpoint_int, ProdInet6Endpoint,
-    adapter: Combo.Endpoint.BanditAdapter,
+    server_adapter: Combo.Endpoint.ServerAdapters.Bandit,
     http: [{:port, @prod_inet6}, :inet6],
     url: [host: "example.com"],
     server: true

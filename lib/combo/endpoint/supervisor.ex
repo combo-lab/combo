@@ -23,7 +23,7 @@ defmodule Combo.Endpoint.Supervisor do
     # runtime config
     http: false,
     https: false,
-    adapter: Combo.Endpoint.BanditAdapter,
+    server_adapter: Combo.Endpoint.ServerAdapters.Bandit,
     url: [host: "localhost", path: "/"],
     static_url: nil,
     log_access_url: true,
@@ -158,8 +158,8 @@ defmodule Combo.Endpoint.Supervisor do
   defp server_children(mod, safe_config, server?) do
     cond do
       server? ->
-        adapter = safe_config[:adapter]
-        adapter.child_specs(mod, safe_config)
+        server_adapter = safe_config[:server_adapter]
+        server_adapter.child_specs(mod, safe_config)
 
       true ->
         []

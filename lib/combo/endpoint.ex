@@ -77,8 +77,8 @@ defmodule Combo.Endpoint do
   starting the endpoint in your supervision tree, such as
   `{MyApp.Web.Endpoint, opts}`.
 
-    * `:adapter` - which web server adapter to use for serving web requests.
-      See the "Adapter configuration" section below.
+    * `:server_adapter` - which web server adapter to use for serving web requests.
+      See the "Server adapter configuration" section below.
 
     * `:static` - the configuration of `Combo.Static`.
 
@@ -169,11 +169,11 @@ defmodule Combo.Endpoint do
 
   Note that you can also store your own configurations in the `Combo.Endpoint`.
 
-  ### Adapter configuration
+  ### Server adapter configuration
 
   Combo allows you to choose which web server adapter to use.
 
-  The default adapter is `Combo.Endpoint.BanditAdapter`.
+  The default adapter is `Combo.Endpoint.ServerAdapters.Bandit`.
 
   Adapters are configured using the following two top-level options:
 
@@ -422,7 +422,7 @@ defmodule Combo.Endpoint do
       @doc """
       Returns the address and port that the server is listening on.
       """
-      def server_info(scheme), do: config(:adapter).server_info(__MODULE__, scheme)
+      def server_info(scheme), do: config(:server_adapter).server_info(__MODULE__, scheme)
     end
   end
 
