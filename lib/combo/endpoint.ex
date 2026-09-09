@@ -212,6 +212,11 @@ defmodule Combo.Endpoint do
 
   """
 
+  @typedoc """
+  The endpoint module, such as `MyApp.Web.Endpoint`.
+  """
+  @type t :: module()
+
   @type topic :: String.t()
   @type event :: String.t()
   @type msg :: map() | {:binary, binary()}
@@ -582,15 +587,13 @@ defmodule Combo.Endpoint do
   @doc """
   Checks if an endpoint's web server has been configured to start.
 
-    * `otp_app` - The OTP application running the endpoint, such as `:my_app`.
-    * `endpoint` - The endpoint module, such as `MyApp.Web.Endpoint`.
-
   ## Examples
 
       iex> Combo.Endpoint.server?(:my_app, MyApp.Web.Endpoint)
       true
 
   """
+  @spec server?(Application.app(), Combo.Endpoint.t()) :: boolean()
   def server?(otp_app, endpoint) when is_atom(otp_app) and is_atom(endpoint) do
     Combo.Endpoint.Supervisor.server?(otp_app, endpoint)
   end

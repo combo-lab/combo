@@ -180,7 +180,7 @@ defmodule Combo.Endpoint.Supervisor do
     end
   end
 
-  @spec server?(atom(), module()) :: boolean()
+  @spec server?(Application.app(), Combo.Endpoint.t()) :: boolean()
   def server?(otp_app, endpoint) when is_atom(otp_app) and is_atom(endpoint) do
     server?(Application.get_env(otp_app, endpoint, []))
   end
