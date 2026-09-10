@@ -164,9 +164,9 @@ defmodule Combo.Integration.LongPollChannelsTest do
       ]
   end
 
-  setup %{adapter: adapter} do
+  setup %{server_adapter: server_adapter} do
     config = Application.get_env(:combo, Endpoint)
-    Application.put_env(:combo, Endpoint, Keyword.merge(config, adapter: adapter))
+    Application.put_env(:combo, Endpoint, Keyword.merge(config, server_adapter: server_adapter))
     capture_log(fn -> start_supervised!(Endpoint) end)
     start_supervised!({Combo.PubSub, name: __MODULE__, pool_size: @pool_size})
     :ok
@@ -337,11 +337,11 @@ defmodule Combo.Integration.LongPollChannelsTest do
     resp
   end
 
-  for %{adapter: adapter} <- [
-        %{adapter: Combo.Endpoint.BanditAdapter}
+  for %{server_adapter: server_adapter} <- [
+        %{server_adapter: Combo.Endpoint.ServerAdapters.Bandit}
       ] do
-    describe "adapter: #{inspect(adapter)}" do
-      @describetag adapter: adapter
+    describe "server_adapter: #{inspect(server_adapter)}" do
+      @describetag server_adapter: server_adapter
 
       for mode <- [:local, :pubsub] do
         @mode mode
@@ -746,8 +746,8 @@ defmodule Combo.Integration.LongPollChannelsTest do
       @vsn vsn
       @join_ref join_ref
 
-      describe "adapter: #{inspect(adapter)} - with #{vsn} serializer #{inspect(serializer)}" do
-        @describetag adapter: adapter
+      describe "server_adapter: #{inspect(server_adapter)} - with #{vsn} serializer #{inspect(serializer)}" do
+        @describetag server_adapter: server_adapter
 
         test "refuses connects that error with 403 response" do
           resp = poll(:get, "/ws", @vsn, %{"reject" => "true"}, %{})

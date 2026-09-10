@@ -225,9 +225,9 @@ defmodule Combo.Integration.WebSocketChannelsTest do
     end
   end
 
-  setup %{adapter: adapter} do
+  setup %{server_adapter: server_adapter} do
     config = Application.get_env(:combo, Endpoint)
-    Application.put_env(:combo, Endpoint, Keyword.merge(config, adapter: adapter))
+    Application.put_env(:combo, Endpoint, Keyword.merge(config, server_adapter: server_adapter))
     capture_log(fn -> start_supervised!(Endpoint) end)
     start_supervised!({Combo.PubSub, name: __MODULE__})
     :ok
@@ -235,8 +235,8 @@ defmodule Combo.Integration.WebSocketChannelsTest do
 
   @endpoint Endpoint
 
-  for %{adapter: adapter} <- [
-        %{adapter: Combo.Endpoint.BanditAdapter}
+  for %{server_adapter: server_adapter} <- [
+        %{server_adapter: Combo.Endpoint.ServerAdapters.Bandit}
       ] do
     for {serializer, vsn, join_ref} <- [
           {V2.JSONSerializer, "2.0.0", "11"}
@@ -246,8 +246,8 @@ defmodule Combo.Integration.WebSocketChannelsTest do
       @vsn_path "ws://127.0.0.1:#{@port}/ws/websocket?vsn=#{@vsn}"
       @join_ref join_ref
 
-      describe "adapter: #{inspect(adapter)} - with #{vsn} serializer #{inspect(serializer)}" do
-        @describetag adapter: adapter
+      describe "server_adapter: #{inspect(server_adapter)} - with #{vsn} serializer #{inspect(serializer)}" do
+        @describetag server_adapter: server_adapter
 
         test "endpoint handles multiple mount segments" do
           {:ok, sock} =
@@ -886,8 +886,8 @@ defmodule Combo.Integration.WebSocketChannelsTest do
     # it is best to assert custom channels work throughout the whole stack,
     # compared to only testing the socket <-> channel communication. Which
     # is why test them under the latest websocket transport.
-    describe "adapter: #{inspect(adapter)} - custom channels" do
-      @describetag adapter: adapter
+    describe "server_adapter: #{inspect(server_adapter)} - custom channels" do
+      @describetag server_adapter: server_adapter
       @serializer V2.JSONSerializer
       @vsn "2.0.0"
       @vsn_path "ws://127.0.0.1:#{@port}/ws/websocket?vsn=#{@vsn}"
@@ -930,8 +930,8 @@ defmodule Combo.Integration.WebSocketChannelsTest do
       end
     end
 
-    describe "adapter: #{inspect(adapter)} - binary" do
-      @describetag adapter: adapter
+    describe "server_adapter: #{inspect(server_adapter)} - binary" do
+      @describetag server_adapter: server_adapter
       @serializer V2.JSONSerializer
       @vsn "2.0.0"
       @join_ref "11"
