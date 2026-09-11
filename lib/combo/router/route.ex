@@ -43,12 +43,17 @@ defmodule Combo.Router.Route do
   end
 
   @doc false
-  def add_route(kind, verb, path, plug, plug_opts, opts) do
+  def get_routes(module) do
+    module |> ModuleAttr.get(:routes) |> Enum.reverse()
+  end
+
+  @doc false
+  def add_route(module, kind, verb, path, plug, plug_opts, opts) do
     route =
       quote do
         unquote(__MODULE__).__build_route__(
           __ENV__.line,
-          __ENV__.module,
+          unquote(module),
           unquote(kind),
           unquote(verb),
           unquote(path),
@@ -59,7 +64,7 @@ defmodule Combo.Router.Route do
       end
 
     quote do
-      ModuleAttr.put(__MODULE__, :routes, unquote(route))
+      ModuleAttr.put(unquote(module), :routes, unquote(route))
     end
   end
 

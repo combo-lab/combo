@@ -309,7 +309,9 @@ defmodule Combo.Router do
 
   @doc false
   defmacro __before_compile__(env) do
-    routes = env.module |> ModuleAttr.get(:routes) |> Enum.reverse()
+    module = env.module
+
+    routes = Route.get_routes(module)
     routes_with_exprs = Enum.map(routes, &{&1, Route.build_exprs(&1)})
 
     # check all plugs referenced by routes.
@@ -780,7 +782,10 @@ defmodule Combo.Router do
 
   """
   defmacro match(verb, path, plug, plug_opts, options \\ []) do
+    module = __CALLER__.module
+
     Route.add_route(
+      module,
       :match,
       verb,
       path,
@@ -810,7 +815,10 @@ defmodule Combo.Router do
     end}
     """
     defmacro unquote(verb)(path, plug, plug_opts, options \\ []) do
+      module = __CALLER__.module
+
       Route.add_route(
+        module,
         :match,
         unquote(verb),
         path,
@@ -854,11 +862,12 @@ defmodule Combo.Router do
 
   """
   defmacro forward(path, plug, plug_opts \\ [], router_opts \\ []) do
+    module = __CALLER__.module
     {plug, plug_opts} = Utils.expand_plug_and_opts(plug, plug_opts, __CALLER__)
     router_opts = Keyword.put(router_opts, :as, nil)
 
     quote unquote: true, bind_quoted: [path: path, plug: plug] do
-      unquote(Route.add_route(:forward, :*, path, plug, plug_opts, router_opts))
+      unquote(Route.add_route(module, :forward, :*, path, plug, plug_opts, router_opts))
     end
   end
 
