@@ -3,7 +3,7 @@ defmodule Combo.LiveReloader.Socket do
   The Socket handler for `combo:live_reloader` channel.
   """
 
-  use Combo.Socket, log: false
+  use Combo.Socket, partitions: 1, log: false
   alias Combo.LiveReloader.Channel
 
   channel "combo:live_reloader", Channel
