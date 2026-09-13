@@ -1,8 +1,8 @@
-defmodule Combo.Router.Scope do
+defmodule Combo.Routing.Scope do
   @moduledoc false
 
-  alias Combo.Router.ModuleAttr
-  alias Combo.Router.Utils
+  alias Combo.Routing.Utils
+  alias Combo.Utils.ModuleAttribute
 
   @struct_keys [:path, :path_info, :module, :as, :pipes, :private, :assigns, :log]
   @enforce_keys @struct_keys
@@ -20,7 +20,7 @@ defmodule Combo.Router.Scope do
         }
 
   @doc false
-  def setup(router) do
+  def setup(module) do
     scope = %__MODULE__{
       path: "/",
       path_info: [],
@@ -32,7 +32,7 @@ defmodule Combo.Router.Scope do
       log: :debug
     }
 
-    ModuleAttr.put(router, :scopes, [scope])
+    ModuleAttribute.put(module, :combo_routing_scopes, [scope])
   end
 
   @doc false
@@ -64,7 +64,7 @@ defmodule Combo.Router.Scope do
               "A plug can only be used once inside a scoped pipe_through"
     end
 
-    ModuleAttr.update(router, :scopes, fn [top | rest] ->
+    ModuleAttribute.update(router, :combo_routing_scopes, fn [top | rest] ->
       [%{top | pipes: pipes ++ new_pipes} | rest]
     end)
   end
@@ -140,11 +140,11 @@ defmodule Combo.Router.Scope do
   end
 
   def __push_scope__(router, scope) do
-    ModuleAttr.update(router, :scopes, fn scopes -> [scope | scopes] end)
+    ModuleAttribute.update(router, :combo_routing_scopes, fn scopes -> [scope | scopes] end)
   end
 
   def __pop_scope__(router) do
-    ModuleAttr.update(router, :scopes, fn [_top | scopes] -> scopes end)
+    ModuleAttribute.update(router, :combo_routing_scopes, fn [_top | scopes] -> scopes end)
   end
 
   @doc false
@@ -156,7 +156,7 @@ defmodule Combo.Router.Scope do
   @doc false
   def get_top_scope(router) do
     router
-    |> ModuleAttr.get(:scopes)
+    |> ModuleAttribute.get(:combo_routing_scopes)
     |> hd()
   end
 end

@@ -35,17 +35,28 @@ defmodule Combo.Integration.LongPollSocketTest do
     end
 
     def connect(map) do
-      %{endpoint: Endpoint, params: params, transport: :longpoll} = map
-      {:ok, {:params, params}}
+      %{
+        endpoint: Endpoint,
+        handler: {__MODULE__, handler_opts},
+        params: params,
+        transport: {Combo.Transports.LongPoll, transport_opts}
+      } = map
+
+      {:ok, {:params, params, handler_opts, transport_opts}}
     end
 
-    def init({:params, _} = state) do
+    def init({:params, _, _, _} = state) do
       {:ok, state}
     end
 
-    def handle_in({"params", opts}, {:params, params} = state) do
+    def handle_in({"params", opts}, {:params, params, _, _} = state) do
       :text = Keyword.fetch!(opts, :opcode)
       {:reply, :ok, {:text, inspect(params)}, state}
+    end
+
+    def handle_in({"opts", _opts}, {:params, _, handler_opts, transport_opts} = state) do
+      logs = {handler_opts[:log], transport_opts[:log]}
+      {:reply, :ok, {:text, inspect(logs)}, state}
     end
 
     def handle_in({"ping", opts}, state) do
@@ -58,7 +69,7 @@ defmodule Combo.Integration.LongPollSocketTest do
       {:push, {:text, "pong"}, state}
     end
 
-    def terminate(_reason, {:params, _}) do
+    def terminate(_reason, {:params, _, _, _}) do
       :ok
     end
   end
@@ -67,17 +78,23 @@ defmodule Combo.Integration.LongPollSocketTest do
     use Combo.Endpoint, otp_app: :combo
 
     socket "/ws", UserSocket,
-      longpoll: [window_ms: 200, pubsub_timeout_ms: 200, check_origin: ["//example.com"]],
+      log: :warning,
+      longpoll: [
+        log: :debug,
+        window_ms: 200,
+        pubsub_timeout_ms: 200,
+        check_origin: ["//example.com"]
+      ],
       custom: :value
 
-    socket "/custom/:socket_var", UserSocket,
-      longpoll: [path: ":path_var/path", check_origin: ["//example.com"], pubsub_timeout_ms: 200],
+    socket "/custom/:socket_var/:path_var/path", UserSocket,
+      longpoll: [check_origin: ["//example.com"], pubsub_timeout_ms: 200],
       custom: :value
   end
 
-  setup %{adapter: adapter} do
+  setup %{server_adapter: server_adapter} do
     config = Application.get_env(:combo, Endpoint)
-    Application.put_env(:combo, Endpoint, Keyword.merge(config, adapter: adapter))
+    Application.put_env(:combo, Endpoint, Keyword.merge(config, server_adapter: server_adapter))
     capture_log(fn -> start_supervised!(Endpoint) end)
     start_supervised!({Combo.PubSub, name: __MODULE__, pool_size: @pool_size})
     :ok
@@ -115,11 +132,11 @@ defmodule Combo.Integration.LongPollSocketTest do
     update_in(resp.body, &Combo.json_library().decode!(&1))
   end
 
-  for %{adapter: adapter} <- [
-        %{adapter: Combo.Endpoint.BanditAdapter}
+  for %{server_adapter: server_adapter} <- [
+        %{server_adapter: Combo.Endpoint.ServerAdapters.Bandit}
       ] do
-    describe "adapter: #{inspect(adapter)}" do
-      @describetag adapter: adapter
+    describe "server_adapter: #{inspect(server_adapter)}" do
+      @describetag server_adapter: server_adapter
 
       test "refuses unallowed origins" do
         capture_log(fn ->
@@ -145,8 +162,23 @@ defmodule Combo.Integration.LongPollSocketTest do
         assert resp.body["messages"] == [~s(%{"hello" => "world"})]
       end
 
+      test "keeps handler and transport options separate" do
+        resp = poll(:get, "ws/longpoll", %{}, nil)
+        secret = Map.take(resp.body, ["token"])
+
+        assert poll(:post, "ws/longpoll", secret, "opts").body["status"] == 200
+        assert poll(:get, "ws/longpoll", secret).body["messages"] == ["{:warning, :debug}"]
+
+        path = "custom/123/456/path/longpoll"
+        resp = poll(:get, path, %{}, nil)
+        secret = Map.take(resp.body, ["token"])
+
+        assert poll(:post, path, secret, "opts").body["status"] == 200
+        assert poll(:get, path, secret).body["messages"] == ["{nil, false}"]
+      end
+
       test "allows a path with variables" do
-        path = "custom/123/456/path"
+        path = "custom/123/456/path/longpoll"
         resp = poll(:get, path, %{"key" => "value"}, nil)
         secret = Map.take(resp.body, ["token"])
 

@@ -1,12 +1,12 @@
-defmodule Combo.Router.Pipeline do
+defmodule Combo.Routing.Pipeline do
   @moduledoc false
 
-  alias Combo.Router.ModuleAttr
+  alias Combo.Utils.ModuleAttribute
 
   @doc false
   def setup(module) do
-    ModuleAttr.put(module, :pipelines, MapSet.new())
-    ModuleAttr.put(module, :pipeline_plugs, nil)
+    ModuleAttribute.put(module, :combo_routing_pipelines, MapSet.new())
+    ModuleAttribute.put(module, :combo_routing_pipeline_plugs, nil)
   end
 
   @doc false
@@ -14,14 +14,14 @@ defmodule Combo.Router.Pipeline do
     pre =
       quote do
         name = unquote(name)
-        ModuleAttr.put(__MODULE__, :pipelines, &MapSet.put(&1, name))
-        ModuleAttr.put(__MODULE__, :pipeline_plugs, [])
+        ModuleAttribute.put(__MODULE__, :combo_routing_pipelines, &MapSet.put(&1, name))
+        ModuleAttribute.put(__MODULE__, :combo_routing_pipeline_plugs, [])
       end
 
     compiled =
       quote unquote: false do
         {conn, body} =
-          with plugs = ModuleAttr.get(__MODULE__, :pipeline_plugs) do
+          with plugs = ModuleAttribute.get(__MODULE__, :combo_routing_pipeline_plugs) do
             Plug.Builder.compile(__ENV__, plugs, init_mode: Combo.plug_init_mode())
           end
 
@@ -40,7 +40,7 @@ defmodule Combo.Router.Pipeline do
 
     post =
       quote do
-        ModuleAttr.put(__MODULE__, :pipeline_plugs, nil)
+        ModuleAttribute.put(__MODULE__, :combo_routing_pipeline_plugs, nil)
       end
 
     quote do
@@ -58,8 +58,10 @@ defmodule Combo.Router.Pipeline do
   @doc false
   def add_plug(plug, opts) do
     quote do
-      if plugs = ModuleAttr.get(__MODULE__, :pipeline_plugs) do
-        ModuleAttr.put(__MODULE__, :pipeline_plugs, [{unquote(plug), unquote(opts), true} | plugs])
+      if plugs = ModuleAttribute.get(__MODULE__, :combo_routing_pipeline_plugs) do
+        ModuleAttribute.put(__MODULE__, :combo_routing_pipeline_plugs, [
+          {unquote(plug), unquote(opts), true} | plugs
+        ])
       else
         raise "expected plug to be defined inside a pipeline"
       end

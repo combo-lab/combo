@@ -1,9 +1,9 @@
-defmodule Combo.Router.Route do
+defmodule Combo.Routing.Route do
   @moduledoc false
 
-  alias Combo.Router.ModuleAttr
-  alias Combo.Router.Scope
-  alias Combo.Router.Utils
+  alias Combo.Routing.Scope
+  alias Combo.Routing.Utils
+  alias Combo.Utils.ModuleAttribute
 
   @struct_keys [
     :line,
@@ -39,12 +39,12 @@ defmodule Combo.Router.Route do
 
   @doc false
   def setup(module) do
-    ModuleAttr.register(module, :routes, accumulate: true)
+    ModuleAttribute.register(module, :combo_routing_routes, accumulate: true)
   end
 
   @doc false
   def get_routes(module) do
-    module |> ModuleAttr.get(:routes) |> Enum.reverse()
+    module |> ModuleAttribute.get(:combo_routing_routes) |> Enum.reverse()
   end
 
   @doc false
@@ -64,7 +64,7 @@ defmodule Combo.Router.Route do
       end
 
     quote do
-      ModuleAttr.put(unquote(module), :routes, unquote(route))
+      ModuleAttribute.put(unquote(module), :combo_routing_routes, unquote(route))
     end
   end
 
@@ -284,7 +284,7 @@ defmodule Combo.Router.Route do
          plug_opts: plug_opts
        }) do
     quote do
-      {Combo.Router.Forward,
+      {Combo.Routing.Forward,
        {unquote(path_info), {unquote(plug), unquote(Macro.escape(plug_opts))}}}
     end
   end

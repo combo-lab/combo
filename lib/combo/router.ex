@@ -244,7 +244,9 @@ defmodule Combo.Router do
   router. We can use it to list all routes included in the router.
   """
 
-  alias Combo.Router.{Pipeline, Scope, Route, Helpers, Utils, ModuleAttr}
+  alias Combo.Router.Helpers
+  alias Combo.Routing.{Pipeline, Scope, Route, Utils}
+  alias Combo.Utils.ModuleAttribute
 
   @http_methods [:get, :post, :put, :patch, :delete, :options, :connect, :trace, :head]
 
@@ -714,7 +716,7 @@ defmodule Combo.Router do
       end
 
     quote do
-      if pipeline = ModuleAttr.get(__MODULE__, :pipeline_plugs) do
+      if pipeline = ModuleAttribute.get(__MODULE__, :combo_routing_pipeline_plugs) do
         raise "cannot pipe_through inside a pipeline"
       else
         Scope.add_pipe_through(__MODULE__, unquote(pipes))

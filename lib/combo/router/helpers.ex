@@ -49,7 +49,7 @@ defmodule Combo.Router.Helpers do
 
   """
 
-  alias Combo.Router.Route
+  alias Combo.Routing.Route
   alias Plug.Conn
 
   @doc """

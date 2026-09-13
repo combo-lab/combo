@@ -1,4 +1,4 @@
-defmodule Combo.Router.Forward do
+defmodule Combo.Routing.Forward do
   @moduledoc false
 
   @behaviour Plug
